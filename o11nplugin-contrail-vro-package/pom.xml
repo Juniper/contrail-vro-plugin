@@ -31,7 +31,7 @@
                     <keystoreLocation>${keystoreLocation}</keystoreLocation>
                     <keystorePassword>${keystorePassword}</keystorePassword>
                     <includes>
-                        <include>**/Library/contrail-vro/**/*.element_info.xml</include>
+                        <include>**/Library/Contrail/**/*.element_info.xml</include>
                     </includes>
                     <packageFileName>o11nplugin-contrail-vro-package-${project.version}</packageFileName>
                     <allowedMask>vef</allowedMask>

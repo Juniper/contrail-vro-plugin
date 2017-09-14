@@ -14,7 +14,7 @@ public class GreetingService  {
    }
    
    public String greet(String name) {
-       return "Hello, " + name +"! Welcome to 'contrail-vro' plug-in";
+       return "Hello, " + name +"! Welcome to 'Contrail' plug-in";
    }
 }
 

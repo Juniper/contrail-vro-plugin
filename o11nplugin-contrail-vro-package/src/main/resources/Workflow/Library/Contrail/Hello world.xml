@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
 <workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd" root-name="item1" 
-object-name="Workflow:name=generic" id="9993475837951223458723498123910203850"  version="0.0.0" api-version="3.1.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0" >
+object-name="Workflow:name=generic" id="9993475837951223458723498502303260502"  version="0.0.0" api-version="3.1.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0" >
 <display-name><![CDATA[Hello world]]></display-name>
 <position x='100.0' y='50.0'/>
 <input><param name='name' type='string' >
