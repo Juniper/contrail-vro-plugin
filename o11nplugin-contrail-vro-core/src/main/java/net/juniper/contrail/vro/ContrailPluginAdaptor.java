@@ -4,20 +4,73 @@
 
 package net.juniper.contrail.vro;
 
-import com.vmware.o11n.sdk.modeldriven.AbstractModelDrivenAdaptor;
+import javax.security.auth.login.LoginException;
 
-public class ContrailPluginAdaptor extends AbstractModelDrivenAdaptor {
-    private static final String[] CONFIG_LOCATIONS = { "classpath:net/juniper/contrail/vro/plugin.xml" };
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    private static final String RUNTIME_PROPERTIES_LOCATION = "net/juniper/contrail/vro_gen/runtime-config.properties";
+import ch.dunes.vso.sdk.api.IPluginAdaptor;
+import ch.dunes.vso.sdk.api.IPluginEventPublisher;
+import ch.dunes.vso.sdk.api.IPluginFactory;
+import ch.dunes.vso.sdk.api.IPluginNotificationHandler;
+import ch.dunes.vso.sdk.api.IPluginPublisher;
+import ch.dunes.vso.sdk.api.PluginLicense;
+import ch.dunes.vso.sdk.api.PluginLicenseException;
+import ch.dunes.vso.sdk.api.PluginWatcher;
 
-    @Override
-    protected String[] getConfigLocations() {
-        return CONFIG_LOCATIONS;
+public class ContrailPluginAdaptor implements IPluginAdaptor {
+
+    private static final Logger log = LoggerFactory.getLogger(ContrailPluginAdaptor.class);
+
+    private String pluginName;
+    
+    private IPluginPublisher pluginPublisher;
+
+    public IPluginFactory createPluginFactory(String sessionId, String username, String password, IPluginNotificationHandler pluginNotificationHandler) throws SecurityException, LoginException, PluginLicenseException {
+        log.debug("createPluginFactory() --> sessionId: " + sessionId + ", username: " + username);
+        //TODO attach repository
+        return new ContrailPluginFactory(pluginName, sessionId, username, password, pluginNotificationHandler);
     }
 
     @Override
-    protected String getRuntimeConfigurationPath() {
-        return RUNTIME_PROPERTIES_LOCATION;
+    public void setPluginName(String pluginName) {
+        log.debug("setPluginName() --> pluginName: " + pluginName);
+        this.pluginName = pluginName;
+    }
+
+    @Override
+    public void setPluginPublisher(IPluginPublisher pluginPublisher) {
+        log.debug("setPluginPublisher()");
+        this.pluginPublisher = pluginPublisher;
+    }
+
+    @Override
+    public void addWatcher(PluginWatcher pluginWatcher) {
+        log.debug("addWatcher() --> pluginWatcher: " + pluginWatcher.getId());
+    }
+
+    @Override
+    public void removeWatcher(String pluginWatcherId) {
+        log.debug("removeWatcher() --> pluginWatcherId: " + pluginWatcherId);
+    }
+
+    @Override
+    public void registerEventPublisher(String type, String id, IPluginEventPublisher pluginEventPublisher) {
+        log.debug("registerEventPublisher() --> type: " + type + ", id: " + id);
+    }
+
+    @Override
+    public void unregisterEventPublisher(String type, String id, IPluginEventPublisher pluginEventPublisher) {
+        log.debug("unregisterEventPublisher() --> type: " + type + ", id: " + id);
+    }
+
+    @Override
+    public void installLicenses(PluginLicense[] licenses) throws PluginLicenseException {
+        log.debug("installLicenses()");
+    }
+
+    @Override
+    public void uninstallPluginFactory(IPluginFactory pluginFactory) {
+        log.debug("uninstallPluginFactory()");
     }
 }
