@@ -14,7 +14,13 @@ import ch.dunes.vso.sdk.api.IPluginFactory;
 import ch.dunes.vso.sdk.api.IPluginNotificationHandler;
 import ch.dunes.vso.sdk.api.PluginExecutionException;
 import ch.dunes.vso.sdk.api.QueryResult;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+import static org.springframework.beans.factory.config.ConfigurableBeanFactory.*;
+
+@Component
+@Scope(SCOPE_PROTOTYPE)
 public class ContrailPluginFactory implements IPluginFactory {
 
     private static final Logger log = LoggerFactory.getLogger(ContrailPluginFactory.class);
@@ -76,10 +82,6 @@ public class ContrailPluginFactory implements IPluginFactory {
     @Override
     public void invalidateAll() {
         log.debug("invalidateAll()");
-    }
-    
-    public String getPluginName() {
-        return pluginName;
     }
 
     public String getUsername() {
