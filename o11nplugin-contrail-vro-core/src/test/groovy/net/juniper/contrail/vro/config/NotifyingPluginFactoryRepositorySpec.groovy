@@ -8,7 +8,7 @@ import ch.dunes.vso.sdk.api.IPluginNotificationHandler
 import net.juniper.contrail.vro.ContrailPluginFactory
 import spock.lang.Specification
 
-class NotifyingPluginFactoryRepositoryOperationSpec extends Specification {
+class NotifyingPluginFactoryRepositorySpec extends Specification {
 
     def notificationHandler = Mock(IPluginNotificationHandler)
     def factory = Mock(ContrailPluginFactory)

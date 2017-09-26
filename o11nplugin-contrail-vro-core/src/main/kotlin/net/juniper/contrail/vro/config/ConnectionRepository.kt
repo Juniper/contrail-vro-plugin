@@ -44,10 +44,6 @@ class DefaultConnectionRepository
 
     private val items = ConcurrentHashMap<String, Connection>()
 
-    init {
-        log.info("ConnectionInfoRepository created.")
-    }
-
     private val Connection.key: String get() =
         info.id
 

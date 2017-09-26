@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import java.io.IOException
 import java.util.*
 
 
@@ -23,9 +22,7 @@ import java.util.*
  */
 interface ConnectionPersister {
     fun findAll(): List<ConnectionInfo>
-
-    fun save(connectionInfo: ConnectionInfo): ConnectionInfo
-
+    fun save(connectionInfo: ConnectionInfo)
     fun delete(connectionInfo: ConnectionInfo)
 }
 
@@ -38,96 +35,52 @@ interface ConnectionPersister {
 class PersisterUsingEndpointConfigurationService
 @Lazy @Autowired constructor
 (
-    private val endpointConfigurationService: IEndpointConfigurationService
+    private val configurationService: IEndpointConfigurationService
 )
 : ConnectionPersister
 {
     private val log = LoggerFactory.getLogger(PersisterUsingEndpointConfigurationService::class.java)
 
-    override fun findAll(): List<ConnectionInfo> {
-        try {
-            val configs = endpointConfigurationService.endpointConfigurations
-            val result = ArrayList<ConnectionInfo>(configs.size)
+    override fun findAll(): List<ConnectionInfo> =
+        configurationService.endpointConfigurations.asSequence()
+            .map { it.asInfo() }
+            .onEach { log.debug("Loading connection info: " + it) }
+            .toList()
 
-            for (config in configs) {
-                val connectionInfo = getConnectionInfo(config)
-                if (connectionInfo != null) {
-                    log.debug("Loading connection info: " + connectionInfo)
-                    result.add(connectionInfo)
-                }
-            }
-            return result
-        } catch (e: IOException) {
-            log.debug("Error reading connections.", e)
-            throw RuntimeException(e)
-        }
+    override fun save(connectionInfo: ConnectionInfo) =
+        createOrGetConfiguration(connectionInfo.id)
+            .updateFrom(connectionInfo)
+            .saveTo(configurationService)
 
+    override fun delete(connectionInfo: ConnectionInfo) =
+        configurationService.deleteEndpointConfiguration(connectionInfo.id)
+
+    private fun createOrGetConfiguration(id: String):IEndpointConfiguration =
+        configurationService.getEndpointConfiguration(id) ?:
+            configurationService.newEndpointConfiguration(id)
+
+    private fun IEndpointConfiguration.saveTo(service: IEndpointConfigurationService) {
+        service.saveEndpointConfiguration(this)
     }
 
-    override fun save(connectionInfo: ConnectionInfo): ConnectionInfo {
-        try {
-            val endpointConfiguration = createOrGetEndpointConfiguration(connectionInfo.id)
+    private fun IEndpointConfiguration.updateFrom(info: ConnectionInfo): IEndpointConfiguration {
+        setString(ID, info.id)
+        setString(HOST, info.hostname)
+        setInt(PORT, info.port)
+        setString(USER, info.username)
+        setPassword(PASSWORD, info.password)
 
-            addConnectionInfoToConfig(endpointConfiguration, connectionInfo)
-
-            endpointConfigurationService.saveEndpointConfiguration(endpointConfiguration)
-
-            return connectionInfo
-        } catch (e: IOException) {
-            log.error("Error saving connection " + connectionInfo, e)
-            throw RuntimeException(e)
-        }
-
+        return this
     }
 
-    private fun createOrGetEndpointConfiguration(id: String):IEndpointConfiguration =
-        endpointConfigurationService.getEndpointConfiguration(id) ?:
-            endpointConfigurationService.newEndpointConfiguration(id)
+    private fun IEndpointConfiguration.asInfo(): ConnectionInfo {
+        val id = UUID.fromString(getString(ID))
+        val host = getString(HOST)
+        val port = getAsInteger(PORT)
+        val username = getString(USER)
+        val password = getPassword(PASSWORD)
 
-    override fun delete(connectionInfo: ConnectionInfo) {
-        try {
-
-            endpointConfigurationService.deleteEndpointConfiguration(connectionInfo.id)
-
-        } catch (e: IOException) {
-            log.error("Error deleting endpoint configuration: " + connectionInfo, e)
-            throw RuntimeException(e)
-        }
-
-    }
-
-    private fun addConnectionInfoToConfig(config: IEndpointConfiguration, info: ConnectionInfo) {
-        try {
-            config.setString(ID, info.id)
-            config.setString(HOST, info.hostname)
-            config.setInt(PORT, info.port)
-            config.setString(USER, info.username)
-            config.setPassword(PASSWORD, info.password)
-
-        } catch (e: Exception) {
-            log.error("Error converting ConnectionInfo to IEndpointConfiguration.", e)
-            throw RuntimeException(e)
-        }
-
-    }
-
-    private fun getConnectionInfo(config: IEndpointConfiguration): ConnectionInfo? {
-        try {
-            val id = UUID.fromString(config.getString(ID))
-            val host = config.getString(HOST)
-            val port = config.getAsInteger(PORT)
-            val username = config.getString(USER)
-            val password = config.getPassword(PASSWORD)
-
-            return ConnectionInfo(id, host, port, username, password)
-
-        } catch (e: IllegalArgumentException) {
-            log.warn("Cannot convert IEndpointConfiguration to ConnectionInfo: " + config.id, e)
-            return null
-        } catch (e: NullPointerException) {
-            log.warn("Cannot convert IEndpointConfiguration to ConnectionInfo: " + config.id, e)
-            return null
-        }
+        return ConnectionInfo(id, host, port, username, password)
     }
 }
 

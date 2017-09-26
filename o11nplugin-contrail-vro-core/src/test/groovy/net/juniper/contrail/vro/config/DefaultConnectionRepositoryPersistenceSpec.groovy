@@ -9,7 +9,7 @@ import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.ConnectionInfo
 import spock.lang.Specification
 
-class DefaultConnectionRepositoryPersistsChangesSpec extends Specification {
+class DefaultConnectionRepositoryPersistenceSpec extends Specification {
 
     def info = new ConnectionInfo("host", 8080, "user", "secret")
     def connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
