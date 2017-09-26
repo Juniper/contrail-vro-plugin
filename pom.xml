@@ -11,6 +11,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <vco.version>7.0.1</vco.version>
     <kotlin.version>1.1.4-3</kotlin.version>
+    <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
   </properties>
 
   <repositories>
@@ -104,6 +105,28 @@
             <source>1.8</source>
             <target>1.8</target>
           </configuration>
+          <executions>
+            <!-- Replacing default-compile as it is treated specially by maven -->
+            <execution>
+              <id>default-compile</id>
+              <phase>none</phase>
+            </execution>
+            <!-- Replacing default-testCompile as it is treated specially by maven -->
+            <execution>
+              <id>default-testCompile</id>
+              <phase>none</phase>
+            </execution>
+            <execution>
+              <id>java-compile</id>
+              <phase>compile</phase>
+              <goals> <goal>compile</goal> </goals>
+            </execution>
+            <execution>
+              <id>java-test-compile</id>
+              <phase>test-compile</phase>
+              <goals> <goal>testCompile</goal> </goals>
+            </execution>
+          </executions>
         </plugin>
 
         <plugin>
@@ -119,17 +142,21 @@
                 <sourceDirs>
                   <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
                   <sourceDir>${project.basedir}/src/main/java</sourceDir>
+                  <sourceDir>${project.basedir}/src/main/groovy</sourceDir>
                 </sourceDirs>
               </configuration>
             </execution>
 
             <execution>
               <id>test-compile</id>
-              <goals> <goal>test-compile</goal> </goals>
+              <goals>
+                <goal>test-compile</goal>
+              </goals>
               <configuration>
                 <sourceDirs>
                   <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>
                   <sourceDir>${project.basedir}/src/test/java</sourceDir>
+                  <sourceDir>${project.basedir}/src/test/groovy</sourceDir>
                 </sourceDirs>
               </configuration>
             </execution>
@@ -142,11 +169,31 @@
           <version>1.5</version>
           <executions>
             <execution>
+              <id>test-compile</id>
               <goals>
                 <goal>testCompile</goal>
               </goals>
             </execution>
+            <execution>
+              <id>compile</id>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+            </execution>
           </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.18.1</version>
+          <configuration>
+            <useFile>false</useFile>
+            <includes>
+              <include>**/*Spec.*</include>
+              <include>**/*Test.*</include>
+            </includes>
+          </configuration>
         </plugin>
 
       </plugins>

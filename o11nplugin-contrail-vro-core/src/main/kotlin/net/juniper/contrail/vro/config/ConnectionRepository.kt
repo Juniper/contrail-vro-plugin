@@ -23,7 +23,7 @@ interface ConnectionRepository {
     fun addConnection(item: Connection)
 
     @Throws(IllegalArgumentException::class)
-    fun removeConnection(key: String): Connection?
+    fun removeConnection(item: Connection)
 
     @Throws(IllegalArgumentException::class)
     fun getConnection(key: String): Connection?
@@ -33,26 +33,28 @@ interface ConnectionRepository {
 
 
 @Lazy @Component
-class ConnectionRepositoryImpl
+class DefaultConnectionRepository
 @Lazy @Autowired constructor
 (
     private val persister: ConnectionPersister
 )
 : ConnectionRepository
 {
+    private val log = LoggerFactory.getLogger(DefaultConnectionRepository::class.java)
+
     private val items = ConcurrentHashMap<String, Connection>()
 
     init {
         log.info("ConnectionInfoRepository created.")
     }
 
-    private fun getKey(info: Connection): String =
+    private val Connection.key: String get() =
         info.id
 
     @Throws(IllegalArgumentException::class)
     override fun addConnection(item: Connection) {
 
-        val key = getKey(item)
+        val key = item.key
         if (items.containsKey(key)) {
             throw IllegalArgumentException("Item with id '$key' already exists!")
         }
@@ -63,23 +65,10 @@ class ConnectionRepositoryImpl
     }
 
     @Throws(IllegalArgumentException::class)
-    fun updateConnection(key: String, item: Connection): Connection? {
-
-        if (!items.containsKey(key)) {
-            return null
-        }
-
-        addConnection(item)
-
-        return item
-    }
-
-    @Throws(IllegalArgumentException::class)
-    override fun removeConnection(key: String): Connection? {
-        val connection = items.remove(key)
+    override fun removeConnection(item: Connection) {
+        val connection = items.remove(item.key)
         if (connection != null)
             persister.delete(connection.info)
-        return connection
     }
 
     override val connections: List<Connection>
@@ -93,10 +82,5 @@ class ConnectionRepositoryImpl
         }
 
         return items[key]
-    }
-
-    companion object {
-
-        private val log = LoggerFactory.getLogger(ConnectionRepositoryImpl::class.java)
     }
 }

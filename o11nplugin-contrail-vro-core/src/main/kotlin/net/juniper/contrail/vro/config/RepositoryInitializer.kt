@@ -32,9 +32,8 @@ class RepositoryInitializerImpl
 ) : RepositoryInitializer {
 
     override fun initRepository() {
-        println("Initializing bean")
         persister.findAll().stream()
-                .map { Connection(it, factory.create(it)) }
-                .forEach{ repository.addConnection(it) }
+            .map { Connection(it, factory.create(it)) }
+            .forEach{ repository.addConnection(it) }
     }
 }

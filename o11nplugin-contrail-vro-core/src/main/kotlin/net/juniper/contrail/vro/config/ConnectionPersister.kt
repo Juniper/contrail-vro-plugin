@@ -42,6 +42,7 @@ class PersisterUsingEndpointConfigurationService
 )
 : ConnectionPersister
 {
+    private val log = LoggerFactory.getLogger(PersisterUsingEndpointConfigurationService::class.java)
 
     override fun findAll(): List<ConnectionInfo> {
         try {
@@ -51,7 +52,7 @@ class PersisterUsingEndpointConfigurationService
             for (config in configs) {
                 val connectionInfo = getConnectionInfo(config)
                 if (connectionInfo != null) {
-                    log.debug("Adding connection info to result map: " + connectionInfo)
+                    log.debug("Loading connection info: " + connectionInfo)
                     result.add(connectionInfo)
                 }
             }
@@ -65,15 +66,9 @@ class PersisterUsingEndpointConfigurationService
 
     override fun save(connectionInfo: ConnectionInfo): ConnectionInfo {
         try {
-            var endpointConfiguration: IEndpointConfiguration? = endpointConfigurationService
-                .getEndpointConfiguration(connectionInfo.id.toString())
+            val endpointConfiguration = createOrGetEndpointConfiguration(connectionInfo.id)
 
-            if (endpointConfiguration == null) {
-                endpointConfiguration = endpointConfigurationService
-                    .newEndpointConfiguration(connectionInfo.id.toString())
-            }
-
-            addConnectionInfoToConfig(endpointConfiguration!!, connectionInfo)
+            addConnectionInfoToConfig(endpointConfiguration, connectionInfo)
 
             endpointConfigurationService.saveEndpointConfiguration(endpointConfiguration)
 
@@ -85,10 +80,14 @@ class PersisterUsingEndpointConfigurationService
 
     }
 
+    private fun createOrGetEndpointConfiguration(id: String):IEndpointConfiguration =
+        endpointConfigurationService.getEndpointConfiguration(id) ?:
+            endpointConfigurationService.newEndpointConfiguration(id)
+
     override fun delete(connectionInfo: ConnectionInfo) {
         try {
 
-            endpointConfigurationService.deleteEndpointConfiguration(connectionInfo.id.toString())
+            endpointConfigurationService.deleteEndpointConfiguration(connectionInfo.id)
 
         } catch (e: IOException) {
             log.error("Error deleting endpoint configuration: " + connectionInfo, e)
@@ -99,7 +98,7 @@ class PersisterUsingEndpointConfigurationService
 
     private fun addConnectionInfoToConfig(config: IEndpointConfiguration, info: ConnectionInfo) {
         try {
-            config.setString(ID, info.id.toString())
+            config.setString(ID, info.id)
             config.setString(HOST, info.hostname)
             config.setInt(PORT, info.port)
             config.setString(USER, info.username)
@@ -129,17 +128,6 @@ class PersisterUsingEndpointConfigurationService
             log.warn("Cannot convert IEndpointConfiguration to ConnectionInfo: " + config.id, e)
             return null
         }
-
-    }
-
-    companion object {
-        private val log = LoggerFactory.getLogger(PersisterUsingEndpointConfigurationService::class.java)
-
-        val ID = "id"
-        val HOST = "host"
-        val PORT = "port"
-        val USER = "user"
-        val PASSWORD = "password"
     }
 }
 

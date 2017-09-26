@@ -21,7 +21,7 @@ interface PluginNotifications {
 
 
 @Component
-class PluginFactoryRepositoryImpl: PluginFactoryRepository, PluginNotifications {
+class NotifyingPluginFactoryRepository : PluginFactoryRepository, PluginNotifications {
     private val factories = CopyOnWriteArrayList<ContrailPluginFactory>()
 
     override fun register(factory: ContrailPluginFactory) {
@@ -31,6 +31,9 @@ class PluginFactoryRepositoryImpl: PluginFactoryRepository, PluginNotifications 
     override fun unregister(factory: ContrailPluginFactory) {
         factories.remove(factory)
     }
+
+    fun contains(factory: ContrailPluginFactory) =
+        factories.contains(factory)
 
     override fun notifyElementsInvalidate() {
         factories.forEach { it.pluginNotificationHandler.notifyElementInvalidate(null, null) }
