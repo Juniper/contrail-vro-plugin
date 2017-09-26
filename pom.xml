@@ -10,7 +10,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <vco.version>7.0.1</vco.version>
-    <kotlin.version>1.1.4-3</kotlin.version>
+    <kotlin.version>1.1.50</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
   </properties>
 
