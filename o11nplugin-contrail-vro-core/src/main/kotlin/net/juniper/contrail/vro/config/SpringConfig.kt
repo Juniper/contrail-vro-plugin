@@ -9,6 +9,6 @@ import org.springframework.context.annotation.*
 
 @Configuration
 @ComponentScan("net.juniper.contrail.vro.config")
-open class SpringConfig
+class SpringConfig
 
 
