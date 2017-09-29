@@ -15,7 +15,8 @@ class NotifyingPluginFactoryRepositorySpec extends Specification {
     def repository = new NotifyingPluginFactoryRepository()
 
     def "Initially repository does not contain any factory" () {
-        when: "repository is created"
+        when:
+        def repository = new NotifyingPluginFactoryRepository()
 
         then:
         !repository.contains(factory)
@@ -30,10 +31,10 @@ class NotifyingPluginFactoryRepositorySpec extends Specification {
     }
 
     def "Repository does not contain removed factory" () {
-        when:
+        given:
         repository.register(factory)
 
-        and:
+        when:
         repository.unregister(factory)
 
         then:
