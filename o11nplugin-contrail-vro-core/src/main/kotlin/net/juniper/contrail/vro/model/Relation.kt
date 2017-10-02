@@ -4,7 +4,6 @@
 
 package net.juniper.contrail.vro.model
 
-
 fun startBuildingRelationTreeNode(objectName: String) = RelationTreeNode.Builder(objectName)
 
 enum class Cardinality {
@@ -41,7 +40,7 @@ class RelationTreeNode private constructor(private val objectName: String, priva
     class Builder(private val objectName: String) {
         private val relationsInfo = mutableListOf<RelationInfo>()
 
-        fun addNode(r: RelationInfo){
+        fun addNode(r: RelationInfo) {
             relationsInfo += r
         }
 

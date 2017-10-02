@@ -10,7 +10,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <vco.version>7.0.1</vco.version>
-    <kotlin.version>1.1.50</kotlin.version>
+    <kotlin.version>1.1.51</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
   </properties>
 
@@ -208,6 +208,47 @@
               <include>**/*Test.*</include>
             </includes>
           </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>1.7</version>
+          <executions>
+            <execution>
+              <id>ktlint</id>
+              <phase>verify</phase>
+              <configuration>
+                <target name="ktlint">
+                  <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
+                        classname="com.github.shyiko.ktlint.Main" classpathref="maven.plugin.classpath">
+                    <arg value="src/**/*.kt"/>
+                  </java>
+                </target>
+              </configuration>
+              <goals><goal>run</goal></goals>
+            </execution>
+            <execution>
+              <id>ktlint-format</id>
+              <configuration>
+                <target name="ktlint">
+                  <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
+                        classname="com.github.shyiko.ktlint.Main" classpathref="maven.plugin.classpath">
+                    <arg value="-F"/>
+                    <arg value="src/**/*.kt"/>
+                  </java>
+                </target>
+              </configuration>
+              <goals><goal>run</goal></goals>
+            </execution>
+          </executions>
+          <dependencies>
+            <dependency>
+              <groupId>com.github.shyiko</groupId>
+              <artifactId>ktlint</artifactId>
+              <version>0.9.2</version>
+            </dependency>
+          </dependencies>
         </plugin>
 
       </plugins>

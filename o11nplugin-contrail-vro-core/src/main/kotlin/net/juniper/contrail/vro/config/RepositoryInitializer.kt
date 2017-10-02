@@ -9,14 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 
-
 /**
  * Service performing initialization of the plugin state.
  */
 interface RepositoryInitializer {
     fun initRepository()
 }
-
 
 /**
  * Bean used to automatically read connection information
@@ -34,6 +32,6 @@ class RepositoryInitializerImpl
     override fun initRepository() {
         persister.findAll().stream()
             .map { Connection(it, factory.create(it)) }
-            .forEach{ repository.addConnection(it) }
+            .forEach { repository.addConnection(it) }
     }
 }

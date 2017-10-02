@@ -12,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import java.util.*
-
+import java.util.UUID
 
 /**
  * Service responsible for persistent storage of Contrail
@@ -25,7 +24,6 @@ interface ConnectionPersister {
     fun save(connectionInfo: ConnectionInfo)
     fun delete(connectionInfo: ConnectionInfo)
 }
-
 
 /**
  * Persister implementation using VRO provided service.
@@ -55,7 +53,7 @@ class PersisterUsingEndpointConfigurationService
     override fun delete(connectionInfo: ConnectionInfo) =
         configurationService.deleteEndpointConfiguration(connectionInfo.id)
 
-    private fun createOrGetConfiguration(id: String):IEndpointConfiguration =
+    private fun createOrGetConfiguration(id: String): IEndpointConfiguration =
         configurationService.getEndpointConfiguration(id) ?:
             configurationService.newEndpointConfiguration(id)
 

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component
 import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
 
-
 /**
  * Service holding all currently active Contrail connections.
  */
@@ -30,7 +29,6 @@ interface ConnectionRepository {
 
     val connections: List<Connection>
 }
-
 
 @Lazy @Component
 class DefaultConnectionRepository

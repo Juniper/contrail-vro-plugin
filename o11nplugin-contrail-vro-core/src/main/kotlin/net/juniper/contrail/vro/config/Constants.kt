@@ -4,7 +4,6 @@
 
 package net.juniper.contrail.vro.config
 
-
 val ID = "uuid"
 val HOST = "host"
 val PORT = "port"

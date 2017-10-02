@@ -8,17 +8,14 @@ import net.juniper.contrail.vro.ContrailPluginFactory
 import org.springframework.stereotype.Component
 import java.util.concurrent.CopyOnWriteArrayList
 
-
 interface PluginFactoryRepository {
     fun register(factory: ContrailPluginFactory)
     fun unregister(factory: ContrailPluginFactory)
 }
 
-
 interface PluginNotifications {
     fun notifyElementsInvalidate()
 }
-
 
 @Component
 class NotifyingPluginFactoryRepository : PluginFactoryRepository, PluginNotifications {
