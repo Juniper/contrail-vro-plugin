@@ -12,3 +12,6 @@ val PASSWORD = "password"
 val TENANT = "tenant"
 val AUTHTYPE = "keystone"
 val AUTHSERVER = "authserver"
+
+val CONNECTION = "connection"
+val CONNECTION_MANAGER = "connection-manager"
