@@ -20,6 +20,7 @@ import ch.dunes.vso.sdk.api.PluginLicense
 import ch.dunes.vso.sdk.api.PluginLicenseException
 import ch.dunes.vso.sdk.api.PluginWatcher
 import com.vmware.o11n.plugin.sdk.spring.impl.PluginNameAwareBeanPostProcessor
+import net.juniper.contrail.vro.config.ConnectionRepository
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.GenericApplicationContext
 
@@ -32,10 +33,11 @@ class ContrailPluginAdaptor(private val context: GenericApplicationContext) : IP
     internal constructor() : this(AnnotationConfigApplicationContext(SpringConfig::class.java))
 
     @Throws(SecurityException::class, LoginException::class, PluginLicenseException::class)
-    override fun createPluginFactory(sessionId: String, username: String, password: String, pluginNotificationHandler: IPluginNotificationHandler): IPluginFactory {
+    override fun createPluginFactory(sessionId: String, username: String?, password: String?, pluginNotificationHandler: IPluginNotificationHandler): IPluginFactory {
         log.debug("createPluginFactory() --> sessionId: $sessionId, username: $username")
         val connections = context.getBean(ConnectionManager::class.java)
-        val factory = ContrailPluginFactory(connections, pluginNotificationHandler)
+        val repository = context.getBean(ConnectionRepository::class.java)
+        val factory = ContrailPluginFactory(connections, repository, pluginNotificationHandler)
         factoryRepository().register(factory)
         return factory
     }

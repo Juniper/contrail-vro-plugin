@@ -7,7 +7,7 @@
   <packaging>jar</packaging>
 
   <properties>
-    <generated.root>${project.build.directory}/target</generated.root>
+    <generated.root>${project.build.directory}</generated.root>
     <generated.sources.dir>${generated.root}/generated-sources</generated.sources.dir>
     <generated.resources.dir>${generated.root}/generated-resources</generated.resources.dir>
   </properties>
@@ -104,6 +104,9 @@
     <resources>
       <resource>
         <directory>${generated.resources.dir}</directory>
+      </resource>
+      <resource>
+        <directory>${project.basedir}/src/main/resources/</directory>
       </resource>
     </resources>
   </build>

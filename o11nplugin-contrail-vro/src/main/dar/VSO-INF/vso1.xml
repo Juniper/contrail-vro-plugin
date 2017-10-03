@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<module name="Contrail" display-name="Contrail" image="images/default-16x16.png" version="${project.version}"
+  build-number="${build.number}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://www.vmware.com/support/orchestrator/plugin-4-1.xsd">
+
+  <description>Contrail plug-in for vRealize Orchestrator</description>
+
+  <installation mode="version">
+    <action type="install-package" resource="packages/o11nplugin-contrail-vro-package-${project.version}.package" />
+  </installation>
+
+  <inventory type="root"/>
+  <finder-datasources>
+    <finder-datasource name="main-datasource" adaptor-class="net.juniper.contrail.vro.ContrailPluginAdaptor" concurrent-call="false" anonymous-login-mode="always"/>
+  </finder-datasources>
+
+  <finders>
+    <finder datasource="main-datasource" java-class="net.juniper.contrail.vro.model.Connection" type="connection">
+      <description/>
+      <id accessor="getId()"/>
+      <properties>
+        <property show-in-description="true" show-in-column="true" bean-property="host" display-name="host" name="host"/>
+        <property show-in-description="true" show-in-column="true" bean-property="port" display-name="port" name="port"/>
+        <property show-in-description="true" show-in-column="true" bean-property="username" display-name="username" name="username"/>
+        <property show-in-description="true" show-in-column="true" bean-property="password" display-name="password" name="password"/>
+      </properties>
+    </finder>
+    <finder hidden="true" datasource="main-datasource" type="root">
+      <inventory-children>
+        <relation-link name="root-has-connections"/>
+      </inventory-children>
+      <relations>
+        <relation name="root-has-connections" type="connection"/>
+      </relations>
+    </finder>
+  </finders>
+
+  <scripting-objects>
+    <object script-name="ContrailConnectionManager"  java-class="net.juniper.contrail.vro.config.ConnectionManager" create="false" strict="true">
+      <description/>
+      <singleton script-name="ContrailConnectionManager" datasource="main-datasource"/>
+      <methods>
+        <method script-name="connect" java-name="connect" return-type="String">
+          <description>Create an instance of Contrail connection</description>
+          <parameters>
+            <parameter type="String" name="host"/>
+            <parameter type="Number" name="port"/>
+            <parameter type="String" name="user"/>
+            <parameter type="String" name="password"/>
+          </parameters>
+        </method>
+      </methods>
+    </object>
+
+    <object script-name="ContrailGreetingService" java-class="net.juniper.contrail.vro.GreetingService" create="true"
+      strict="true">
+      <description><![CDATA[Simple greeter]]></description>
+      <methods>
+        <method script-name="greet" java-name="greet" return-type="String">
+          <description><![CDATA[Produces a greeting]]></description>
+          <parameters>
+            <parameter name="name" type="String"><![CDATA[The person to greet]]></parameter>
+          </parameters>
+        </method>
+      </methods>
+    </object>
+  </scripting-objects>
+</module>
