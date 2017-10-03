@@ -66,7 +66,7 @@
               <tasks>
                 <copy tofile="${basedir}/target/${project.artifactId}.${project.packaging}" flatten="true"
                       overwrite="true" verbose="true" failonerror="true"
-                      file="${basedir}/target/${project.build.finalName}.${project.packaging}"></copy>
+                      file="${basedir}/target/${project.build.finalName}.${project.packaging}"/>
                 <mkdir dir="${basedir}/target/VSO-INF"/>
                 <copy todir="${basedir}/target/VSO-INF" overwrite="true" verbose="true" failonerror="true">
                   <fileset dir="${basedir}/src/main/vmoapp/VSO-INF"/>
@@ -92,12 +92,47 @@
               <tasks if="o11n.root.path">
                 <copy tofile="${o11n.root.path}/app-server/plugins/${project.build.finalName}.${project.packaging}"
                       flatten="true" overwrite="true" verbose="true" failonerror="true"
-                      file="${basedir}/target/${project.build.finalName}.${project.packaging}"></copy>
+                      file="${basedir}/target/${project.build.finalName}.${project.packaging}"/>
               </tasks>
             </configuration>
           </execution>
         </executions>
       </plugin>
+
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>buildnumber</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <buildNumberPropertyName>build.number</buildNumberPropertyName>
+          <format>{0,number}</format>
+          <items>
+            <item>buildNumber</item>
+          </items>
+          <doCheck>false</doCheck>
+          <doUpdate>false</doUpdate>
+          <revisionOnScmFailure>unknownbuild</revisionOnScmFailure>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+
+  <!-- Dummy config to satisfy the buildnumber plugin -->
+  <scm>
+    <connection>scm:svn:http://127.0.0.1/dummy</connection>
+    <developerConnection>scm:svn:https://127.0.0.1/dummy</developerConnection>
+    <tag>HEAD</tag>
+    <url>http://127.0.0.1/dummy</url>
+  </scm>
+
 </project>
