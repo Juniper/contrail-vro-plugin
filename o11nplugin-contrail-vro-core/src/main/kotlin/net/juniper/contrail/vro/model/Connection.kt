@@ -14,10 +14,11 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
         info.id
 }
 
-data class ConnectionInfo(val uuid: UUID, val hostname: String, val port: Int, val username: String, val password: String) : Serializable {
-
+data class ConnectionInfo(val uuid: UUID, val hostname: String, val port: Int, val username: String?, val password: String?,
+                          val tenant: String?, val authServer: String?) : Serializable {
+    // TODO tenant and authType shouldn't be constant
     constructor(hostname: String, port: Int, username: String, password: String):
-        this(UUID.randomUUID(), hostname, port, username, password)
+        this(UUID.randomUUID(), hostname, port, username, password, null, null)
 
     val id: String get() =
         uuid.toString()

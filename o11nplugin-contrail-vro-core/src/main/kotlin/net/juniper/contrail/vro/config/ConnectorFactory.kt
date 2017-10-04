@@ -24,8 +24,11 @@ interface ConnectorFactory {
  */
 @Component
 class ConnectorFactoryImpl : ConnectorFactory {
-    override fun create(info: ConnectionInfo): ApiConnector =
-        ApiConnectorFactory.build(info.hostname, info.port)
-            //TODO specify AuthType
+    override fun create(info: ConnectionInfo): ApiConnector {
+        val authType = if (info.authServer != null ) AUTHTYPE else null
+        return ApiConnectorFactory.build(info.hostname, info.port)
             .credentials(info.hostname, info.password)
+            .tenantName(info.tenant)
+            .authServer(authType, info.authServer)
+    }
 }
