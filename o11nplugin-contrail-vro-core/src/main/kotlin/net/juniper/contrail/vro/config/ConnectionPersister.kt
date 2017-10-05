@@ -39,19 +39,25 @@ class PersisterUsingEndpointConfigurationService
 {
     private val log = LoggerFactory.getLogger(PersisterUsingEndpointConfigurationService::class.java)
 
-    override fun findAll(): List<ConnectionInfo> =
-        configurationService.endpointConfigurations.asSequence()
-            .map { it.asInfo() }
-            .onEach { log.debug("Loading connection info: " + it) }
+    override fun findAll(): List<ConnectionInfo> {
+        log.debug("Loading connections.")
+        return configurationService.endpointConfigurations.asSequence()
+            .map { it.asInfo }
+            .onEach { log.debug("Loading connection info: {}", it) }
             .toList()
+    }
 
-    override fun save(connectionInfo: ConnectionInfo) =
+    override fun save(connectionInfo: ConnectionInfo) {
+        log.debug("Saving connection: {}", connectionInfo)
         createOrGetConfiguration(connectionInfo.id)
             .updateFrom(connectionInfo)
             .saveTo(configurationService)
+    }
 
-    override fun delete(connectionInfo: ConnectionInfo) =
+    override fun delete(connectionInfo: ConnectionInfo) {
+        log.debug("Deleting connection: {}", connectionInfo)
         configurationService.deleteEndpointConfiguration(connectionInfo.id)
+    }
 
     private fun createOrGetConfiguration(id: String): IEndpointConfiguration =
         configurationService.getEndpointConfiguration(id) ?:
@@ -73,7 +79,7 @@ class PersisterUsingEndpointConfigurationService
         return this
     }
 
-    private fun IEndpointConfiguration.asInfo(): ConnectionInfo {
+    private val IEndpointConfiguration.asInfo: ConnectionInfo get() {
         val id = UUID.fromString(getString(ID))
         val host = getString(HOST)
         val port = getAsInteger(PORT)

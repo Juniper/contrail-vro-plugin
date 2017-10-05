@@ -34,7 +34,7 @@ class ContrailPluginAdaptor(private val context: GenericApplicationContext) : IP
 
     @Throws(SecurityException::class, LoginException::class, PluginLicenseException::class)
     override fun createPluginFactory(sessionId: String, username: String?, password: String?, pluginNotificationHandler: IPluginNotificationHandler): IPluginFactory {
-        log.debug("createPluginFactory() --> sessionId: $sessionId, username: $username")
+        log.debug("createPluginFactory(sessionId={}, username={},...)", sessionId, username)
         val connections = context.getBean(ConnectionManager::class.java)
         val repository = context.getBean(ConnectionRepository::class.java)
         val factory = ContrailPluginFactory(connections, repository, pluginNotificationHandler)
@@ -77,24 +77,24 @@ class ContrailPluginAdaptor(private val context: GenericApplicationContext) : IP
     }
 
     override fun addWatcher(pluginWatcher: PluginWatcher) {
-        log.debug("addWatcher() --> pluginWatcher: " + pluginWatcher.id)
+        log.debug("addWatcher(id={})", pluginWatcher.id)
     }
 
     override fun removeWatcher(pluginWatcherId: String) {
-        log.debug("removeWatcher() --> pluginWatcherId: " + pluginWatcherId)
+        log.debug("removeWatcher(id={})", pluginWatcherId)
     }
 
     override fun registerEventPublisher(type: String, id: String, pluginEventPublisher: IPluginEventPublisher) {
-        log.debug("registerEventPublisher() --> type: $type, id: $id")
+        log.debug("registerEventPublisher(type={}, id={})", type, id)
     }
 
     override fun unregisterEventPublisher(type: String, id: String, pluginEventPublisher: IPluginEventPublisher) {
-        log.debug("unregisterEventPublisher() --> type: $type, id: $id")
+        log.debug("unregisterEventPublisher(type={}, id={})", type, id)
     }
 
     @Throws(PluginLicenseException::class)
     override fun installLicenses(licenses: Array<PluginLicense>) {
-        log.debug("installLicenses()")
+        log.debug("installLicenses(...)")
     }
 
     override fun uninstallPluginFactory(pluginFactory: IPluginFactory) {

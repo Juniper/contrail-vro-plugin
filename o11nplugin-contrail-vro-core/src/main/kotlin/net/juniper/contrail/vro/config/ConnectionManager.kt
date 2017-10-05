@@ -24,7 +24,7 @@ class ConnectionManager
         log.info("ConnectionInfoManager created.")
     }
 
-    fun connect(host: String, port: Int, user: String, password: String): String {
+    fun create(host: String, port: Int, user: String, password: String): String {
         val info = ConnectionInfo(host, port, user, password)
         val connector = connectorFactory.create(info)
         val connection = Connection(info, connector)

@@ -12,6 +12,12 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
 
     val id: String get() =
         info.id
+
+    val host: String get() =
+        info.hostname
+
+    val port: Int get() =
+        info.port
 }
 
 data class ConnectionInfo(val uuid: UUID, val hostname: String, val port: Int, val username: String?, val password: String?,
