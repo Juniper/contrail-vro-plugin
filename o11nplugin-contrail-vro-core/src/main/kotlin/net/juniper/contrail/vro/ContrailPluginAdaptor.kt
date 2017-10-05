@@ -4,8 +4,6 @@
 
 package net.juniper.contrail.vro
 
-import javax.security.auth.login.LoginException
-import org.slf4j.LoggerFactory
 import ch.dunes.vso.sdk.IServiceRegistry
 import ch.dunes.vso.sdk.IServiceRegistryAdaptor
 import ch.dunes.vso.sdk.api.IPluginAdaptor
@@ -17,9 +15,15 @@ import ch.dunes.vso.sdk.api.PluginLicense
 import ch.dunes.vso.sdk.api.PluginLicenseException
 import ch.dunes.vso.sdk.api.PluginWatcher
 import com.vmware.o11n.plugin.sdk.spring.impl.PluginNameAwareBeanPostProcessor
-import net.juniper.contrail.vro.config.*
+import net.juniper.contrail.vro.config.ConnectionManager
+import net.juniper.contrail.vro.config.ConnectionRepository
+import net.juniper.contrail.vro.config.PluginFactoryRepository
+import net.juniper.contrail.vro.config.RepositoryInitializer
+import net.juniper.contrail.vro.config.SpringConfig
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.GenericApplicationContext
+import javax.security.auth.login.LoginException
 
 class ContrailPluginAdaptor(private val context: GenericApplicationContext) : IPluginAdaptor, IServiceRegistryAdaptor {
     companion object {

@@ -23,7 +23,7 @@ class ConnectionManagerSpec extends Specification {
         factory.create(_) >> connector
 
         when:
-        manager.create(info.hostname, info.port, info.username, info.password)
+        manager.create(info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
 
         then:
         1 * repository.addConnection(_)

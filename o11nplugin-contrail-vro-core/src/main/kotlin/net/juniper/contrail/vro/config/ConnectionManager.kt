@@ -18,20 +18,18 @@ class ConnectionManager
     private val repository: ConnectionRepository,
     private val connectorFactory: ConnectorFactory) {
 
-
     companion object {
         private val log = LoggerFactory.getLogger(ConnectionManager::class.java)
         @JvmStatic fun createScriptingSingleton(factory: IPluginFactory): ConnectionManager =
             (factory as ContrailPluginFactory).connections
     }
 
-
     init {
         log.info("ConnectionInfoManager created.")
     }
 
-    fun create(host: String, port: Int, user: String, password: String): String {
-        val info = ConnectionInfo(host, port, user, password)
+    fun create(host: String, port: Int, user: String, password: String, tenant: String? = null, authServer: String? = null): String {
+        val info = ConnectionInfo(host, port, user, password, tenant, authServer)
         val connector = connectorFactory.create(info)
         val connection = Connection(info, connector)
         repository.addConnection(connection)

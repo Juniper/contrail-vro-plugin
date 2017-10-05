@@ -22,8 +22,8 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
 
 data class ConnectionInfo(val uuid: UUID, val hostname: String, val port: Int, val username: String?, val password: String?,
                           val tenant: String?, val authServer: String?) : Serializable {
-    constructor(hostname: String, port: Int, username: String, password: String):
-        this(UUID.randomUUID(), hostname, port, username, password, null, null)
+    @JvmOverloads constructor(hostname: String, port: Int, username: String, password: String, tenant: String? = null, authServer: String? = null) :
+        this(UUID.randomUUID(), hostname, port, username, password, tenant, authServer)
 
     val id: String get() =
         uuid.toString()
