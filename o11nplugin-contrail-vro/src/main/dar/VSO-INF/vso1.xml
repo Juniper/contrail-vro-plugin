@@ -12,7 +12,7 @@
 
   <inventory type="root"/>
   <finder-datasources>
-    <finder-datasource name="main-datasource" adaptor-class="net.juniper.contrail.vro.ContrailPluginAdaptor" concurrent-call="false" anonymous-login-mode="always"/>
+    <finder-datasource name="main-datasource" adaptor-class="net.juniper.contrail.vro.ContrailPluginAdaptor" concurrent-call="false" anonymous-login-mode="always" invoker-mode="direct"/>
   </finder-datasources>
 
   <finders>
@@ -22,26 +22,24 @@
       <properties>
         <property show-in-description="true" show-in-column="true" bean-property="host" display-name="host" name="host"/>
         <property show-in-description="true" show-in-column="true" bean-property="port" display-name="port" name="port"/>
-        <property show-in-description="true" show-in-column="true" bean-property="username" display-name="username" name="username"/>
-        <property show-in-description="true" show-in-column="true" bean-property="password" display-name="password" name="password"/>
       </properties>
     </finder>
     <finder hidden="true" datasource="main-datasource" type="root">
       <inventory-children>
-        <relation-link name="root-has-connections"/>
+        <relation-link name="root-to-connection"/>
       </inventory-children>
       <relations>
-        <relation name="root-has-connections" type="connection"/>
+        <relation name="root-to-connection" type="connection"/>
       </relations>
     </finder>
   </finders>
 
   <scripting-objects>
-    <object script-name="ContrailConnectionManager"  java-class="net.juniper.contrail.vro.config.ConnectionManager" create="false" strict="true">
+    <object script-name="_ContrailConnectionManager"  java-class="net.juniper.contrail.vro.config.ConnectionManager" create="false" strict="true">
       <description/>
       <singleton script-name="ContrailConnectionManager" datasource="main-datasource"/>
       <methods>
-        <method script-name="connect" java-name="connect" return-type="String">
+        <method script-name="create" java-name="create" return-type="String">
           <description>Create an instance of Contrail connection</description>
           <parameters>
             <parameter type="String" name="host"/>
