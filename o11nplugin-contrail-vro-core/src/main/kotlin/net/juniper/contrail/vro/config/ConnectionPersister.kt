@@ -35,15 +35,16 @@ class PersisterUsingEndpointConfigurationService
 (
     private val configurationService: IEndpointConfigurationService
 )
-: ConnectionPersister
-{
-    private val log = LoggerFactory.getLogger(PersisterUsingEndpointConfigurationService::class.java)
+: ConnectionPersister {
+    companion object {
+        @JvmStatic private val log = LoggerFactory.getLogger(PersisterUsingEndpointConfigurationService::class.java)
+    }
 
     override fun findAll(): List<ConnectionInfo> {
         log.debug("Loading connections.")
         return configurationService.endpointConfigurations.asSequence()
             .map { it.asInfo }
-            .onEach { log.debug("Loading connection info: {}", it) }
+            .onEach { log.trace("---> Loading connection info: {}", it) }
             .toList()
     }
 

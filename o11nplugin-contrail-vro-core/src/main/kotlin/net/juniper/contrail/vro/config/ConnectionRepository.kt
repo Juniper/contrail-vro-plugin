@@ -38,7 +38,9 @@ class DefaultConnectionRepository
 )
 : ConnectionRepository
 {
-    private val log = LoggerFactory.getLogger(DefaultConnectionRepository::class.java)
+    companion object {
+        private val log = LoggerFactory.getLogger(DefaultConnectionRepository::class.java)
+    }
 
     private val items = ConcurrentHashMap<String, Connection>()
 

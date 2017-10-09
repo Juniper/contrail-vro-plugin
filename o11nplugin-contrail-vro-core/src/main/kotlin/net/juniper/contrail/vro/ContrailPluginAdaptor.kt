@@ -5,9 +5,6 @@
 package net.juniper.contrail.vro
 
 import javax.security.auth.login.LoginException
-import net.juniper.contrail.vro.config.PluginFactoryRepository
-import net.juniper.contrail.vro.config.SpringConfig
-import net.juniper.contrail.vro.config.ConnectionManager
 import org.slf4j.LoggerFactory
 import ch.dunes.vso.sdk.IServiceRegistry
 import ch.dunes.vso.sdk.IServiceRegistryAdaptor
@@ -20,13 +17,14 @@ import ch.dunes.vso.sdk.api.PluginLicense
 import ch.dunes.vso.sdk.api.PluginLicenseException
 import ch.dunes.vso.sdk.api.PluginWatcher
 import com.vmware.o11n.plugin.sdk.spring.impl.PluginNameAwareBeanPostProcessor
-import net.juniper.contrail.vro.config.ConnectionRepository
+import net.juniper.contrail.vro.config.*
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.GenericApplicationContext
 
 class ContrailPluginAdaptor(private val context: GenericApplicationContext) : IPluginAdaptor, IServiceRegistryAdaptor {
-
-    private val log = LoggerFactory.getLogger(ContrailPluginAdaptor::class.java)
+    companion object {
+        private val log = LoggerFactory.getLogger(ContrailPluginAdaptor::class.java)
+    }
 
     private var pluginName: String? = null
 
@@ -57,10 +55,15 @@ class ContrailPluginAdaptor(private val context: GenericApplicationContext) : IP
 
         val endpointService = serviceRegistry.getService("ch.dunes.vso.sdk.endpoints.IEndpointConfigurationService")
         if (endpointService != null) {
+            log.debug("Registering endpoint configuration service.")
             registerSingleton("endpointConfigurationService", endpointService)
         } else {
             log.error("Endpoint configuration service not found in the service registry.")
         }
+
+        log.debug("Initializing repository.")
+        val initializer = context.getBean(RepositoryInitializer::class.java)
+        initializer.initRepository()
     }
 
     override fun setPluginName(pluginName: String) {

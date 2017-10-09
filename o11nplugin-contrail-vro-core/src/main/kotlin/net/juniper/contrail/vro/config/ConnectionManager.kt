@@ -18,7 +18,13 @@ class ConnectionManager
     private val repository: ConnectionRepository,
     private val connectorFactory: ConnectorFactory) {
 
-    private val log = LoggerFactory.getLogger(ConnectionManager::class.java)
+
+    companion object {
+        private val log = LoggerFactory.getLogger(ConnectionManager::class.java)
+        @JvmStatic fun createScriptingSingleton(factory: IPluginFactory): ConnectionManager =
+            (factory as ContrailPluginFactory).connections
+    }
+
 
     init {
         log.info("ConnectionInfoManager created.")
@@ -34,10 +40,5 @@ class ConnectionManager
 
     fun delete(connection: Connection) {
         repository.removeConnection(connection)
-    }
-
-    companion object {
-        @JvmStatic fun createScriptingSingleton(factory: IPluginFactory): ConnectionManager =
-            (factory as ContrailPluginFactory).connections
     }
 }
