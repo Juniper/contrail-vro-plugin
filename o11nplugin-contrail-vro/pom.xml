@@ -19,6 +19,11 @@
     </dependency>
     <dependency>
       <groupId>net.juniper.contrail.vro</groupId>
+      <artifactId>o11nplugin-contrail-vro-gen</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.juniper.contrail.vro</groupId>
       <artifactId>o11nplugin-contrail-vro-package</artifactId>
       <type>package</type>
     </dependency>
@@ -64,17 +69,18 @@
             </goals>
             <configuration>
               <tasks>
-                <copy tofile="${basedir}/target/${project.artifactId}.${project.packaging}" flatten="true"
-                      overwrite="true" verbose="true" failonerror="true"
+                <copy tofile="${basedir}/target/${project.artifactId}.${project.packaging}"
+                      flatten="true" overwrite="true" verbose="true" failonerror="true"
                       file="${basedir}/target/${project.build.finalName}.${project.packaging}"/>
-                <mkdir dir="${basedir}/target/VSO-INF"/>
-                <copy todir="${basedir}/target/VSO-INF" overwrite="true" verbose="true" failonerror="true">
-                  <fileset dir="${basedir}/src/main/vmoapp/VSO-INF"/>
+                <mkdir dir="${basedir}/target/VSO-INF" />
+                <copy todir="${basedir}/target/VSO-INF" overwrite="true" verbose="true"
+                      failonerror="true">
+                  <fileset dir="${basedir}/src/main/vmoapp/VSO-INF" />
                 </copy>
                 <jar destfile="${basedir}/target/${project.build.finalName}.vmoapp">
                   <fileset dir="${basedir}/target/">
-                    <include name="${project.artifactId}.${project.packaging}"/>
-                    <include name="VSO-INF/*"/>
+                    <include name="${project.artifactId}.${project.packaging}" />
+                    <include name="VSO-INF/*" />
                   </fileset>
                 </jar>
               </tasks>
@@ -94,6 +100,31 @@
                       flatten="true" overwrite="true" verbose="true" failonerror="true"
                       file="${basedir}/target/${project.build.finalName}.${project.packaging}"/>
               </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- copy deliverable to dist folder -->
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.0.1</version>
+        <executions>
+          <execution>
+            <id>copy-vmoapp-file</id>
+            <phase>install</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/../dist</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/target/</directory>
+                  <includes>
+                    <include>${project.build.finalName}.vmoapp</include>
+                  </includes>
+                </resource>
+              </resources>
             </configuration>
           </execution>
         </executions>

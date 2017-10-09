@@ -11,6 +11,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <vco.version>7.3.0</vco.version>
+    <installation.mode>version</installation.mode>
     <kotlin.version>1.1.51</kotlin.version>
   </properties>
 
@@ -282,6 +283,8 @@
   <modules>
     <module>o11nplugin-contrail-vro-generator</module>
     <module>o11nplugin-contrail-vro-core</module>
+    <module>o11nplugin-contrail-vro-custom</module>
+    <module>o11nplugin-contrail-vro-gen</module>
     <module>o11nplugin-contrail-vro-package</module>
     <module>o11nplugin-contrail-vro</module>
   </modules>

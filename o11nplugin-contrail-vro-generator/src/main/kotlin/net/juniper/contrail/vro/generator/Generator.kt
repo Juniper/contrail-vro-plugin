@@ -4,14 +4,10 @@
 
 package net.juniper.contrail.vro.generator
 
-import java.io.File
 import java.util.Properties
 
 object Generator {
-    @JvmStatic fun main(args: Array<String>) {
-        val info = readProjectInfo()
-        copyVSOFile(info)
-    }
+    @JvmStatic fun main(args: Array<String>) = Unit
 }
 
 private fun readProjectInfo(): ProjectInfo {
@@ -41,13 +37,3 @@ data class ProjectInfo(
     val staticRoot: String,
     val version: String,
     val baseVersion: String)
-
-fun copyVSOFile(info: ProjectInfo) {
-    val vsoFilename = "vso.xml"
-
-    val source = "${info.staticRoot}/$vsoFilename"
-    val target = "${info.finalProjectRoot}/src/main/dar/VSO-INF/$vsoFilename"
-
-    println("Copying vso.xml file.")
-    File(source).copyTo(File(target), overwrite = true)
-}

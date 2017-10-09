@@ -6,6 +6,7 @@
 *.iml
 
 #Ignore generated files
+dist/
 target/
 o11nplugin-contrail-vro-package/src
 

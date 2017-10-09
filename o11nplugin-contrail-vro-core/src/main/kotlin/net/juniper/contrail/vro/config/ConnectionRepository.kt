@@ -4,9 +4,8 @@
 
 package net.juniper.contrail.vro.config
 
+import com.vmware.o11n.sdk.modeldriven.Sid
 import net.juniper.contrail.vro.model.Connection
-import org.apache.commons.lang.StringUtils
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
@@ -25,7 +24,7 @@ interface ConnectionRepository {
     fun removeConnection(item: Connection)
 
     @Throws(IllegalArgumentException::class)
-    fun getConnection(name: String): Connection?
+    fun getConnection(id: Sid): Connection?
 
     fun findConnections(query: String): List<Connection>
 
@@ -40,27 +39,22 @@ class DefaultConnectionRepository
 )
 : ConnectionRepository
 {
-    companion object {
-        private val log = LoggerFactory.getLogger(DefaultConnectionRepository::class.java)
-    }
-
     private val items = ConcurrentHashMap<String, Connection>()
 
-    private fun String.toKey() =
-        toLowerCase()
+    private fun Sid.toKey() =
+        id.toString().toLowerCase()
 
     private val Connection.key: String get() =
-        info.name.toKey()
+        info.sid.toKey()
 
     @Throws(IllegalArgumentException::class)
     override fun addConnection(item: Connection) {
-
         val key = item.key
         if (items.containsKey(key)) {
             throw IllegalArgumentException("Item with id '$key' already exists!")
         }
 
-        items.put(key, item)
+        items[key] = item
 
         persister.save(item.info)
     }
@@ -76,19 +70,13 @@ class DefaultConnectionRepository
         get() = ArrayList(items.values)
 
     @Throws(IllegalArgumentException::class)
-    override fun getConnection(name: String): Connection? {
-
-        if (StringUtils.isBlank(name)) {
-            throw IllegalArgumentException("'name' is empty")
-        }
-
-        return items[name.toKey()]
-    }
+    override fun getConnection(id: Sid): Connection? =
+        items[id.toKey()]
 
     override fun findConnections(query: String): List<Connection> {
         val cleanedQuery = query.trim()
         return items.values.asSequence()
-            .filter { it.key.startsWith(cleanedQuery, ignoreCase = true) }
+            .filter { it.name.startsWith(cleanedQuery, ignoreCase = true) }
             .toList()
     }
 }

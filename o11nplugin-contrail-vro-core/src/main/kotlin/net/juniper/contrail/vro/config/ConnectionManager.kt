@@ -4,10 +4,9 @@
 
 package net.juniper.contrail.vro.config
 
-import ch.dunes.vso.sdk.api.IPluginFactory
-import net.juniper.contrail.vro.ContrailPluginFactory
-import net.juniper.contrail.vro.model.ConnectionInfo
+import com.vmware.o11n.plugin.sdk.spring.platform.GlobalPluginNotificationHandler
 import net.juniper.contrail.vro.model.Connection
+import net.juniper.contrail.vro.model.ConnectionInfo
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -17,20 +16,11 @@ class ConnectionManager
 @Autowired constructor(
     private val repository: ConnectionRepository,
     private val connectorFactory: ConnectorFactory,
-    private val notifier: PluginNotifications) {
+    private val notifier: GlobalPluginNotificationHandler) {
 
     companion object {
         private val log = LoggerFactory.getLogger(ConnectionManager::class.java)
         private val blankPattern = "\\s+".toRegex()
-
-        /**
-         * Method retrieves an instance of [ConnectionManager] from [ContrailPluginFactory].
-         *
-         * This method is never called directly and is only required by the vRO
-         * so that [ConnectionManager] could be accessed as a singleton from JavaScript.
-         */
-        @JvmStatic fun createScriptingSingleton(factory: IPluginFactory): ConnectionManager =
-            (factory as ContrailPluginFactory).connections
     }
 
     init {

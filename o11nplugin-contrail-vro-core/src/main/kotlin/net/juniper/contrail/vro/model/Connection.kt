@@ -4,10 +4,16 @@
 
 package net.juniper.contrail.vro.model
 
+import com.vmware.o11n.sdk.modeldriven.Findable
+import com.vmware.o11n.sdk.modeldriven.Sid
 import net.juniper.contrail.api.ApiConnector
-import java.io.Serializable
 
-class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
+class Connection(val info: ConnectionInfo, val connector: ApiConnector) : Findable {
+    override fun getInternalId(): Sid =
+        info.sid
+
+    // ignored since id is fixed and provided by info
+    override fun setInternalId(id: Sid?) = Unit
 
     val name: String get() =
         info.name
@@ -27,7 +33,8 @@ data class ConnectionInfo @JvmOverloads constructor(
     val password: String? = null,
     val authServer: String? = null,
     val tenant: String? = null
-) : Serializable {
+) {
+    val sid: Sid = Sid.valueOf(name)
 
     override fun toString(): String =
         "$username@$hostname:$port"

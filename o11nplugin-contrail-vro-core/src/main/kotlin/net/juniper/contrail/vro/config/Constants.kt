@@ -15,6 +15,7 @@ val AUTHSERVER = "authserver"
 
 val ROOT = "Root"
 val CONNECTION = "Connection"
+val PROJECT = "Project"
 
 infix fun String.has(child: String) =
     "$this-to-$child".toLowerCase()

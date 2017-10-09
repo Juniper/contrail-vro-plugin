@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.config
 
+import com.vmware.o11n.plugin.sdk.spring.platform.GlobalPluginNotificationHandler
 import net.juniper.contrail.api.ApiConnectorMock
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.ConnectionInfo
@@ -16,7 +17,7 @@ class ConnectionManagerSpec extends Specification {
     def connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
     def repository = Mock(ConnectionRepository)
     def factory = Mock(ConnectorFactory)
-    def notifier = Mock(PluginNotifications)
+    def notifier = Mock(GlobalPluginNotificationHandler)
     def manager = new ConnectionManager(repository, factory, notifier)
 
     def setup() {
