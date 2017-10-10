@@ -16,9 +16,10 @@ class ConnectionManagerSpec extends Specification {
     def connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
     def repository = Mock(ConnectionRepository)
     def factory = Mock(ConnectorFactory)
-    def manager = new ConnectionManager(repository, factory)
+    def notifier = Mock(PluginNotifications)
+    def manager = new ConnectionManager(repository, factory, notifier)
 
-    def "Calling create inserts connection into repository" () {
+    def "Calling create inserts connection into repository and notifies plugin" () {
         given:
         factory.create(_) >> connector
 
@@ -27,13 +28,15 @@ class ConnectionManagerSpec extends Specification {
 
         then:
         1 * repository.addConnection(_)
+        1 * notifier.notifyElementsInvalidate()
     }
 
-    def "Calling deleted removes connection from repository" () {
+    def "Calling deleted removes connection from repository and notifies plugin" () {
         when:
         manager.delete(connection)
 
         then:
         1 * repository.removeConnection(connection)
+        1 * notifier.notifyElementsInvalidate()
     }
 }

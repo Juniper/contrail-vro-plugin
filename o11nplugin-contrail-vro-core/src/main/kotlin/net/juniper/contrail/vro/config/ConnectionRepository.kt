@@ -27,6 +27,8 @@ interface ConnectionRepository {
     @Throws(IllegalArgumentException::class)
     fun getConnection(key: String): Connection?
 
+    fun findConnections(query: String): List<Connection>
+
     val connections: List<Connection>
 }
 
@@ -79,4 +81,9 @@ class DefaultConnectionRepository
 
         return items[key]
     }
+
+    override fun findConnections(query: String): List<Connection> =
+        items.values.asSequence()
+            .filter { it.key.startsWith(query, ignoreCase = true) }
+            .toList()
 }

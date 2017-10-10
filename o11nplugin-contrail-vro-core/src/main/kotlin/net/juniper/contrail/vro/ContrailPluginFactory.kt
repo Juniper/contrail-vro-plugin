@@ -46,11 +46,21 @@ class ContrailPluginFactory(
         return null
     }
 
+    private fun <T> List<T>.toResult(): QueryResult {
+        val result = QueryResult()
+        forEach(result::addElement)
+        result.totalCount = size.toLong()
+        return result
+    }
+
     override fun findAll(type: String, query: String): QueryResult {
         log.debug("findAll(type={}, query='{}')", type, query)
 
-        if (type == CONNECTION)
-            return QueryResult(connectionRepository.connections)
+        if (type == CONNECTION) {
+            val connections = connectionRepository.findConnections(query)
+            log.debug("Found {} connections", connections.size)
+            return connections.toResult()
+        }
 
         return QueryResult()
     }

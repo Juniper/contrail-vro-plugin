@@ -16,7 +16,8 @@ import org.springframework.stereotype.Component
 class ConnectionManager
 @Autowired constructor(
     private val repository: ConnectionRepository,
-    private val connectorFactory: ConnectorFactory) {
+    private val connectorFactory: ConnectorFactory,
+    private val notifier: PluginNotifications) {
 
     companion object {
         private val log = LoggerFactory.getLogger(ConnectionManager::class.java)
@@ -33,10 +34,12 @@ class ConnectionManager
         val connector = connectorFactory.create(info)
         val connection = Connection(info, connector)
         repository.addConnection(connection)
+        notifier.notifyElementsInvalidate()
         return connection.id
     }
 
     fun delete(connection: Connection) {
         repository.removeConnection(connection)
+        notifier.notifyElementsInvalidate()
     }
 }

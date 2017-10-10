@@ -13,12 +13,11 @@ val TENANT = "tenant"
 val AUTHTYPE = "keystone"
 val AUTHSERVER = "authserver"
 
-val ROOT = "root"
-val CONNECTION = "connection"
-val CONNECTION_MANAGER = "connection-manager"
+val ROOT = "Root"
+val CONNECTION = "Connection"
 
 infix fun String.has(child: String) =
-    "$this-to-$child"
+    "$this-to-$child".toLowerCase()
 
 val ROOT_HAS_CONNECTIONS =
     ROOT has CONNECTION

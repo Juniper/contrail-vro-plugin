@@ -10,13 +10,13 @@
     <action type="install-package" resource="packages/o11nplugin-contrail-vro-package-${project.version}.package" />
   </installation>
 
-  <inventory type="root"/>
+  <inventory type="Root"/>
   <finder-datasources>
     <finder-datasource name="main-datasource" adaptor-class="net.juniper.contrail.vro.ContrailPluginAdaptor" concurrent-call="false" anonymous-login-mode="always" invoker-mode="direct"/>
   </finder-datasources>
 
   <finders>
-    <finder image="images/default-16x16.png" datasource="main-datasource" java-class="net.juniper.contrail.vro.model.Connection" type="connection">
+    <finder image="images/default-16x16.png" datasource="main-datasource" java-class="net.juniper.contrail.vro.model.Connection" type="Connection">
       <description/>
       <id accessor="getId()"/>
       <properties>
@@ -24,12 +24,12 @@
         <property show-in-description="true" show-in-column="true" bean-property="port" display-name="port" name="port"/>
       </properties>
     </finder>
-    <finder hidden="true" datasource="main-datasource" type="root">
+    <finder hidden="true" datasource="main-datasource" type="Root">
       <inventory-children>
         <relation-link name="root-to-connection"/>
       </inventory-children>
       <relations>
-        <relation name="root-to-connection" type="connection"/>
+        <relation name="root-to-connection" type="Connection"/>
       </relations>
     </finder>
   </finders>
@@ -48,17 +48,10 @@
             <parameter type="String" name="password"/>
           </parameters>
         </method>
-      </methods>
-    </object>
-
-    <object script-name="ContrailGreetingService" java-class="net.juniper.contrail.vro.GreetingService" create="true"
-      strict="true">
-      <description><![CDATA[Simple greeter]]></description>
-      <methods>
-        <method script-name="greet" java-name="greet" return-type="String">
-          <description><![CDATA[Produces a greeting]]></description>
+        <method script-name="delete" java-name="delete" return-type="void">
+          <description>Delete an instance of Contrail connection</description>
           <parameters>
-            <parameter name="name" type="String"><![CDATA[The person to greet]]></parameter>
+            <parameter type="ContrailConnection" name="connection"/>
           </parameters>
         </method>
       </methods>
