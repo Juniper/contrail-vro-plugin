@@ -74,8 +74,8 @@ class PersisterUsingEndpointConfigurationService
         setInt(PORT, info.port)
         setString(USER, info.username)
         setPassword(PASSWORD, info.password)
-        setString(TENANT, info.tenant)
         setString(AUTHSERVER, info.authServer)
+        setString(TENANT, info.tenant)
 
         return this
     }
@@ -86,10 +86,10 @@ class PersisterUsingEndpointConfigurationService
         val port = getAsInteger(PORT)
         val username = getString(USER)
         val password = getPassword(PASSWORD)
-        val tenant = getString(TENANT)
         val authServer = getString(AUTHSERVER)
+        val tenant = getString(TENANT)
 
-        return ConnectionInfo(id, host, port, username, password, tenant, authServer)
+        return ConnectionInfo(id, host, port, username, password, authServer, tenant)
     }
 }
 

@@ -29,8 +29,8 @@ class ConnectionManager
         log.info("ConnectionInfoManager created.")
     }
 
-    fun create(host: String, port: Int, user: String, password: String, tenant: String? = null, authServer: String? = null): String {
-        val info = ConnectionInfo(host, port, user, password, tenant, authServer)
+    fun create(host: String, port: Int, user: String, password: String, authServer: String? = null, tenant: String? = null): String {
+        val info = ConnectionInfo(host, port, user, password, authServer, tenant)
         val connector = connectorFactory.create(info)
         val connection = Connection(info, connector)
         repository.addConnection(connection)

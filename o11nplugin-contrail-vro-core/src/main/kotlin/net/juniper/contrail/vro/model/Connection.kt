@@ -21,9 +21,9 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
 }
 
 data class ConnectionInfo(val uuid: UUID, val hostname: String, val port: Int, val username: String?, val password: String?,
-                          val tenant: String?, val authServer: String?) : Serializable {
-    @JvmOverloads constructor(hostname: String, port: Int, username: String, password: String, tenant: String? = null, authServer: String? = null) :
-        this(UUID.randomUUID(), hostname, port, username, password, tenant, authServer)
+                          val authServer: String?, val tenant: String?) : Serializable {
+    @JvmOverloads constructor(hostname: String, port: Int, username: String, password: String, authServer: String? = null, tenant: String? = null) :
+        this(UUID.randomUUID(), hostname, port, username, password, authServer, tenant)
 
     val id: String get() =
         uuid.toString()
