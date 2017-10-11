@@ -47,12 +47,12 @@ class DefaultConnectionRepository
     private val items = ConcurrentHashMap<String, Connection>()
 
     private val Connection.key: String get() =
-        info.id
+        info.name
 
     @Throws(IllegalArgumentException::class)
     override fun addConnection(item: Connection) {
 
-        val key = item.key
+        val key = item.key.toLowerCase().trim().replace("\\s+".toRegex(), " ")
         if (items.containsKey(key)) {
             throw IllegalArgumentException("Item with id '$key' already exists!")
         }

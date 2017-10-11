@@ -11,7 +11,7 @@ import spock.lang.Specification
 
 class ConnectionManagerSpec extends Specification {
 
-    def info = new ConnectionInfo("host", 8080, "user", "secret")
+    def info = new ConnectionInfo("connection name", "host", 8080, "user", "secret")
     def connector = new ApiConnectorMock(info.hostname, info.port)
     def connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
     def repository = Mock(ConnectionRepository)
@@ -24,7 +24,7 @@ class ConnectionManagerSpec extends Specification {
         factory.create(_) >> connector
 
         when:
-        manager.create(info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
+        manager.create(info.name, info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
 
         then:
         1 * repository.addConnection(_)

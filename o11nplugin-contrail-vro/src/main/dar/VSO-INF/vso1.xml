@@ -18,7 +18,7 @@
   <finders>
     <finder image="images/default-16x16.png" datasource="main-datasource" java-class="net.juniper.contrail.vro.model.Connection" type="Connection">
       <description/>
-      <id accessor="getId()"/>
+      <id accessor="getName()"/>
       <properties>
         <property show-in-description="true" show-in-column="true" bean-property="host" display-name="host" name="host"/>
         <property show-in-description="true" show-in-column="true" bean-property="port" display-name="port" name="port"/>
@@ -35,13 +35,15 @@
   </finders>
 
   <scripting-objects>
-    <object script-name="_ContrailConnectionManager"  java-class="net.juniper.contrail.vro.config.ConnectionManager" create="false" strict="true">
+    <object script-name="ContrailConnectionManager" java-class="net.juniper.contrail.vro.config.ConnectionManager"
+            create="false" strict="true">
       <description/>
       <singleton script-name="ContrailConnectionManager" datasource="main-datasource"/>
       <methods>
         <method script-name="create" java-name="create" return-type="String">
           <description>Create an instance of Contrail connection</description>
           <parameters>
+            <parameter type="String" name="name"/>
             <parameter type="String" name="host"/>
             <parameter type="Number" name="port"/>
             <parameter type="String" name="user"/>

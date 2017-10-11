@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-import java.util.UUID
 
 /**
  * Service responsible for persistent storage of Contrail
@@ -50,14 +49,14 @@ class PersisterUsingEndpointConfigurationService
 
     override fun save(connectionInfo: ConnectionInfo) {
         log.debug("Saving connection: {}", connectionInfo)
-        createOrGetConfiguration(connectionInfo.id)
+        createOrGetConfiguration(connectionInfo.name)
             .updateFrom(connectionInfo)
             .saveTo(configurationService)
     }
 
     override fun delete(connectionInfo: ConnectionInfo) {
         log.debug("Deleting connection: {}", connectionInfo)
-        configurationService.deleteEndpointConfiguration(connectionInfo.id)
+        configurationService.deleteEndpointConfiguration(connectionInfo.name)
     }
 
     private fun createOrGetConfiguration(id: String): IEndpointConfiguration =
@@ -69,7 +68,7 @@ class PersisterUsingEndpointConfigurationService
     }
 
     private fun IEndpointConfiguration.updateFrom(info: ConnectionInfo): IEndpointConfiguration {
-        setString(ID, info.id)
+        setString(NAME, info.name)
         setString(HOST, info.hostname)
         setInt(PORT, info.port)
         setString(USER, info.username)
@@ -81,7 +80,7 @@ class PersisterUsingEndpointConfigurationService
     }
 
     private val IEndpointConfiguration.asInfo: ConnectionInfo get() {
-        val id = UUID.fromString(getString(ID))
+        val name = getString(NAME)
         val host = getString(HOST)
         val port = getAsInteger(PORT)
         val username = getString(USER)
@@ -89,7 +88,7 @@ class PersisterUsingEndpointConfigurationService
         val authServer = getString(AUTHSERVER)
         val tenant = getString(TENANT)
 
-        return ConnectionInfo(id, host, port, username, password, authServer, tenant)
+        return ConnectionInfo(name, host, port, username, password, authServer, tenant)
     }
 }
 

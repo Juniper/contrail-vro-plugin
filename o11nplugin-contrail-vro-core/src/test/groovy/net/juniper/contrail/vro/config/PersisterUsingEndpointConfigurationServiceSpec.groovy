@@ -14,13 +14,13 @@ import static net.juniper.contrail.vro.config.ConstantsKt.*
 class PersisterUsingEndpointConfigurationServiceSpec extends Specification {
     def service = Mock(IEndpointConfigurationService)
     def persister = new PersisterUsingEndpointConfigurationService(service)
-    def info = new ConnectionInfo("host", 8080, "user", "secret")
+    def info = new ConnectionInfo("connection name", "host", 8080, "user", "secret")
 
     def "Persister returns connections based on the configuration in the service" () {
         setup:
         def config = Mock(IEndpointConfiguration)
 
-        config.getString(ID) >> info.id
+        config.getString(NAME) >> info.name
         config.getString(HOST) >> info.hostname
         config.getAsInteger(PORT) >> info.port
         config.getString(USER) >> info.username
@@ -39,14 +39,14 @@ class PersisterUsingEndpointConfigurationServiceSpec extends Specification {
     def "Persister adds connection to the service" () {
         given:
         def config = Mock(IEndpointConfiguration)
-        service.getEndpointConfiguration(info.id) >> config
+        service.getEndpointConfiguration(info.name) >> config
 
         when:
         persister.save(info)
 
         then:
         1 * service.saveEndpointConfiguration(config)
-        1 * config.setString  (ID,           info.id)
+        1 * config.setString(NAME, info.name)
         1 * config.setString  (HOST,         info.hostname)
         1 * config.setInt     (PORT,         info.port)
         1 * config.setString  (USER,         info.username)
@@ -60,6 +60,6 @@ class PersisterUsingEndpointConfigurationServiceSpec extends Specification {
         persister.delete(info)
 
         then:
-        1 * service.deleteEndpointConfiguration(info.id)
+        1 * service.deleteEndpointConfiguration(info.name)
     }
 }

@@ -11,7 +11,7 @@ import spock.lang.Specification
 
 class DefaultConnectionRepositorySpec extends Specification {
 
-    def info = new ConnectionInfo("host", 8080, "user", "secret")
+    def info = new ConnectionInfo("connection name", "host", 8080, "user", "secret")
     def connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
     def persister = Mock(ConnectionPersister)
     def repository = new DefaultConnectionRepository(persister)
@@ -27,7 +27,7 @@ class DefaultConnectionRepositorySpec extends Specification {
     def "Repository returns null for unknown connection Id" () {
 
         when:
-        def returnedConnection = repository.getConnection(connection.id)
+        def returnedConnection = repository.getConnection(connection.name)
 
         then:
         returnedConnection == null
@@ -38,11 +38,49 @@ class DefaultConnectionRepositorySpec extends Specification {
         repository.addConnection(connection)
 
         when:
-        def returnedConnection = repository.getConnection(connection.id)
+        def returnedConnection = repository.getConnection(connection.name)
 
         then:
         returnedConnection == connection
     }
+
+    def "Cannot add connection with the same name"() {
+        given:
+        repository.addConnection(connection)
+
+        when:
+        repository.addConnection(connection)
+
+        then:
+        thrown IllegalArgumentException
+    }
+
+    def "Cannot add connection with the same name - case sensitive"() {
+        given:
+        repository.addConnection(connection)
+        info = new ConnectionInfo(" CONNECTION NAME ", "host", 8080, "user", "secret")
+        connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
+
+        when:
+        repository.addConnection(connection)
+
+        then:
+        thrown IllegalArgumentException
+    }
+
+    def "Cannot add connection with the same name - spacing"() {
+        given:
+        repository.addConnection(connection)
+        info = new ConnectionInfo(" connection   name ", "host", 8080, "user", "secret")
+        connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
+
+        when:
+        repository.addConnection(connection)
+
+        then:
+        thrown IllegalArgumentException
+    }
+
 
     def "Added repository is returned in connection list" () {
         given:
@@ -64,7 +102,7 @@ class DefaultConnectionRepositorySpec extends Specification {
         repository.removeConnection(connection)
 
         and:
-        def returnedConnection = repository.getConnection(connection.id)
+        def returnedConnection = repository.getConnection(connection.name)
 
         then:
         returnedConnection == null

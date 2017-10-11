@@ -11,7 +11,7 @@ import spock.lang.Specification
 
 class DefaultConnectionRepositoryPersistenceSpec extends Specification {
 
-    def info = new ConnectionInfo("host", 8080, "user", "secret")
+    def info = new ConnectionInfo("connection name", "host", 8080, "user", "secret")
     def connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
     def persister = Mock(ConnectionPersister)
     def repository = new DefaultConnectionRepository(persister)

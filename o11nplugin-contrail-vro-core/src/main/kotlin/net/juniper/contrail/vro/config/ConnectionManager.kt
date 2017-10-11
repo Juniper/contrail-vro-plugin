@@ -29,13 +29,13 @@ class ConnectionManager
         log.info("ConnectionInfoManager created.")
     }
 
-    fun create(host: String, port: Int, user: String, password: String, authServer: String? = null, tenant: String? = null): String {
-        val info = ConnectionInfo(host, port, user, password, authServer, tenant)
+    fun create(name: String, host: String, port: Int, user: String, password: String, authServer: String? = null, tenant: String? = null): String {
+        val info = ConnectionInfo(name, host, port, user, password, authServer, tenant)
         val connector = connectorFactory.create(info)
         val connection = Connection(info, connector)
         repository.addConnection(connection)
         notifier.notifyElementsInvalidate()
-        return connection.id
+        return connection.name
     }
 
     fun delete(connection: Connection) {
