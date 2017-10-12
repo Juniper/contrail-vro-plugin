@@ -6,6 +6,10 @@
   <artifactId>o11nplugin-contrail-vro-generator</artifactId>
   <packaging>jar</packaging>
 
+  <properties>
+    <generator.main.class>net.juniper.contrail.vro.generator.Generator</generator.main.class>
+  </properties>
+
   <parent>
     <artifactId>contrail-vro</artifactId>
     <groupId>net.juniper.contrail.vro</groupId>
@@ -39,6 +43,12 @@
 
   <build>
     <finalName>generator</finalName>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
 
     <plugins>
       <plugin>
