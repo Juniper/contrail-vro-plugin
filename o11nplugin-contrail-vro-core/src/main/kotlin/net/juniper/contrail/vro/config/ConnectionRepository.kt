@@ -25,7 +25,7 @@ interface ConnectionRepository {
     fun removeConnection(item: Connection)
 
     @Throws(IllegalArgumentException::class)
-    fun getConnection(key: String): Connection?
+    fun getConnection(id: String): Connection?
 
     fun findConnections(query: String): List<Connection>
 
@@ -46,13 +46,16 @@ class DefaultConnectionRepository
 
     private val items = ConcurrentHashMap<String, Connection>()
 
+    private fun String.toKey() =
+        toLowerCase()
+
     private val Connection.key: String get() =
-        info.name
+        info.name.toKey()
 
     @Throws(IllegalArgumentException::class)
     override fun addConnection(item: Connection) {
 
-        val key = item.key.toLowerCase().trim().replace("\\s+".toRegex(), " ")
+        val key = item.key
         if (items.containsKey(key)) {
             throw IllegalArgumentException("Item with id '$key' already exists!")
         }
@@ -73,17 +76,19 @@ class DefaultConnectionRepository
         get() = ArrayList(items.values)
 
     @Throws(IllegalArgumentException::class)
-    override fun getConnection(key: String): Connection? {
+    override fun getConnection(id: String): Connection? {
 
-        if (StringUtils.isBlank(key)) {
+        if (StringUtils.isBlank(id)) {
             throw IllegalArgumentException("'key' is empty")
         }
 
-        return items[key]
+        return items[id.toKey()]
     }
 
-    override fun findConnections(query: String): List<Connection> =
-        items.values.asSequence()
-            .filter { it.key.startsWith(query, ignoreCase = true) }
+    override fun findConnections(query: String): List<Connection> {
+        val cleanedQuery = query.trim()
+        return items.values.asSequence()
+            .filter { it.key.startsWith(cleanedQuery, ignoreCase = true) }
             .toList()
+    }
 }

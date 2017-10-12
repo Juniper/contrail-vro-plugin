@@ -4,17 +4,17 @@
 
 package net.juniper.contrail.vro.config
 
-const val HOST = "host"
-const val PORT = "port"
-const val USER = "user"
-const val PASSWORD = "password"
-const val TENANT = "tenant"
-const val AUTHTYPE = "keystone"
-const val AUTHSERVER = "authserver"
-const val NAME = "name"
+val NAME = "name"
+val HOST = "host"
+val PORT = "port"
+val USER = "user"
+val PASSWORD = "password"
+val TENANT = "tenant"
+val AUTHTYPE = "keystone"
+val AUTHSERVER = "authserver"
 
-const val ROOT = "Root"
-const val CONNECTION = "Connection"
+val ROOT = "Root"
+val CONNECTION = "Connection"
 
 infix fun String.has(child: String) =
     "$this-to-$child".toLowerCase()

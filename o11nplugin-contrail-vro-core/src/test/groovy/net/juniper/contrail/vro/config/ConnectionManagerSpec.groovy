@@ -19,16 +19,29 @@ class ConnectionManagerSpec extends Specification {
     def notifier = Mock(PluginNotifications)
     def manager = new ConnectionManager(repository, factory, notifier)
 
-    def "Calling create inserts connection into repository and notifies plugin" () {
-        given:
+    def setup() {
         factory.create(_) >> connector
+    }
 
+    def "Calling create inserts connection into repository and notifies plugin" () {
         when:
         manager.create(info.name, info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
 
         then:
         1 * repository.addConnection(_)
         1 * notifier.notifyElementsInvalidate()
+    }
+
+    def "Create trims name and removes duplicate whitespace"() {
+        given:
+        def nameWithDuplicatedSpaces = info.name.replace(" ", "  ")
+        def dirtyName = " $nameWithDuplicatedSpaces "
+
+        when:
+        def id = manager.create(dirtyName, info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
+
+        then:
+        id == info.name
     }
 
     def "Calling deleted removes connection from repository and notifies plugin" () {

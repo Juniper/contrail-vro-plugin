@@ -21,6 +21,7 @@ class ConnectionManager
 
     companion object {
         private val log = LoggerFactory.getLogger(ConnectionManager::class.java)
+        private val cleanPattern = "\\s+".toRegex()
         @JvmStatic fun createScriptingSingleton(factory: IPluginFactory): ConnectionManager =
             (factory as ContrailPluginFactory).connections
     }
@@ -29,8 +30,11 @@ class ConnectionManager
         log.info("ConnectionInfoManager created.")
     }
 
-    fun create(name: String, host: String, port: Int, user: String, password: String, authServer: String? = null, tenant: String? = null): String {
-        val info = ConnectionInfo(name, host, port, user, password, authServer, tenant)
+    private fun String.preprocess() =
+        trim().replace(cleanPattern, " ")
+
+    fun create(name: String, host: String, port: Int, user: String?, password: String?, authServer: String?, tenant: String?): String {
+        val info = ConnectionInfo(name.preprocess(), host, port, user, password, authServer, tenant)
         val connector = connectorFactory.create(info)
         val connection = Connection(info, connector)
         repository.addConnection(connection)

@@ -58,7 +58,7 @@ class DefaultConnectionRepositorySpec extends Specification {
     def "Cannot add connection with the same name - case sensitive"() {
         given:
         repository.addConnection(connection)
-        info = new ConnectionInfo(" CONNECTION NAME ", "host", 8080, "user", "secret")
+        info = new ConnectionInfo("CONNECTION NAME", "host", 8080, "user", "secret")
         connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
 
         when:
@@ -68,21 +68,7 @@ class DefaultConnectionRepositorySpec extends Specification {
         thrown IllegalArgumentException
     }
 
-    def "Cannot add connection with the same name - spacing"() {
-        given:
-        repository.addConnection(connection)
-        info = new ConnectionInfo(" connection   name ", "host", 8080, "user", "secret")
-        connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
-
-        when:
-        repository.addConnection(connection)
-
-        then:
-        thrown IllegalArgumentException
-    }
-
-
-    def "Added repository is returned in connection list" () {
+    def "Added connection is returned in connection list" () {
         given:
         repository.addConnection(connection)
 

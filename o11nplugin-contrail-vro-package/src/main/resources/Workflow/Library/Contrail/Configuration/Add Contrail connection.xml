@@ -67,7 +67,7 @@ System.log("Created connection with ID: " + connectionId);]]></script>
       <p-param name="name">
         <desc><![CDATA[Connection name]]></desc>
         <p-qual kind="static" name="mandatory" type="boolean"><![CDATA[true]]></p-qual>
-        <p-qual kind="static" name="defaultValue" type="string"><![CDATA[Connection name]]></p-qual>
+        <p-qual kind="static" name="defaultValue" type="string"><![CDATA[Controller]]></p-qual>
       </p-param>
       <p-param name="host">
         <desc><![CDATA[Host]]></desc>

@@ -35,7 +35,7 @@
   </finders>
 
   <scripting-objects>
-    <object script-name="ContrailConnectionManager" java-class="net.juniper.contrail.vro.config.ConnectionManager"
+    <object script-name="_ContrailConnectionManager" java-class="net.juniper.contrail.vro.config.ConnectionManager"
             create="false" strict="true">
       <description/>
       <singleton script-name="ContrailConnectionManager" datasource="main-datasource"/>

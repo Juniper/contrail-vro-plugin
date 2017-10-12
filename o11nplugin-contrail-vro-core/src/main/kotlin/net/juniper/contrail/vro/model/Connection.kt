@@ -9,9 +9,8 @@ import java.io.Serializable
 
 class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
 
-    val name: String
-        get() =
-            info.name
+    val name: String get() =
+        info.name
 
     val host: String get() =
         info.hostname
@@ -20,18 +19,15 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
         info.port
 }
 
-data class ConnectionInfo(
+data class ConnectionInfo @JvmOverloads constructor(
     val name: String,
     val hostname: String,
     val port: Int,
-    val username: String?,
-    val password: String?,
-    val authServer: String?,
-    val tenant: String?
+    val username: String? = null,
+    val password: String? = null,
+    val authServer: String? = null,
+    val tenant: String? = null
 ) : Serializable {
-
-    constructor(name: String, hostname: String, port: Int, username: String, password: String) :
-        this(name, hostname, port, username, password, null, null)
 
     override fun toString(): String =
         "$username@$hostname:$port"
