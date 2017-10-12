@@ -38,10 +38,10 @@ class ConnectionManagerSpec extends Specification {
         def dirtyName = " $nameWithDuplicatedSpaces "
 
         when:
-        def id = manager.create(dirtyName, info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
+        def name = manager.create(dirtyName, info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
 
         then:
-        id == info.name
+        name == info.name
     }
 
     def "Calling deleted removes connection from repository and notifies plugin" () {

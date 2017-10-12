@@ -59,10 +59,10 @@ class DefaultConnectionRepositorySpec extends Specification {
         given:
         repository.addConnection(connection)
         info = new ConnectionInfo("CONNECTION NAME", "host", 8080, "user", "secret")
-        connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
+        def newConnection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
 
         when:
-        repository.addConnection(connection)
+        repository.addConnection(newConnection)
 
         then:
         thrown IllegalArgumentException

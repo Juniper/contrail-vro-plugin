@@ -46,13 +46,13 @@ class PersisterUsingEndpointConfigurationServiceSpec extends Specification {
 
         then:
         1 * service.saveEndpointConfiguration(config)
-        1 * config.setString(NAME, info.name)
-        1 * config.setString  (HOST,         info.hostname)
-        1 * config.setInt     (PORT,         info.port)
-        1 * config.setString  (USER,         info.username)
-        1 * config.setPassword(PASSWORD ,    info.password)
-        1 * config.setString  (TENANT,       info.tenant)
-        1 * config.setString  (AUTHSERVER,   info.authServer)
+        1 * config.setString  (NAME,       info.name)
+        1 * config.setString  (HOST,       info.hostname)
+        1 * config.setInt     (PORT,       info.port)
+        1 * config.setString  (USER,       info.username)
+        1 * config.setPassword(PASSWORD,   info.password)
+        1 * config.setString  (TENANT,     info.tenant)
+        1 * config.setString  (AUTHSERVER, info.authServer)
     }
 
     def "Persister deletes connection from the service" () {

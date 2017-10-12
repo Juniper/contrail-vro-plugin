@@ -11,7 +11,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <vco.version>7.0.1</vco.version>
     <kotlin.version>1.1.51</kotlin.version>
-    <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <generator.main.class>net.juniper.contrail.vro.Hello</generator.main.class>
   </properties>
 

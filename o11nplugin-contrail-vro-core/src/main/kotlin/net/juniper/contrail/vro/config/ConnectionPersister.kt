@@ -43,6 +43,7 @@ class PersisterUsingEndpointConfigurationService
         log.debug("Loading connections.")
         return configurationService.endpointConfigurations.asSequence()
             .map { it.asInfo }
+            .filterNotNull()
             .onEach { log.trace("---> Loading connection info: {}", it) }
             .toList()
     }
@@ -79,10 +80,10 @@ class PersisterUsingEndpointConfigurationService
         return this
     }
 
-    private val IEndpointConfiguration.asInfo: ConnectionInfo get() {
-        val name = getString(NAME)
-        val host = getString(HOST)
-        val port = getAsInteger(PORT)
+    private val IEndpointConfiguration.asInfo: ConnectionInfo? get() {
+        val name = getString(NAME) ?: return null
+        val host = getString(HOST) ?: return null
+        val port = getAsInteger(PORT) ?: return null
         val username = getString(USER)
         val password = getPassword(PASSWORD)
         val authServer = getString(AUTHSERVER)

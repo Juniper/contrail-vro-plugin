@@ -21,7 +21,14 @@ class ConnectionManager
 
     companion object {
         private val log = LoggerFactory.getLogger(ConnectionManager::class.java)
-        private val cleanPattern = "\\s+".toRegex()
+        private val blankPattern = "\\s+".toRegex()
+
+        /**
+         * Method retrieves an instance of [ConnectionManager] from [ContrailPluginFactory].
+         *
+         * This method is never called directly and is only required by the vRO
+         * so that [ConnectionManager] could be accessed as a singleton from JavaScript.
+         */
         @JvmStatic fun createScriptingSingleton(factory: IPluginFactory): ConnectionManager =
             (factory as ContrailPluginFactory).connections
     }
@@ -30,11 +37,11 @@ class ConnectionManager
         log.info("ConnectionInfoManager created.")
     }
 
-    private fun String.preprocess() =
-        trim().replace(cleanPattern, " ")
+    private fun String.clean() =
+        trim().replace(blankPattern, " ")
 
     fun create(name: String, host: String, port: Int, user: String?, password: String?, authServer: String?, tenant: String?): String {
-        val info = ConnectionInfo(name.preprocess(), host, port, user, password, authServer, tenant)
+        val info = ConnectionInfo(name.clean(), host, port, user, password, authServer, tenant)
         val connector = connectorFactory.create(info)
         val connection = Connection(info, connector)
         repository.addConnection(connection)

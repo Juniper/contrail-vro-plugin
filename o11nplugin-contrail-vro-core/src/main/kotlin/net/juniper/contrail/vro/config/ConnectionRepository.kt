@@ -25,7 +25,7 @@ interface ConnectionRepository {
     fun removeConnection(item: Connection)
 
     @Throws(IllegalArgumentException::class)
-    fun getConnection(id: String): Connection?
+    fun getConnection(name: String): Connection?
 
     fun findConnections(query: String): List<Connection>
 
@@ -76,13 +76,13 @@ class DefaultConnectionRepository
         get() = ArrayList(items.values)
 
     @Throws(IllegalArgumentException::class)
-    override fun getConnection(id: String): Connection? {
+    override fun getConnection(name: String): Connection? {
 
-        if (StringUtils.isBlank(id)) {
-            throw IllegalArgumentException("'key' is empty")
+        if (StringUtils.isBlank(name)) {
+            throw IllegalArgumentException("'name' is empty")
         }
 
-        return items[id.toKey()]
+        return items[name.toKey()]
     }
 
     override fun findConnections(query: String): List<Connection> {
