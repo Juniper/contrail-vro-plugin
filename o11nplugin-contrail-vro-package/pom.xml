@@ -1,43 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
-    <artifactId>o11nplugin-contrail-vro-package</artifactId>
-    <packaging>package</packaging>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>o11nplugin-contrail-vro-package</artifactId>
+  <packaging>package</packaging>
 
-    <parent>
-        <artifactId>contrail-vro</artifactId>
-        <groupId>net.juniper.contrail.vro</groupId>
-        <version>1.0.0-SNAPSHOT</version>
-    </parent>
+  <parent>
+    <artifactId>contrail-vro</artifactId>
+    <groupId>net.juniper.contrail.vro</groupId>
+    <version>1.0</version>
+  </parent>
 
-    <properties>
-        <!-- vCO packages are signed. Create your own JKS keystore that contains a key-pair under the alias _DunesRSA_Alias_ -->
-        <!-- This keystore is meant for easier initial setup and should not be used in production -->
-        <keystoreLocation>archetype.keystore</keystoreLocation>
-        <keystorePassword>password123</keystorePassword>
-    </properties>
-    <build>
-        <plugins>        
-            <plugin>
-                <groupId>com.vmware.o11n.mojo.pkg</groupId>
-                <artifactId>maven-o11n-package-plugin</artifactId>
-                <version>${vco.version}</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <packageName>net.juniper.contrail.vro</packageName>
-                    <!-- Set the local path to the *.vmokeystore file used to sign the content -->
-                    <keystoreLocation>${keystoreLocation}</keystoreLocation>
-                    <keystorePassword>${keystorePassword}</keystorePassword>
-                    <includes>
-                        <include>**/Library/Contrail/**/*.element_info.xml</include>
-                    </includes>
-                    <packageFileName>o11nplugin-contrail-vro-package-${project.version}</packageFileName>
-                    <allowedMask>vef</allowedMask>
-                    <exportVersionHistory>false</exportVersionHistory>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <properties>
+    <!-- vCO packages are signed. Create your own JKS keystore that contains a key-pair under the alias _DunesRSA_Alias_ -->
+    <!-- This keystore is meant for easier initial setup and should not be used in production -->
+    <keystoreLocation>archetype.keystore</keystoreLocation>
+    <keystorePassword>password123</keystorePassword>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>buildnumber</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <buildNumberPropertyName>build.number</buildNumberPropertyName>
+          <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
+          <format>{0,number}</format>
+          <items>
+            <item>buildNumber</item>
+          </items>
+          <doCheck>false</doCheck>
+          <doUpdate>false</doUpdate>
+          <revisionOnScmFailure>unknownbuild</revisionOnScmFailure>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.0.2</version>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/src/main/resources</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/templates/main/resources</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.vmware.o11n.mojo.pkg</groupId>
+        <artifactId>maven-o11n-package-plugin</artifactId>
+        <version>${vco.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <packageName>net.juniper.contrail.vro</packageName>
+          <!-- Set the local path to the *.vmokeystore file used to sign the content -->
+          <keystoreLocation>${keystoreLocation}</keystoreLocation>
+          <keystorePassword>${keystorePassword}</keystorePassword>
+          <includes>
+            <include>**/Library/Contrail/**/*.element_info.xml</include>
+          </includes>
+          <packageFileName>o11nplugin-contrail-vro-package-${project.version}</packageFileName>
+          <allowedMask>vef</allowedMask>
+          <exportVersionHistory>false</exportVersionHistory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>src</directory>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

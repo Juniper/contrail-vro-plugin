@@ -15,7 +15,7 @@
   <parent>
     <artifactId>contrail-vro</artifactId>
     <groupId>net.juniper.contrail.vro</groupId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0</version>
   </parent>
 
   <dependencies>

@@ -2,7 +2,8 @@
 <workflow xmlns="http://vmware.com/vco/workflow" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://vmware.com/vco/workflow http://vmware.com/vco/workflow/Workflow-v4.xsd"
           root-name="item1" object-name="workflow:name=generic" id="8f3b8033-f078-463b-976a-3c41dfd2294f"
-          version="1.0.0" api-version="6.0.0" allowed-operations="vef" restartMode="1" resumeFromFailedMode="0">
+          version="${project.version}.${build.number}" api-version="6.0.0" allowed-operations="vef" restartMode="1"
+          resumeFromFailedMode="0">
   <display-name><![CDATA[Add Contrail connection]]></display-name>
   <position y="9.545454545454543" x="45.0"/>
   <input>
