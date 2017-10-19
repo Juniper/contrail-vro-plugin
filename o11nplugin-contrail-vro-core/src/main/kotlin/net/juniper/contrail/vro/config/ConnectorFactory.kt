@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.config
 
+import com.google.common.annotations.VisibleForTesting
 import net.juniper.contrail.api.ApiConnector
 import net.juniper.contrail.api.ApiConnectorFactory
 import net.juniper.contrail.vro.model.ConnectionInfo
@@ -18,17 +19,33 @@ interface ConnectorFactory {
 }
 
 /**
- * Default implementation of the ConnectorFactory
+ * Internal interface to allow testing.
+ */
+@VisibleForTesting
+interface ConnectorSource {
+    fun build(hostname: String, port: Int): ApiConnector
+}
+
+private object DefaultConnectorSource : ConnectorSource {
+    override fun build(hostname: String, port: Int): ApiConnector =
+        ApiConnectorFactory.build(hostname, port)
+}
+
+/**
+ * Default implementation of the [ConnectorFactory]
  * that delegates to Contrail provided factory for
  * instantiation of the API interface.
  */
 @Component
-class ConnectorFactoryImpl : ConnectorFactory {
+class DefaultConnectorFactory(private val source: ConnectorSource) : ConnectorFactory {
+    constructor(): this(DefaultConnectorSource)
+
     override fun create(info: ConnectionInfo): ApiConnector {
         val authType = if (info.authServer != null ) AUTHTYPE else null
-        return ApiConnectorFactory.build(info.hostname, info.port)
-            .credentials(info.hostname, info.password)
-            .tenantName(info.tenant)
-            .authServer(authType, info.authServer)
+        return source.build(info.hostname, info.port).apply {
+            credentials(info.username, info.password)
+            authServer(authType, info.authServer)
+            tenantName(info.tenant)
+        }
     }
 }
