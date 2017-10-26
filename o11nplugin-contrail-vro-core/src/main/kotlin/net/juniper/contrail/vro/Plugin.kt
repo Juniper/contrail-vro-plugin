@@ -10,7 +10,7 @@ import com.vmware.o11n.sdk.modeldriven.AbstractModelDrivenFactory
 class ContrailPluginAdaptor : AbstractModelDrivenAdaptor() {
 
     override fun getConfigLocations(): Array<String> =
-        arrayOf("classpath:net/juniper/contrail/vro/plugin.xml")
+        arrayOf("classpath:net/juniper/contrail/vro/plugin_class_config.xml")
 
     override fun getRuntimeConfigurationPath(): String =
         "net/juniper/contrail/vro/gen/runtime-config.properties"
