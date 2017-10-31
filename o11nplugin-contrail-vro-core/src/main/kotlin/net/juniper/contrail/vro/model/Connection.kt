@@ -12,7 +12,7 @@ import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
 import java.io.IOException
 
-class Connection(val info: ConnectionInfo, val connector: ApiConnector) : Findable {
+class Connection(public val info: ConnectionInfo, val connector: ApiConnector) : Findable {
     override fun getInternalId(): Sid =
         info.sid
 

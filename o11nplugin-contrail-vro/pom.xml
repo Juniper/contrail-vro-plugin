@@ -27,10 +27,15 @@
       <artifactId>o11nplugin-contrail-vro-package</artifactId>
       <type>package</type>
     </dependency>
+    <dependency>
+      <groupId>org.spockframework</groupId>
+      <artifactId>spock-core</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
     <finalName>o11nplugin-contrail-vro</finalName>
+    <testSourceDirectory>src/test</testSourceDirectory>
     <plugins>
       <!-- dar file generation -->
       <plugin>
@@ -128,6 +133,14 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.gmavenplus</groupId>
+        <artifactId>gmavenplus-plugin</artifactId>
       </plugin>
     </plugins>
   </build>

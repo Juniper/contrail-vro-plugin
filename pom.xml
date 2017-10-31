@@ -92,6 +92,11 @@
         <version>2.5.1</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>com.vmware.o11n</groupId>
+        <artifactId>o11n-spring-tools</artifactId>
+        <version>7.3.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -210,20 +215,26 @@
             </execution>
           </executions>
         </plugin>
-
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.18.1</version>
-          <configuration>
-            <useFile>false</useFile>
-            <includes>
-              <include>**/*Spec.*</include>
-              <include>**/*Test.*</include>
-            </includes>
-          </configuration>
+          <executions>
+            <execution>
+              <phase>test</phase>
+              <goals>
+                <goal>test</goal>
+              </goals>
+              <configuration>
+                <useFile>false</useFile>
+                <includes>
+                  <include>**/*Spec.*</include>
+                  <include>**/*Test.*</include>
+                </includes>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
-
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>

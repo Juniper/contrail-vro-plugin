@@ -4,7 +4,6 @@
 
 package net.juniper.contrail.vro.config
 
-import com.vmware.o11n.plugin.sdk.spring.impl.GlobalPluginNotificationHandlerImpl
 import com.vmware.o11n.sdk.modeldriven.impl.DefaultCollectionFactory
 import com.vmware.o11n.sdk.modeldriven.impl.DefaultInventoryService
 import com.vmware.o11n.sdk.modeldriven.impl.DefaultModelClassResolver
@@ -39,9 +38,6 @@ class SpringConfig {
 
     @Bean
     fun defaultModelClassResolver() = DefaultModelClassResolver()
-
-    @Bean
-    fun globalPluginNotificationHandlerImpl() = GlobalPluginNotificationHandlerImpl()
 
     @Bean(name = arrayOf("pluginFactory"))
     @Scope("prototype")
