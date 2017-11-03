@@ -47,6 +47,15 @@
       <groupId>net.juniper.contrail</groupId>
       <artifactId>juniper-contrail-api</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.pacesys</groupId>
+      <artifactId>openstack4j</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.spockframework</groupId>
