@@ -252,6 +252,11 @@
         <artifactId>o11n-spring-tools</artifactId>
         <version>7.3.0</version>
       </dependency>
+      <dependency>
+        <groupId>com.vmware.o11n</groupId>
+        <artifactId>o11n-plugin-modeldriven-generator</artifactId>
+        <version>7.3.0</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

@@ -69,6 +69,11 @@
       <groupId>org.objenesis</groupId>
       <artifactId>objenesis</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.vmware.o11n</groupId>
+      <artifactId>o11n-plugin-modeldriven-generator</artifactId>
+      <version>${vco.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

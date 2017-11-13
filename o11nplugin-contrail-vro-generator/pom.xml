@@ -20,6 +20,7 @@
     <dependency>
       <groupId>net.juniper.contrail</groupId>
       <artifactId>juniper-contrail-api</artifactId>
+      <scope>compile</scope>
     </dependency>
 
     <dependency>
@@ -38,6 +39,26 @@
     <dependency>
       <groupId>org.objenesis</groupId>
       <artifactId>objenesis</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.pacesys</groupId>
+      <artifactId>openstack4j</artifactId>
+      <classifier>withdeps</classifier>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.vmware.o11n</groupId>
+      <artifactId>o11n-plugin-modeldriven-generator</artifactId>
     </dependency>
   </dependencies>
 
