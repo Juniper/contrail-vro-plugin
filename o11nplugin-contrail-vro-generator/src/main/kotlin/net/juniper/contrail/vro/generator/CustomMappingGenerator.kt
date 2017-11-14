@@ -13,35 +13,39 @@ import javax.inject.Inject
 
 class CustomMappingGenerator @Inject constructor(private val cfg: CodeGeneratorConfig, private val te: TemplateEngine) {
 
+    private val packageName = "net.juniper.contrail.vro.generated"
+    private val javaFileName = "CustomMapping.java"
+    private val templateFileName = "customMapping.ftl"
+
     @Throws(IOException::class)
     fun generateJavaCode(mapping: AbstractMapping?, model: CustomMappingModel) {
-        this.cfg.javaOutputDir.mkdirs()
+        cfg.javaOutputDir.mkdirs()
 
-        this.generate(model)
+        generate(model)
     }
 
     @Throws(IOException::class)
     private fun generate(t: CustomMappingModel) {
-        this.createPackageStructure("net.juniper.contrail.vro.generated")
-        if (this.cfg.isVerbose) {
-            println("generating code for CustomMapping.java")
+        createPackageStructure(packageName)
+        if (cfg.isVerbose) {
+            println("generating code for $javaFileName")
         }
 
         val current = java.io.File(".").canonicalPath
         println("Current dir:" + current)
 
-        val template = this.te.getTemplate("customMapping.ftl")
-        template.render(t, this.javaFile(t))
+        val template = te.getTemplate(templateFileName)
+        template.render(t, javaFile(t))
     }
 
     private fun javaFile(t: CustomMappingModel): File {
-        val path = "net.juniper.contrail.vro.generated".replace('.', '/')
-        val dir = File(this.cfg.javaOutputDir, path)
+        val path = packageName.replace('.', '/')
+        val dir = File(cfg.javaOutputDir, path)
         return File(dir, "CustomMapping.java")
     }
 
     private fun createPackageStructure(packageName: String) {
         val path = packageName.replace('.', '/')
-        File(this.cfg.javaOutputDir, path).mkdirs()
+        File(cfg.javaOutputDir, path).mkdirs()
     }
 }

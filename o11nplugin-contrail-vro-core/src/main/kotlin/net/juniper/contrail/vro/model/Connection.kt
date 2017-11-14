@@ -54,47 +54,42 @@ class Connection(public val info: ConnectionInfo, val connector: ApiConnector) :
     }
 
     @Throws(IOException::class)
-    fun findByName(clazz: Class<out ApiObjectBase>, parent: ApiObjectBase, name: String): String? {
-        return connector.findByName(clazz, parent, name)
-    }
+    fun findByName(clazz: Class<out ApiObjectBase>, parent: ApiObjectBase, name: String): String? =
+        connector.findByName(clazz, parent, name)
 
     @Throws(IOException::class)
-    fun findByName(clazz: Class<out ApiObjectBase>, ancestorNames: List<String>): String? {
-        return connector.findByName(clazz, ancestorNames)
-    }
+    fun findByName(clazz: Class<out ApiObjectBase>, ancestorNames: List<String>): String? =
+        connector.findByName(clazz, ancestorNames)
 
     @Throws(IOException::class)
-    fun find(clazz: Class<out ApiObjectBase>, parent: ApiObjectBase, name: String): ApiObjectBase? {
-        return connector.find(clazz, parent, name)
-    }
+    fun <T : ApiObjectBase> find(clazz: Class<T>, parent: ApiObjectBase, name: String): T? =
+        connector.find(clazz, parent, name) as T?
 
     @Throws(IOException::class)
-    fun findById(clazz: Class<out ApiObjectBase>, objectId: String): ApiObjectBase? {
-        return connector.findById(clazz, objectId)
-    }
+    fun <T : ApiObjectBase> findById(clazz: Class<T>, objectId: String): T? =
+        connector.findById(clazz, objectId) as T?
 
     @Throws(IOException::class)
-    fun findByFQN(clazz: Class<out ApiObjectBase>, fqn: String): ApiObjectBase? {
-        return connector.findByFQN(clazz, fqn)
-    }
+    fun <T : ApiObjectBase> findByFQN(clazz: Class<T>, fqn: String): T? =
+        connector.findByFQN(clazz, fqn) as T?
 
     @Throws(IOException::class)
-    fun list(clazz: Class<out ApiObjectBase>): List<ApiObjectBase>? {
-        return connector.list(clazz, null)
-    }
+    fun <T : ApiObjectBase> list(clazz: Class<T>): List<T>? =
+        connector.list(clazz, null) as List<T>?
 
     @Throws(IOException::class)
-    fun <A : ApiPropertyBase> getObjects(
-        clazz: Class<out ApiObjectBase>,
-        references: List<ObjectReference<A>>
-    ): List<ApiObjectBase>? {
-        return connector.getObjects(clazz, references)
-    }
+    fun sync(uri: String): Boolean =
+        connector.sync(uri)
 
     @Throws(IOException::class)
-    fun sync(uri: String): Boolean {
-        return connector.sync(uri)
+    fun <T : ApiObjectBase> getObjects(
+        clazz: Class<T>,
+        references: List<ObjectReference<ApiPropertyBase>>?
+    ): List<T>? {
+
+        return connector.getObjects(clazz, references ?: return null) as List<T>?
     }
+
 }
 
 data class ConnectionInfo @JvmOverloads constructor(

@@ -27,6 +27,8 @@ private fun dashedClassNameToCamelCase(name: String): String {
 
 fun generateRelationsModel(): RelationsModel {
     val relations = generateRelationStatements()
+    val rootClassNames = rootClasses()
+        .map { it.simpleName }
 
-    return RelationsModel(relations)
+    return RelationsModel(rootClassNames, relations)
 }

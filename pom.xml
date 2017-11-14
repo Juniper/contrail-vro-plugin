@@ -57,6 +57,12 @@
         <type>package</type>
       </dependency>
       <dependency>
+        <groupId>net.juniper.contrail.vro</groupId>
+        <artifactId>o11nplugin-contrail-vro-generator</artifactId>
+        <version>${project.version}</version>
+        <type>provided</type>
+      </dependency>
+      <dependency>
         <groupId>com.vmware.o11n</groupId>
         <artifactId>o11n-provided-deps</artifactId>
         <version>${vco.version}</version>
@@ -67,6 +73,12 @@
         <groupId>com.vmware.o11n</groupId>
         <artifactId>o11n-plugin-modeldriven-runtime</artifactId>
         <version>${vco.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.vmware.o11n</groupId>
+        <artifactId>o11n-plugin-modeldriven-generator</artifactId>
+        <version>${vco.version}</version>
+        <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>com.vmware.o11n</groupId>
@@ -295,6 +307,25 @@
         </plugin>
 
         <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>3.0.0</version>
+          <executions>
+            <execution>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>add-source</goal>
+              </goals>
+              <configuration>
+                <sources>
+                  <source>${project.basedir}/target/generated-sources</source>
+                </sources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
           <artifactId>kotlin-maven-plugin</artifactId>
           <groupId>org.jetbrains.kotlin</groupId>
           <version>${kotlin.version}</version>
@@ -315,6 +346,7 @@
               <configuration>
                 <sourceDirs>
                   <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+                  <sourceDir>${project.basedir}/target/generated-sources</sourceDir>
                 </sourceDirs>
               </configuration>
             </execution>

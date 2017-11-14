@@ -4,10 +4,7 @@
 
 package net.juniper.contrail.vro.generator
 
-import net.juniper.contrail.api.ApiObjectBase
-import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.vro.relation.extractRelations
-import net.juniper.contrail.vro.relation.nonAbstractSubclassesIn
 
 private val finderImportPrefix = "net.juniper.contrail.vro.model"
 private fun generateImportStatements(propertyClasses: List<Class<*>>, objectClasses: List<Class<*>>): List<String> {
@@ -36,17 +33,19 @@ private fun generateRelationStatements(): List<CustomMappingModel.Relation> {
     }.flatten()
 }
 
+
 private fun dashedClassNameToCamelCase(name: String): String {
     // DNS -> Dns because reasons
     return name.split("-").map { it.capitalize() }.joinToString("").replace("DNS", "Dns")
 }
 
 fun generateCustomMappingModel(): CustomMappingModel {
-    val propertyClasses = ApiPropertyBase::class.java.nonAbstractSubclassesIn("net.juniper.contrail.api")
-    val objectClasses = ApiObjectBase::class.java.nonAbstractSubclassesIn("net.juniper.contrail.api")
+    val propertyClasses = propertyClasses()
+    val objectClasses = objectClasses()
     val imports = generateImportStatements(propertyClasses, objectClasses)
     val relations = generateRelationStatements()
+    val rootClasses = rootClasses()
 
     // TODO: How to extract inner classes???
-    return CustomMappingModel(imports, listOf(), propertyClasses, objectClasses, relations)
+    return CustomMappingModel(imports, listOf(), propertyClasses, objectClasses, rootClasses, relations)
 }

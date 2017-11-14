@@ -29,11 +29,11 @@ public class CustomMapping extends AbstractMapping {
 
         <#list findableClasses as klass>
         wrap(${klass.simpleName}.class)
+          .hiding("getObjectType", "getDefaultParentType", "getDefaultParent")
           .andFind()
           .using(${klass.simpleName}Finder.class)
           .withIcon("folder.png");
         </#list>
-
 
         wrap(Connection.class)
            .andFind()
@@ -45,13 +45,15 @@ public class CustomMapping extends AbstractMapping {
         relateRoot()
             .to(Connection.class)
             .using(RootHasConnections.class)
-            .as("root-to-connection");
+            .as("RootHasConnections");
 
+        <#list rootClasses as rootClass>
         relate(Connection.class)
-            .to(Project.class)
-            .using(ConnectionHasProjects.class)
-            .as("connection-to-project")
-            .in(new FolderDef("Projects", "folder.png"));
+            .to(${rootClass.simpleName}.class)
+            .using(ConnectionHas${rootClass.simpleName}.class)
+            .as("ConnectionHas${rootClass.simpleName}")
+            .in(new FolderDef("${rootClass.simpleName}s", "folder.png"));
+        </#list>
 
         <#list relations as relation>
         relate(${relation.parentClassName}.class)

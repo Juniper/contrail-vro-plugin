@@ -6,12 +6,6 @@
   <artifactId>o11nplugin-contrail-vro-core</artifactId>
   <packaging>jar</packaging>
 
-  <properties>
-    <generated.root>${project.build.directory}</generated.root>
-    <generated.sources.dir>${generated.root}/generated-sources</generated.sources.dir>
-    <generated.resources.dir>${generated.root}/generated-resources</generated.resources.dir>
-  </properties>
-
   <parent>
     <artifactId>contrail-vro</artifactId>
     <groupId>net.juniper.contrail.vro</groupId>
@@ -81,20 +75,6 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <phase>generate-sources</phase>
-            <goals>
-              <goal>add-source</goal>
-            </goals>
-            <configuration>
-              <sources>
-                <source>${generated.sources.dir}</source>
-              </sources>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
@@ -114,7 +94,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
       </plugin>
-
     </plugins>
 
     <resources>

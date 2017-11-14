@@ -7,6 +7,7 @@ package net.juniper.contrail.vro;
 import com.google.inject.AbstractModule;
 import com.vmware.o11n.sdk.modeldrivengen.mapping.AbstractMapping;
 import com.vmware.o11n.sdk.modeldrivengen.model.Plugin;
+import net.juniper.contrail.vro.generated.CustomMapping;
 import java.util.Collections;
 
 public class CustomModule extends AbstractModule {

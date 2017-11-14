@@ -12,11 +12,13 @@ import java.util.Properties
 object Generator {
     @JvmStatic fun main(args: Array<String>) {
         val projectInfo = readProjectInfo()
-        val templateEngine = FreemarkerTemplateEngine("/net/juniper/contrail/vro/templates")
+        val templateEngine = FreemarkerTemplateEngine("/templates")
+
+        val generatedSourcesRoot = "/target/generated-sources"
 
         val customMappingGeneratorConfig = DefaultCodeGeneratorConfig()
         customMappingGeneratorConfig.isVerbose = true
-        customMappingGeneratorConfig.javaOutputDir = File(projectInfo.coreRoot + "/src/main/kotlin/") // temporary
+        customMappingGeneratorConfig.javaOutputDir = File(projectInfo.customRoot + generatedSourcesRoot)
 
         val customMappingGenerator = CustomMappingGenerator(
                 customMappingGeneratorConfig,
@@ -28,7 +30,7 @@ object Generator {
 
         val findersGeneratorConfig = DefaultCodeGeneratorConfig()
         findersGeneratorConfig.isVerbose = true
-        findersGeneratorConfig.javaOutputDir = File(projectInfo.coreRoot + "/src/main/kotlin/")
+        findersGeneratorConfig.javaOutputDir = File(projectInfo.coreRoot + generatedSourcesRoot)
 
         val findersGenerator = FindersGenerator(
                 findersGeneratorConfig,
@@ -39,7 +41,7 @@ object Generator {
 
         val relationsGeneratorConfig = DefaultCodeGeneratorConfig()
         relationsGeneratorConfig.isVerbose = true
-        relationsGeneratorConfig.javaOutputDir = File(projectInfo.coreRoot + "/src/main/kotlin/")
+        relationsGeneratorConfig.javaOutputDir = File(projectInfo.coreRoot + generatedSourcesRoot)
 
         val relationsGenerator = RelationsGenerator(
                 relationsGeneratorConfig,
@@ -49,32 +51,35 @@ object Generator {
         val relationsModel = generateRelationsModel()
         relationsGenerator.generateJavaCode(null, relationsModel)
     }
-}
 
-private fun readProjectInfo(): ProjectInfo {
-    val props = Properties()
-    props.load(Generator::class.java.getResourceAsStream("/maven.properties"))
-    val generatorRoot = props["project.dir"] as String
-    val generatorPattern = "-generator$".toRegex()
-    val staticRoot = "$generatorRoot/src/main/static"
-    val finalProjectRoot = generatorRoot.replace(generatorPattern, "")
-    val coreRoot = generatorRoot.replace(generatorPattern, "-core")
-    val version = props["project.version"] as String
-    val baseVersion = version.replace("-SNAPSHOT", "")
+    private fun readProjectInfo(): ProjectInfo {
+        val props = Properties()
+        props.load(Generator::class.java.getResourceAsStream("/maven.properties"))
+        val generatorRoot = props["project.dir"] as String
+        val generatorPattern = "-generator$".toRegex()
+        val staticRoot = "$generatorRoot/src/main/static"
+        val finalProjectRoot = generatorRoot.replace(generatorPattern, "")
+        val coreRoot = generatorRoot.replace(generatorPattern, "-core")
+        val customRoot = generatorRoot.replace(generatorPattern, "-custom")
+        val version = props["project.version"] as String
+        val baseVersion = version.replace("-SNAPSHOT", "")
 
-    return ProjectInfo(
-        generatorRoot = generatorRoot,
-        finalProjectRoot = finalProjectRoot,
-        coreRoot = coreRoot,
-        staticRoot = staticRoot,
-        version = version,
-        baseVersion = baseVersion)
+        return ProjectInfo(
+            generatorRoot = generatorRoot,
+            finalProjectRoot = finalProjectRoot,
+            coreRoot = coreRoot,
+            customRoot = customRoot,
+            staticRoot = staticRoot,
+            version = version,
+            baseVersion = baseVersion)
+    }
 }
 
 data class ProjectInfo(
     val generatorRoot: String,
     val finalProjectRoot: String,
     val coreRoot: String,
+    val customRoot: String,
     val staticRoot: String,
     val version: String,
     val baseVersion: String)
