@@ -4,6 +4,8 @@
 
 package net.juniper.contrail.vro.generator
 
+import net.juniper.contrail.api.ApiObjectBase
+
 class CustomMappingModel (
     val importPaths: List<String>,
     val canonicalNameClasses: List<Class<*>>,
@@ -11,7 +13,7 @@ class CustomMappingModel (
     val findableClasses: List<Class<*>>,
     val rootClasses: List<ClassInfo>,
     val relations: List<Relation>
-)
+) : GenericModel()
 
 fun Class<*>.toClassInfo() =
     ClassInfo(this.simpleName)
@@ -33,13 +35,14 @@ private fun generateImportStatements(propertyClasses: List<Class<*>>, objectClas
     return imports + finderImports
 }
 
-fun generateCustomMappingModel(): CustomMappingModel {
-    val propertyClasses = propertyClasses()
-    val objectClasses = objectClasses()
+fun generateCustomMappingModel(
+        propertyClasses: List<Class<*>>,
+        objectClasses: List<Class<out ApiObjectBase>>,
+        rootClasses: List<Class<out ApiObjectBase>>): CustomMappingModel {
     val imports = generateImportStatements(propertyClasses, objectClasses)
-    val relations = generateRelationStatements()
-    val rootClasses = rootClasses().map { it.toClassInfo() }
+    val relations = generateRelationStatements(objectClasses)
+    val rootClassesInfo = rootClasses.map { it.toClassInfo() }
 
     // TODO: How to extract inner classes???
-    return CustomMappingModel(imports, listOf(), propertyClasses, objectClasses, rootClasses, relations)
+    return CustomMappingModel(imports, listOf(), propertyClasses, objectClasses, rootClassesInfo, relations)
 }

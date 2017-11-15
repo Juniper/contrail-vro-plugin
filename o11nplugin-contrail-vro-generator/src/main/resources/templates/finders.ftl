@@ -1,6 +1,4 @@
-/***********************************************************
- *               GENERATED FILE - DO NOT EDIT              *
- ***********************************************************/
+${editWarning}
 package net.juniper.contrail.vro.generated
 
 import net.juniper.contrail.vro.config.ConnectionRepository

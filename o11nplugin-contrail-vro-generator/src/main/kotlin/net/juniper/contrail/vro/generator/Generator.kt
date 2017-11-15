@@ -13,6 +13,9 @@ object Generator {
     @JvmStatic fun main(args: Array<String>) {
         val projectInfo = readProjectInfo()
         val templateEngine = FreemarkerTemplateEngine("/templates")
+        val propertyClasses = propertyClasses()
+        val objectClasses = objectClasses()
+        val rootClasses = rootClasses(objectClasses)
 
         val generatedSourcesRoot = "/target/generated-sources"
 
@@ -25,7 +28,7 @@ object Generator {
                 templateEngine
         )
 
-        val customMappingModel = generateCustomMappingModel()
+        val customMappingModel = generateCustomMappingModel(propertyClasses, objectClasses, rootClasses)
         customMappingGenerator.generateJavaCode(null, customMappingModel)
 
         val findersGeneratorConfig = DefaultCodeGeneratorConfig()
@@ -36,7 +39,7 @@ object Generator {
                 findersGeneratorConfig,
                 templateEngine
         )
-        val findersModel = generateFindersModel()
+        val findersModel = generateFindersModel(objectClasses)
         findersGenerator.generateJavaCode(null, findersModel)
 
         val relationsGeneratorConfig = DefaultCodeGeneratorConfig()
@@ -48,7 +51,7 @@ object Generator {
                 templateEngine
         )
 
-        val relationsModel = generateRelationsModel()
+        val relationsModel = generateRelationsModel(objectClasses)
         relationsGenerator.generateJavaCode(null, relationsModel)
     }
 

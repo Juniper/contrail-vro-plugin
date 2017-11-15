@@ -17,22 +17,22 @@ fun propertyClasses() =
 fun objectClasses() =
     ApiObjectBase::class.java.nonAbstractSubclassesIn(apiPackageName)
 
+fun rootClasses(classes: List<Class<out ApiObjectBase>>) =
+        classes.filter { it.isRootClass }
+
 val Class<out ApiObjectBase>.isRootClass: Boolean
     get() {
         val parentType = defaultParentType
-        if (!isRelateable) return false
+        if (!isRelatable) return false
         return parentType == null
             || parentType == "config-root"
     }
 
-val Class<out ApiObjectBase>.isRelateable: Boolean
+val Class<out ApiObjectBase>.isRelatable: Boolean
     get() = this != ConfigRoot::class.java
 
-fun rootClasses() =
-    objectClasses().filter { it.isRootClass }
-
 fun String.dashedToCamelCase(): String =
-    split("-").map { it.toLowerCase().capitalize() }.joinToString("")
+    split("-").joinToString("") { it.toLowerCase().capitalize() }
 
 fun String.splitCamel(): String {
     val sb = StringBuilder()

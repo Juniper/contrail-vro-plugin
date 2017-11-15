@@ -1,6 +1,4 @@
-/***********************************************************
- *               GENERATED FILE - DO NOT EDIT              *
- ***********************************************************/
+${editWarning}
 package net.juniper.contrail.vro.generated
 
 import com.vmware.o11n.sdk.modeldriven.ObjectRelater

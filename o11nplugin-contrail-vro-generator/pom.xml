@@ -125,11 +125,6 @@
             <phase>none</phase>
           </execution>
         </executions>
-        <configuration>
-          <excludes>
-
-          </excludes>
-        </configuration>
       </plugin>
 
       <!-- Replacing default-install, which require jar-->

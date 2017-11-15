@@ -4,6 +4,12 @@
 
 package net.juniper.contrail.vro.generator
 
+import net.juniper.contrail.api.ApiObjectBase
+
 class FindersModel(
     val classes: List<Class<*>>
-)
+) : GenericModel()
+
+fun generateFindersModel(objectClasses: List<Class<out ApiObjectBase>>): FindersModel {
+    return FindersModel(objectClasses)
+}

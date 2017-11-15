@@ -4,10 +4,10 @@
 
 package net.juniper.contrail.vro.generator
 
+import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.relation.extractRelations
 
-class Relation
-(
+class Relation (
     val name: String,
     val parentClassName: String,
     val childClassName: String
@@ -16,10 +16,8 @@ class Relation
     val childClassNameSplitCamel = childClassName.splitCamel()
 }
 
-fun generateRelationStatements(): List<Relation> {
-    // TODO: What about Domain and ConfigRoot classes?
-    // TODO: (Their relations are extracted but we do not represent them in VRO)
-    val relationsGraph = extractRelations()
+fun generateRelationStatements(classes: List<Class<out ApiObjectBase>>): List<Relation> {
+    val relationsGraph = extractRelations(classes)
     return relationsGraph.map { relationsNode ->
         relationsNode.second.map {
             Relation(

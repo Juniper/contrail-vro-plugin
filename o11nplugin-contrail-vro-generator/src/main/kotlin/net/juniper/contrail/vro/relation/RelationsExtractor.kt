@@ -6,22 +6,20 @@ package net.juniper.contrail.vro.relation
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.generator.defaultParentType
-import net.juniper.contrail.vro.generator.isRelateable
-import net.juniper.contrail.vro.generator.objectClasses
+import net.juniper.contrail.vro.generator.isRelatable
 import net.juniper.contrail.vro.generator.objectType
 
 typealias RelationGraphVertex = Pair<String, List<ClassRelation>>
 typealias RelationGraph = List<RelationGraphVertex>
 
-fun extractRelations(): RelationGraph {
-    val classes = objectClasses()
+fun extractRelations(classes: List<Class<out ApiObjectBase>>): RelationGraph {
     return buildRelationGraph(classes)
 }
 
 private fun buildRelationGraph(classes: List<Class<out ApiObjectBase>>): RelationGraph {
     val parentToChildren = classes.groupBy { it.defaultParentType }
     return classes.asSequence()
-        .filter { it.isRelateable }
+        .filter { it.isRelatable }
         .map { createRelationGraphVertex(it, parentToChildren) }
         .toList()
 }
