@@ -9,13 +9,10 @@ import java.io.ObjectOutputStream;
 import java.util.List;
 
 import net.juniper.contrail.vro.ContrailPluginFactory;
+import net.juniper.contrail.vro.ReferencePropertyFormatter;
 import org.springframework.beans.factory.BeanFactory;
 import net.juniper.contrail.api.*;
 import net.juniper.contrail.api.types.*;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-
-
 
 <@compress single_line=true>
 public class ${className}
@@ -28,6 +25,8 @@ public class ${className}
 </@compress>
 
     private static final long serialVersionUID = 1L;
+    private static ReferencePropertyFormatter propertyFormatter = new ReferencePropertyFormatter();
+
     @Override
     public void setContext(PluginContext ctx) {
         <#if interceptor??>
@@ -172,6 +171,10 @@ public class ${className}
                     builder.append(prefix);
                     prefix = "\n";
                     builder.append(((ApiObjectBase)element.__getTarget()).getName());
+                    String properties = propertyFormatter.convert(ref.getAttr());
+                    if( !properties.matches("^\\s*$") ) {
+                        builder.append(":\n").append(properties);
+                    }
                 }
             }
         }
