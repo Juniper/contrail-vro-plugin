@@ -13,7 +13,6 @@ import javax.inject.Inject
 
 class CustomMappingGenerator @Inject constructor(private val cfg: CodeGeneratorConfig, private val te: TemplateEngine) {
 
-    private val packageName = "net.juniper.contrail.vro.generated"
     private val javaFileName = "CustomMapping.java"
     private val templateFileName = "customMapping.ftl"
 
@@ -26,7 +25,7 @@ class CustomMappingGenerator @Inject constructor(private val cfg: CodeGeneratorC
 
     @Throws(IOException::class)
     private fun generate(t: CustomMappingModel) {
-        createPackageStructure(packageName)
+        createPackageStructure(generatedPackageName)
         if (cfg.isVerbose) {
             println("generating code for $javaFileName")
         }
@@ -35,13 +34,13 @@ class CustomMappingGenerator @Inject constructor(private val cfg: CodeGeneratorC
         println("Current dir:" + current)
 
         val template = te.getTemplate(templateFileName)
-        template.render(t, javaFile(t))
+        template.render(t, javaFile())
     }
 
-    private fun javaFile(t: CustomMappingModel): File {
-        val path = packageName.replace('.', '/')
+    private fun javaFile(): File {
+        val path = generatedPackageName.replace('.', '/')
         val dir = File(cfg.javaOutputDir, path)
-        return File(dir, "CustomMapping.java")
+        return File(dir, javaFileName)
     }
 
     private fun createPackageStructure(packageName: String) {

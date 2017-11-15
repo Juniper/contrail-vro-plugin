@@ -10,7 +10,7 @@ import net.juniper.contrail.vro.generator.isRelateable
 import net.juniper.contrail.vro.generator.objectClasses
 import net.juniper.contrail.vro.generator.objectType
 
-typealias RelationGraphVertex = Pair<String, List<Relation>>
+typealias RelationGraphVertex = Pair<String, List<ClassRelation>>
 typealias RelationGraph = List<RelationGraphVertex>
 
 fun extractRelations(): RelationGraph {

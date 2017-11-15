@@ -14,7 +14,7 @@ enum class Cardinality(val value: String) {
         ONE_TO_MANY == this
 }
 
-data class Relation(
+data class ClassRelation(
     val name: String,
     val childTypeName: String,
     val cardinality: Cardinality = Cardinality.ONE_TO_MANY)
@@ -23,7 +23,7 @@ fun buildRelation(
         parentType: String,
         childType: String,
         cardinality: Cardinality = Cardinality.ONE_TO_MANY
-): Relation {
+): ClassRelation {
     val relationName = "$parentType-to-$childType"
-    return Relation(relationName, childType, cardinality)
+    return ClassRelation(relationName, childType, cardinality)
 }

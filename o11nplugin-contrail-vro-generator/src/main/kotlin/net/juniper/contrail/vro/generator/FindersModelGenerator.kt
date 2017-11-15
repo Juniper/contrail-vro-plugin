@@ -7,6 +7,6 @@ package net.juniper.contrail.vro.generator
 import net.juniper.contrail.api.ApiObjectBase
 
 fun generateFindersModel(): FindersModel {
-    val objectClasses = ApiObjectBase::class.java.nonAbstractSubclassesIn("net.juniper.contrail.api")
+    val objectClasses = ApiObjectBase::class.java.nonAbstractSubclassesIn(apiPackageName)
     return FindersModel(objectClasses)
 }

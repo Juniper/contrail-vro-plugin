@@ -1,9 +1,7 @@
+/***********************************************************
+ *               GENERATED FILE - DO NOT EDIT              *
+ ***********************************************************/
 package net.juniper.contrail.vro.generated
-
-/* ************************
- *     GENERATED FILE     *
- *       DO NOT EDIT      *
- **************************/
 
 import com.vmware.o11n.sdk.modeldriven.ObjectRelater
 import com.vmware.o11n.sdk.modeldriven.PluginContext
@@ -12,13 +10,6 @@ import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.config.ConnectionRepository
 import org.springframework.beans.factory.annotation.Autowired
-
-class RootHasConnections
-@Autowired constructor(private val connectionRepository: ConnectionRepository) : ObjectRelater<Connection>
-{
-    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid?): List<Connection> =
-        connectionRepository.connections
-}
 
 <#list rootClassNames as rootClass>
 class ConnectionHas${rootClass}

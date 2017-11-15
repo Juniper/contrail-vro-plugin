@@ -22,7 +22,7 @@ class FindersGenerator @Inject constructor(private val cfg: CodeGeneratorConfig,
 
     @Throws(IOException::class)
     private fun generate(t: FindersModel) {
-        this.createPackageStructure("net.juniper.contrail.vro.generated")
+        this.createPackageStructure(generatedPackageName)
         if (this.cfg.isVerbose) {
             println("generating code for Finders.kt")
         }
@@ -31,17 +31,17 @@ class FindersGenerator @Inject constructor(private val cfg: CodeGeneratorConfig,
         println("Current dir:" + current)
 
         val template = this.te.getTemplate("finders.ftl")
-        template.render(t, this.javaFile(t))
+        template.render(t, this.javaFile())
     }
 
-    private fun javaFile(t: FindersModel): File {
-        val path = "net.juniper.contrail.vro.generated".replace('.', '/')
+    private fun javaFile(): File {
+        val path = generatedPackageName.packageToPath()
         val dir = File(this.cfg.javaOutputDir, path)
         return File(dir, "Finders.kt")
     }
 
     private fun createPackageStructure(packageName: String) {
-        val path = packageName.replace('.', '/')
+        val path = packageName.packageToPath()
         File(this.cfg.javaOutputDir, path).mkdirs()
     }
 }
