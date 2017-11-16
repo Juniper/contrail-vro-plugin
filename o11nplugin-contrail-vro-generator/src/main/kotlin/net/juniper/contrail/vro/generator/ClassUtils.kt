@@ -5,7 +5,6 @@
 package net.juniper.contrail.vro.generator
 
 import com.google.common.reflect.ClassPath
-import net.juniper.contrail.api.ApiObjectBase
 import java.lang.reflect.Modifier
 
 fun <T> Class<T>.nonAbstractSubclassesIn(packageName: String): List<Class<out T>> {
@@ -20,12 +19,6 @@ val <T> Class<T>.isAbstract: Boolean get() =
 
 val <T> Class<T>.isNotAbstract: Boolean get() =
     !isAbstract
-
-val Class<out ApiObjectBase>.defaultParentType: String? get() =
-    newInstance().defaultParentType
-
-val Class<out ApiObjectBase>.objectType: String get() =
-    newInstance().objectType
 
 private val loader get(): ClassLoader =
     Thread.currentThread().contextClassLoader

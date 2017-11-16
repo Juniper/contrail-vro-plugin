@@ -4,55 +4,38 @@
 
 package net.juniper.contrail.vro.generator
 
-import com.vmware.o11n.sdk.modeldrivengen.code.DefaultCodeGeneratorConfig
-import com.vmware.o11n.sdk.modeldrivengen.template.fm.FreemarkerTemplateEngine
-import java.io.File
 import java.util.Properties
 
 object Generator {
+
+    private val generatedSourcesRoot = "/target/generated-sources"
+    private val templatePath = "/templates"
+    private val generatedPackageName = "net.juniper.contrail.vro.generated"
+
     @JvmStatic fun main(args: Array<String>) {
         val projectInfo = readProjectInfo()
-        val templateEngine = FreemarkerTemplateEngine("/templates")
         val propertyClasses = propertyClasses()
         val objectClasses = objectClasses()
         val rootClasses = rootClasses(objectClasses)
 
-        val generatedSourcesRoot = "/target/generated-sources"
-
-        val customMappingGeneratorConfig = DefaultCodeGeneratorConfig()
-        customMappingGeneratorConfig.isVerbose = true
-        customMappingGeneratorConfig.javaOutputDir = File(projectInfo.customRoot + generatedSourcesRoot)
-
-        val customMappingGenerator = CustomMappingGenerator(
-                customMappingGeneratorConfig,
-                templateEngine
-        )
-
         val customMappingModel = generateCustomMappingModel(propertyClasses, objectClasses, rootClasses)
-        customMappingGenerator.generateJavaCode(null, customMappingModel)
-
-        val findersGeneratorConfig = DefaultCodeGeneratorConfig()
-        findersGeneratorConfig.isVerbose = true
-        findersGeneratorConfig.javaOutputDir = File(projectInfo.coreRoot + generatedSourcesRoot)
-
-        val findersGenerator = FindersGenerator(
-                findersGeneratorConfig,
-                templateEngine
-        )
         val findersModel = generateFindersModel(objectClasses)
-        findersGenerator.generateJavaCode(null, findersModel)
-
-        val relationsGeneratorConfig = DefaultCodeGeneratorConfig()
-        relationsGeneratorConfig.isVerbose = true
-        relationsGeneratorConfig.javaOutputDir = File(projectInfo.coreRoot + generatedSourcesRoot)
-
-        val relationsGenerator = RelationsGenerator(
-                relationsGeneratorConfig,
-                templateEngine
-        )
-
         val relationsModel = generateRelationsModel(objectClasses)
-        relationsGenerator.generateJavaCode(null, relationsModel)
+
+        val customMappingConfig = GeneratorConfig(
+            baseDir = projectInfo.customRoot/generatedSourcesRoot,
+            packageName = generatedPackageName)
+        val customMappingGenerator = GeneratorEngine(customMappingConfig, templatePath)
+        // TODO change to Kotlin for consistency?
+        customMappingGenerator.generate(customMappingModel, "CustomMapping.java")
+
+        val coreGeneratorConfig = GeneratorConfig(
+            baseDir = projectInfo.coreRoot/generatedSourcesRoot,
+            packageName = generatedPackageName)
+
+        val coreGenerator = GeneratorEngine(coreGeneratorConfig, templatePath)
+        coreGenerator.generate(relationsModel, "Relations.kt")
+        coreGenerator.generate(findersModel, "Finders.kt")
     }
 
     private fun readProjectInfo(): ProjectInfo {

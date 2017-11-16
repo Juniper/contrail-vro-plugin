@@ -5,7 +5,8 @@
 package net.juniper.contrail.vro.generator
 
 import net.juniper.contrail.api.ApiObjectBase
-import net.juniper.contrail.vro.relation.extractRelations
+import net.juniper.contrail.vro.relation.RelationGraphVertex
+import net.juniper.contrail.vro.relation.buildRelationGraph
 
 class Relation (
     val name: String,
@@ -17,14 +18,16 @@ class Relation (
 }
 
 fun generateRelationStatements(classes: List<Class<out ApiObjectBase>>): List<Relation> {
-    val relationsGraph = extractRelations(classes)
-    return relationsGraph.map { relationsNode ->
-        relationsNode.second.map {
-            Relation(
-                it.name.dashedToCamelCase(),
-                relationsNode.first.dashedToCamelCase(),
-                it.childTypeName.dashedToCamelCase()
-            )
-        }
-    }.flatten()
+    val relationsGraph = buildRelationGraph(classes)
+    return relationsGraph.map { it.asRelationList() }.flatten()
+}
+
+private fun RelationGraphVertex.asRelationList(): List<Relation> {
+    return second.map {
+        Relation(
+            it.name.dashedToCamelCase(),
+            first.dashedToCamelCase(),
+            it.childTypeName.dashedToCamelCase()
+        )
+    }
 }

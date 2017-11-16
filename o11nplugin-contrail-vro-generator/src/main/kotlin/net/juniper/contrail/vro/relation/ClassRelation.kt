@@ -4,26 +4,9 @@
 
 package net.juniper.contrail.vro.relation
 
-enum class Cardinality(val value: String) {
-    ONE_TO_ONE("to-one"),
-    ONE_TO_MANY("to-many");
+data class ClassRelation(val name: String, val childTypeName: String)
 
-    val isOneToOne get() =
-        ONE_TO_ONE == this
-    val isOneToMany get() =
-        ONE_TO_MANY == this
-}
-
-data class ClassRelation(
-    val name: String,
-    val childTypeName: String,
-    val cardinality: Cardinality = Cardinality.ONE_TO_MANY)
-
-fun buildRelation(
-        parentType: String,
-        childType: String,
-        cardinality: Cardinality = Cardinality.ONE_TO_MANY
-): ClassRelation {
-    val relationName = "$parentType-to-$childType"
-    return ClassRelation(relationName, childType, cardinality)
+fun buildRelation(parentType: String, childType: String ): ClassRelation {
+    val relationName = "${parentType}To$childType"
+    return ClassRelation(relationName, childType)
 }
