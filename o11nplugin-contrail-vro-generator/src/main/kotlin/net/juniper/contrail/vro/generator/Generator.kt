@@ -26,8 +26,7 @@ object Generator {
             baseDir = projectInfo.customRoot/generatedSourcesRoot,
             packageName = generatedPackageName)
         val customMappingGenerator = GeneratorEngine(customMappingConfig, templatePath)
-        // TODO change to Kotlin for consistency?
-        customMappingGenerator.generate(customMappingModel, "CustomMapping.java")
+        customMappingGenerator.generate(customMappingModel, "CustomMapping.kt")
 
         val coreGeneratorConfig = GeneratorConfig(
             baseDir = projectInfo.coreRoot/generatedSourcesRoot,

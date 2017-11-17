@@ -1,75 +1,74 @@
 ${editWarning}
-package net.juniper.contrail.vro.generated;
+package net.juniper.contrail.vro.generated
 
-import com.vmware.o11n.sdk.modeldrivengen.mapping.AbstractMapping;
-import com.vmware.o11n.sdk.modeldrivengen.mapping.FolderDef;
-import net.juniper.contrail.api.types.*; // ktlint-disable no-wildcard-imports
-import net.juniper.contrail.vro.config.ConnectionManager;
-import net.juniper.contrail.vro.model.Connection;
-import net.juniper.contrail.vro.model.ConnectionFinder;
-import net.juniper.contrail.vro.model.RootHasConnections;
+import com.vmware.o11n.sdk.modeldrivengen.mapping.AbstractMapping
+import com.vmware.o11n.sdk.modeldrivengen.mapping.FolderDef
+import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
+import net.juniper.contrail.vro.config.ConnectionManager
+import net.juniper.contrail.vro.model.Connection
+import net.juniper.contrail.vro.model.ConnectionFinder
+import net.juniper.contrail.vro.model.RootHasConnections
 
-public class CustomMapping extends AbstractMapping {
+class CustomMapping: AbstractMapping() {
 
-    @Override
-    public void define() {
-        convertWellKnownTypes();
+    override fun define() {
+        convertWellKnownTypes()
 
         <#list canonicalNameClasses as klass>
-        wrap(${klass.canonicalName}.class);
+        wrap(${klass.canonicalName}::class.java)
         </#list>
 
         <#list unfindableClasses as klass>
-        wrap(${klass.simpleName}.class);
+        wrap(${klass.simpleName}::class.java)
         </#list>
 
-        String[] methodsToHide = {
+        val methodsToHide = arrayOf(
             "getObjectType",
             "getDefaultParentType",
             "getDefaultParent",
-            "getDisplayName",
-        };
+            "getDisplayName"
+        )
 
-        String[] propertiesToHide = {
+        val propertiesToHide = arrayOf(
             "parentUuid",
-            "parentType",
-        };
+            "parentType"
+        )
 
         <#list findableClasses as klass>
-        wrap(${klass.simpleName}.class)
-          .hiding(methodsToHide)
+        wrap(${klass.simpleName}::class.java)
+          .hiding(*methodsToHide)
           .andFind()
-          .using(${klass.simpleName}Finder.class)
-          .hiding(propertiesToHide)
-          .withIcon("item-16x16.png");
+          .using(${klass.simpleName}Finder::class.java)
+          .hiding(*propertiesToHide)
+          .withIcon("item-16x16.png")
         </#list>
 
-        wrap(Connection.class)
+        wrap(Connection::class.java)
            .andFind()
-           .using(ConnectionFinder.class)
-           .withIcon("default-16x16.png");
+           .using(ConnectionFinder::class.java)
+           .withIcon("default-16x16.png")
 
-        singleton(ConnectionManager.class);
+        singleton(ConnectionManager::class.java)
 
         relateRoot()
-            .to(Connection.class)
-            .using(RootHasConnections.class)
-            .as("RootHasConnections");
+            .to(Connection::class.java)
+            .using(RootHasConnections::class.java)
+            .`as`("RootHasConnections")
 
         <#list rootClasses as rootClass>
-        relate(Connection.class)
-            .to(${rootClass.simpleName}.class)
-            .using(ConnectionHas${rootClass.simpleName}.class)
-            .as("ConnectionHas${rootClass.simpleName}")
-            .in(new FolderDef("${rootClass.simpleNameSplitCamel}s", "folder.png"));
+        relate(Connection::class.java)
+            .to(${rootClass.simpleName}::class.java)
+            .using(ConnectionHas${rootClass.simpleName}::class.java)
+            .`as`("ConnectionHas${rootClass.simpleName}")
+            .`in`(FolderDef("${rootClass.simpleNameSplitCamel}s", "folder.png"))
         </#list>
 
         <#list relations as relation>
-        relate(${relation.parentClassName}.class)
-            .to(${relation.childClassName}.class)
-            .using(${relation.parentClassName}Has${relation.childClassName}.class)
-            .as("${relation.name}")
-            .in(new FolderDef("${relation.childClassNameSplitCamel}s", "folder.png"));
+        relate(${relation.parentClassName}::class.java)
+            .to(${relation.childClassName}::class.java)
+            .using(${relation.parentClassName}Has${relation.childClassName}::class.java)
+            .`as`("${relation.name}")
+            .`in`(FolderDef("${relation.childClassNameSplitCamel}s", "folder.png"))
         </#list>
     }
 }
