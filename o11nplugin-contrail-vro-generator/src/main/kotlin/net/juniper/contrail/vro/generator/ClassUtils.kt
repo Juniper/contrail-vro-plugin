@@ -14,6 +14,9 @@ fun <T> Class<T>.nonAbstractSubclassesIn(packageName: String): List<Class<out T>
         .filter { it.isNotAbstract }
 }
 
+fun <T> Class<T>.nonAbstractSubclasses(): List<Class<out T>> =
+    nonAbstractSubclassesIn(`package`.name)
+
 val <T> Class<T>.isAbstract: Boolean get() =
     Modifier.isAbstract(modifiers)
 

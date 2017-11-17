@@ -10,6 +10,5 @@ class FindersModel(
     val classes: List<Class<*>>
 ) : GenericModel()
 
-fun generateFindersModel(objectClasses: List<Class<out ApiObjectBase>>): FindersModel {
-    return FindersModel(objectClasses)
-}
+fun generateFindersModel(objectClasses: List<Class<out ApiObjectBase>>): FindersModel =
+    FindersModel(objectClasses)
