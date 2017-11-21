@@ -18,11 +18,13 @@ object Generator {
 
         val propertyClasses = propertyClasses()
         val objectClasses = objectClasses()
-        val rootClasses = rootClasses(objectClasses)
+        val rootClasses = objectClasses.rootClasses()
+        val nestedClasses = propertyClasses.nestedClasses()
 
-        val customMappingModel = generateCustomMappingModel(propertyClasses, objectClasses, rootClasses)
+        val customMappingModel = generateCustomMappingModel(propertyClasses, objectClasses, rootClasses, nestedClasses)
         val findersModel = generateFindersModel(objectClasses)
         val relationsModel = generateRelationsModel(objectClasses)
+        val convertersModel = generateConvertersModel(nestedClasses.aliasClasses, propertyClasses)
 
         val customMappingConfig = GeneratorConfig(
             baseDir = projectInfo.customRoot / generatedSourcesRoot,

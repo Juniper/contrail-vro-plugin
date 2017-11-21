@@ -13,7 +13,7 @@ class RelationsModel(
 
 fun generateRelationsModel(objectClasses: List<Class<out ApiObjectBase>>): RelationsModel {
     val relations = generateRelationStatements(objectClasses)
-    val rootClassNames = rootClasses(objectClasses)
+    val rootClassNames = objectClasses.rootClasses()
         .map { it.simpleName }
 
     return RelationsModel(rootClassNames, relations)

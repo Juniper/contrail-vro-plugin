@@ -1,13 +1,12 @@
 ${editWarning}
 package net.juniper.contrail.vro.generated
 
-import com.vmware.o11n.sdk.modeldrivengen.mapping.AbstractMapping
-import com.vmware.o11n.sdk.modeldrivengen.mapping.FolderDef
-import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
-import net.juniper.contrail.vro.config.ConnectionManager
-import net.juniper.contrail.vro.model.Connection
-import net.juniper.contrail.vro.model.ConnectionFinder
-import net.juniper.contrail.vro.model.RootHasConnections
+/* ktlint-disable no-wildcard-imports */
+import com.vmware.o11n.sdk.modeldrivengen.mapping.*
+import net.juniper.contrail.api.types.*
+import net.juniper.contrail.vro.config.*
+import net.juniper.contrail.vro.model.*
+/* ktlint-enable no-wildcard-imports */
 
 class CustomMapping: AbstractMapping() {
 
@@ -15,7 +14,8 @@ class CustomMapping: AbstractMapping() {
         convertWellKnownTypes()
 
         <#list nestedClasses as klass>
-        wrap(${klass.nestedName}::class.java)
+        wrap(${klass.canonicalName}::class.java)
+            .`as`("${klass.simpleName}")
         </#list>
 
         val methodsToHide = arrayOf(
