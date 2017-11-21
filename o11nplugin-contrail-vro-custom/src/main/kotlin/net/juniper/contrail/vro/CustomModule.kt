@@ -8,7 +8,6 @@ import com.google.inject.AbstractModule
 import com.vmware.o11n.sdk.modeldrivengen.mapping.AbstractMapping
 import com.vmware.o11n.sdk.modeldrivengen.model.Plugin
 import net.juniper.contrail.vro.generated.CustomMapping
-import java.util.Collections
 
 class CustomModule : AbstractModule() {
     private val plugin = Plugin()

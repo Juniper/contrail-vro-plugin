@@ -14,8 +14,8 @@ class CustomMapping: AbstractMapping() {
     override fun define() {
         convertWellKnownTypes()
 
-        <#list canonicalNameClasses as klass>
-        wrap(${klass.canonicalName}::class.java)
+        <#list nestedClasses as klass>
+        wrap(${klass.nestedName}::class.java)
         </#list>
 
         <#list unfindableClasses as klass>
