@@ -25,7 +25,7 @@ public class ${className}
 </@compress>
 
     private static final long serialVersionUID = 1L;
-    private static ReferencePropertyFormatter propertyFormatter = new ReferencePropertyFormatter();
+    private ReferencePropertyFormatter propertyFormatter;
 
     @Override
     public void setContext(PluginContext ctx) {
@@ -34,6 +34,9 @@ public class ${className}
         <#else>
 		_ctx = new WrapperContext(ctx, null);
 		</#if>
+        BeanFactory beanFactory = _ctx.getPluginContext().getApplicationContext().getAutowireCapableBeanFactory();
+        ContrailPluginFactory factory = beanFactory.getBean(ContrailPluginFactory.class);
+		propertyFormatter = new ReferencePropertyFormatter(factory);
     }
 
     <#if findable>
@@ -147,45 +150,10 @@ public class ${className}
     public String get${field.methodName}() {
         List<${field.returnTypeName}> ref_list = __getTarget().get${field.methodName}();
 
-        return getRefString(ref_list, "${field.refObjectType}");
+        return propertyFormatter.getRefString(this, ref_list, "${field.refObjectType}");
     }
 
     </#list>
-    <#if findable>
-    private <T extends ApiPropertyBase>String getRefString(List<ObjectReference<T>> ref_list, String type) {
-       if( ref_list == null) {
-            return null;
-        }
-
-        BeanFactory beanFactory = _ctx.getPluginContext().getApplicationContext().getAutowireCapableBeanFactory();
-        ContrailPluginFactory factory = beanFactory.getBean(ContrailPluginFactory.class);
-        StringBuilder builder = new StringBuilder();
-        String prefix = "";
-        Sid wrapperSid = this.getInternalId();
-
-        try {
-            for( ObjectReference<T> ref : ref_list ) {
-                Sid sid = wrapperSid.with(type, ref.getUuid());
-                ModelWrapper element = (ModelWrapper)factory.find(type, sid.toString());
-                if( element != null ) {
-                    builder.append(prefix);
-                    prefix = "\n";
-                    builder.append(((ApiObjectBase)element.__getTarget()).getName());
-                    String properties = propertyFormatter.convert(ref.getAttr());
-                    if( !properties.matches("^\\s*$") ) {
-                        builder.append(":\n").append(properties);
-                    }
-                }
-            }
-        }
-        catch (IllegalArgumentException e) {
-            return null;
-        }
-        return builder.toString();
-    }
-    </#if>
-
-
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
     }
