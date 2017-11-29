@@ -18,10 +18,6 @@ class CustomMapping: AbstractMapping() {
         wrap(${klass.nestedName}::class.java)
         </#list>
 
-        <#list unfindableClasses as klass>
-        wrap(${klass.simpleName}::class.java)
-        </#list>
-
         val methodsToHide = arrayOf(
             "getObjectType",
             "getDefaultParentType",
@@ -60,7 +56,7 @@ class CustomMapping: AbstractMapping() {
             .to(${rootClass.simpleName}::class.java)
             .using(ConnectionHas${rootClass.simpleName}::class.java)
             .`as`("ConnectionHas${rootClass.simpleName}")
-            .`in`(FolderDef("${rootClass.simpleNameSplitCamel}s", "folder.png"))
+            .`in`(FolderDef("${rootClass.pluralizedSimpleName}", "folder.png"))
         </#list>
 
         <#list relations as relation>
@@ -68,7 +64,7 @@ class CustomMapping: AbstractMapping() {
             .to(${relation.childClassName}::class.java)
             .using(${relation.parentClassName}Has${relation.childClassName}::class.java)
             .`as`("${relation.name}")
-            .`in`(FolderDef("${relation.childClassNameSplitCamel}s", "folder.png"))
+            .`in`(FolderDef("${relation.folderName}", "folder.png"))
         </#list>
     }
 }

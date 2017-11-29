@@ -15,6 +15,7 @@ class Relation (
 ) {
     val childClassNameDecapitalized = childClassName.decapitalize()
     val childClassNameSplitCamel = childClassName.splitCamel()
+    val folderName = childClassName.folderName()
 }
 
 fun generateRelationStatements(classes: List<Class<out ApiObjectBase>>): List<Relation> {
