@@ -84,7 +84,7 @@ fun Iterable<Class<*>>.toConverterInfo() =
     map { it.toConverterInfo() }
 
 class ClassInfo(val simpleName: String) {
-    val pluralizedSimpleName = simpleName.folderName()
+    val folderName get() = simpleName.folderName()
 }
 
 class NestedClassInfo(clazz: Class<*>) {

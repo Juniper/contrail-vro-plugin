@@ -56,7 +56,7 @@ class CustomMapping: AbstractMapping() {
             .to(${rootClass.simpleName}::class.java)
             .using(ConnectionHas${rootClass.simpleName}::class.java)
             .`as`("ConnectionHas${rootClass.simpleName}")
-            .`in`(FolderDef("${rootClass.pluralizedSimpleName}", "folder.png"))
+            .`in`(FolderDef("${rootClass.folderName}", "folder.png"))
         </#list>
 
         <#list relations as relation>
