@@ -6,7 +6,9 @@ package net.juniper.contrail.vro.generator
 
 import com.google.common.reflect.ClassPath
 import net.juniper.contrail.api.ApiObjectBase
+import java.lang.reflect.Field
 import java.lang.reflect.Modifier
+import java.lang.reflect.ParameterizedType
 
 fun <T> Class<T>.nonAbstractSubclassesIn(packageName: String): List<Class<out T>> {
     val classes = subclassesIn(packageName)
@@ -65,6 +67,26 @@ private fun classForName(name: String): Class<*>? {
         null
     }
 }
+fun Class<*>.classUsages(classes: List<Class<*>>): ClassUsageInfo {
+    val simpleFields = this.declaredFields
+            .filter { classes.contains(it.type) }
+            .map { FieldInfo(it.name, it.type) }
+    val listFields = this.declaredFields
+            .filter { it.isListOfInnerClasses(classes) }
+            .map { FieldInfo(it.name, it.listFieldParameterType()) }
+    return ClassUsageInfo(simpleFields, listFields)
+}
+
+private fun Field.isListOfInnerClasses(innerClasses: List<Class<*>>): Boolean {
+    if (this.type != List::class.java) return false
+    return innerClasses.contains(listFieldParameterType())
+}
+
+private fun Field.listFieldParameterType(): Class<*> {
+    val parameterizedType = genericType as ParameterizedType
+    return parameterizedType.actualTypeArguments[0] as Class<*>
+}
+
 fun Class<*>.toClassInfo() =
     ClassInfo(this.simpleName)
 
@@ -113,3 +135,7 @@ class ConverterInfo(
 
 val Class<out ApiObjectBase>.hasParent
     get() = this.newInstance().defaultParentType != null
+
+class FieldInfo(val name: String, val type: Class<*>)
+
+class ClassUsageInfo(val simpleFields: List<FieldInfo>, val listFields: List<FieldInfo>)

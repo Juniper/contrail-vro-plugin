@@ -22,14 +22,14 @@ class ConnectionHas${rootClass}
 </#list>
 
 <#list relations as relation>
-class ${relation.parentClassName}Has${relation.childClassName}
-@Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${relation.childClassName}> {
+class ${relation.parentName}Has${relation.childName}
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${relation.childName}> {
 
-    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childClassName}>? {
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childName}>? {
         val connection = connections.getConnection(parentId)
         //TODO handle IOException
-        val parent = connection?.findById(${relation.parentClassName}::class.java, parentId.getString("${relation.parentClassName}"))
-        return connection?.getObjects(${relation.childClassName}::class.java, parent?.${relation.childClassNameDecapitalized}s)
+        val parent = connection?.findById(${relation.parentName}::class.java, parentId.getString("${relation.parentName}"))
+        return connection?.getObjects(${relation.childName}::class.java, parent?.${relation.childNameDecapitalized}s)
     }
 }
 </#list>

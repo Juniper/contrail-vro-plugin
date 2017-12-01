@@ -20,11 +20,13 @@ object Generator {
         val objectClasses = objectClasses()
         val rootClasses = objectClasses.rootClasses()
         val nestedClasses = propertyClasses.nestedClasses()
+        val innerClasses = propertyClasses.allInnerClasses()
 
         val customMappingModel = generateCustomMappingModel(propertyClasses, objectClasses, rootClasses, nestedClasses)
-        val findersModel = generateFindersModel(objectClasses)
+        val findersModel = generateFindersModel(objectClasses, nestedClasses.nonAliasClasses)
         val relationsModel = generateRelationsModel(objectClasses)
         val convertersModel = generateConvertersModel(nestedClasses.aliasClasses, propertyClasses)
+        val wrappersModel = generateWrappersModel(innerClasses.toList())
 
         val customMappingConfig = GeneratorConfig(
             baseDir = projectInfo.customRoot / generatedSourcesRoot,
@@ -40,7 +42,8 @@ object Generator {
         coreGenerator.generate(relationsModel, "Relations.kt")
         coreGenerator.generate(findersModel, "Finders.kt")
         coreGenerator.generate(customMappingModel, "Executor.kt")
-
+        coreGenerator.generate(wrappersModel, "Wrappers.kt")
+        
         runWorkflowGenerator(projectInfo, objectClasses)
     }
 }

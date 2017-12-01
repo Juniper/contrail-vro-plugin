@@ -10,6 +10,8 @@ import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.types.ConfigRoot
 
+val apiPackageName = "net.juniper.contrail.api.types"
+
 fun propertyClasses() =
     ApiPropertyBase::class.java.nonAbstractSubclasses()
 

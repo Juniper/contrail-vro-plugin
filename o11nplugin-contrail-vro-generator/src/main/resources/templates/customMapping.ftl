@@ -16,6 +16,7 @@ class CustomMapping: AbstractMapping() {
         <#list nestedClasses as klass>
         wrap(${klass.canonicalName}::class.java)
             .`as`("${klass.simpleName}")
+            // ANDFIND
         </#list>
 
         val methodsToHide = arrayOf(
@@ -62,9 +63,9 @@ class CustomMapping: AbstractMapping() {
         </#list>
 
         <#list relations as relation>
-        relate(${relation.parentClassName}::class.java)
-            .to(${relation.childClassName}::class.java)
-            .using(${relation.parentClassName}Has${relation.childClassName}::class.java)
+        relate(${relation.parentName}::class.java)
+            .to(${relation.childName}::class.java)
+            .using(${relation.parentName}Has${relation.childName}::class.java)
             .`as`("${relation.name}")
             .`in`(FolderDef("${relation.folderName}", "folder.png"))
         </#list>

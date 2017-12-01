@@ -10,18 +10,9 @@ import com.vmware.o11n.sdk.modeldriven.ObjectFinder
 import com.vmware.o11n.sdk.modeldriven.PluginContext
 import com.vmware.o11n.sdk.modeldriven.Sid
 import org.springframework.beans.factory.annotation.Autowired
-
-class ConnectionFinder
-@Autowired constructor(private val connectionRepository: ConnectionRepository) : ObjectFinder<Connection> {
-    override fun assignId(connection: Connection, relatedObject: Sid?): Sid =
-        connection.internalId
-
-    override fun find(ctx: PluginContext, type: String, id: Sid): Connection? =
-        connectionRepository.getConnection(id)
-
-    override fun query(ctx: PluginContext, type: String, query: String): List<FoundObject<Connection>> =
-        connectionRepository.findConnections(query).map { FoundObject<Connection>(it) }
-}
+<#list nestedClasses as klass>
+import ${klass.canonicalName}
+</#list>
 
 private fun <T : ApiObjectBase> ConnectionRepository.query(clazz: Class<T>, query: String, key: String): List<FoundObject<T>> =
     connections.asSequence().map { it.query(clazz, query, key) }.filterNotNull().flatten().toList()
@@ -50,3 +41,38 @@ class ${klass.simpleName}Finder
 }
 
 </#list>
+
+class ParameterCoordinates(val fieldPosition: Int, val listPosition: Int) {
+    override fun toString(): String =
+        "$fieldPosition.$listPosition"
+
+    companion object {
+        fun fromString(parameterId: String): ParameterCoordinates {
+            val coords = parameterId.split(".").map { Integer.parseInt(it) }
+            return ParameterCoordinates(coords.first(), coords.last())
+        }
+    }
+}
+
+/*
+<#list nestedClasses as klass>
+class ${klass.simpleName}Finder
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${klass.simpleName}> {
+
+    override fun assignId(obj: ${klass.simpleName}, sid: Sid): Sid {
+        val sidKeyName = "${klass.simpleName}"
+        val parentKey =
+        sid.with(sidKeyName, obj.uuid) // TUTAJ NIE MOŻNA BRAĆ TEGO UUID; TRZEBA COŚ NA PODSTAWIE OJCA WYSZUKAĆ
+    }
+    override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${klass.simpleName}? {
+        val connection = connections.getConnection(sid)
+        //TODO handle IOException
+        return connection?.findById(${klass.simpleName}::class.java, sid.getString("${klass.simpleName}"))
+    }
+
+    override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${klass.simpleName}>>? =
+        connections.query(${klass.simpleName}::class.java, query, "${klass.simpleName}")
+}
+
+</#list>
+*/

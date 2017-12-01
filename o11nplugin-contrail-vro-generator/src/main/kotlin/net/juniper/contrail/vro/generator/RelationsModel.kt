@@ -8,13 +8,15 @@ import net.juniper.contrail.api.ApiObjectBase
 
 class RelationsModel(
     val rootClassNames: List<String>,
-    val relations: List<Relation>
+    val relations: List<Relation>,
+    val nestedRelations: List<NestedRelation>
 ) : GenericModel()
 
 fun generateRelationsModel(objectClasses: List<Class<out ApiObjectBase>>): RelationsModel {
-    val relations = generateRelationStatements(objectClasses)
+    val relations = generateRelations(objectClasses)
+    val nestedRelations = generateNestedRelations(objectClasses)
     val rootClassNames = objectClasses.rootClasses()
         .map { it.simpleName }
 
-    return RelationsModel(rootClassNames, relations)
+    return RelationsModel(rootClassNames, relations, nestedRelations)
 }

@@ -20,7 +20,7 @@ fun generateCustomMappingModel(
         objectClasses: List<Class<out ApiObjectBase>>,
         rootClasses: List<Class<out ApiObjectBase>>,
         nestedClasses: NestedClasses): CustomMappingModel {
-    val relations = generateRelationStatements(objectClasses)
+    val relations = generateRelations(objectClasses)
     val rootClassesInfo = rootClasses.toClassInfo()
     val innerClassesInfo = nestedClasses.nonAliasClasses.toNestedClassInfo()
     val proxyClassesInfo = nestedClasses.aliasClasses.keySet().map { ClassInfo(it) }.toList()
