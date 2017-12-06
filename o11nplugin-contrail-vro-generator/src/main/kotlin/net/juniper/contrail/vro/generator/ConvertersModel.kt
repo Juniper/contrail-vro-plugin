@@ -6,17 +6,28 @@ package net.juniper.contrail.vro.generator
 
 import java.lang.reflect.ParameterizedType
 
-class Property(fieldName: String, clazz: Class<*>) {
+class Property(fieldName: String, val clazz: Class<*>, private val parent: Class<*>) {
     val className = clazz.kotlinClassName
-    val collapsedName = clazz.collapsedNestedName
+    val collapsedName get() = clazz.collapsedNestedName
     val propertyName = fieldName.underscoredPropertyToCamelCase()
-    val componentName = propertyName.replace("List$".toRegex(), "").capitalize()
+    val componentName get() = propertyName.replace("List$".toRegex(), "").capitalize()
+    val classLabel get() = if (clazz.isApiClass) clazz.underscoredNestedName else clazz.kotlinClassName
+    val wrapperName get() = if (clazz.isApiClass) parent.wrapperName(propertyName) else clazz.kotlinClassName
 }
+
+val Property.isApiProperty get() =
+    clazz.isApiClass
 
 open class ClassProperties(
     val simpleProperties: List<Property>,
     val listProperties: List<Property>
-)
+) {
+
+    val isEmpty: Boolean =
+        simpleProperties.isEmpty() && listProperties.isEmpty()
+    val isNotEmpty: Boolean get() =
+        ! isEmpty
+}
 
 class Proxy(
     val name: String,
@@ -76,9 +87,9 @@ private val <T> Class<T>.properties: ClassProperties get() {
         if (type == java.util.List::class.java) {
             val genericType = field.genericType as ParameterizedType
             val genericArg = genericType.actualTypeArguments[0] as Class<*>
-            listProperties.add(Property(fieldName, genericArg))
+            listProperties.add(Property(fieldName, genericArg, this))
         } else {
-            simpleProperties.add(Property(fieldName, type))
+            simpleProperties.add(Property(fieldName, type, this))
         }
     }
 

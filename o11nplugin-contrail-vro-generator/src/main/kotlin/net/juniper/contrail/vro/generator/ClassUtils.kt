@@ -26,6 +26,12 @@ val <T> Class<T>.nestedName get() =
 val <T> Class<T>.collapsedNestedName get() =
     nestedName.replace(".", "")
 
+val <T> Class<T>.underscoredNestedName get() =
+    nestedName.replace(".", "_")
+
+fun <T> Class<T>.wrapperName(property: String) =
+    "${underscoredNestedName}_${property.capitalize()}"
+
 val <T> Class<T>.kotlinClassName: String get() = when (this) {
     java.lang.Integer::class.java, java.lang.Integer.TYPE -> "Int"
     java.lang.Boolean.TYPE -> "Boolean"
@@ -51,8 +57,14 @@ fun Class<*>.innerClassTree(includeThis: Boolean = true): Sequence<Class<*>> {
     return root + declaredClasses.asSequence().map { it.innerClassTree() }.flatten()
 }
 
+private fun List<Class<*>>.innerClasses(includeThis: Boolean): Sequence<Class<*>> =
+    asSequence().map { it.innerClassTree(includeThis) }.flatten()
+
 fun List<Class<*>>.allInnerClasses(): Sequence<Class<*>> =
-    asSequence().map { it.innerClassTree() }.flatten()
+    innerClasses(true)
+
+fun List<Class<*>>.strictlyInnerClasses(): Sequence<Class<*>> =
+    innerClasses(false)
 
 private fun classesIn(packageName: String): Sequence<Class<*>> =
     ClassPath.from(loader).getTopLevelClassesRecursive(packageName).asSequence()
@@ -67,16 +79,6 @@ private fun classForName(name: String): Class<*>? {
         null
     }
 }
-fun Class<*>.classUsages(classes: List<Class<*>>): ClassUsageInfo {
-    val simpleFields = this.declaredFields
-            .filter { classes.contains(it.type) }
-            .map { FieldInfo(it.name, it.type) }
-    val listFields = this.declaredFields
-            .filter { it.isListOfInnerClasses(classes) }
-            .map { FieldInfo(it.name, it.listFieldParameterType()) }
-    return ClassUsageInfo(simpleFields, listFields)
-}
-
 private fun Field.isListOfInnerClasses(innerClasses: List<Class<*>>): Boolean {
     if (this.type != List::class.java) return false
     return innerClasses.contains(listFieldParameterType())
@@ -135,7 +137,3 @@ class ConverterInfo(
 
 val Class<out ApiObjectBase>.hasParent
     get() = this.newInstance().defaultParentType != null
-
-class FieldInfo(val name: String, val type: Class<*>)
-
-class ClassUsageInfo(val simpleFields: List<FieldInfo>, val listFields: List<FieldInfo>)

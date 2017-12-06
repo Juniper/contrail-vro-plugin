@@ -89,6 +89,3 @@ private fun Class<*>.nestedRelationInfos(): Sequence<NestedClassRelationInfo> =
         .filter { it.name.startsWith("get") }
         .filter { it.returnType.isApiClass }
         .map { it.toRelationInfo() }
-
-private val Class<*>.isApiClass get() =
-    `package` != null && `package`.name == apiPackageName

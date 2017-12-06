@@ -18,7 +18,7 @@ fun String.underscoredPropertyToCamelCase(): String {
     val elements = split("_")
     val first = elements[0]
     val rest = elements.slice(1 until elements.size)
-    return first + rest.joinToString("") { it.capitalize() }
+    return first + rest.joinToString("") { it.toLowerCase().capitalize() }
 }
 
 fun String.splitCamel(): String =
