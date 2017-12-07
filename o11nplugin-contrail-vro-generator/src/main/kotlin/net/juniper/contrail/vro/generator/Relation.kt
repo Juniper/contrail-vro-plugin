@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.generator
 
 import net.juniper.contrail.api.ApiObjectBase
 import java.lang.reflect.Method
+import java.lang.reflect.ParameterizedType
 
 open class Relation (
     val parentName: String,
@@ -19,7 +20,8 @@ open class Relation (
 class NestedRelation(
     parent: Class<*>,
     child: Class<*>,
-    val getter: String
+    val getter: String,
+    val toMany: Boolean = false
 ) {
     val parentName: String = parent.nestedName
     val childName: String = child.nestedName
@@ -67,9 +69,9 @@ private fun relationName(parentType: String, childType: String) =
 private fun RelationGraphNode.asRelationSequence(): Sequence<Relation> =
     second.asSequence().map { Relation( first, it) }
 
-fun generateNestedRelations(classes: List<Class<out ApiObjectBase>>): List<NestedRelation> {
+fun generateNestedRelations(classes: List<Class<*>>): List<NestedRelation> {
     return classes.asSequence()
-        .map { it.nestedRelations() }
+        .map { it.nestedRelations(classes) }
         .flatten()
         .toList()
 }
@@ -80,12 +82,36 @@ private typealias NestedClassRelationInfo = Pair<Class<*>, String>
 private fun Method.toRelationInfo(): NestedClassRelationInfo =
     NestedClassRelationInfo(returnType, name.replaceFirst("get", ""))
 
-private fun Class<*>.nestedRelations(): Sequence<NestedRelation> =
-    nestedRelationInfos()
-        .map { NestedRelation(this, it.first, it.second) }
-
-private fun Class<*>.nestedRelationInfos(): Sequence<NestedClassRelationInfo> =
+private fun Class<*>.nestedRelations(baseClasses: List<Class<*>>): Sequence<NestedRelation> =
     methods.asSequence()
         .filter { it.name.startsWith("get") }
-        .filter { it.returnType.isApiClass }
-        .map { it.toRelationInfo() }
+        .filter { it.isRelevantType }
+        .map { it.recursiveRelations(baseClasses) }
+        .flatten()
+
+private fun Method.recursiveRelations(baseClasses: List<Class<*>>): Sequence<NestedRelation> {
+    val info = toRelationInfo()
+    val (childType, toMany) = when (info.first) {
+        List::class.java -> Pair(listGenericType, true)
+        else -> Pair(info.first, false)
+    }
+    val rel = NestedRelation(declaringClass, childType, info.second, toMany)
+    return if (baseClasses.contains(childType)) {
+        sequenceOf()
+    } else {
+        childType.nestedRelations(baseClasses)
+    } + rel
+}
+
+private val Method.isRelevantType: Boolean get() {
+    if (returnType.isApiClass) return true
+    return listGenericType.isApiClass
+}
+
+private val Method.listGenericType: Class<*> get() {
+    if (returnType == java.util.List::class.java) {
+        val genericType = genericReturnType as ParameterizedType
+        genericType.actualTypeArguments[0] as? ParameterizedType ?: return genericType.actualTypeArguments[0] as Class<*>
+    }
+    return Object::class.java // in case of List<ObjectReference<*>>
+}

@@ -33,3 +33,16 @@ class ${relation.parentName}Has${relation.childName}
     }
 }
 </#list>
+
+<#list nestedRelations as relation>
+/*
+    RELATION:
+    ${relation.parentName}
+    ${relation.childName}
+    ${relation.parentCollapsedName}
+    ${relation.childCollapsedName}
+    ${relation.name}
+    ${relation.getterSplitCamel}
+    ${relation.getterDecapitalized}
+*/
+</#list>

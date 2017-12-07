@@ -24,7 +24,7 @@ object Generator {
 
         val customMappingModel = generateCustomMappingModel(propertyClasses, objectClasses, rootClasses, nestedClasses)
         val findersModel = generateFindersModel(objectClasses, nestedClasses.nonAliasClasses)
-        val relationsModel = generateRelationsModel(objectClasses)
+        val relationsModel = generateRelationsModel(objectClasses, propertyClasses)
         val convertersModel = generateConvertersModel(nestedClasses.aliasClasses, propertyClasses)
         val wrappersModel = generateWrappersModel(innerClasses.toList())
 
