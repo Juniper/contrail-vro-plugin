@@ -1,5 +1,5 @@
 ${editWarning}
-package net.juniper.contrail.vro.generated
+package ${packageName}
 
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 import java.util.Date
@@ -53,7 +53,7 @@ class ${wrapper.name} {
 }
 
 fun ${wrapper.unwrappedName}?.${wrapper.name}() : ${wrapper.name} {
-    val wrapper = ${wrapper.name}()
+    val wrapper = ${packageName}.${wrapper.name}()
     if (this == null) return wrapper
 
     <#list wrapper.simpleProperties as property>

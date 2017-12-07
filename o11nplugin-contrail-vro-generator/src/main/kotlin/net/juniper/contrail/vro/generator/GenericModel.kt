@@ -11,4 +11,5 @@ open class GenericModel {
  *               GENERATED FILE - DO NOT EDIT              *
  ***********************************************************/
 """
+    val packageName: String = "net.juniper.contrail.vro.generated"
 }

@@ -1,5 +1,5 @@
 ${editWarning}
-package net.juniper.contrail.vro.generated
+package ${packageName}
 
 import net.juniper.contrail.vro.config.ConnectionRepository
 import net.juniper.contrail.vro.model.Connection

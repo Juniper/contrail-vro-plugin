@@ -1,5 +1,5 @@
 ${editWarning}
-package net.juniper.contrail.vro.generated
+package ${packageName}
 
 /* ktlint-disable no-wildcard-imports */
 import com.vmware.o11n.sdk.modeldriven.Converter

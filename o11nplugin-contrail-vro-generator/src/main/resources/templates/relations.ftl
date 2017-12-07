@@ -1,5 +1,5 @@
 ${editWarning}
-package net.juniper.contrail.vro.generated
+package ${packageName}
 
 import com.vmware.o11n.sdk.modeldriven.ObjectRelater
 import com.vmware.o11n.sdk.modeldriven.PluginContext
