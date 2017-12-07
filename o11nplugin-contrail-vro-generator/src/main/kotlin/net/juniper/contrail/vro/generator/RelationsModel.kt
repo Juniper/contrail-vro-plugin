@@ -18,12 +18,26 @@ fun generateRelationsModel(
     propertyClasses: List<Class<out ApiPropertyBase>>
 ): RelationsModel {
     val relations = generateRelations(objectClasses)
-    val nestedRelations = generateNestedRelations(objectClasses + propertyClasses)
+    val nestedRelations = generateNestedRelations(objectClasses)
+    /*
+    class NestedRelation(
+        parent: Class<*>,
+        child: Class<*>,
+        getter: String,
+        simpleProperties: List<Property>,
+        listProperties: List<Property>,
+        getterChain: List<String>,
+        val toMany: Boolean = false
+    ) {
+    */
     for (nestedRelation in nestedRelations) {
         println("#REL# -- NEXT RELATION --")
         println("#REL# " + nestedRelation.parentName)
         println("#REL# " + nestedRelation.childName)
         println("#REL# " + nestedRelation.name)
+        println("#REL# " + nestedRelation.getter)
+        println("#REL# " + nestedRelation.getterChain)
+        println("#REL# " + nestedRelation.toMany)
     }
     val rootClassNames = objectClasses.rootClasses()
         .map { it.simpleName }

@@ -37,6 +37,7 @@ class ${relation.parentName}Has${relation.childName}
 <#list nestedRelations as relation>
 /*
     RELATION:
+    ${relation.getter}
     ${relation.parentName}
     ${relation.childName}
     ${relation.parentCollapsedName}
@@ -44,5 +45,12 @@ class ${relation.parentName}Has${relation.childName}
     ${relation.name}
     ${relation.getterSplitCamel}
     ${relation.getterDecapitalized}
+    ${relation.getter}
+    ${relation.toMany?c}
+    :: GETTER CHAIN:
+    <#list relation.getterChain as getterStuff>
+        ${getterStuff}
+    </#list>
+    :: END OF GETTER CHAIN.
 */
 </#list>

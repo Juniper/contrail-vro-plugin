@@ -21,6 +21,9 @@ class NestedRelation(
     parent: Class<*>,
     child: Class<*>,
     val getter: String,
+    simpleProperties: List<Property>,
+    listProperties: List<Property>,
+    val getterChain: List<String>,
     val toMany: Boolean = false
 ) {
     val parentName: String = parent.nestedName
@@ -71,35 +74,52 @@ private fun RelationGraphNode.asRelationSequence(): Sequence<Relation> =
 
 fun generateNestedRelations(classes: List<Class<*>>): List<NestedRelation> {
     return classes.asSequence()
-        .map { it.nestedRelations(classes) }
+        .map { it.nestedRelations(classes, listOf()) }
         .flatten()
         .toList()
 }
 
 
-private typealias NestedClassRelationInfo = Pair<Class<*>, String>
-
-private fun Method.toRelationInfo(): NestedClassRelationInfo =
-    NestedClassRelationInfo(returnType, name.replaceFirst("get", ""))
-
-private fun Class<*>.nestedRelations(baseClasses: List<Class<*>>): Sequence<NestedRelation> =
+private fun Class<*>.nestedRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>): Sequence<NestedRelation> =
     methods.asSequence()
         .filter { it.name.startsWith("get") }
         .filter { it.isRelevantType }
-        .map { it.recursiveRelations(baseClasses) }
+        .map { it.recursiveRelations(baseClasses, chainSoFar) }
         .flatten()
 
-private fun Method.recursiveRelations(baseClasses: List<Class<*>>): Sequence<NestedRelation> {
-    val info = toRelationInfo()
-    val (childType, toMany) = when (info.first) {
+private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>): Sequence<NestedRelation> {
+    val wrapperChildName = name.replaceFirst("get", "")
+
+    val (childType, toMany) = when (returnType) {
         List::class.java -> Pair(listGenericType, true)
-        else -> Pair(info.first, false)
+        else -> Pair(returnType, false)
     }
-    val rel = NestedRelation(declaringClass, childType, info.second, toMany)
+
+    val newChain = chainSoFar + wrapperChildName
+
+    val rel = NestedRelation(
+        declaringClass,
+        childType,
+        wrapperChildName,
+        listOf(),
+        listOf(),
+        newChain,
+        toMany)
+    /*
+    class NestedRelation(
+        parent: Class<*>,
+        child: Class<*>,
+        getter: String,
+        simpleProperties: List<Property>,
+        listProperties: List<Property>,
+        getterChain: List<String>,
+        val toMany: Boolean = false
+    ) {
+    */
     return if (baseClasses.contains(childType)) {
         sequenceOf()
     } else {
-        childType.nestedRelations(baseClasses)
+        childType.nestedRelations(baseClasses, newChain)
     } + rel
 }
 
