@@ -48,6 +48,8 @@ class ${relation.parentName}Has${relation.childName}
     ${relation.getter}
     ${relation.toMany?c}
     ${relation.rootClass.simpleName}
+    ${relation.parentWrapperName}
+    ${relation.childWrapperName}
     :: PARAMS:
     <#list relation.simpleProperties as prop>
         SIMPLE PARAM:
@@ -75,3 +77,17 @@ class ${relation.parentName}Has${relation.childName}
     :: END OF GETTER CHAIN.
 </#list>
 */
+
+<#list nestedRelations as relation>
+class ${relation.parentWrapperName}Has${relation.childWrapperName}
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${relation.childWrapperName}> {
+
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childWrapperName}>? {
+        val connection = connections.getConnection(parentId)
+        //TODO handle IOException
+        val parent = connection?.findById(${relation.rootClass.simpleName}::class.java, parentId.getString("${relation.rootClass.simpleName}"))
+        return listOf()
+    }
+}
+
+</#list>

@@ -35,6 +35,8 @@ class NestedRelation(
     val name: String = relationName(parentCollapsedName, getter)
     val getterSplitCamel = getter.splitCamel()
     val getterDecapitalized = getter.decapitalize()
+    val childWrapperName = rootClass.simpleName + "_" + getterChain.joinToString("_")
+    val parentWrapperName = rootClass.simpleName + getterChain.dropLast(1).joinToString("") { "_" + it }
 }
 
 private fun RelationGraphVertex.asRelationList(): List<Relation> {
