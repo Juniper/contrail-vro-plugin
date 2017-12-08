@@ -34,8 +34,8 @@ class ${relation.parentName}Has${relation.childName}
 }
 </#list>
 
-<#list nestedRelations as relation>
 /*
+<#list nestedRelations as relation>
     RELATION:
     ${relation.getter}
     ${relation.parentName}
@@ -47,10 +47,31 @@ class ${relation.parentName}Has${relation.childName}
     ${relation.getterDecapitalized}
     ${relation.getter}
     ${relation.toMany?c}
+    ${relation.rootClass.simpleName}
+    :: PARAMS:
+    <#list relation.simpleProperties as prop>
+        SIMPLE PARAM:
+        ${prop.className}
+        ${prop.collapsedName}
+        ${prop.propertyName}
+        ${prop.componentName}
+        ${prop.classLabel}
+        ${prop.wrapperName}
+    </#list>
+    <#list relation.listProperties as prop>
+        LIST PARAM:
+        ${prop.className}
+        ${prop.collapsedName}
+        ${prop.propertyName}
+        ${prop.componentName}
+        ${prop.classLabel}
+        ${prop.wrapperName}
+    </#list>
+    :: END OF PARAMS.
     :: GETTER CHAIN:
     <#list relation.getterChain as getterStuff>
         ${getterStuff}
     </#list>
     :: END OF GETTER CHAIN.
-*/
 </#list>
+*/

@@ -6,13 +6,13 @@ package net.juniper.contrail.vro.generator
 
 import java.lang.reflect.ParameterizedType
 
-class Property(fieldName: String, val clazz: Class<*>, private val parent: Class<*>) {
+class Property(val fieldName: String, val clazz: Class<*>, val parent: Class<*>, val wrapname: String? = null) {
     val className = clazz.kotlinClassName
     val collapsedName get() = clazz.collapsedNestedName
     val propertyName = fieldName.underscoredPropertyToCamelCase()
     val componentName get() = propertyName.replace("List$".toRegex(), "").capitalize()
     val classLabel get() = if (clazz.isApiClass) clazz.underscoredNestedName else clazz.kotlinClassName
-    val wrapperName get() = if (clazz.isApiClass) parent.wrapperName(propertyName) else clazz.kotlinClassName
+    val wrapperName get() = wrapname ?: if (clazz.isApiClass) parent.wrapperName(propertyName) else clazz.kotlinClassName
 }
 
 val Property.isApiProperty get() =

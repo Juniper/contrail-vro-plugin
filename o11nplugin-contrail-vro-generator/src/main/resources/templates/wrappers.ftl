@@ -66,7 +66,7 @@ fun ${wrapper.unwrappedName}?.${wrapper.name}() : ${wrapper.name} {
 }
 
 fun ${wrapper.name}?.${wrapper.unwrappedLabel}() : ${wrapper.unwrappedName} {
-    val model = ${wrapper.unwrappedName}()
+    val model = ${juniPackageName}.${wrapper.unwrappedName}()
     if (this == null) return model
 
     <#list wrapper.simpleProperties as property>

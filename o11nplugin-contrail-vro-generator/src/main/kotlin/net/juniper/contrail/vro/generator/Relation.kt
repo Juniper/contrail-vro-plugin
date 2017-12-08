@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.generator
 
 import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.api.ObjectReference
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 
@@ -18,12 +19,13 @@ open class Relation (
 }
 
 class NestedRelation(
-    parent: Class<*>,
-    child: Class<*>,
+    val parent: Class<*>,
+    val child: Class<*>,
     val getter: String,
-    simpleProperties: List<Property>,
-    listProperties: List<Property>,
+    val simpleProperties: List<Property>,
+    val listProperties: List<Property>,
     val getterChain: List<String>,
+    val rootClass: Class<*>,
     val toMany: Boolean = false
 ) {
     val parentName: String = parent.nestedName
@@ -74,20 +76,20 @@ private fun RelationGraphNode.asRelationSequence(): Sequence<Relation> =
 
 fun generateNestedRelations(classes: List<Class<*>>): List<NestedRelation> {
     return classes.asSequence()
-        .map { it.nestedRelations(classes, listOf()) }
+        .map { it.nestedRelations(classes, listOf(), it) }
         .flatten()
         .toList()
 }
 
 
-private fun Class<*>.nestedRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>): Sequence<NestedRelation> =
+private fun Class<*>.nestedRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>, rootClass: Class<*>): Sequence<NestedRelation> =
     methods.asSequence()
         .filter { it.name.startsWith("get") }
         .filter { it.isRelevantType }
-        .map { it.recursiveRelations(baseClasses, chainSoFar) }
+        .map { it.recursiveRelations(baseClasses, chainSoFar, rootClass) }
         .flatten()
 
-private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>): Sequence<NestedRelation> {
+private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>, rootClass: Class<*>): Sequence<NestedRelation> {
     val wrapperChildName = name.replaceFirst("get", "")
 
     val (childType, toMany) = when (returnType) {
@@ -101,25 +103,16 @@ private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: L
         declaringClass,
         childType,
         wrapperChildName,
-        listOf(),
-        listOf(),
+        childType.properties.simpleProperties,
+        childType.properties.listProperties,
         newChain,
+        rootClass,
         toMany)
-    /*
-    class NestedRelation(
-        parent: Class<*>,
-        child: Class<*>,
-        getter: String,
-        simpleProperties: List<Property>,
-        listProperties: List<Property>,
-        getterChain: List<String>,
-        val toMany: Boolean = false
-    ) {
-    */
+
     return if (baseClasses.contains(childType)) {
         sequenceOf()
     } else {
-        childType.nestedRelations(baseClasses, newChain)
+        childType.nestedRelations(baseClasses, newChain, rootClass)
     } + rel
 }
 
@@ -135,3 +128,24 @@ private val Method.listGenericType: Class<*> get() {
     }
     return Object::class.java // in case of List<ObjectReference<*>>
 }
+
+private val <T> Class<T>.properties: ClassProperties
+    get() {
+        val simpleProperties = mutableListOf<Property>()
+        val listProperties = mutableListOf<Property>()
+
+        for (method in declaredMethods.filter { it.name.startsWith("get") }) {
+            val type = method.returnType
+            val fieldName = method.name.replaceFirst("get", "").decapitalize()
+            if (type == java.util.List::class.java) {
+                val genericType = method.genericReturnType as ParameterizedType
+                val genericArg = genericType.actualTypeArguments[0] as Class<*>
+                if (genericArg != ObjectReference::class.java)
+                    listProperties.add(Property(fieldName, genericArg, this))
+            } else {
+                simpleProperties.add(Property(fieldName, type, this))
+            }
+        }
+
+        return ClassProperties(simpleProperties, listProperties)
+    }

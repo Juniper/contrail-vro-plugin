@@ -5,7 +5,6 @@
 package net.juniper.contrail.vro.generator
 
 import net.juniper.contrail.api.ApiObjectBase
-import net.juniper.contrail.api.ApiPropertyBase
 
 class RelationsModel(
     val rootClassNames: List<String>,
@@ -15,9 +14,10 @@ class RelationsModel(
 
 fun generateRelationsModel(
     objectClasses: List<Class<out ApiObjectBase>>,
-    propertyClasses: List<Class<out ApiPropertyBase>>
+    propertyClasses: List<Class<*>>
 ): RelationsModel {
     val relations = generateRelations(objectClasses)
+    // val nestedRelations = generateNestedRelations(objectClasses + propertyClasses)
     val nestedRelations = generateNestedRelations(objectClasses)
     /*
     class NestedRelation(

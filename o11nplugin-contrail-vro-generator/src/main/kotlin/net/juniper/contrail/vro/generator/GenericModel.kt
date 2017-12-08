@@ -12,4 +12,5 @@ open class GenericModel {
  ***********************************************************/
 """
     val packageName: String = "net.juniper.contrail.vro.generated"
+    val juniPackageName: String = "net.juniper.contrail.api.types"
 }
