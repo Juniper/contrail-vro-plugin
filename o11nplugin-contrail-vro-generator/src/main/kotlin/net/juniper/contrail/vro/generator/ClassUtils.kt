@@ -68,6 +68,16 @@ private fun classForName(name: String): Class<*>? {
 fun Class<*>.toClassInfo() =
     ClassInfo(this.simpleName)
 
+val Class<*>.xsdName : String
+    get() = simpleName.splitCamel().toLowerCase().replace(" ", "-")
+
+val <T> Class<T>.xsdType: String get() = when (this.simpleName) {
+    "String" -> "string"
+    "Boolean" -> "boolean"
+    "Int" -> "number"
+    else -> ""
+}
+
 fun Iterable<Class<*>>.toClassInfo() =
     map { it.toClassInfo() }
 

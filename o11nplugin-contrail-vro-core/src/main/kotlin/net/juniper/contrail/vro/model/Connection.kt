@@ -29,7 +29,7 @@ class Connection(public val info: ConnectionInfo, val connector: ApiConnector) :
         info.port
 
     val displayName: String get() =
-        "$name (${info.username?:"anonymous"}@$host:$port)"
+        "$name (${info.username ?: "anonymous"}@$host:$port)"
 
     @Throws(IOException::class)
     fun create(obj: ApiObjectBase): Boolean {
