@@ -41,6 +41,9 @@ fun List<Class<out ApiPropertyBase>>.nestedClasses(): NestedClasses {
 val Class<*>.isApiClass get() =
     `package` != null && `package`.name == apiPackageName
 
+val String.isApiTypeClass get() =
+    classForName("$apiPackageName.$this") != null
+
 val Class<out ApiObjectBase>.isRootClass: Boolean get() {
     if (!isRelatable) return false
     val parentType = defaultParentType

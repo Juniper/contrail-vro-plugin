@@ -42,6 +42,26 @@ class ${klass.simpleName}Finder
 
 </#list>
 
+<#list referenceWrappers as wrapper>
+class ${wrapper.referenceName}Finder
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${wrapper.referenceName}> {
+
+    override fun assignId(obj: ${wrapper.referenceName}, sid: Sid): Sid =
+        sid.with("${wrapper.referenceName}", obj.uuid)
+
+    override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${wrapper.referenceName}? {
+        val connection = connections.getConnection(sid)
+        //TODO handle IOException
+        return connection?.findById(${wrapper.className}::class.java, sid.getString("${wrapper.referenceName}"))?.as${wrapper.referenceName}()
+    }
+
+    override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${wrapper.referenceName}>>? =
+        connections.query(${wrapper.className}::class.java, query, "${wrapper.referenceName}")
+            .map { FoundObject(it.`object`.as${wrapper.referenceName}(), it.id) }
+}
+
+</#list>
+
 <#list nestedRelations as relation>
 class ${relation.childWrapperName}Finder
 @Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${relation.childWrapperName}> {

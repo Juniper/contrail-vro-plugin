@@ -4,8 +4,14 @@
 
 package net.juniper.contrail.vro.generator
 
+import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ObjectReference
 import java.lang.reflect.ParameterizedType
+
+class ReferenceWrapper(clazz: Class<out ApiObjectBase>) {
+    val className = clazz.simpleName
+    val referenceName = clazz.referenceName
+}
 
 class Wrapper(
     val property: String,
@@ -24,8 +30,9 @@ class Wrapper(
 }
 
 class WrappersModel(
-    val wrappers: List<Wrapper>)
-    : GenericModel()
+    val references: List<ReferenceWrapper>,
+    val wrappers: List<Wrapper>
+) : GenericModel()
 
 private val <T> Class<T>.properties: ClassProperties
     get() {
@@ -62,7 +69,9 @@ private fun Pair<Class<*>, Property>.toWrapper(classToProperties: Map<Class<*>, 
     return propertyClassProperties.toWrapper(property.propertyName, property.clazz, parent)
 }
 
-fun generateWrappersModel(nestedClasses: List<Class<*>>, relationsModel: RelationsModel): WrappersModel {
+fun generateWrappersModel(objectClasses: List<Class<out ApiObjectBase>>, nestedClasses: List<Class<*>>, relationsModel: RelationsModel): WrappersModel {
+
+    val references = objectClasses.map { ReferenceWrapper(it) }
 
     val classToProperties: Map<Class<*>, ClassProperties> = nestedClasses.associateBy({ it }, { it.properties })
     val wrappers1 = classToProperties.asSequence()
@@ -115,5 +124,5 @@ fun generateWrappersModel(nestedClasses: List<Class<*>>, relationsModel: Relatio
     println("#DUPATEST : ")
     println("#DUPATEST : ")
 
-    return WrappersModel(wrappers2)
+    return WrappersModel(references, wrappers2)
 }

@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.generator
 import com.google.common.reflect.ClassPath
 import net.juniper.contrail.api.ApiObjectBase
 import java.lang.reflect.Field
+import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.lang.reflect.ParameterizedType
 
@@ -37,6 +38,30 @@ val <T> Class<T>.kotlinClassName: String get() = when (this) {
     java.lang.Boolean.TYPE -> "Boolean"
     else -> simpleName
 }
+
+private val String.ref get() =
+    "${this}Ref"
+
+private val getterPattern = "^get".toRegex()
+private val backRefsPattern = "BackRefs$".toRegex()
+
+val Method.nameWithoutGet get() =
+    name.replace(getterPattern, "")
+
+val Method.nameWithoutGetAndBackRefs get() =
+    nameWithoutGet.replace(backRefsPattern, "")
+
+val Method.propertyName get() =
+    nameWithoutGet.decapitalize()
+
+val Method.isGetter get() =
+    name.startsWith("get")
+
+val Method.referenceName get() =
+    nameWithoutGetAndBackRefs.ref
+
+val <T> Class<T>.referenceName: String get() =
+    simpleName.ref
 
 val <T> Class<T>.isAbstract: Boolean get() =
     Modifier.isAbstract(modifiers)
@@ -72,7 +97,7 @@ private fun classesIn(packageName: String): Sequence<Class<*>> =
         .map { classForName(it) }
         .filterNotNull()
 
-private fun classForName(name: String): Class<*>? {
+fun classForName(name: String): Class<*>? {
     return try {
         Class.forName(name)
     } catch (e: ClassNotFoundException) {

@@ -1,6 +1,8 @@
 ${editWarning}
 package ${packageName}
 
+import net.juniper.contrail.api.ApiPropertyBase
+import net.juniper.contrail.api.ObjectReference
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 import java.util.Date
 
@@ -26,6 +28,34 @@ private fun Boolean?.Boolean(lidx: Int?) = this ?: false
 private fun Int?.Int(lidx: Int?) = this
 private fun Long?.Long(lidx: Int?) = this
 private fun Date?.Date(lidx: Int?) = this
+
+
+<#list references as wrapper>
+class ${wrapper.referenceName} @JvmOverloads constructor (
+    val name:String? = null,
+    val uuid:String? = null
+) {
+    fun as${wrapper.className}(): ${wrapper.className} {
+        val target = ${wrapper.className}()
+        target.name = name
+        target.uuid = uuid
+        return target
+    }
+
+    fun asObjectReference(): ObjectReference<ApiPropertyBase> {
+        val ref = ObjectReference<ApiPropertyBase>()
+        ref.setReference(null, null, null, uuid)
+        return ref
+    }
+}
+
+fun ${wrapper.className}.as${wrapper.referenceName}(): ${wrapper.referenceName} =
+    ${wrapper.referenceName}(name, uuid)
+
+fun ObjectReference<*>.as${wrapper.referenceName}(): ${wrapper.referenceName} =
+    ${wrapper.referenceName}(uuid = uuid)
+
+</#list>
 
 <#list wrappers as wrapper>
 class ${wrapper.name} {

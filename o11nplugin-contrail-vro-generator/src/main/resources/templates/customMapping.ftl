@@ -42,6 +42,13 @@ class CustomMapping: AbstractMapping() {
           .withIcon("item-16x16.png")
         </#list>
 
+        <#list referenceRelations as relation>
+        wrap(${relation.childName}::class.java)
+          .andFind()
+          .using(${relation.childName}Finder::class.java)
+          .withIcon("item-16x16.png")
+        </#list>
+
         wrap(Connection::class.java)
            .andFind()
            .using(ConnectionFinder::class.java)
@@ -68,6 +75,15 @@ class CustomMapping: AbstractMapping() {
             .using(${relation.parentName}Has${relation.childName}::class.java)
             .`as`("${relation.name}")
             .`in`(FolderDef("${relation.folderName}", "folder.png"))
+        </#list>
+        
+        <#list referenceRelations as relation>
+        relate(${relation.parentName}::class.java)
+            .to(${relation.childName}::class.java)
+            .using(${relation.parentName}Has${relation.childName}::class.java)
+            .`as`("${relation.parentName}To${relation.childName}")
+            //TODO pluralize
+            .`in`(FolderDef("${relation.childName}s", "folder.png"))
         </#list>
 
         <#list nestedRelations as relation>

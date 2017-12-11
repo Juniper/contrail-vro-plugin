@@ -32,6 +32,21 @@ class ${relation.parentName}Has${relation.childName}
         return connection?.getObjects(${relation.childName}::class.java, parent?.${relation.childNameDecapitalized}s)
     }
 }
+
+</#list>
+
+<#list referenceRelations as relation>
+class ${relation.parentName}Has${relation.childName}
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${relation.childName}> {
+
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childName}>? {
+        val connection = connections.getConnection(parentId)
+        //TODO handle IOException
+        val parent = connection?.findById(${relation.parentName}::class.java, parentId.getString("${relation.parentName}"))
+        return parent?.${relation.getter}?.map { it.as${relation.childName}() }
+    }
+}
+
 </#list>
 
 fun <T> toList(x: T?): List<T>? {

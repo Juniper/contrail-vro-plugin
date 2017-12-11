@@ -18,6 +18,15 @@ open class Relation (
     val folderName = childName.folderName()
 }
 
+class RefRelation (
+    parentClass: Class<out ApiObjectBase>,
+    method: Method
+) {
+    val parentName: String = parentClass.simpleName
+    val childName: String = method.referenceName
+    val getter: String = method.propertyName
+}
+
 class NestedRelation(
     val parent: Class<*>,
     val child: Class<*>,
@@ -80,6 +89,33 @@ private fun relationName(parentType: String, childType: String) =
 private fun RelationGraphNode.asRelationSequence(): Sequence<Relation> =
     second.asSequence().map { Relation( first, it) }
 
+fun generateReferenceRelations(classes: List<Class<out ApiObjectBase>>): List<RefRelation> =
+    classes.asSequence()
+        .map { it.refRelations }
+        .flatten()
+        .toList()
+
+private val <T: ApiObjectBase> Class<T>.refRelations: Sequence<RefRelation> get() =
+    referenceMethods.distinctBy { it.referenceName }.map { RefRelation(this, it) }
+
+private val <T: ApiObjectBase> Class<T>.referenceMethods: Sequence<Method> get() =
+    declaredMethods.asSequence()
+        .filter { it.isRefMethod }
+        .filter { it.returnsObjectReferences }
+
+private val Method.isRefMethod get() =
+    name.startsWith("get") && nameWithoutGetAndBackRefs.isApiTypeClass
+
+private val Method.returnsObjectReferences: Boolean get() {
+    if (returnType == java.util.List::class.java) {
+        val genericType = genericReturnType as ParameterizedType
+        val parameter = genericType.actualTypeArguments[0]
+        if (parameter is ParameterizedType)
+            return parameter.rawType == ObjectReference::class.java
+    }
+    return false
+}
+
 fun generateNestedRelations(classes: List<Class<*>>): List<NestedRelation> {
     return classes.asSequence()
         .map { it.nestedRelations(classes, listOf(), listOf(), it) }
@@ -137,23 +173,22 @@ private val Method.listGenericType: Class<*> get() {
     return Object::class.java // in case of List<ObjectReference<*>>
 }
 
-private val <T> Class<T>.properties: ClassProperties
-    get() {
-        val simpleProperties = mutableListOf<Property>()
-        val listProperties = mutableListOf<Property>()
+private val <T> Class<T>.properties: ClassProperties get() {
+    val simpleProperties = mutableListOf<Property>()
+    val listProperties = mutableListOf<Property>()
 
-        for (method in declaredMethods.filter { it.name.startsWith("get") }) {
-            val type = method.returnType
-            val fieldName = method.name.replaceFirst("get", "").decapitalize()
-            if (type == java.util.List::class.java) {
-                val genericType = method.genericReturnType as ParameterizedType
-                val genericArg = genericType.actualTypeArguments[0] as Class<*>
-                if (genericArg != ObjectReference::class.java)
-                    listProperties.add(Property(fieldName, genericArg, this))
-            } else {
-                simpleProperties.add(Property(fieldName, type, this))
-            }
+    for (method in declaredMethods.filter { it.name.startsWith("get") }) {
+        val type = method.returnType
+        val fieldName = method.name.replaceFirst("get", "").decapitalize()
+        if (type == java.util.List::class.java) {
+            val genericType = method.genericReturnType as ParameterizedType
+            val genericArg = genericType.actualTypeArguments[0] as Class<*>
+            if (genericArg != ObjectReference::class.java)
+                listProperties.add(Property(fieldName, genericArg, this))
+        } else {
+            simpleProperties.add(Property(fieldName, type, this))
         }
-
-        return ClassProperties(simpleProperties, listProperties)
     }
+
+    return ClassProperties(simpleProperties, listProperties)
+}

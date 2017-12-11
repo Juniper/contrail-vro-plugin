@@ -9,6 +9,7 @@ import net.juniper.contrail.api.ApiObjectBase
 class RelationsModel(
     val rootClassNames: List<String>,
     val relations: List<Relation>,
+    val referenceRelations: List<RefRelation>,
     val nestedRelations: List<NestedRelation>
 ) : GenericModel()
 
@@ -17,7 +18,7 @@ fun generateRelationsModel(
     propertyClasses: List<Class<*>>
 ): RelationsModel {
     val relations = generateRelations(objectClasses)
-//    val nestedRelations = generateNestedRelations(listOf(NetworkPolicy::class.java))
+    val refRelations = generateReferenceRelations(objectClasses)
     val nestedRelations = generateNestedRelations(objectClasses)
     /*
     class NestedRelation(
@@ -36,11 +37,11 @@ fun generateRelationsModel(
         println("#REL# " + nestedRelation.childName)
         println("#REL# " + nestedRelation.name)
         println("#REL# " + nestedRelation.getter)
-        println("#REL# " + nestedRelation.getterChain)
-        println("#REL# " + nestedRelation.toMany)
+//        println("#REL# " + nestedRelation.getterChain)
+//        println("#REL# " + nestedRelation.toMany)
     }
     val rootClassNames = objectClasses.rootClasses()
         .map { it.simpleName }
 
-    return RelationsModel(rootClassNames, relations, nestedRelations)
+    return RelationsModel(rootClassNames, relations, refRelations, nestedRelations)
 }
