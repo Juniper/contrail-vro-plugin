@@ -8,7 +8,7 @@ import net.juniper.contrail.api.ObjectReference
 import java.lang.reflect.ParameterizedType
 
 class Wrapper(
-    property: String,
+    val property: String,
     unwrapped: Class<*>,
     parent: Class<*>,
     simpleProperties: List<Property>,

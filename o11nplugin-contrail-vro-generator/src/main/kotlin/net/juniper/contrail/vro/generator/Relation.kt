@@ -15,7 +15,7 @@ open class Relation (
 ) {
     val name: String = relationName(parentName, childName)
     val childNameDecapitalized = childName.decapitalize()
-    val folderName = childClassName.folderName()
+    val folderName = childName.folderName()
 }
 
 class NestedRelation(

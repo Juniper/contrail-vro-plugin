@@ -42,25 +42,7 @@ class ${klass.simpleName}Finder
 
 </#list>
 
-class ParameterCoordinates(val fieldPosition: Int, val listPosition: Int) {
-    override fun toString(): String =
-        "$fieldPosition.$listPosition"
-
-    companion object {
-        fun fromString(parameterId: String): ParameterCoordinates {
-            val coords = parameterId.split(".").map { Integer.parseInt(it) }
-            return ParameterCoordinates(coords.first(), coords.last())
-        }
-    }
-}
-
 <#list nestedRelations as relation>
-/*
-<#list relation.getterChainWithStatus as nextGetter>
-    ${nextGetter.getGetterName()}
-    ${nextGetter.getGetterStatus()?c}
-</#list>
-*/
 class ${relation.childWrapperName}Finder
 @Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${relation.childWrapperName}> {
 

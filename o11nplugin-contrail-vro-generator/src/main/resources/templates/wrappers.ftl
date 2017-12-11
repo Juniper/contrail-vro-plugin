@@ -31,6 +31,8 @@ private fun Date?.Date(lidx: Int?) = this
 class ${wrapper.name} {
     var listIdx: Int? = null
         set(value) { field = value }
+    val displayName: String get() = "${wrapper.property}"
+
     <#list wrapper.simpleProperties as property>
     var ${property.propertyName}: ${property.wrapperName}? = null
         set(value) { field = value }

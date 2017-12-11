@@ -13,14 +13,6 @@ class CustomMapping: AbstractMapping() {
     override fun define() {
         convertWellKnownTypes()
 
-        /*
-        <#list nestedClasses as klass>
-        wrap(${klass.canonicalName}::class.java)
-            .`as`("${klass.simpleName}")
-        </#list>
-
-        */
-
         <#list nestedRelations as relation>
         wrap(${relation.childWrapperName}::class.java)
           .andFind()
@@ -83,7 +75,7 @@ class CustomMapping: AbstractMapping() {
             .to(${relation.childWrapperName}::class.java)
             .using(${relation.parentWrapperName}Has${relation.childWrapperName}::class.java)
             .`as`("${relation.name}")
-            .`in`(FolderDef("${relation.childWrapperName}s", "folder.png"))
+            .`in`(FolderDef("${relation.childWrapperName}", "folder.png"))
         </#list>
     }
 }
