@@ -8,8 +8,13 @@ import net.juniper.contrail.api.ApiObjectBase
 
 class FindersModel(
     val classes: List<Class<*>>,
-    val nestedClasses: List<Class<*>> // non-alias right now
+    val nestedClasses: List<Class<*>>,
+    val nestedRelations: List<NestedRelation>
 ) : GenericModel()
 
-fun generateFindersModel(objectClasses: List<Class<out ApiObjectBase>>, nestedClasses: List<Class<*>>): FindersModel =
-    FindersModel(objectClasses, nestedClasses)
+fun generateFindersModel(
+        objectClasses: List<Class<out ApiObjectBase>>,
+        nestedClasses: List<Class<*>>,
+        relationsModel: RelationsModel
+): FindersModel =
+    FindersModel(objectClasses, nestedClasses, relationsModel.nestedRelations)

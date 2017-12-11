@@ -34,50 +34,6 @@ class ${relation.parentName}Has${relation.childName}
 }
 </#list>
 
-/*
-<#list nestedRelations as relation>
-    RELATION:
-    ${relation.getter}
-    ${relation.parentName}
-    ${relation.childName}
-    ${relation.parentCollapsedName}
-    ${relation.childCollapsedName}
-    ${relation.name}
-    ${relation.getterSplitCamel}
-    ${relation.getterDecapitalized}
-    ${relation.getter}
-    ${relation.toMany?c}
-    ${relation.rootClass.simpleName}
-    ${relation.parentWrapperName}
-    ${relation.childWrapperName}
-    :: PARAMS:
-    <#list relation.simpleProperties as prop>
-        SIMPLE PARAM:
-        ${prop.className}
-        ${prop.collapsedName}
-        ${prop.propertyName}
-        ${prop.componentName}
-        ${prop.classLabel}
-        ${prop.wrapperName}
-    </#list>
-    <#list relation.listProperties as prop>
-        LIST PARAM:
-        ${prop.className}
-        ${prop.collapsedName}
-        ${prop.propertyName}
-        ${prop.componentName}
-        ${prop.classLabel}
-        ${prop.wrapperName}
-    </#list>
-    :: END OF PARAMS.
-    :: GETTER CHAIN:
-    <#list relation.getterChain as getterStuff>
-        ${getterStuff}
-    </#list>
-    :: END OF GETTER CHAIN.
-</#list>
-*/
-
 <#list nestedRelations as relation>
 class ${relation.parentWrapperName}Has${relation.childWrapperName}
 @Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${relation.childWrapperName}> {
@@ -86,7 +42,7 @@ class ${relation.parentWrapperName}Has${relation.childWrapperName}
         val connection = connections.getConnection(parentId)
         //TODO handle IOException
         val parent = connection?.findById(${relation.rootClass.simpleName}::class.java, parentId.getString("${relation.rootClass.simpleName}"))
-        return listOf()
+        return <#if relation.toMany == false>listOf(</#if>parent<#list relation.getterChainWithStatus as nextGetter>?.${nextGetter.getGetterDecap()}</#list><#if relation.toMany == true>?.map { it</#if>?.${relation.childWrapperName}(potentialIndex)<#if relation.toMany == true> }</#if><#if relation.toMany == false>)</#if>
     }
 }
 

@@ -54,25 +54,36 @@ class ParameterCoordinates(val fieldPosition: Int, val listPosition: Int) {
     }
 }
 
+<#list nestedRelations as relation>
 /*
-<#list nestedClasses as klass>
-class ${klass.simpleName}Finder
-@Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${klass.simpleName}> {
+<#list relation.getterChainWithStatus as nextGetter>
+    ${nextGetter.getGetterName()}
+    ${nextGetter.getGetterStatus()?c}
+</#list>
+*/
+class ${relation.childWrapperName}Finder
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${relation.childWrapperName}> {
 
-    override fun assignId(obj: ${klass.simpleName}, sid: Sid): Sid {
-        val sidKeyName = "${klass.simpleName}"
-        val parentKey =
-        sid.with(sidKeyName, obj.uuid) // TUTAJ NIE MOŻNA BRAĆ TEGO UUID; TRZEBA COŚ NA PODSTAWIE OJCA WYSZUKAĆ
+    override fun assignId(obj: ${relation.childWrapperName}, sid: Sid): Sid {
+        val sidKeyName = "${relation.childWrapperName}"
+        val listIdx = obj.listIdx?.toString() ?: ""
+        return sid.with(sidKeyName, listIdx)
     }
-    override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${klass.simpleName}? {
+    override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${relation.childWrapperName}? {
         val connection = connections.getConnection(sid)
         //TODO handle IOException
-        return connection?.findById(${klass.simpleName}::class.java, sid.getString("${klass.simpleName}"))
+        val parent = connection?.findById(${relation.rootClass.simpleName}::class.java, sid.getString("${relation.rootClass.simpleName}"))
+        val potentialIndexStr = sid.getString("${relation.childWrapperName}")
+        val potentialIndex: Int? = if(potentialIndexStr == "") {
+            null
+        } else {
+            potentialIndexStr.toInt()
+        }
+        return parent<#list relation.getterChainWithStatus as nextGetter>?.${nextGetter.getGetterDecap()}<#if nextGetter.getGetterStatus() == true>?.get(sid.getString("${nextGetter.getGetterName()}").toInt())</#if></#list>?.${relation.childWrapperName}(potentialIndex)
     }
 
-    override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${klass.simpleName}>>? =
-        connections.query(${klass.simpleName}::class.java, query, "${klass.simpleName}")
+    override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${relation.childWrapperName}>>? =
+        null
 }
 
 </#list>
-*/

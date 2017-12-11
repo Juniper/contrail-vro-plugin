@@ -9,8 +9,8 @@ import java.util.Date
   <#if properties?has_content>@JvmOverloads </#if>
   constructor(
   <#list properties as property>
-    ${property.propertyName}:${property.wrapperName}? = null<#if property_has_next>, </#if>
-  </#list>)
+    ${property.propertyName}:${property.wrapperName}? = null,
+  </#list> listIdx: Int? = null)
   </@compress>
 </#macro>
 
@@ -21,8 +21,15 @@ private fun Int?.Int() = this
 private fun Long?.Long() = this
 private fun Date?.Date() = this
 
+private fun String?.String(lidx: Int?) = this
+private fun Boolean?.Boolean(lidx: Int?) = this ?: false
+private fun Int?.Int(lidx: Int?) = this
+private fun Long?.Long(lidx: Int?) = this
+private fun Date?.Date(lidx: Int?) = this
+
 <#list wrappers as wrapper>
 class ${wrapper.name} {
+    var listIdx: Int? = null
     <#list wrapper.simpleProperties as property>
     var ${property.propertyName}: ${property.wrapperName}? = null
         set(value) { field = value }
@@ -32,6 +39,7 @@ class ${wrapper.name} {
         set(value) { field = value }
     </#list>
     <@constructor wrapper.simpleProperties/> {
+        this.listIdx = listIdx
         <#list wrapper.simpleProperties as property>
         this.${property.propertyName} = ${property.propertyName}
         </#list>
@@ -52,15 +60,21 @@ class ${wrapper.name} {
     </#list>
 }
 
-fun ${wrapper.unwrappedName}?.${wrapper.name}() : ${wrapper.name} {
+fun ${wrapper.unwrappedName}?.${wrapper.name}(listIdx: Int?) : ${wrapper.name} {
     val wrapper = ${packageName}.${wrapper.name}()
     if (this == null) return wrapper
 
+    wrapper.listIdx = listIdx
+
     <#list wrapper.simpleProperties as property>
-    wrapper.${property.propertyName} = ${property.propertyName}.${property.wrapperName}()
+    wrapper.${property.propertyName} = ${property.propertyName}.${property.wrapperName}(null)
     </#list>
     <#list wrapper.listProperties as property>
-    ${property.propertyName}?.forEach { wrapper.add${property.componentName}(it.${property.wrapperName}()) }
+    if(${property.propertyName} != null){
+        for ((index, value) in ${property.propertyName}.withIndex()) {
+            wrapper.add${property.componentName}(value.${property.wrapperName}(index))
+        }
+    }
     </#list>
     return wrapper
 }

@@ -25,6 +25,7 @@ class NestedRelation(
     val simpleProperties: List<Property>,
     val listProperties: List<Property>,
     val getterChain: List<String>,
+    val listStatusChain: List<Boolean>,
     val rootClass: Class<*>,
     val toMany: Boolean = false
 ) {
@@ -37,7 +38,10 @@ class NestedRelation(
     val getterDecapitalized = getter.decapitalize()
     val childWrapperName = rootClass.simpleName + "_" + getterChain.joinToString("_")
     val parentWrapperName = rootClass.simpleName + getterChain.dropLast(1).joinToString("") { "_" + it }
+    val getterChainWithStatus = getterChain.zip(listStatusChain).map { GetterWithMultiplinessStatus(it.first, it.first.decapitalize(), it.second) }
 }
+
+class GetterWithMultiplinessStatus(val getterName: String, val getterDecap: String, val getterStatus: Boolean)
 
 private fun RelationGraphVertex.asRelationList(): List<Relation> {
     return second.map {
@@ -78,20 +82,20 @@ private fun RelationGraphNode.asRelationSequence(): Sequence<Relation> =
 
 fun generateNestedRelations(classes: List<Class<*>>): List<NestedRelation> {
     return classes.asSequence()
-        .map { it.nestedRelations(classes, listOf(), it) }
+        .map { it.nestedRelations(classes, listOf(), listOf(), it) }
         .flatten()
         .toList()
 }
 
 
-private fun Class<*>.nestedRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>, rootClass: Class<*>): Sequence<NestedRelation> =
+private fun Class<*>.nestedRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>, listChainSoFar: List<Boolean>, rootClass: Class<*>): Sequence<NestedRelation> =
     methods.asSequence()
         .filter { it.name.startsWith("get") }
         .filter { it.isRelevantType }
-        .map { it.recursiveRelations(baseClasses, chainSoFar, rootClass) }
+        .map { it.recursiveRelations(baseClasses, chainSoFar, listChainSoFar, rootClass) }
         .flatten()
 
-private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>, rootClass: Class<*>): Sequence<NestedRelation> {
+private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>, listChainSoFar: List<Boolean>, rootClass: Class<*>): Sequence<NestedRelation> {
     val wrapperChildName = name.replaceFirst("get", "")
 
     val (childType, toMany) = when (returnType) {
@@ -100,6 +104,7 @@ private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: L
     }
 
     val newChain = chainSoFar + wrapperChildName
+    val newListChain = listChainSoFar + toMany
 
     val rel = NestedRelation(
         declaringClass,
@@ -108,13 +113,14 @@ private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: L
         childType.properties.simpleProperties,
         childType.properties.listProperties,
         newChain,
+        newListChain,
         rootClass,
         toMany)
 
     return if (baseClasses.contains(childType)) {
         sequenceOf()
     } else {
-        childType.nestedRelations(baseClasses, newChain, rootClass)
+        childType.nestedRelations(baseClasses, newChain, newListChain, rootClass)
     } + rel
 }
 
