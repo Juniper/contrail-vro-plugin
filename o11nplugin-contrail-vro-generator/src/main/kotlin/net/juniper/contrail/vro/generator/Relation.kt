@@ -8,6 +8,7 @@ import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ObjectReference
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
 
 open class Relation (
     val parentName: String,
@@ -69,7 +70,7 @@ fun generateRelations(classes: List<Class<out ApiObjectBase>>): List<Relation> {
     return classes.asSequence()
         .filter { it.isRelatable }
         .map { createRelationGraphNode(it, parentToChildren) }
-        .map { it.asRelationSequence() }
+        .map { it.toRelationSequence() }
         .flatten().toList()
 }
 
@@ -86,7 +87,7 @@ private fun createRelationGraphNode(
 private fun relationName(parentType: String, childType: String) =
     "${parentType}To$childType"
 
-private fun RelationGraphNode.asRelationSequence(): Sequence<Relation> =
+private fun RelationGraphNode.toRelationSequence(): Sequence<Relation> =
     second.asSequence().map { Relation( first, it) }
 
 fun generateReferenceRelations(classes: List<Class<out ApiObjectBase>>): List<RefRelation> =
@@ -95,54 +96,31 @@ fun generateReferenceRelations(classes: List<Class<out ApiObjectBase>>): List<Re
         .flatten()
         .toList()
 
-private val <T: ApiObjectBase> Class<T>.refRelations: Sequence<RefRelation> get() =
-    referenceMethods.distinctBy { it.referenceName }.map { RefRelation(this, it) }
-
-private val <T: ApiObjectBase> Class<T>.referenceMethods: Sequence<Method> get() =
-    declaredMethods.asSequence()
-        .filter { it.isRefMethod }
-        .filter { it.returnsObjectReferences }
-
-private val Method.isRefMethod get() =
-    name.startsWith("get") && nameWithoutGetAndBackRefs.isApiTypeClass
-
-private val Method.returnsObjectReferences: Boolean get() {
-    if (returnType == java.util.List::class.java) {
-        val genericType = genericReturnType as ParameterizedType
-        val parameter = genericType.actualTypeArguments[0]
-        if (parameter is ParameterizedType)
-            return parameter.rawType == ObjectReference::class.java
-    }
-    return false
-}
-
-fun generateNestedRelations(classes: List<Class<*>>): List<NestedRelation> {
-    return classes.asSequence()
+fun generateNestedRelations(classes: List<Class<*>>): List<NestedRelation> =
+    classes.asSequence()
         .map { it.nestedRelations(classes, listOf(), listOf(), it) }
         .flatten()
         .toList()
-}
 
 
 private fun Class<*>.nestedRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>, listChainSoFar: List<Boolean>, rootClass: Class<*>): Sequence<NestedRelation> =
     methods.asSequence()
-        .filter { it.name.startsWith("get") }
-        .filter { it.isRelevantType }
+        .filter { it.isGetter && it.returnsApiPropertyOrList }
         .map { it.recursiveRelations(baseClasses, chainSoFar, listChainSoFar, rootClass) }
         .flatten()
 
 private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>, listChainSoFar: List<Boolean>, rootClass: Class<*>): Sequence<NestedRelation> {
-    val wrapperChildName = name.replaceFirst("get", "")
+    val wrapperChildName = nameWithoutGet
 
     val (childType, toMany) = when (returnType) {
-        List::class.java -> Pair(listGenericType, true)
+        List::class.java -> Pair(returnListGenericType!!, true)
         else -> Pair(returnType, false)
     }
 
     val newChain = chainSoFar + wrapperChildName
     val newListChain = listChainSoFar + toMany
 
-    val rel = NestedRelation(
+    val relation = NestedRelation(
         declaringClass,
         childType,
         wrapperChildName,
@@ -153,42 +131,31 @@ private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: L
         rootClass,
         toMany)
 
-    return if (baseClasses.contains(childType)) {
-        sequenceOf()
-    } else {
-        childType.nestedRelations(baseClasses, newChain, newListChain, rootClass)
-    } + rel
+    return if (baseClasses.contains(childType))
+        sequenceOf(relation)
+    else
+        childType.nestedRelations(baseClasses, newChain, newListChain, rootClass) + relation
 }
 
-private val Method.isRelevantType: Boolean get() {
-    if (returnType.isApiClass) return true
-    return listGenericType.isApiClass
-}
+private val <T: ApiObjectBase> Class<T>.refRelations: Sequence<RefRelation> get() =
+    referenceMethods.distinctBy { it.referenceName }.map { RefRelation(this, it) }
 
-private val Method.listGenericType: Class<*> get() {
-    if (returnType == java.util.List::class.java) {
-        val genericType = genericReturnType as ParameterizedType
-        genericType.actualTypeArguments[0] as? ParameterizedType ?: return genericType.actualTypeArguments[0] as Class<*>
-    }
-    return Object::class.java // in case of List<ObjectReference<*>>
-}
+private val <T: ApiObjectBase> Class<T>.referenceMethods: Sequence<Method> get() =
+    declaredMethods.asSequence()
+        .filter { it.isRefMethod && it.returnsObjectReferences }
 
-private val <T> Class<T>.properties: ClassProperties get() {
-    val simpleProperties = mutableListOf<Property>()
-    val listProperties = mutableListOf<Property>()
+private val Type.parameterType: Class<*>? get() =
+    if (this is ParameterizedType) actualTypeArguments[0] as? Class<*> else null
 
-    for (method in declaredMethods.filter { it.name.startsWith("get") }) {
-        val type = method.returnType
-        val fieldName = method.name.replaceFirst("get", "").decapitalize()
-        if (type == java.util.List::class.java) {
-            val genericType = method.genericReturnType as ParameterizedType
-            val genericArg = genericType.actualTypeArguments[0] as Class<*>
-            if (genericArg != ObjectReference::class.java)
-                listProperties.add(Property(fieldName, genericArg, this))
-        } else {
-            simpleProperties.add(Property(fieldName, type, this))
-        }
-    }
+private val Method.isRefMethod get() =
+    isGetter && nameWithoutGetAndBackRefs.isApiTypeClass
 
-    return ClassProperties(simpleProperties, listProperties)
-}
+private val Method.returnListGenericType: Class<*>? get() =
+    if (returnType == List::class.java) genericReturnType.parameterType else null
+
+private val Method.returnsObjectReferences: Boolean get() =
+    returnListGenericType == ObjectReference::class.java
+
+private val Method.returnsApiPropertyOrList: Boolean get() =
+    if (returnType.isApiTypeClass) true
+    else returnListGenericType?.isApiTypeClass ?: false

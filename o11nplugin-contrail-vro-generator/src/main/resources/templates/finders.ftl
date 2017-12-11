@@ -10,9 +10,6 @@ import com.vmware.o11n.sdk.modeldriven.ObjectFinder
 import com.vmware.o11n.sdk.modeldriven.PluginContext
 import com.vmware.o11n.sdk.modeldriven.Sid
 import org.springframework.beans.factory.annotation.Autowired
-<#list nestedClasses as klass>
-import ${klass.canonicalName}
-</#list>
 
 private fun <T : ApiObjectBase> ConnectionRepository.query(clazz: Class<T>, query: String, key: String): List<FoundObject<T>> =
     connections.asSequence().map { it.query(clazz, query, key) }.filterNotNull().flatten().toList()

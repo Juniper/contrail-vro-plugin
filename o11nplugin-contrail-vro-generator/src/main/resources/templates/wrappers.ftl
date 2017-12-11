@@ -113,7 +113,7 @@ fun ${wrapper.unwrappedName}?.${wrapper.name}(listIdx: Int?) : ${wrapper.name} {
 }
 
 fun ${wrapper.name}?.${wrapper.unwrappedLabel}() : ${wrapper.unwrappedName} {
-    val model = ${juniPackageName}.${wrapper.unwrappedName}()
+    val model = ${contrailPackageName}.${wrapper.unwrappedName}()
     if (this == null) return model
 
     <#list wrapper.simpleProperties as property>

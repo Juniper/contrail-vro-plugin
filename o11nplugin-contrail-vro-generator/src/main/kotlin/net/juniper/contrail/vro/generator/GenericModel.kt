@@ -5,12 +5,7 @@
 package net.juniper.contrail.vro.generator
 
 open class GenericModel {
-    val editWarning: String =
-"""
-/***********************************************************
- *               GENERATED FILE - DO NOT EDIT              *
- ***********************************************************/
-"""
-    val packageName: String = "net.juniper.contrail.vro.generated"
-    val juniPackageName: String = "net.juniper.contrail.api.types"
+    val editWarning: String = editWarningMessage
+    val packageName: String = generatedPackageName
+    val contrailPackageName: String = apiTypesPackageName
 }

@@ -11,22 +11,17 @@ object Generator {
 
     private val generatedSourcesRoot = "/target/generated-sources"
     private val templatePath = "/templates"
-    private val generatedPackageName = "net.juniper.contrail.vro.generated"
 
     @JvmStatic fun main(args: Array<String>) {
         val projectInfo = readProjectInfo()
 
-        val propertyClasses = propertyClasses()
         val objectClasses = objectClasses()
         val rootClasses = objectClasses.rootClasses()
-        val nestedClasses = propertyClasses.nestedClasses()
-        val innerClasses = propertyClasses.allInnerClasses()
 
-        val relationsModel = generateRelationsModel(objectClasses, propertyClasses)
-        val customMappingModel = generateCustomMappingModel(propertyClasses, objectClasses, rootClasses, nestedClasses, relationsModel)
-        val wrappersModel = generateWrappersModel(objectClasses, innerClasses.toList(), relationsModel)
-        val findersModel = generateFindersModel(objectClasses, nestedClasses.nonAliasClasses, wrappersModel, relationsModel)
-        val convertersModel = generateConvertersModel(nestedClasses.aliasClasses, propertyClasses)
+        val relationsModel = generateRelationsModel(objectClasses)
+        val customMappingModel = generateCustomMappingModel(objectClasses, rootClasses, relationsModel)
+        val wrappersModel = generateWrappersModel(objectClasses, relationsModel)
+        val findersModel = generateFindersModel(objectClasses, wrappersModel, relationsModel)
 
         val customMappingConfig = GeneratorConfig(
             baseDir = projectInfo.customRoot / generatedSourcesRoot,

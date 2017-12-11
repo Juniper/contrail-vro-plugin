@@ -10,8 +10,37 @@ import net.juniper.contrail.vro.model.*
 
 class CustomMapping: AbstractMapping() {
 
+    val methodsToHide = arrayOf(
+        "getObjectType",
+        "getDefaultParentType",
+        "getDefaultParent",
+        "getDisplayName"
+    )
+
+    val propertiesToHide = arrayOf(
+        "parentUuid",
+        "parentType"
+    )
+
     override fun define() {
         convertWellKnownTypes()
+
+        doSingletons()
+        doWrapping()
+        doRelations()
+    }
+
+    private fun doSingletons() {
+
+        singleton(ConnectionManager::class.java)
+    }
+
+    private fun doWrapping() {
+
+        wrap(Connection::class.java)
+           .andFind()
+           .using(ConnectionFinder::class.java)
+           .withIcon("default-16x16.png")
 
         <#list nestedRelations as relation>
         wrap(${relation.childWrapperName}::class.java)
@@ -19,17 +48,6 @@ class CustomMapping: AbstractMapping() {
           .using(${relation.childWrapperName}Finder::class.java)
           .withIcon("item-16x16.png")
         </#list>
-        val methodsToHide = arrayOf(
-            "getObjectType",
-            "getDefaultParentType",
-            "getDefaultParent",
-            "getDisplayName"
-        )
-
-        val propertiesToHide = arrayOf(
-            "parentUuid",
-            "parentType"
-        )
 
         wrap(Executor::class.java)
 
@@ -40,21 +58,15 @@ class CustomMapping: AbstractMapping() {
           .using(${klass.simpleName}Finder::class.java)
           .hiding(*propertiesToHide)
           .withIcon("item-16x16.png")
-        </#list>
 
-        <#list referenceRelations as relation>
-        wrap(${relation.childName}::class.java)
+        wrap(${klass.simpleName}Ref::class.java)
           .andFind()
-          .using(${relation.childName}Finder::class.java)
+          .using(${klass.simpleName}RefFinder::class.java)
           .withIcon("item-16x16.png")
         </#list>
+    }
 
-        wrap(Connection::class.java)
-           .andFind()
-           .using(ConnectionFinder::class.java)
-           .withIcon("default-16x16.png")
-
-        singleton(ConnectionManager::class.java)
+    private fun doRelations() {
 
         relateRoot()
             .to(Connection::class.java)
@@ -76,7 +88,7 @@ class CustomMapping: AbstractMapping() {
             .`as`("${relation.name}")
             .`in`(FolderDef("${relation.folderName}", "folder.png"))
         </#list>
-        
+
         <#list referenceRelations as relation>
         relate(${relation.parentName}::class.java)
             .to(${relation.childName}::class.java)
