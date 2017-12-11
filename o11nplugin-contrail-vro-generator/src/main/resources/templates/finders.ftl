@@ -65,7 +65,7 @@ class ${relation.childWrapperName}Finder
 @Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${relation.childWrapperName}> {
 
     override fun assignId(obj: ${relation.childWrapperName}, sid: Sid): Sid {
-        val sidKeyName = "${relation.childWrapperName}"
+        val sidKeyName = "${relation.getter}"
         val listIdx = obj.listIdx?.toString() ?: ""
         return sid.with(sidKeyName, listIdx)
     }
@@ -73,7 +73,7 @@ class ${relation.childWrapperName}Finder
         val connection = connections.getConnection(sid)
         //TODO handle IOException
         val parent = connection?.findById(${relation.rootClass.simpleName}::class.java, sid.getString("${relation.rootClass.simpleName}"))
-        val potentialIndexStr = sid.getString("${relation.childWrapperName}")
+        val potentialIndexStr = sid.getString("${relation.getter}")
         val potentialIndex: Int? = if(potentialIndexStr == "") {
             null
         } else {

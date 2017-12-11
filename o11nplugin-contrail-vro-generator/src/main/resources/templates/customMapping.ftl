@@ -13,12 +13,20 @@ class CustomMapping: AbstractMapping() {
     override fun define() {
         convertWellKnownTypes()
 
+        /*
         <#list nestedClasses as klass>
         wrap(${klass.canonicalName}::class.java)
             .`as`("${klass.simpleName}")
-            // ANDFIND
         </#list>
 
+        */
+
+        <#list nestedRelations as relation>
+        wrap(${relation.childWrapperName}::class.java)
+          .andFind()
+          .using(${relation.childWrapperName}Finder::class.java)
+          .withIcon("item-16x16.png")
+        </#list>
         val methodsToHide = arrayOf(
             "getObjectType",
             "getDefaultParentType",
@@ -68,6 +76,14 @@ class CustomMapping: AbstractMapping() {
             .using(${relation.parentName}Has${relation.childName}::class.java)
             .`as`("${relation.name}")
             .`in`(FolderDef("${relation.folderName}", "folder.png"))
+        </#list>
+
+        <#list nestedRelations as relation>
+        relate(${relation.parentWrapperName}::class.java)
+            .to(${relation.childWrapperName}::class.java)
+            .using(${relation.parentWrapperName}Has${relation.childWrapperName}::class.java)
+            .`as`("${relation.name}")
+            .`in`(FolderDef("${relation.childWrapperName}s", "folder.png"))
         </#list>
     }
 }

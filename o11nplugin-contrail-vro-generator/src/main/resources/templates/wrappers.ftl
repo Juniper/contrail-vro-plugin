@@ -30,6 +30,7 @@ private fun Date?.Date(lidx: Int?) = this
 <#list wrappers as wrapper>
 class ${wrapper.name} {
     var listIdx: Int? = null
+        set(value) { field = value }
     <#list wrapper.simpleProperties as property>
     var ${property.propertyName}: ${property.wrapperName}? = null
         set(value) { field = value }

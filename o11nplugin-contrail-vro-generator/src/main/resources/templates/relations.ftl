@@ -34,6 +34,11 @@ class ${relation.parentName}Has${relation.childName}
 }
 </#list>
 
+fun <T> toList(x: T?): List<T>? {
+    if(x == null) return null
+    return listOf(x)
+}
+
 <#list nestedRelations as relation>
 class ${relation.parentWrapperName}Has${relation.childWrapperName}
 @Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${relation.childWrapperName}> {
@@ -42,7 +47,7 @@ class ${relation.parentWrapperName}Has${relation.childWrapperName}
         val connection = connections.getConnection(parentId)
         //TODO handle IOException
         val parent = connection?.findById(${relation.rootClass.simpleName}::class.java, parentId.getString("${relation.rootClass.simpleName}"))
-        return <#if relation.toMany == false>listOf(</#if>parent<#list relation.getterChainWithStatus as nextGetter>?.${nextGetter.getGetterDecap()}</#list><#if relation.toMany == true>?.map { it</#if>?.${relation.childWrapperName}(potentialIndex)<#if relation.toMany == true> }</#if><#if relation.toMany == false>)</#if>
+        return <#if relation.toMany == false>toList(</#if>parent<#list relation.getterChainWithStatus as nextGetter>?.${nextGetter.getGetterDecap()}<#if nextGetter.getGetterStatus() == true && nextGetter?has_next>?.get(parentId.getString("${nextGetter.getGetterName()}").toInt())</#if></#list><#if relation.toMany == true>?.mapIndexedNotNull { index, value -> value?.${relation.childWrapperName}(index) }<#else>?.${relation.childWrapperName}(null)</#if><#if relation.toMany == false>)</#if>
     }
 }
 

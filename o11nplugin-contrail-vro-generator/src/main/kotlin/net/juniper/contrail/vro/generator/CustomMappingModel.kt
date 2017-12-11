@@ -12,14 +12,16 @@ class CustomMappingModel (
     val converters: List<ConverterInfo>,
     val findableClasses: List<Class<*>>,
     val rootClasses: List<ClassInfo>,
-    val relations: List<Relation>
+    val relations: List<Relation>,
+    val nestedRelations: List<NestedRelation>
 ) : GenericModel()
 
 fun generateCustomMappingModel(
         propertyClasses: List<Class<*>>,
         objectClasses: List<Class<out ApiObjectBase>>,
         rootClasses: List<Class<out ApiObjectBase>>,
-        nestedClasses: NestedClasses): CustomMappingModel {
+        nestedClasses: NestedClasses,
+        relationsModel: RelationsModel): CustomMappingModel {
     val relations = generateRelations(objectClasses)
     val rootClassesInfo = rootClasses.toClassInfo()
     val innerClassesInfo = nestedClasses.nonAliasClasses.toNestedClassInfo()
@@ -32,6 +34,7 @@ fun generateCustomMappingModel(
         converterInfo,
         objectClasses,
         rootClassesInfo,
-        relations
+        relations,
+        relationsModel.nestedRelations
     )
 }
