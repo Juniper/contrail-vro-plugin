@@ -25,7 +25,9 @@ class RefRelation (
 ) {
     val parentName: String = parentClass.simpleName
     val childName: String = method.referenceName
+    val childOriginalName: String = method.nameWithoutGetAndBackRefs
     val getter: String = method.propertyName
+    val folderName = method.nameWithoutGetAndBackRefs.folderName()
 }
 
 class NestedRelation(
@@ -49,6 +51,7 @@ class NestedRelation(
     val childWrapperName = rootClass.simpleName + "_" + getterChain.joinToString("_")
     val parentWrapperName = rootClass.simpleName + getterChain.dropLast(1).joinToString("") { "_" + it }
     val getterChainWithStatus = getterChain.zip(listStatusChain).map { GetterWithMultiplinessStatus(it.first, it.first.decapitalize(), it.second) }
+    val folderName = child.simpleName.folderName()
 }
 
 class GetterWithMultiplinessStatus(val getterName: String, val getterDecap: String, val getterStatus: Boolean)

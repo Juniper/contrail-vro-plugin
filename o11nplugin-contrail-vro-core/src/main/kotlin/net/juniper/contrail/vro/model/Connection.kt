@@ -86,9 +86,9 @@ class Connection(public val info: ConnectionInfo, val connector: ApiConnector) :
         connector.sync(uri)
 
     @Throws(IOException::class)
-    fun <T : ApiObjectBase> getObjects(
+    fun <T : ApiObjectBase, U : ApiPropertyBase> getObjects(
         clazz: Class<T>,
-        references: List<ObjectReference<ApiPropertyBase>>?
+        references: List<ObjectReference<U>>?
     ): List<T>? {
 
         return connector.getObjects(clazz, references ?: return null) as List<T>?

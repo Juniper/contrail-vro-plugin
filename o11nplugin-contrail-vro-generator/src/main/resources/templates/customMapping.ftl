@@ -78,7 +78,7 @@ class CustomMapping: AbstractMapping() {
             .to(${rootClass.simpleName}::class.java)
             .using(ConnectionHas${rootClass.simpleName}::class.java)
             .`as`("ConnectionHas${rootClass.simpleName}")
-            .`in`(FolderDef("${rootClass.folderName}", "folder.png"))
+            .`in`(FolderDef("${rootClass.folderName}__in__ROOT", "folder.png"))
         </#list>
 
         <#list relations as relation>
@@ -86,7 +86,7 @@ class CustomMapping: AbstractMapping() {
             .to(${relation.childName}::class.java)
             .using(${relation.parentName}Has${relation.childName}::class.java)
             .`as`("${relation.name}")
-            .`in`(FolderDef("${relation.folderName}", "folder.png"))
+            .`in`(FolderDef("${relation.folderName}__in__${relation.parentName}_${relation.childName}s", "folder.png"))
         </#list>
 
         <#list referenceRelations as relation>
@@ -94,8 +94,7 @@ class CustomMapping: AbstractMapping() {
             .to(${relation.childName}::class.java)
             .using(${relation.parentName}Has${relation.childName}::class.java)
             .`as`("${relation.parentName}To${relation.childName}")
-            //TODO pluralize
-            .`in`(FolderDef("${relation.childName}s", "folder.png"))
+            .`in`(FolderDef("${relation.folderName}__in__${relation.parentName}_${relation.getter}", "folder-ref.png"))
         </#list>
 
         <#list nestedRelations as relation>
@@ -103,7 +102,7 @@ class CustomMapping: AbstractMapping() {
             .to(${relation.childWrapperName}::class.java)
             .using(${relation.parentWrapperName}Has${relation.childWrapperName}::class.java)
             .`as`("${relation.name}")
-            .`in`(FolderDef("${relation.childWrapperName}", "folder.png"))
+            .`in`(FolderDef("${relation.folderName}__in__${relation.parentWrapperName}_${relation.getter}", "folder.png"))
         </#list>
     }
 }

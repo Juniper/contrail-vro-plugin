@@ -43,7 +43,7 @@ class ${relation.parentName}Has${relation.childName}
         val connection = connections.getConnection(parentId)
         //TODO handle IOException
         val parent = connection?.findById(${relation.parentName}::class.java, parentId.getString("${relation.parentName}"))
-        return parent?.${relation.getter}?.map { it.as${relation.childName}() }
+        return connection?.getObjects(${relation.childOriginalName}::class.java, parent?.${relation.getter})?.map { it.as${relation.childName}() }
     }
 }
 

@@ -40,11 +40,12 @@ private val String.unqualifiedName get() =
 <#list references as wrapper>
 class ${wrapper.referenceName} @JvmOverloads constructor (
     val name:String? = null,
+    val fqn:String? = null,
     val uuid:String? = null
 ) {
     fun as${wrapper.className}(): ${wrapper.className} {
         val target = ${wrapper.className}()
-        target.name = name?.unqualifiedName
+        target.name = name
         target.uuid = uuid
         return target
     }
@@ -57,7 +58,7 @@ class ${wrapper.referenceName} @JvmOverloads constructor (
 }
 
 fun ${wrapper.className}.as${wrapper.referenceName}(): ${wrapper.referenceName} =
-    ${wrapper.referenceName}(referenceName, uuid)
+    ${wrapper.referenceName}(name, referenceName, uuid)
 
 fun ObjectReference<*>.as${wrapper.referenceName}(): ${wrapper.referenceName} =
     ${wrapper.referenceName}(uuid = uuid)

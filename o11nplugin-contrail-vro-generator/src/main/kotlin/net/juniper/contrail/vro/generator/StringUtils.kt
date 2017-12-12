@@ -45,7 +45,13 @@ fun uppercaseAcronyms(name: String): String = when (name) {
     else -> name
 }
 
+private val String.nonPluralizable get() = when (this) {
+    "Pairs", "Details", "Fields", "Type2" -> true
+    else -> false
+}
+
 fun String.pluralize(): String = when {
+    nonPluralizable -> this
     matches(ES_SUFFIXES) -> this + "es"
     endsWith("y") && !matches(NON_IES_SUFFIXES_REGEX) -> dropLast(1) + "ies"
     endsWith("list", true) -> this
