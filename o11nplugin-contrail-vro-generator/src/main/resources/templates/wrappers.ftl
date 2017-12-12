@@ -1,6 +1,7 @@
 ${editWarning}
 package ${packageName}
 
+import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
@@ -29,6 +30,12 @@ private fun Int?.Int(lidx: Int?) = this
 private fun Long?.Long(lidx: Int?) = this
 private fun Date?.Date(lidx: Int?) = this
 
+private val ApiObjectBase.referenceName get() =
+    getQualifiedName().joinToString(":")
+
+val fqnPattern = ":?([\\d\\w\\-\\s_]+)$".toRegex()
+private val String.unqualifiedName get() =
+    fqnPattern.matchEntire(this)?.groupValues?.get(1)
 
 <#list references as wrapper>
 class ${wrapper.referenceName} @JvmOverloads constructor (
@@ -37,7 +44,7 @@ class ${wrapper.referenceName} @JvmOverloads constructor (
 ) {
     fun as${wrapper.className}(): ${wrapper.className} {
         val target = ${wrapper.className}()
-        target.name = name
+        target.name = name?.unqualifiedName
         target.uuid = uuid
         return target
     }
@@ -50,7 +57,7 @@ class ${wrapper.referenceName} @JvmOverloads constructor (
 }
 
 fun ${wrapper.className}.as${wrapper.referenceName}(): ${wrapper.referenceName} =
-    ${wrapper.referenceName}(name, uuid)
+    ${wrapper.referenceName}(referenceName, uuid)
 
 fun ObjectReference<*>.as${wrapper.referenceName}(): ${wrapper.referenceName} =
     ${wrapper.referenceName}(uuid = uuid)

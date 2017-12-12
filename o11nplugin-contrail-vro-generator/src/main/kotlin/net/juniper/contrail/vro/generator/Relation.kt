@@ -113,7 +113,7 @@ private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: L
     val wrapperChildName = nameWithoutGet
 
     val (childType, toMany) = when (returnType) {
-        List::class.java -> Pair(returnListGenericType!!, true)
+        List::class.java -> Pair(returnListGenericClass!!, true)
         else -> Pair(returnType, false)
     }
 
@@ -144,18 +144,21 @@ private val <T: ApiObjectBase> Class<T>.referenceMethods: Sequence<Method> get()
     declaredMethods.asSequence()
         .filter { it.isRefMethod && it.returnsObjectReferences }
 
-private val Type.parameterType: Class<*>? get() =
-    if (this is ParameterizedType) actualTypeArguments[0] as? Class<*> else null
+private val Type.parameterClass: Class<*>? get() =
+    if (this is ParameterizedType) actualTypeArguments[0].unwrapped else null
+
+private val Type.unwrapped: Class<*> get() =
+    if (this is ParameterizedType) rawType as Class<*> else this as Class<*>
 
 private val Method.isRefMethod get() =
     isGetter && nameWithoutGetAndBackRefs.isApiTypeClass
 
-private val Method.returnListGenericType: Class<*>? get() =
-    if (returnType == List::class.java) genericReturnType.parameterType else null
+private val Method.returnListGenericClass: Class<*>? get() =
+    if (returnType == List::class.java) genericReturnType.parameterClass else null
 
 private val Method.returnsObjectReferences: Boolean get() =
-    returnListGenericType == ObjectReference::class.java
+    returnListGenericClass == ObjectReference::class.java
 
 private val Method.returnsApiPropertyOrList: Boolean get() =
     if (returnType.isApiTypeClass) true
-    else returnListGenericType?.isApiTypeClass ?: false
+    else returnListGenericClass?.isApiTypeClass ?: false
