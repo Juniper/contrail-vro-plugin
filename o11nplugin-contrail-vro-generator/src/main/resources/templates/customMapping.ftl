@@ -46,6 +46,7 @@ class CustomMapping: AbstractMapping() {
         wrap(${relation.childWrapperName}::class.java)
           .andFind()
           .using(${relation.childWrapperName}Finder::class.java)
+          .hiding("listIdx")
           .withIcon("item-16x16.png")
         </#list>
 
@@ -81,6 +82,14 @@ class CustomMapping: AbstractMapping() {
             .`in`(FolderDef("${rootClass.folderName}__in__ROOT", "folder.png"))
         </#list>
 
+        <#list nestedRelations as relation>
+        relate(${relation.parentWrapperName}::class.java)
+            .to(${relation.childWrapperName}::class.java)
+            .using(${relation.parentWrapperName}Has${relation.childWrapperName}::class.java)
+            .`as`("${relation.name}")
+            <#if relation.toMany>.`in`(FolderDef("${relation.folderName}__in__${relation.parentWrapperName}_${relation.getter}", "folder.png"))</#if>
+        </#list>
+
         <#list relations as relation>
         relate(${relation.parentName}::class.java)
             .to(${relation.childName}::class.java)
@@ -95,14 +104,6 @@ class CustomMapping: AbstractMapping() {
             .using(${relation.parentName}Has${relation.childName}::class.java)
             .`as`("${relation.parentName}To${relation.childName}")
             .`in`(FolderDef("${relation.folderName}__in__${relation.parentName}_${relation.getter}", "folder-ref.png"))
-        </#list>
-
-        <#list nestedRelations as relation>
-        relate(${relation.parentWrapperName}::class.java)
-            .to(${relation.childWrapperName}::class.java)
-            .using(${relation.parentWrapperName}Has${relation.childWrapperName}::class.java)
-            .`as`("${relation.name}")
-            .`in`(FolderDef("${relation.folderName}__in__${relation.parentWrapperName}_${relation.getter}", "folder.png"))
         </#list>
     }
 }
