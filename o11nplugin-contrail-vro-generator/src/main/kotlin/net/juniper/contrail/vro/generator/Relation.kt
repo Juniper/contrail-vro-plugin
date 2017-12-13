@@ -33,28 +33,28 @@ class RefRelation (
 class NestedRelation(
     val parent: Class<*>,
     val child: Class<*>,
-    val getter: String,
     val simpleProperties: List<Property>,
     val listProperties: List<Property>,
-    val getterChain: List<String>,
-    val listStatusChain: List<Boolean>,
-    val rootClass: Class<*>,
-    val toMany: Boolean = false
+    val getterChain: List<Getter>,
+    val rootClass: Class<*>
 ) {
     val parentName: String = parent.nestedName
     val childName: String = child.nestedName
     val parentCollapsedName = parent.collapsedNestedName
     val childCollapsedName = child.collapsedNestedName
-    val name: String = relationName(parentCollapsedName, getter)
-    val getterSplitCamel = getter.splitCamel()
+    val getter: String = getterChain.last().name
     val getterDecapitalized = getter.decapitalize()
-    val childWrapperName = rootClass.simpleName + "_" + getterChain.joinToString("_")
-    val parentWrapperName = rootClass.simpleName + getterChain.dropLast(1).joinToString("") { "_" + it }
-    val getterChainWithStatus = getterChain.zip(listStatusChain).map { GetterWithMultiplinessStatus(it.first, it.first.decapitalize(), it.second) }
+    val getterSplitCamel = getter.splitCamel()
+    val name: String = relationName(parentCollapsedName, getter)
+    val childWrapperName = rootClass.simpleName + getterChain.joinToString("") { "_" + it.name }
+    val parentWrapperName = rootClass.simpleName + getterChain.dropLast(1).joinToString("") { "_" + it.name }
     val folderName = child.simpleName.folderName()
+    val toMany: Boolean = getterChain.last().toMany
 }
 
-class GetterWithMultiplinessStatus(val getterName: String, val getterDecap: String, val getterStatus: Boolean)
+class Getter(val name: String, val toMany: Boolean) {
+    val nameDecapitalized: String = name.decapitalize()
+}
 
 private fun RelationGraphVertex.asRelationList(): List<Relation> {
     return second.map {
@@ -101,18 +101,26 @@ fun generateReferenceRelations(classes: List<Class<out ApiObjectBase>>): List<Re
 
 fun generateNestedRelations(classes: List<Class<*>>): List<NestedRelation> =
     classes.asSequence()
-        .map { it.nestedRelations(classes, listOf(), listOf(), it) }
+        .map { it.nestedRelations(classes, listOf(), it) }
         .flatten()
         .toList()
 
 
-private fun Class<*>.nestedRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>, listChainSoFar: List<Boolean>, rootClass: Class<*>): Sequence<NestedRelation> =
+private fun Class<*>.nestedRelations(
+    baseClasses: List<Class<*>>,
+    chainSoFar: List<Getter>,
+    rootClass: Class<*>
+): Sequence<NestedRelation> =
     methods.asSequence()
-        .filter { it.isGetter && it.returnsApiPropertyOrList }
-        .map { it.recursiveRelations(baseClasses, chainSoFar, listChainSoFar, rootClass) }
+        .filter { it.isGetter and it.returnsApiPropertyOrList }
+        .map { it.recursiveRelations(baseClasses, chainSoFar, rootClass) }
         .flatten()
 
-private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: List<String>, listChainSoFar: List<Boolean>, rootClass: Class<*>): Sequence<NestedRelation> {
+private fun Method.recursiveRelations(
+    baseClasses: List<Class<*>>,
+    chainSoFar: List<Getter>,
+    rootClass: Class<*>
+): Sequence<NestedRelation> {
     val wrapperChildName = nameWithoutGet
 
     val (childType, toMany) = when (returnType) {
@@ -120,24 +128,21 @@ private fun Method.recursiveRelations(baseClasses: List<Class<*>>, chainSoFar: L
         else -> Pair(returnType, false)
     }
 
-    val newChain = chainSoFar + wrapperChildName
-    val newListChain = listChainSoFar + toMany
+    val newChain = chainSoFar + Getter(wrapperChildName, toMany)
 
     val relation = NestedRelation(
         declaringClass,
         childType,
-        wrapperChildName,
         childType.properties.simpleProperties,
         childType.properties.listProperties,
         newChain,
-        newListChain,
-        rootClass,
-        toMany)
+        rootClass
+    )
 
     return if (baseClasses.contains(childType))
         sequenceOf(relation)
     else
-        childType.nestedRelations(baseClasses, newChain, newListChain, rootClass) + relation
+        childType.nestedRelations(baseClasses, newChain, rootClass) + relation
 }
 
 private val <T: ApiObjectBase> Class<T>.refRelations: Sequence<RefRelation> get() =
@@ -145,7 +150,7 @@ private val <T: ApiObjectBase> Class<T>.refRelations: Sequence<RefRelation> get(
 
 private val <T: ApiObjectBase> Class<T>.referenceMethods: Sequence<Method> get() =
     declaredMethods.asSequence()
-        .filter { it.isRefMethod && it.returnsObjectReferences }
+        .filter { it.isRefMethod and it.returnsObjectReferences }
 
 private val Type.parameterClass: Class<*>? get() =
     if (this is ParameterizedType) actualTypeArguments[0].unwrapped else null
@@ -154,7 +159,7 @@ private val Type.unwrapped: Class<*> get() =
     if (this is ParameterizedType) rawType as Class<*> else this as Class<*>
 
 private val Method.isRefMethod get() =
-    isGetter && nameWithoutGetAndBackRefs.isApiTypeClass
+    isGetter and nameWithoutGetAndBackRefs.isApiTypeClass
 
 private val Method.returnListGenericClass: Class<*>? get() =
     if (returnType == List::class.java) genericReturnType.parameterClass else null

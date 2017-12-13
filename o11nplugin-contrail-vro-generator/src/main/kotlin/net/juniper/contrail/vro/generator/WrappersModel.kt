@@ -21,7 +21,7 @@ class Wrapper(
     simpleProperties: List<Property>,
     listProperties: List<Property>,
     rootClass: Class<*>,
-    getterChain: List<String>
+    getterChain: List<Getter>
 ) : ClassProperties(simpleProperties, listProperties) {
     val name = wrapperName(rootClass, getterChain)
     val unwrappedName = unwrapped.nestedName
@@ -34,8 +34,8 @@ class WrappersModel(
     val wrappers: List<Wrapper>
 ) : GenericModel()
 
-private fun wrapperName(clazz: Class<*>, getterChain: List<String>) =
-    clazz.simpleName + "_" + getterChain.joinToString("_")
+private fun wrapperName(clazz: Class<*>, getterChain: List<Getter>) =
+    clazz.simpleName + getterChain.joinToString("") { "_" + it.name }
 
 private fun Property.toWrapperProperties(wrapperName: String) : Property {
     val fieldName = fieldName.capitalize()

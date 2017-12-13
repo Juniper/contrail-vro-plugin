@@ -78,7 +78,7 @@ class ${relation.childWrapperName}Finder
         } else {
             potentialIndexStr.toInt()
         }
-        return parent<#list relation.getterChainWithStatus as nextGetter>?.${nextGetter.getGetterDecap()}<#if nextGetter.getGetterStatus() == true>?.get(sid.getString("${nextGetter.getGetterName()}").toInt())</#if></#list>?.${relation.childWrapperName}(potentialIndex)
+        return parent<#list relation.getterChain as nextGetter>?.${nextGetter.nameDecapitalized}<#if nextGetter.toMany == true>?.get(sid.getString("${nextGetter.name}").toInt())</#if></#list>?.${relation.childWrapperName}(potentialIndex)
     }
 
     override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${relation.childWrapperName}>>? =
