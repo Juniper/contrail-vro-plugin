@@ -9,13 +9,13 @@ class Executor(private val connection: Connection) {
 
     <#list relations as relation>
     @Throws(IOException::class)
-    fun create${relation.childClassName}(obj: ${relation.childClassName}, parent: ${relation.parentClassName}) {
+    fun create${relation.childName}(obj: ${relation.childName}, parent: ${relation.parentName}) {
         obj.setParent(parent)
         connection.create(obj)
     }
 
     @Throws(IOException::class)
-    fun delete${relation.childClassName}(obj: ${relation.childClassName}) {
+    fun delete${relation.childName}(obj: ${relation.childName}) {
         connection.delete(obj::class.java, obj.uuid)
     }
     </#list>

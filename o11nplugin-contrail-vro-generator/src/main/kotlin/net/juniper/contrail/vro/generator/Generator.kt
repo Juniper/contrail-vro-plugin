@@ -43,7 +43,7 @@ object Generator {
         coreGenerator.generate(findersModel, "Finders.kt")
         coreGenerator.generate(customMappingModel, "Executor.kt")
         coreGenerator.generate(wrappersModel, "Wrappers.kt")
-        
+
         runWorkflowGenerator(projectInfo, objectClasses)
     }
 }

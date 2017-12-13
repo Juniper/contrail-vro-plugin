@@ -49,16 +49,6 @@ class NestedRelation(
 
 class Getter(val name: String, val toMany: Boolean)
 
-private fun RelationGraphVertex.asRelationList(): List<Relation> {
-    return second.map {
-        Relation(
-            it.name.typeToClassName(),
-            first.typeToClassName(),
-            it.childTypeName.typeToClassName()
-        )
-    }
-}
-
 typealias RelationGraphNode = Pair<String, List<String>>
 
 fun generateRelations(classes: List<Class<out ApiObjectBase>>): List<Relation> {
@@ -76,8 +66,8 @@ private fun createRelationGraphNode(
 ): RelationGraphNode {
     val parentType = parentClass.objectType
     val children = parentToChildren.getOrElse(parentType) { listOf() }
-    val childrenTypes = children.map { it.objectType.dashedToCamelCase() }
-    return RelationGraphNode(parentType.dashedToCamelCase(), childrenTypes)
+    val childrenTypes = children.map { it.objectType.typeToClassName() }
+    return RelationGraphNode(parentType.typeToClassName(), childrenTypes)
 }
 
 private fun relationName(parentType: String, childType: String) =
@@ -97,7 +87,6 @@ fun generateNestedRelations(classes: List<Class<*>>): List<NestedRelation> =
         .map { it.nestedRelations(classes, listOf(), it) }
         .flatten()
         .toList()
-
 
 private fun Class<*>.nestedRelations(
     baseClasses: List<Class<*>>,

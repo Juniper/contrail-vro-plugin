@@ -47,7 +47,7 @@ class CustomMapping: AbstractMapping() {
           .andFind()
           .using(${relation.childWrapperName}Finder::class.java)
           .hiding("listIdx")
-          .withIcon("item-16x16.png")
+          .withIcon("item-prop.png")
         </#list>
 
         wrap(Executor::class.java)
@@ -58,12 +58,12 @@ class CustomMapping: AbstractMapping() {
           .andFind()
           .using(${klass}Finder::class.java)
           .hiding(*propertiesToHide)
-          .withIcon("item-16x16.png")
+          .withIcon("item.png")
 
         wrap(${klass}Ref::class.java)
           .andFind()
           .using(${klass}RefFinder::class.java)
-          .withIcon("item-16x16.png")
+          .withIcon("item-ref.png")
         </#list>
     }
 
