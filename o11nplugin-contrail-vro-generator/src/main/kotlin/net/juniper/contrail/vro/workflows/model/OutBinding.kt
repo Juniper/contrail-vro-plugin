@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlType
 )
 class OutBinding {
 
-    @XmlElement(required = true)
-    var bind: Bind? = null
+    @XmlElement(name = "bind")
+    var binds: MutableList<Bind> = mutableListOf()
 
 }

@@ -15,14 +15,25 @@ import javax.xml.bind.annotation.XmlType
     name = "p-paramType",
     propOrder = arrayOf("description", "parameterQualifiers")
 )
-class PresentationParameter {
+class PresentationParameter(name: String) {
 
     @XmlElement(name = "desc", required = true)
     var description: String? = null
+    set( value ) {
+        field = "<![CDATA[$value]]>"
+    }
 
     @XmlElement(name = "p-qual")
     var parameterQualifiers: MutableList<ParameterQualifier> = mutableListOf()
 
     @XmlAttribute(name = "name")
     var name: String? = null
+
+    init {
+        this.name = name
+    }
+
+    constructor(name: String, rawDescritpiton: String) : this(name) {
+        this.description = "<![CDATA[$rawDescritpiton]]>"
+    }
 }

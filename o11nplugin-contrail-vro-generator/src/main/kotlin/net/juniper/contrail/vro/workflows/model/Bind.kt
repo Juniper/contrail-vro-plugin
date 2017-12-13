@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlType
     name = "bindType",
     propOrder = arrayOf("description")
 )
-class Bind {
+class Bind(name: String, type: String, exportName: String) {
 
     @XmlElement(required = true)
     var description: String? = null
@@ -29,4 +29,9 @@ class Bind {
     @XmlAttribute(name = "export-name")
     var exportName: String? = null
 
+    init {
+        this.name = name
+        this.type = type
+        this.exportName = exportName
+    }
 }

@@ -12,10 +12,10 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "outputType",
-    propOrder = arrayOf("parameter")
+    propOrder = arrayOf("parameters")
 )
 class Output {
 
-    @XmlElement(required = true)
-    var parameter: Parameter? = null
+    @XmlElement(name = "param")
+    var parameters: MutableList<Parameter> = mutableListOf()
 }

@@ -16,7 +16,6 @@ import javax.xml.bind.annotation.XmlType
 )
 class Input {
 
-    @XmlElement
+    @XmlElement(name = "param")
     var parameters: MutableList<Parameter> = mutableListOf()
-
 }

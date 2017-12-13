@@ -15,10 +15,13 @@ import javax.xml.bind.annotation.XmlType
     name = "workflow-itemType",
     propOrder = arrayOf("displayName", "script", "inBinding", "outBinding", "position")
 )
-class WorkflowItem {
+class WorkflowItem(name: String, type: String) {
 
     @XmlElement(name = "display-name")
     var displayName: String? = null
+    set( value ) {
+        field = "<![CDATA[$value]]>"
+    }
 
     @XmlElement
     var script: WorkflowScript? = null
@@ -43,4 +46,9 @@ class WorkflowItem {
 
     @XmlAttribute(name = "out-name")
     var outName: String? = null
+
+    init {
+        this.name = name
+        this.type = type
+    }
 }

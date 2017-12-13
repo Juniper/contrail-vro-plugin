@@ -19,10 +19,18 @@ class Parameter {
 
     @XmlElement(required = true)
     var description: String? = null
+    set( value ) {
+        field = "<![CDATA[$value]]>"
+    }
 
     @XmlAttribute(name = "name")
     var name: String? = null
 
     @XmlAttribute(name = "type")
     var type: String? = null
+
+    init {
+        this.name = name
+        this.type = type
+    }
 }

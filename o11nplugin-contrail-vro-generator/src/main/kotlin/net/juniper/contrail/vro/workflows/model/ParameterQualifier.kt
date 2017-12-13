@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlValue
     name = "p-qualType",
     propOrder = arrayOf("value")
 )
-class ParameterQualifier {
+class ParameterQualifier(kind: String?, name: String?, type: String?, rawValue: String?) {
 
     @XmlValue
     var value: String? = null
@@ -28,4 +28,11 @@ class ParameterQualifier {
 
     @XmlAttribute(name = "type")
     var type: String? = null
+
+    init {
+        this.kind = kind
+        this.name = name
+        this.type = type
+        this.value = "<![CDATA[$rawValue]]>"
+    }
 }

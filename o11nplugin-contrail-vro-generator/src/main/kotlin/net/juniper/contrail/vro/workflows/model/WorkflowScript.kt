@@ -19,6 +19,9 @@ class WorkflowScript {
 
     @XmlValue
     var value: String? = null
+    set( value ) {
+        field = "<![CDATA[$value]]>"
+    }
 
     @XmlAttribute(name = "encoded")
     var encoded: String? = null

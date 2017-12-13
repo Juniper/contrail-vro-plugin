@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlValue
     name = "positionType",
     propOrder = arrayOf("value")
 )
-class Position {
+class Position(x: Float, y: Float) {
 
     @XmlValue
     var value: String? = null
@@ -25,4 +25,9 @@ class Position {
 
     @XmlAttribute(name = "x")
     var x: String? = null
+
+    init {
+        this.x = x.toString()
+        this.y = y.toString()
+    }
 }

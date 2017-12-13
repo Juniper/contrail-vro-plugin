@@ -16,6 +16,6 @@ import javax.xml.bind.annotation.XmlType
 )
 class InBinding {
 
-    @XmlElement
-    var bind: MutableList<Bind> = mutableListOf()
+    @XmlElement(name = "bind")
+    var binds: MutableList<Bind> = ArrayList()
 }
