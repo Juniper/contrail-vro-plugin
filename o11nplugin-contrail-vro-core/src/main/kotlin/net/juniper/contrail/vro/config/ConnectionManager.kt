@@ -5,6 +5,8 @@
 package net.juniper.contrail.vro.config
 
 import com.vmware.o11n.plugin.sdk.spring.platform.GlobalPluginNotificationHandler
+import com.vmware.o11n.sdk.modeldriven.Sid
+import net.juniper.contrail.vro.generated.Executor
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.ConnectionInfo
 import org.slf4j.LoggerFactory
@@ -42,5 +44,11 @@ class ConnectionManager
     fun delete(connection: Connection) {
         repository.removeConnection(connection)
         notifier.notifyElementsInvalidate()
+    }
+
+    fun getExecutor(id: String?): Executor? {
+        val sid = Sid.valueOf(id ?: return null)
+        val connection = repository.getConnection(sid) ?: return null
+        return Executor(connection)
     }
 }

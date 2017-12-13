@@ -30,6 +30,8 @@ class CustomMapping: AbstractMapping() {
             "parentType"
         )
 
+        wrap(Executor::class.java)
+
         <#list findableClasses as klass>
         wrap(${klass.simpleName}::class.java)
           .hiding(*methodsToHide)

@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.generator
 
+import net.juniper.contrail.vro.workflows.runWorkflowsGenerator
 import java.util.Properties
 
 object Generator {
@@ -23,18 +24,21 @@ object Generator {
         val relationsModel = generateRelationsModel(objectClasses)
 
         val customMappingConfig = GeneratorConfig(
-            baseDir = projectInfo.customRoot/generatedSourcesRoot,
+            baseDir = projectInfo.customRoot / generatedSourcesRoot,
             packageName = generatedPackageName)
         val customMappingGenerator = GeneratorEngine(customMappingConfig, templatePath)
         customMappingGenerator.generate(customMappingModel, "CustomMapping.kt")
 
         val coreGeneratorConfig = GeneratorConfig(
-            baseDir = projectInfo.coreRoot/generatedSourcesRoot,
+            baseDir = projectInfo.coreRoot / generatedSourcesRoot,
             packageName = generatedPackageName)
 
         val coreGenerator = GeneratorEngine(coreGeneratorConfig, templatePath)
         coreGenerator.generate(relationsModel, "Relations.kt")
         coreGenerator.generate(findersModel, "Finders.kt")
+        coreGenerator.generate(customMappingModel, "Executor.kt")
+
+        runWorkflowsGenerator(projectInfo.packageRoot, projectInfo.baseVersion, projectInfo.buildNumber)
     }
 
     private fun readProjectInfo(): ProjectInfo {
@@ -46,7 +50,9 @@ object Generator {
         val finalProjectRoot = generatorRoot.replace(generatorPattern, "")
         val coreRoot = generatorRoot.replace(generatorPattern, "-core")
         val customRoot = generatorRoot.replace(generatorPattern, "-custom")
+        val packageRoot = generatorRoot.replace(generatorPattern, "-package")
         val version = props["project.version"] as String
+        val buildNumber = props["build.number"] as String
         val baseVersion = version.replace("-SNAPSHOT", "")
 
         return ProjectInfo(
@@ -54,9 +60,11 @@ object Generator {
             finalProjectRoot = finalProjectRoot,
             coreRoot = coreRoot,
             customRoot = customRoot,
+            packageRoot = packageRoot,
             staticRoot = staticRoot,
             version = version,
-            baseVersion = baseVersion)
+            baseVersion = baseVersion,
+            buildNumber = buildNumber)
     }
 }
 
@@ -65,6 +73,8 @@ data class ProjectInfo(
     val finalProjectRoot: String,
     val coreRoot: String,
     val customRoot: String,
+    val packageRoot: String,
     val staticRoot: String,
     val version: String,
-    val baseVersion: String)
+    val baseVersion: String,
+    val buildNumber: String)

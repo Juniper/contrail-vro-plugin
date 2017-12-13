@@ -8,6 +8,7 @@ abstract class IdlComment(val comment: String) {
     lateinit var type: String
     lateinit var parentClassName: String
     lateinit var elementName: String
+    var isRequired = false
     val insideQuotesRegex = "'[^']+'".toRegex()
 
     init {
@@ -19,7 +20,6 @@ abstract class IdlComment(val comment: String) {
 
 class Link(comment: String) : IdlComment(comment) {
     lateinit var propertyClassName: String
-    var isRequired = false
 
     override fun setProperties() {
         val properties = insideQuotesRegex.findAll(comment).toList()
@@ -31,13 +31,12 @@ class Link(comment: String) : IdlComment(comment) {
         propertyClassName = properties[1].value
         parentClassName = properties[2].value
         isRequired = checkIsRequired()
-
     }
 
-    private fun checkIsRequired() : Boolean {
+    private fun checkIsRequired(): Boolean {
         val splitedString = comment.split("]")[1]
 
-        if ( !splitedString.matches(insideQuotesRegex) ) return false
+        if (!splitedString.matches(insideQuotesRegex)) return false
 
         val properties = insideQuotesRegex.findAll(splitedString).toList()
         return properties[0].value != "'optional'"
@@ -45,7 +44,6 @@ class Link(comment: String) : IdlComment(comment) {
 }
 
 class Property(comment: String) : IdlComment(comment) {
-    var isRequired = false
 
     override fun setProperties() {
         val properties = insideQuotesRegex.findAll(comment).toList()
@@ -56,7 +54,7 @@ class Property(comment: String) : IdlComment(comment) {
         elementName = properties[0].value
         parentClassName = properties[1].value
 
-        if ( properties.size > 2 ) {
+        if (properties.size > 2) {
             val prop = properties[2].value
             isRequired = properties[2].value != "'optional'" // system-only is also required
         }

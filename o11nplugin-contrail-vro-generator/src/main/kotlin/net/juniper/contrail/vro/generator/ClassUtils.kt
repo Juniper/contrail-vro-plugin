@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.generator
 
 import com.google.common.reflect.ClassPath
+import net.juniper.contrail.api.ApiObjectBase
 import java.lang.reflect.Modifier
 
 fun <T> Class<T>.nonAbstractSubclassesIn(packageName: String): List<Class<out T>> {
@@ -103,10 +104,20 @@ class NestedClassInfo(clazz: Class<*>) {
     val nestedName = clazz.nestedName
 }
 
-class ConverterInfo(
+val <T> Class<T>.xsdType: String
     targetClass: Class<*>
 ) {
     val proxyName = targetClass.simpleName
     val targetName = targetClass.canonicalName
     val targetCollapsedName = targetClass.collapsedNestedName
 }
+
+val Class<out ApiObjectBase>.hasParent
+    get() = this.newInstance().defaultParentType != null
+
+val Class<out ApiObjectBase>.parentClassName: String
+    get() {
+        val instance = this.newInstance()
+        val parent: String? = instance.defaultParentType
+        return parent?.split("-")?.joinToString("") { it.capitalize() } ?: ""
+    }
