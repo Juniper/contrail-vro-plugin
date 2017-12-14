@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.model
 
+import net.juniper.contrail.vro.generator.CDATA
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -13,42 +14,50 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "workflow-itemType",
-    propOrder = arrayOf("displayName", "script", "inBinding", "outBinding", "position")
+    propOrder = ["displayName", "script", "inBinding", "outBinding", "position"]
 )
-class WorkflowItem(name: String, type: String) {
-
-    @XmlElement(name = "display-name")
-    var displayName: String? = null
-    set( value ) {
-        field = "<![CDATA[$value]]>"
-    }
-
-    @XmlElement
-    var script: WorkflowScript? = null
-
-    @XmlElement(name = "in-binding")
-    var inBinding: InBinding? = null
-
-    @XmlElement(name = "out-binding")
-    var outBinding: OutBinding? = null
-
-    @XmlElement(required = true)
-    var position: Position? = null
+class WorkflowItem(
 
     @XmlAttribute(name = "name")
-    var name: String? = null
+    var name: String? = null,
 
     @XmlAttribute(name = "type")
-    var type: String? = null
+    var type: String? = null,
+
+    @XmlElement
+    var script: WorkflowScript? = null,
+
+    @XmlElement(required = true)
+    var position: Position? = null,
 
     @XmlAttribute(name = "end-mode")
-    var endMode: String? = null
+    var endMode: String? = null,
 
     @XmlAttribute(name = "out-name")
-    var outName: String? = null
+    var outName: String? = null,
 
-    init {
-        this.name = name
-        this.type = type
+    displayName: String? = null
+) {
+    @XmlElement(name = "display-name")
+    var displayName: String? = displayName.CDATA
+        set(value) {
+            field = value.CDATA
+        }
+
+    @XmlElement(name = "in-binding")
+    var inBinding: Binding? = null
+
+    @XmlElement(name = "out-binding")
+    var outBinding: Binding? = null
+
+    fun inBinding(name: String, type: String, exportName: String = name) {
+        inBinding = inBinding.safeBind(name, type, exportName)
     }
+
+    fun outBinding(name: String, type: String, exportName: String = name) {
+        outBinding = outBinding.safeBind(name, type, exportName)
+    }
+
+    private fun Binding?.safeBind(name: String, type: String, exportName: String): Binding =
+        (this ?: Binding()).apply { bind(name, type, exportName) }
 }

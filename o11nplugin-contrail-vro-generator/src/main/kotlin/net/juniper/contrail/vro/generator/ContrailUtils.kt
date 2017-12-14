@@ -32,3 +32,6 @@ val Class<out ApiObjectBase>.defaultParentType: String? get() =
 
 val Class<out ApiObjectBase>.objectType: String get() =
     newInstance().objectType
+
+val Class<out ApiObjectBase>.parentClassName: String? get() =
+    defaultParentType?.typeToClassName()

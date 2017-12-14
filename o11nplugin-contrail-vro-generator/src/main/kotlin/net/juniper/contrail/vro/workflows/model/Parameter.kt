@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.model
 
+import net.juniper.contrail.vro.generator.CDATA
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -13,24 +14,17 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "paramType",
-    propOrder = arrayOf("description")
+    propOrder = ["description"]
 )
-class Parameter {
-
-    @XmlElement(required = true)
-    var description: String? = null
-    set( value ) {
-        field = "<![CDATA[$value]]>"
-    }
-
+class Parameter(
     @XmlAttribute(name = "name")
-    var name: String? = null
+    val name: String? = null,
 
     @XmlAttribute(name = "type")
-    var type: String? = null
+    val type: String? = null,
 
-    init {
-        this.name = name
-        this.type = type
-    }
+    description: String? = null
+) {
+    @XmlElement(required = true)
+    val description: String? = description.CDATA
 }

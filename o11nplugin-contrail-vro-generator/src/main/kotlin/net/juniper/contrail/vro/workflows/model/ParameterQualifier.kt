@@ -4,7 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.model
 
-import net.juniper.contrail.vro.generator.xsdType
+import net.juniper.contrail.vro.generator.CDATA
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -14,65 +14,81 @@ import javax.xml.bind.annotation.XmlValue
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "p-qualType",
-    propOrder = arrayOf("value")
+    propOrder = ["value"]
 )
-class ParameterQualifier(kind: String? = "static", name: String?, type: String?, rawValue: String?) {
-
-    @XmlValue
-    var value: String? = null
-
+class ParameterQualifier (
     @XmlAttribute(name = "kind")
-    var kind: String? = null
+    val kind: String? = null,
 
     @XmlAttribute(name = "name")
-    var name: String? = null
+    val name: String? = null,
 
     @XmlAttribute(name = "type")
-    var type: String? = null
+    val type: String? = null,
 
-    init {
-        this.kind = kind
-        this.name = name
-        this.type = type
-        this.value = "<![CDATA[$rawValue]]>"
+    value: String? = null
+) {
+    @XmlValue
+    val value: String? = value.CDATA
+
+    companion object {
+        val mandatory = ParameterQualifier("static", "mandatory", "boolean", true.toString())
     }
 }
 
-fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQualifier? {
-    return when (xsdConstraint) {
-        "default" -> ParameterQualifier(
-            kind = "static",
-            name = "defaultValue",
-            type = constraintValue.javaClass.xsdType,
-            rawValue = "<![CDATA[$constraintValue]]>"
-        )
-        "minInclusive" -> ParameterQualifier(
-            name = "minNumberValue",
-            type = "number",
-            rawValue = "<![CDATA[$constraintValue]]>"
-        )
-        "maxInclusive" -> ParameterQualifier(
-            name = "maxNumberValue",
-            type = "number",
-            rawValue = "<![CDATA[$constraintValue]]>"
-        )
-        "pattern" -> ParameterQualifier(
-            name = "regexp",
-            type = "Regexp",
-            rawValue = "<![CDATA[$constraintValue]]>"
-        )
-        "enumerations" -> ParameterQualifier(
-            kind = "static",
-            name = "genericEnumeration",
-            type = "Array/string",
-            rawValue = "<![CDATA[#{${(constraintValue as List<String>).joinToString(";") { "#string#$it#" }}}#]]>"
-        )
-        "required" -> ParameterQualifier(
-            kind = "static",
-            name = "mandatory",
-            type = "boolean",
-            rawValue = "<![CDATA[$constraintValue]]>"
-        )
+fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQualifier? =
+    when (xsdConstraint) {
+        "default" -> {
+            ParameterQualifier(
+                "static",
+                "defaultValue",
+                constraintValue.javaClass.xsdType,
+                constraintValue.toString()
+            )
+        }
+        "minInclusive" -> {
+            ParameterQualifier(
+                "minNumberValue",
+                null,
+                null,
+                constraintValue.toString()
+            )
+        }
+        "maxInclusive" -> {
+            ParameterQualifier(
+                "maxNumberValue",
+                null,
+                null,
+                constraintValue.toString()
+            )
+        }
+        "pattern" -> {
+            ParameterQualifier(
+                "static",
+                "regexp",
+                "Regexp",
+                constraintValue.toString()
+            )
+        }
+        "enumerations" -> {
+            val xsdArrayAsString = (constraintValue as List<String>).joinToString(";") { "#string#$it#" }
+            ParameterQualifier(
+                "static",
+                "genericEnumeration",
+                "Array/string",
+                xsdArrayAsString.toString()
+            )
+        }
+        "required" -> {
+            ParameterQualifier(
+                "static",
+                "mandatory",
+                "boolean",
+                constraintValue.toString()
+            )
+        }
         else -> null
     }
-}
+
+private val <T> Class<T>.xsdType: String?
+    get() = TODO()

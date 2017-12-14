@@ -12,10 +12,12 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "inputType",
-    propOrder = arrayOf("parameters")
+    propOrder = ["parameters"]
 )
 class Input {
-
     @XmlElement(name = "param")
     var parameters: MutableList<Parameter> = mutableListOf()
+
+    fun addParameters(vararg parameter: Parameter) =
+        this.parameters.addAll(parameter)
 }

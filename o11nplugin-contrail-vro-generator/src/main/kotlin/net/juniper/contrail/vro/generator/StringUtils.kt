@@ -11,7 +11,7 @@ val CAMEL_CASE_REGEX = "(?<=[a-z])(?=[A-Z])".toRegex()
 val ES_SUFFIXES = ".*(s|x|z|ch|sh)$".toRegex()
 val NON_IES_SUFFIXES_REGEX = "(ay|ey|iy|oy|uy)\$".toRegex()
 
-fun String.dashedToCamelCase(): String =
+fun String.typeToClassName(): String =
     split("-").joinToString("") { it.toLowerCase().capitalize() }
 
 fun String.splitCamel(): String =
@@ -53,3 +53,6 @@ fun Path.append(subpath: String): Path =
 
 operator fun String.div(subpath: String): Path =
     Paths.get(this, subpath)
+
+val String?.CDATA get() =
+    if (this == null) null else "<![CDATA[$this]]>"

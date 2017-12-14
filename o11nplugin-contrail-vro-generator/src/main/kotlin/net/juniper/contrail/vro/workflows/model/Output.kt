@@ -11,11 +11,13 @@ import javax.xml.bind.annotation.XmlType
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
-    name = "outputType",
-    propOrder = arrayOf("parameters")
+    name = "parametersRootType",
+    propOrder = ["parameters"]
 )
-class Output {
-
+class ParameterRoot {
     @XmlElement(name = "param")
-    var parameters: MutableList<Parameter> = mutableListOf()
+    private val parameters: MutableList<Parameter> = mutableListOf()
+
+    fun addParameter(parameter: Parameter) =
+        this.parameters.add(parameter)
 }

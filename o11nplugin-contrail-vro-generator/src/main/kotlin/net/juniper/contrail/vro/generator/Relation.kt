@@ -26,9 +26,9 @@ fun generateRelationStatements(classes: List<Class<out ApiObjectBase>>): List<Re
 private fun RelationGraphVertex.asRelationList(): List<Relation> {
     return second.map {
         Relation(
-            it.name.dashedToCamelCase(),
-            first.dashedToCamelCase(),
-            it.childTypeName.dashedToCamelCase()
+            it.name.typeToClassName(),
+            first.typeToClassName(),
+            it.childTypeName.typeToClassName()
         )
     }
 }

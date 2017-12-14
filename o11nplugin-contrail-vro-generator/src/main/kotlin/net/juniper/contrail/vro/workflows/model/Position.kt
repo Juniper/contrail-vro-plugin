@@ -13,21 +13,17 @@ import javax.xml.bind.annotation.XmlValue
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "positionType",
-    propOrder = arrayOf("value")
+    propOrder = ["value"]
 )
-class Position(x: Float, y: Float) {
+class Position (
+    @XmlAttribute(name = "x")
+    var x: String? = null,
+
+    @XmlAttribute(name = "y")
+    var y: String? = null,
 
     @XmlValue
     var value: String? = null
-
-    @XmlAttribute(name = "y")
-    var y: String? = null
-
-    @XmlAttribute(name = "x")
-    var x: String? = null
-
-    init {
-        this.x = x.toString()
-        this.y = y.toString()
-    }
+) {
+    constructor(x: Float, y: Float) : this(x = x.toString(), y = y.toString())
 }

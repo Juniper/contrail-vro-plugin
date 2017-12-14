@@ -12,14 +12,18 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "p-stepType",
-    propOrder = arrayOf("title", "presentationParameters")
+    propOrder = ["title", "presentationParameters"]
 )
-class PresentationStep {
-
-    @XmlElement(required = true)
-    var title: String? = null
-
+class PresentationStep (
+    @XmlElement
+    val title: String? = null
+) {
     @XmlElement(name = "p-param")
-    var presentationParameters: MutableList<PresentationParameter> = mutableListOf()
+    private val presentationParameters: MutableList<PresentationParameter> = mutableListOf()
 
+    fun parameter(name: String, description: String, setup: PresentationParameter.() -> Unit) {
+        val parameter = PresentationParameter(name, description)
+        parameter.setup()
+        presentationParameters.add(parameter)
+    }
 }

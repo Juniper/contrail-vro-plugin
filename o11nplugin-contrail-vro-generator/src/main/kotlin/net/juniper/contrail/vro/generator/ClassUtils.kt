@@ -65,7 +65,6 @@ private fun classForName(name: String): Class<*>? {
         null
     }
 }
-
 fun Class<*>.toClassInfo() =
     ClassInfo(this.simpleName)
 

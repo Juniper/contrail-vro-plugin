@@ -11,12 +11,14 @@ import javax.xml.bind.annotation.XmlType
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
-    name = "out-bindingType",
-    propOrder = arrayOf("bind")
+    name = "bindingType",
+    propOrder = ["binds"]
 )
-class OutBinding {
+class Binding {
 
     @XmlElement(name = "bind")
-    var binds: MutableList<Bind> = mutableListOf()
+    private val binds: MutableList<Bind> = mutableListOf()
 
+    fun bind(name: String, type: String, exportName: String = name) =
+        apply { binds.add(Bind(name, type, exportName)) }
 }
