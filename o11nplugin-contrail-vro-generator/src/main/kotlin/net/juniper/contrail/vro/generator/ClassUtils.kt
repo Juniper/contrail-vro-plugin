@@ -83,9 +83,6 @@ private fun classesIn(packageName: String): Sequence<Class<*>> =
 fun classForName(name: String): Class<*>? =
     try { Class.forName(name) } catch (e: ClassNotFoundException) { null }
 
-fun Class<*>.toClassInfo() =
-    ClassInfo(this.simpleName)
-
 val Class<*>.xsdName : String
     get() = simpleName.splitCamel().toLowerCase().replace(" ", "-")
 
@@ -94,13 +91,6 @@ val <T> Class<T>.xsdType: String get() = when (this.simpleName) {
     "Boolean" -> "boolean"
     "Int" -> "number"
     else -> ""
-}
-
-fun Iterable<Class<*>>.toClassInfo() =
-    map { it.toClassInfo() }
-
-class ClassInfo(val simpleName: String) {
-    val folderName get() = simpleName.folderName()
 }
 
 val Class<out ApiObjectBase>.hasParent

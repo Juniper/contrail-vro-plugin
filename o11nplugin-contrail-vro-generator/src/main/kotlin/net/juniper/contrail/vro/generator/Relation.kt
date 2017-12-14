@@ -15,7 +15,6 @@ open class Relation (
     val childName: String
 ) {
     val name: String = relationName(parentName, childName)
-    val childNameDecapitalized = childName.decapitalize()
     val folderName = childName.folderName()
 }
 
@@ -38,13 +37,9 @@ class NestedRelation(
     val getterChain: List<Getter>,
     val rootClass: Class<*>
 ) {
-    val parentName: String = parent.nestedName
-    val childName: String = child.nestedName
     val parentCollapsedName = parent.collapsedNestedName
-    val childCollapsedName = child.collapsedNestedName
     val getter: String = getterChain.last().name
     val getterDecapitalized = getter.decapitalize()
-    val getterSplitCamel = getter.splitCamel()
     val name: String = relationName(parentCollapsedName, getter)
     val childWrapperName = rootClass.simpleName + getterChain.joinToString("") { "_" + it.name }
     val parentWrapperName = rootClass.simpleName + getterChain.dropLast(1).joinToString("") { "_" + it.name }
@@ -52,9 +47,7 @@ class NestedRelation(
     val toMany: Boolean = getterChain.last().toMany
 }
 
-class Getter(val name: String, val toMany: Boolean) {
-    val nameDecapitalized: String = name.decapitalize()
-}
+class Getter(val name: String, val toMany: Boolean)
 
 private fun RelationGraphVertex.asRelationList(): List<Relation> {
     return second.map {

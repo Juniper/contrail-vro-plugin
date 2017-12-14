@@ -18,10 +18,15 @@ object Generator {
         val objectClasses = objectClasses()
         val rootClasses = objectClasses.rootClasses()
 
-        val relationsModel = generateRelationsModel(objectClasses)
-        val customMappingModel = generateCustomMappingModel(objectClasses, rootClasses, relationsModel)
-        val wrappersModel = generateWrappersModel(objectClasses, relationsModel)
-        val findersModel = generateFindersModel(objectClasses, wrappersModel, relationsModel)
+        val relations = generateRelations(objectClasses)
+        val refRelations = generateReferenceRelations(objectClasses)
+        val nestedRelations = generateNestedRelations(objectClasses)
+        val referenceWrappers = generateReferenceWrappers(objectClasses)
+
+        val relationsModel = generateRelationsModel(relations, refRelations, nestedRelations, rootClasses)
+        val customMappingModel = generateCustomMappingModel(objectClasses, rootClasses, relations, refRelations, nestedRelations)
+        val wrappersModel = generateWrappersModel(referenceWrappers, nestedRelations)
+        val findersModel = generateFindersModel(objectClasses, referenceWrappers, nestedRelations)
 
         val customMappingConfig = GeneratorConfig(
             baseDir = projectInfo.customRoot / generatedSourcesRoot,

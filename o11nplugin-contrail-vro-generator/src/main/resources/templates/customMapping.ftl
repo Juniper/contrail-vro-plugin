@@ -52,17 +52,17 @@ class CustomMapping: AbstractMapping() {
 
         wrap(Executor::class.java)
 
-        <#list findableClasses as klass>
-        wrap(${klass.simpleName}::class.java)
+        <#list findableClassNames as klass>
+        wrap(${klass}::class.java)
           .hiding(*methodsToHide)
           .andFind()
-          .using(${klass.simpleName}Finder::class.java)
+          .using(${klass}Finder::class.java)
           .hiding(*propertiesToHide)
           .withIcon("item-16x16.png")
 
-        wrap(${klass.simpleName}Ref::class.java)
+        wrap(${klass}Ref::class.java)
           .andFind()
-          .using(${klass.simpleName}RefFinder::class.java)
+          .using(${klass}RefFinder::class.java)
           .withIcon("item-16x16.png")
         </#list>
     }

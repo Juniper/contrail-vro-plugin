@@ -6,18 +6,49 @@ package net.juniper.contrail.vro.generator
 
 import net.juniper.contrail.api.ApiObjectBase
 
-class ReferenceWrapper(clazz: Class<out ApiObjectBase>) {
-    val className = clazz.simpleName
-    val referenceName = clazz.referenceName
-}
+data class WrappersModel(
+    val references: List<ReferenceWrapperModel>,
+    val wrappers: List<WrapperModel>
+) : GenericModel()
 
-private fun Class<out ApiObjectBase>.toReferenceWrapper() =
-    ReferenceWrapper(this)
+data class ReferenceWrapperModel(
+    val className: String,
+    val referenceName: String
+)
+
+data class WrapperModel(
+    val name: String,
+    val property: String,
+    val simpleProperties: List<PropertyModel>,
+    val listProperties: List<PropertyModel>,
+    val unwrappedName: String,
+    val unwrappedLabel: String
+)
+
+data class PropertyModel(
+    val propertyName: String,
+    val wrapperName: String,
+    val componentName: String,
+    val classLabel: String
+)
+
+fun Property.toPropertyModel() =
+    PropertyModel(
+        propertyName,
+        wrapperName,
+        componentName,
+        classLabel
+    )
+
+fun ReferenceWrapper.toReferenceWrapperModel() =
+    ReferenceWrapperModel(
+        simpleName,
+        referenceName
+    )
 
 class Wrapper(
     val property: String,
     unwrapped: Class<*>,
-    parent: Class<*>,
     simpleProperties: List<Property>,
     listProperties: List<Property>,
     rootClass: Class<*>,
@@ -26,16 +57,31 @@ class Wrapper(
     val name = wrapperName(rootClass, getterChain)
     val unwrappedName = unwrapped.nestedName
     val unwrappedLabel = unwrapped.underscoredNestedName
-    val parentName = parent.nestedName
 }
 
-class WrappersModel(
-    val references: List<ReferenceWrapper>,
-    val wrappers: List<Wrapper>
-) : GenericModel()
+class ReferenceWrapper(
+    val simpleName: String,
+    val referenceName: String
+)
 
-private fun wrapperName(clazz: Class<*>, getterChain: List<Getter>) =
-    clazz.simpleName + getterChain.joinToString("") { "_" + it.name }
+fun Class<*>.toReferenceWrapper() =
+    ReferenceWrapper(
+        simpleName,
+        referenceName
+    )
+
+fun Wrapper.toWrapperModel() =
+    WrapperModel(
+        name,
+        property,
+        simpleProperties.map { it.toPropertyModel() },
+        listProperties.map { it.toPropertyModel() },
+        unwrappedName,
+        unwrappedLabel
+    )
+
+private fun wrapperName(rootClass: Class<*>, getterChain: List<Getter>) =
+    rootClass.simpleName + getterChain.joinToString("") { "_" + it.name }
 
 private fun Property.toWrapperProperties(wrapperName: String) : Property {
     val fieldName = fieldName.capitalize()
@@ -59,7 +105,6 @@ private fun NestedRelation.toWrapper() : Wrapper {
     return Wrapper(
         getterDecapitalized,
         child,
-        parent,
         newSimpleProperties,
         newListProperties,
         rootClass,
@@ -67,13 +112,15 @@ private fun NestedRelation.toWrapper() : Wrapper {
     )
 }
 
-fun generateWrappersModel(objectClasses: List<Class<out ApiObjectBase>>, relationsModel: RelationsModel): WrappersModel {
+fun generateReferenceWrappers(objectClasses: List<Class<out ApiObjectBase>>) =
+    objectClasses.map { it.toReferenceWrapper() }
 
-    val references = objectClasses
-        .map { it.toReferenceWrapper() }
+fun generateWrappersModel(referenceWrappers: List<ReferenceWrapper>, nestedRelations: List<NestedRelation>): WrappersModel {
+    val references = referenceWrappers.map { it.toReferenceWrapperModel() }
 
-    val wrappers = relationsModel.nestedRelations
+    val wrappers = nestedRelations
         .map { it.toWrapper() }
+        .map { it.toWrapperModel() }
 
     return WrappersModel(references, wrappers)
 }

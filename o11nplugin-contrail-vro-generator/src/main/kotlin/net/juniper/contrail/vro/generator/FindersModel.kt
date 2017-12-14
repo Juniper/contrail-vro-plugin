@@ -6,15 +6,19 @@ package net.juniper.contrail.vro.generator
 
 import net.juniper.contrail.api.ApiObjectBase
 
-class FindersModel(
-    val classes: List<Class<*>>,
-    val referenceWrappers: List<ReferenceWrapper>,
-    val nestedRelations: List<NestedRelation>
+data class FindersModel(
+    val classNames: List<String>,
+    val referenceWrappers: List<ReferenceWrapperModel>,
+    val nestedRelations: List<NestedRelationModel>
 ) : GenericModel()
 
 fun generateFindersModel(
     objectClasses: List<Class<out ApiObjectBase>>,
-    wrappersModel: WrappersModel,
-    relationsModel: RelationsModel
+    referenceWrappers: List<ReferenceWrapper>,
+    nestedRelations: List<NestedRelation>
 ): FindersModel =
-    FindersModel(objectClasses, wrappersModel.references, relationsModel.nestedRelations)
+    FindersModel(
+        objectClasses.map { it.simpleName },
+        referenceWrappers.map { it.toReferenceWrapperModel() },
+        nestedRelations.map { it.toNestedRelationModel() }
+    )

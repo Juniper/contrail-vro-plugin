@@ -61,7 +61,7 @@ class ${relation.parentWrapperName}Has${relation.childWrapperName}
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childWrapperName}>? {
         val connection = connections.getConnection(parentId)
         //TODO handle IOException
-        val parent = connection?.findById(${relation.rootClass.simpleName}::class.java, parentId.getString("${relation.rootClass.simpleName}"))
+        val parent = connection?.findById(${relation.rootClassSimpleName}::class.java, parentId.getString("${relation.rootClassSimpleName}"))
         return <#if relation.toMany == false>toList(</#if>parent<#list relation.getterChain as nextGetter>?.${nextGetter.nameDecapitalized}<#if nextGetter.toMany == true && nextGetter?has_next>?.get(parentId.getString("${nextGetter.name}").toInt())</#if></#list><#if relation.toMany == true>?.mapIndexedNotNull { index, value -> value?.${relation.childWrapperName}(index) }<#else>?.${relation.childWrapperName}(null)</#if><#if relation.toMany == false>)</#if>
     }
 }

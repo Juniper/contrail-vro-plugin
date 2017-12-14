@@ -4,23 +4,93 @@
 
 package net.juniper.contrail.vro.generator
 
-import net.juniper.contrail.api.ApiObjectBase
-
-class RelationsModel(
+data class RelationsModel(
     val rootClassNames: List<String>,
-    val relations: List<Relation>,
-    val referenceRelations: List<RefRelation>,
-    val nestedRelations: List<NestedRelation>
+    val relations: List<RelationModel>,
+    val referenceRelations: List<RefRelationModel>,
+    val nestedRelations: List<NestedRelationModel>
 ) : GenericModel()
 
-fun generateRelationsModel(
-    objectClasses: List<Class<out ApiObjectBase>>
-): RelationsModel {
-    val relations = generateRelations(objectClasses)
-    val refRelations = generateReferenceRelations(objectClasses)
-    val nestedRelations = generateNestedRelations(objectClasses)
-    val rootClassNames = objectClasses.rootClasses()
-        .map { it.simpleName }
+data class RelationModel(
+    val parentName: String,
+    val childName: String,
+    val childNameDecapitalized: String,
+    val name: String,
+    val folderName: String
+)
 
-    return RelationsModel(rootClassNames, relations, refRelations, nestedRelations)
+data class RefRelationModel(
+    val parentName: String,
+    val childName: String,
+    val childOriginalName: String,
+    val getter: String,
+    val folderName: String
+)
+
+data class NestedRelationModel(
+    val childWrapperName: String,
+    val parentWrapperName: String,
+    val name: String,
+    val getter: String,
+    val folderName: String,
+    val toMany: Boolean,
+    val rootClassSimpleName: String,
+    val getterChain: List<GetterModel>
+)
+
+data class GetterModel(
+    val name: String,
+    val nameDecapitalized: String,
+    val toMany: Boolean
+)
+
+fun Relation.toRelationModel(): RelationModel =
+    RelationModel(
+        parentName,
+        childName,
+        childName.decapitalize(),
+        name,
+        folderName
+    )
+
+fun RefRelation.toRefRelationModel() =
+    RefRelationModel(
+        parentName,
+        childName,
+        childOriginalName,
+        getter,
+        folderName
+    )
+
+fun NestedRelation.toNestedRelationModel() =
+    NestedRelationModel(
+        childWrapperName,
+        parentWrapperName,
+        name,
+        getter,
+        folderName,
+        toMany,
+        rootClass.simpleName,
+        getterChain.map { it.toGetterModel() }
+    )
+
+fun Getter.toGetterModel() =
+    GetterModel(
+        name,
+        name.decapitalize(),
+        toMany
+    )
+
+fun generateRelationsModel(
+    relations: List<Relation>,
+    refRelations: List<RefRelation>,
+    nestedRelations: List<NestedRelation>,
+    rootClasses: List<Class<*>>
+): RelationsModel {
+    val relationModels = relations.map { it.toRelationModel() }
+    val refRelationModels = refRelations.map { it.toRefRelationModel() }
+    val nestedRelationModels = nestedRelations.map { it.toNestedRelationModel() }
+    val rootClassNames = rootClasses.map { it.simpleName }
+
+    return RelationsModel(rootClassNames, relationModels, refRelationModels, nestedRelationModels)
 }

@@ -20,21 +20,21 @@ private fun <T : ApiObjectBase> Connection.query(clazz: Class<T>, query: String,
         ?.map { FoundObject(it, internalId.with(key, it.uuid)) }
         ?.toList()
 
-<#list classes as klass>
-class ${klass.simpleName}Finder
-@Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${klass.simpleName}> {
+<#list classNames as klass>
+class ${klass}Finder
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${klass}> {
 
-    override fun assignId(obj: ${klass.simpleName}, sid: Sid): Sid =
-        sid.with("${klass.simpleName}", obj.uuid)
+    override fun assignId(obj: ${klass}, sid: Sid): Sid =
+        sid.with("${klass}", obj.uuid)
 
-    override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${klass.simpleName}? {
+    override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${klass}? {
         val connection = connections.getConnection(sid)
         //TODO handle IOException
-        return connection?.findById(${klass.simpleName}::class.java, sid.getString("${klass.simpleName}"))
+        return connection?.findById(${klass}::class.java, sid.getString("${klass}"))
     }
 
-    override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${klass.simpleName}>>? =
-        connections.query(${klass.simpleName}::class.java, query, "${klass.simpleName}")
+    override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${klass}>>? =
+        connections.query(${klass}::class.java, query, "${klass}")
 }
 
 </#list>
@@ -71,7 +71,7 @@ class ${relation.childWrapperName}Finder
     override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${relation.childWrapperName}? {
         val connection = connections.getConnection(sid)
         //TODO handle IOException
-        val parent = connection?.findById(${relation.rootClass.simpleName}::class.java, sid.getString("${relation.rootClass.simpleName}"))
+        val parent = connection?.findById(${relation.rootClassSimpleName}::class.java, sid.getString("${relation.rootClassSimpleName}"))
         val potentialIndexStr = sid.getString("${relation.getter}")
         val potentialIndex: Int? = if(potentialIndexStr == "") {
             null
