@@ -28,6 +28,9 @@ class Connection(public val info: ConnectionInfo, val connector: ApiConnector) :
     val port: Int get() =
         info.port
 
+    val displayName: String get() =
+        "$name (${info.username?:"anonymous"}@$host:$port)"
+
     @Throws(IOException::class)
     fun create(obj: ApiObjectBase): Boolean {
         return connector.create(obj)
