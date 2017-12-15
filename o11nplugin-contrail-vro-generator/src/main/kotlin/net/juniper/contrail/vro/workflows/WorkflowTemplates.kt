@@ -5,14 +5,12 @@
 package net.juniper.contrail.vro.workflows
 
 import net.juniper.contrail.api.ApiObjectBase
-import net.juniper.contrail.vro.generator.isRootClass
 import net.juniper.contrail.vro.generator.parentClassName
 import net.juniper.contrail.vro.generator.splitCamel
 import net.juniper.contrail.vro.workflows.model.Properties
 import net.juniper.contrail.vro.workflows.model.Workflow
 import net.juniper.contrail.vro.workflows.model.properties
 import net.juniper.contrail.vro.workflows.model.workflow
-
 
 fun propertiesFor(workflow: Workflow, category: String) : Properties {
     return properties {
@@ -23,24 +21,27 @@ fun propertiesFor(workflow: Workflow, category: String) : Properties {
     }
 }
 
+private val Connection = "Connection"
 
-fun createWorkflow(clazz: Class<out ApiObjectBase>, workflowVersion: String): Workflow {
+private val String.inWorkflowName get() =
+    splitCamel().toLowerCase()
 
-    val parentType =
-        if (clazz.isRootClass)
-            "Contrail:Connection"
-        else
-            "Contrail:${clazz.parentClassName}"
-    val displayName = "Create ${clazz.simpleName.splitCamel().toLowerCase()}"
-    val className = clazz.simpleName.splitCamel()
-    val parentClassName = clazz.parentClassName?.splitCamel()
+private val String.inDescription get() =
+    splitCamel()
 
-    return workflow(displayName) {
-        version = workflowVersion
+private val String.asFinder get() =
+    "Contrail:$this"
 
+private val <T : ApiObjectBase> Class<T>.parentName get() =
+    parentClassName ?: Connection
+
+fun createConnectionWorkflow(): Workflow {
+
+    val nameInputDescription = "Connection name"
+
+    return workflow("Create Contrail connection") {
         input {
-            parameter("name", "string", "$className name")
-            parameter("parent", parentType, parentClassName)
+            parameter("name", "string", nameInputDescription)
         }
 
         output {
@@ -48,11 +49,45 @@ fun createWorkflow(clazz: Class<out ApiObjectBase>, workflowVersion: String): Wo
         }
 
         items {
-
-            includeEnd()
-
             script {
-                script = clazz.createScript
+                body = createConnectionScriptBody
+
+                inBinding("name", "string")
+
+                outBinding("success", "boolean")
+            }
+        }
+
+        presentation {
+            step {
+                parameter("name", nameInputDescription) {
+                    mandatory = true
+                }
+            }
+        }
+    }
+}
+
+fun createWorkflow(clazz: Class<out ApiObjectBase>): Workflow {
+
+    val workflowName = "Create ${clazz.simpleName.inWorkflowName}"
+    val nameInputDescription = "${clazz.simpleName.inDescription} name"
+    val parentType = clazz.parentName.asFinder
+    val parentInputDescription = "Parent ${clazz.parentName.inDescription}"
+
+    return workflow(workflowName) {
+        input {
+            parameter("name", "string", nameInputDescription)
+            parameter("parent", parentType, parentInputDescription)
+        }
+
+        output {
+            parameter("success", "boolean")
+        }
+
+        items {
+            script {
+                body = clazz.createScript
 
                 inBinding("name", "string")
                 inBinding("parent", parentType)
@@ -63,10 +98,10 @@ fun createWorkflow(clazz: Class<out ApiObjectBase>, workflowVersion: String): Wo
 
         presentation {
             step {
-                parameter("parent", "Parent") {
+                parameter("parent", parentInputDescription) {
                     mandatory = true
                 }
-                parameter("name", "$className name") {
+                parameter("name", nameInputDescription) {
                     mandatory = true
                 }
             }
@@ -74,17 +109,21 @@ fun createWorkflow(clazz: Class<out ApiObjectBase>, workflowVersion: String): Wo
     }
 }
 
+fun deleteConnectionWorkflow(): Workflow =
+    deleteWorkflow("Connection", deleteConnectionScriptBody)
 
-fun deleteWorkflow(clazz: Class<out ApiObjectBase>, workflowVersion: String): Workflow {
+fun deleteWorkflow(clazz: Class<out ApiObjectBase>): Workflow =
+    deleteWorkflow(clazz.simpleName, clazz.deleteScript)
 
-    val displayName = "Delete ${clazz.simpleName.splitCamel().toLowerCase()}"
-    val className = clazz.simpleName.splitCamel()
+fun deleteWorkflow(clazz: String, scriptBody: String): Workflow {
 
-    return workflow(displayName) {
-        version = workflowVersion
+    val workflowName = "Delete ${clazz.inWorkflowName}"
+    val finderName = clazz.asFinder
+    val inputDescription = "${clazz.inDescription} to delete"
 
+    return workflow(workflowName) {
         input {
-            parameter("object", "Contrail:${clazz.simpleName}", "$className to delete")
+            parameter("object", finderName, inputDescription)
         }
 
         output {
@@ -92,13 +131,10 @@ fun deleteWorkflow(clazz: Class<out ApiObjectBase>, workflowVersion: String): Wo
         }
 
         items {
-
-            includeEnd()
-
             script {
-                script = clazz.deleteScript
+                body = scriptBody
 
-                inBinding("object", "Contrail:${clazz.simpleName}")
+                inBinding("object", finderName)
 
                 outBinding("success", "boolean")
             }
@@ -106,7 +142,7 @@ fun deleteWorkflow(clazz: Class<out ApiObjectBase>, workflowVersion: String): Wo
 
         presentation {
             step {
-                parameter("object", "$className to delete") {
+                parameter("object", inputDescription) {
                     mandatory = true
                 }
             }
@@ -120,14 +156,23 @@ private val <T : ApiObjectBase> Class<T>.createScript get() =
 private val <T : ApiObjectBase> Class<T>.deleteScript get() =
     deleteScriptBody(simpleName)
 
+private val createConnectionScriptBody = """
+var connectionId = ContrailConnectionManager.create(name, host, port, username, password, authServer, tenant);
+System.log("Created connection with ID: " + connectionId);
+""".trimIndent()
+
+private val deleteConnectionScriptBody = """
+ContrailConnectionManager.delete(connection);
+""".trimIndent()
+
 private fun createScriptBody(className: String) = """
 var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
 var element = new Contrail$className();
 element.setName(name);
 executor.create$className(element, parent);
-""".trim()
+""".trimIndent()
 
 private fun deleteScriptBody(className: String) = """
 var executor = ContrailConnectionManager.getExecutor(object.getInternalId().toString());
 executor.delete$className(object);
-""".trim()
+""".trimIndent()

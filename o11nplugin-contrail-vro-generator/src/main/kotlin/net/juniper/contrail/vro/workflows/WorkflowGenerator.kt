@@ -6,11 +6,8 @@ package net.juniper.contrail.vro.workflows
 
 import com.sun.xml.internal.bind.marshaller.CharacterEscapeHandler
 import net.juniper.contrail.api.ApiObjectBase
-import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.generator.ProjectInfo
-import net.juniper.contrail.vro.generator.objectClasses
 import net.juniper.contrail.vro.generator.packageToPath
-import net.juniper.contrail.vro.generator.readProjectInfo
 import net.juniper.contrail.vro.workflows.model.Workflow
 import net.juniper.contrail.vro.workflows.model.Properties
 import java.io.File
@@ -18,38 +15,21 @@ import java.io.Writer
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
 
+fun runWorkflowGenerator(info: ProjectInfo, objectClasses: List<Class<out ApiObjectBase>>) {
 
-fun main(args: Array<String>) {
-    runWorkflowsGenerator(readProjectInfo())
+    createConnectionWorkflow().saveInConfiguration(info)
+    deleteConnectionWorkflow().saveInConfiguration(info)
+
+    objectClasses.forEach {
+        generateWorkflowsFor(it, info)
+    }
 }
-
-fun runWorkflowsGenerator(projectInfo: ProjectInfo) {
-
-//    objectClasses().forEach {
-//        generateWorkflowsFor(it, projectInfo)
-//    }
-
-    generateWorkflowsFor(VirtualNetwork::class.java, projectInfo)
-}
-
 
 private fun generateWorkflowsFor(clazz: Class<out ApiObjectBase>, info: ProjectInfo) {
     val category = clazz.simpleName
-    val version = "${info.baseVersion}.${info.buildNumber}"
 
-    createWorkflow(clazz, version).save(info, category)
-    deleteWorkflow(clazz, version).save(info, category)
-}
-
-private fun Workflow.save(info: ProjectInfo, category: String) {
-    generateDefinition(info, category)
-    generateElementInfo(info, category)
-}
-
-private class DefaultCharacterEscapeHandler : CharacterEscapeHandler {
-    override fun escape(ac: CharArray, i: Int, j: Int, flag: Boolean, writer: Writer) {
-        writer.write(ac, i, j)
-    }
+    createWorkflow(clazz).save(info, category)
+    deleteWorkflow(clazz).save(info, category)
 }
 
 val workflowContext = JAXBContext.newInstance(Workflow::class.java)
@@ -61,10 +41,24 @@ val workflowMarshaller = workflowContext.createMarshaller().apply {
 val propertiesContext = JAXBContext.newInstance(Properties::class.java)
 val propertiesMarshaller = propertiesContext.createMarshaller().apply {
     setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
-    //Is this really necessary?
-    setProperty(
-        "com.sun.xml.internal.bind.xmlHeaders",
-        "\n<!DOCTYPE properties SYSTEM \"http://java.sun.com/dtd/properties.dtd\">")
+    setProperty(Marshaller.JAXB_FRAGMENT, true)
+    setProperty("com.sun.xml.internal.bind.xmlHeaders", """
+        <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+        <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">""".trimIndent())
+}
+
+private fun Workflow.saveInConfiguration(info: ProjectInfo) =
+    save(info, "Configuration")
+
+private fun Workflow.save(info: ProjectInfo, category: String) {
+    generateDefinition(info, category)
+    generateElementInfo(info, category)
+}
+
+private class DefaultCharacterEscapeHandler : CharacterEscapeHandler {
+    override fun escape(ac: CharArray, i: Int, j: Int, flag: Boolean, writer: Writer) {
+        writer.write(ac, i, j)
+    }
 }
 
 private fun Workflow.generateDefinition(info: ProjectInfo, category: String) {
@@ -78,14 +72,12 @@ private fun Workflow.generateElementInfo(info: ProjectInfo, category: String) {
     val file = prepareElementInfoFile(info, category)
     val properties = propertiesFor(this, category)
 
-    TODO("https://stackoverflow.com/questions/277996/jaxb-remove-standalone-yes-from-generated-xml")
-
     propertiesMarshaller.marshal(properties, file)
 }
 
 val libraryPackage = "Library.Contrail"
 val libraryPath = libraryPackage.packageToPath()
-val workflowResources = "src/main/resources/Workflow"
+val workflowResources = "templates/main/resources/Workflow"
 
 private fun File.prepare()
 {

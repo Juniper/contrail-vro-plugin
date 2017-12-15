@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlType
 )
 @XmlRootElement(name = "workflow")
 class Workflow(
-    displayName: String,
+    displayName: String = "Workflow",
 
     @XmlElement(required = true)
     var position: Position? = null,
@@ -87,11 +87,14 @@ class Workflow(
 
     class ItemBuilder(private val workflow: Workflow) {
 
-        fun includeEnd() {
-            val workflowItem = WorkflowItem(name = "item0", type = "end")
-            workflowItem.endMode = "0"
-            workflowItem.position = Position(300.0f, 45.0f)
-            workflow.workflowItems.add(workflowItem)
+        var includeEnd: Boolean
+            get() = workflow.workflowItems.contains(END)
+            set(value) {
+                if (value) workflow.workflowItems.add(END) else workflow.workflowItems.remove(END)
+            }
+
+        init {
+            includeEnd = true
         }
 
         fun script(setup: WorkflowItem.() -> Unit) {
@@ -100,11 +103,16 @@ class Workflow(
             val scriptableItem = WorkflowItem("item$id", "task")
             scriptableItem.outName = "item$previousId"
             scriptableItem.displayName = "Scriptable task"
-            scriptableItem.position = Position(200.0f, 45.0f)
+            scriptableItem.position = Position(145.0f, 20.0f)
             scriptableItem.setup()
             workflow.workflowItems.add(scriptableItem)
         }
     }
+}
+
+private val END = WorkflowItem("item0", type = "end").apply {
+    endMode = "0"
+    position = Position(325.0f, 10.0f)
 }
 
 val API_VERSION = "6.0.0"

@@ -103,7 +103,7 @@ class NestedClassInfo(clazz: Class<*>) {
     val nestedName = clazz.nestedName
 }
 
-val <T> Class<T>.xsdType: String
+class ConverterInfo(
     targetClass: Class<*>
 ) {
     val proxyName = targetClass.simpleName
@@ -113,10 +113,3 @@ val <T> Class<T>.xsdType: String
 
 val Class<out ApiObjectBase>.hasParent
     get() = this.newInstance().defaultParentType != null
-
-val Class<out ApiObjectBase>.parentClassName: String
-    get() {
-        val instance = this.newInstance()
-        val parent: String? = instance.defaultParentType
-        return parent?.split("-")?.joinToString("") { it.capitalize() } ?: ""
-    }

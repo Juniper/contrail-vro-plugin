@@ -4,7 +4,7 @@
 
 package net.juniper.contrail.vro.generator
 
-import net.juniper.contrail.vro.workflows.runWorkflowsGenerator
+import net.juniper.contrail.vro.workflows.runWorkflowGenerator
 import java.util.Properties
 
 object Generator {
@@ -15,6 +15,7 @@ object Generator {
 
     @JvmStatic fun main(args: Array<String>) {
         val projectInfo = readProjectInfo()
+
         val propertyClasses = propertyClasses()
         val objectClasses = objectClasses()
         val rootClasses = rootClasses(objectClasses)
@@ -38,7 +39,7 @@ object Generator {
         coreGenerator.generate(findersModel, "Finders.kt")
         coreGenerator.generate(customMappingModel, "Executor.kt")
 
-        runWorkflowsGenerator(projectInfo)
+        runWorkflowGenerator(projectInfo, objectClasses)
     }
 }
 

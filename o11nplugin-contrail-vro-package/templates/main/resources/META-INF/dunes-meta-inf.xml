@@ -4,7 +4,7 @@
 <comment>127.0.0.1:8230</comment>
 <entry key="pkg-description">Contrail package</entry>
 <entry key="pkg-name">net.juniper.contrail.vro</entry>
-<entry key="used-plugins">Contrail#1.0.0-SNAPSHOT</entry>
+<entry key="used-plugins">Contrail#${project.version}</entry>
 <entry key="pkg-owner">Juniper</entry>
 <entry key="pkg-id">4452345677834623546675023032605023032</entry>
 </properties>

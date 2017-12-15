@@ -68,6 +68,7 @@
           <filesets>
             <fileset>
               <directory>src</directory>
+              <directory>templates/main/resources/Workflow</directory>
               <followSymlinks>false</followSymlinks>
             </fileset>
           </filesets>

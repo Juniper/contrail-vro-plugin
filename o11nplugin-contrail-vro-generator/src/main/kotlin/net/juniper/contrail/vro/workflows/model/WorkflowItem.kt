@@ -37,12 +37,12 @@ class WorkflowItem(
 ) {
 
     @XmlElement(name = "script")
-    private var scriptDefinition: WorkflowScript? = null
+    private var script: WorkflowScript? = null
 
-    var script: String?
-        get() = scriptDefinition?.value
+    var body: String?
+        get() = script?.value
         set(value) {
-            scriptDefinition = WorkflowScript(value = value, encoded = false)
+            script = WorkflowScript(value = value, encoded = false)
         }
 
     @XmlElement(name = "display-name")

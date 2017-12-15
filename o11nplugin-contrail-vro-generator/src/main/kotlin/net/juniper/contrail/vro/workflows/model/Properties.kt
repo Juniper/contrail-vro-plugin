@@ -22,7 +22,7 @@ class Properties {
     @XmlElement(name = "entry")
     private val entries: MutableList<Entry> = mutableListOf()
 
-    fun addEntry(key: String, value:String) {
+    fun addEntry(key: String, value: String) {
         entries.add(Entry(key, value))
     }
 
@@ -41,7 +41,7 @@ private class Entry (
     val value: String?
 )
 
-fun properties(setup: PropertiesBuilder.()->Unit) : Properties =
+fun properties(setup: PropertiesBuilder.() -> Unit) : Properties =
     PropertiesBuilder().also(setup).build()
 
 class PropertiesBuilder {
@@ -78,7 +78,7 @@ class PropertiesBuilder {
     val Workflow get() =
         ElementType.Workflow
 
-    fun build(): Properties =  Properties().apply {
+    fun build(): Properties = Properties().apply {
         entries.forEach(::addEntry)
     }
 
