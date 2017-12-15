@@ -46,19 +46,6 @@ fun ReferenceWrapper.toReferenceWrapperModel() =
         referenceName
     )
 
-class Wrapper(
-    val property: String,
-    unwrapped: Class<*>,
-    simpleProperties: List<Property>,
-    listProperties: List<Property>,
-    rootClass: Class<*>,
-    getterChain: List<Getter>
-) : ClassProperties(simpleProperties, listProperties) {
-    val name = wrapperName(rootClass, getterChain)
-    val unwrappedName = unwrapped.nestedName
-    val unwrappedLabel = unwrapped.underscoredNestedName
-}
-
 class ReferenceWrapper(
     val simpleName: String,
     val referenceName: String
@@ -68,16 +55,6 @@ fun Class<*>.toReferenceWrapper() =
     ReferenceWrapper(
         simpleName,
         referenceName
-    )
-
-fun Wrapper.toWrapperModel() =
-    WrapperModel(
-        name,
-        property,
-        simpleProperties.map { it.toPropertyModel() },
-        listProperties.map { it.toPropertyModel() },
-        unwrappedName,
-        unwrappedLabel
     )
 
 private fun wrapperName(rootClass: Class<*>, getterChain: List<Getter>) =
@@ -97,18 +74,21 @@ private fun Property.toWrapperProperties(wrapperName: String) : Property {
 private fun List<Property>.toWrapperProperties(wrapperName: String) : List<Property> =
     map { it.toWrapperProperties(wrapperName) }
 
-private fun NestedRelation.toWrapper() : Wrapper {
+private fun NestedRelation.toWrapperModel() : WrapperModel {
     val wrapperName = wrapperName(rootClass, getterChain)
     val newSimpleProperties = simpleProperties.toWrapperProperties(wrapperName)
     val newListProperties = listProperties.toWrapperProperties(wrapperName)
 
-    return Wrapper(
+    val name = wrapperName(rootClass, getterChain)
+    val unwrappedName = child.nestedName
+    val unwrappedLabel = child.underscoredNestedName
+    return WrapperModel(
+        name,
         getterDecapitalized,
-        child,
-        newSimpleProperties,
-        newListProperties,
-        rootClass,
-        getterChain
+        newSimpleProperties.map { it.toPropertyModel() },
+        newListProperties.map { it.toPropertyModel() },
+        unwrappedName,
+        unwrappedLabel
     )
 }
 
@@ -119,7 +99,6 @@ fun generateWrappersModel(referenceWrappers: List<ReferenceWrapper>, nestedRelat
     val references = referenceWrappers.map { it.toReferenceWrapperModel() }
 
     val wrappers = nestedRelations
-        .map { it.toWrapper() }
         .map { it.toWrapperModel() }
 
     return WrappersModel(references, wrappers)
