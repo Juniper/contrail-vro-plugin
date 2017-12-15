@@ -11,6 +11,19 @@ import com.vmware.o11n.sdk.modeldriven.PluginContext
 import com.vmware.o11n.sdk.modeldriven.Sid
 import org.springframework.beans.factory.annotation.Autowired
 
+<#macro getterChain relation>
+  <@compress single_line=true>
+    parent
+    <#list relation.getterChain as nextGetter>
+      ?.${nextGetter.nameDecapitalized}
+      <#if nextGetter.toMany == true>
+        ?.get(sid.getString("${nextGetter.name}").toInt())
+      </#if>
+    </#list>
+    ?.${relation.childWrapperName}(index)
+  </@compress>
+</#macro>
+
 private fun <T : ApiObjectBase> ConnectionRepository.query(clazz: Class<T>, query: String, key: String): List<FoundObject<T>> =
     connections.asSequence().map { it.query(clazz, query, key) }.filterNotNull().flatten().toList()
 
@@ -59,6 +72,15 @@ class ${wrapper.referenceName}Finder
 
 </#list>
 
+fun getIndex(sid: Sid, key: String): Int? {
+    val potentialIndexStr = sid.getString(key)
+    return if(potentialIndexStr == "") {
+        null
+    } else {
+        potentialIndexStr.toInt()
+    }
+}
+
 <#list nestedRelations as relation>
 class ${relation.childWrapperName}Finder
 @Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${relation.childWrapperName}> {
@@ -72,13 +94,8 @@ class ${relation.childWrapperName}Finder
         val connection = connections.getConnection(sid)
         //TODO handle IOException
         val parent = connection?.findById(${relation.rootClassSimpleName}::class.java, sid.getString("${relation.rootClassSimpleName}"))
-        val potentialIndexStr = sid.getString("${relation.getter}")
-        val potentialIndex: Int? = if(potentialIndexStr == "") {
-            null
-        } else {
-            potentialIndexStr.toInt()
-        }
-        return parent<#list relation.getterChain as nextGetter>?.${nextGetter.nameDecapitalized}<#if nextGetter.toMany == true>?.get(sid.getString("${nextGetter.name}").toInt())</#if></#list>?.${relation.childWrapperName}(potentialIndex)
+        val index = getIndex(sid, "${relation.getter}")
+        return <@getterChain relation/>
     }
 
     override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${relation.childWrapperName}>>? =
