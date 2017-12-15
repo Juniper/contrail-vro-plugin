@@ -11,18 +11,18 @@ import javax.xml.bind.annotation.XmlAttribute
 import javax.xml.bind.annotation.XmlType
 import javax.xml.bind.annotation.XmlValue
 
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlType(
     name = "scriptType",
-    propOrder = arrayOf("value")
+    propOrder = ["value"]
 )
 class WorkflowScript (
-    encoded: Boolean = false,
-    value: String? = null
+    value: String? = null,
+    encoded: Boolean = false
 ) {
-    @XmlAttribute(name = "encoded")
-    val encoded: String? = encoded.toString()
-
     @XmlValue
     val value: String? = value.CDATA
+
+    @XmlAttribute(name = "encoded")
+    val encoded: String? = encoded.toString()
 }

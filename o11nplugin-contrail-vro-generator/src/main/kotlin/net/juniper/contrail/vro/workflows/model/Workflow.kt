@@ -14,18 +14,20 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "workflow",
-    propOrder = arrayOf("displayName", "position", "input", "output", "workflowItems", "presentation")
+    propOrder = ["displayName", "position", "input", "output", "workflowItems", "presentation"]
 )
 @XmlRootElement(name = "workflow")
 class Workflow(
+    displayName: String,
+
     @XmlElement(required = true)
     var position: Position? = null,
 
     @XmlElement(required = true)
-    val input: ParameterRoot = ParameterRoot(),
+    val input: ParameterSet = ParameterSet(),
 
     @XmlElement(required = true)
-    val output: ParameterRoot = ParameterRoot(),
+    val output: ParameterSet = ParameterSet(),
 
     @XmlAttribute(name = "root-name")
     var rootName: String? = null,
@@ -52,7 +54,7 @@ class Workflow(
     var resumeFromFailedMode: String? = null
 ) {
     @XmlElement(name = "display-name", required = true)
-    var displayName: String? = null
+    val displayName: String = displayName
 
     @XmlElement(name = "workflow-item")
     val workflowItems: MutableList<WorkflowItem> = mutableListOf()
@@ -76,7 +78,7 @@ class Workflow(
         presentation.setup()
     }
 
-    class ParametersBuilder(private val parameters: ParameterRoot) {
+    class ParametersBuilder(private val parameters: ParameterSet) {
 
         fun parameter(name: String, type: String, description: String? = null) {
             parameters.addParameter(Parameter(name, type, description))
@@ -109,8 +111,7 @@ val API_VERSION = "6.0.0"
 val VERSION = "\${project.version}.\${build.number}"
 
 fun workflow(displayName: String, setup: Workflow.() -> Unit): Workflow {
-    val workflow = Workflow()
-    workflow.displayName = displayName
+    val workflow = Workflow(displayName)
     workflow.id = displayName.hashCode().toString()
     workflow.rootName = "item1"
     workflow.objectName = "workflow:name=generic"

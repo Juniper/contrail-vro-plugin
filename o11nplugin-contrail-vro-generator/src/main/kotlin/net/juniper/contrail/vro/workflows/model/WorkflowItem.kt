@@ -24,9 +24,6 @@ class WorkflowItem(
     @XmlAttribute(name = "type")
     var type: String? = null,
 
-    @XmlElement
-    var script: WorkflowScript? = null,
-
     @XmlElement(required = true)
     var position: Position? = null,
 
@@ -38,6 +35,16 @@ class WorkflowItem(
 
     displayName: String? = null
 ) {
+
+    @XmlElement(name = "script")
+    private var scriptDefinition: WorkflowScript? = null
+
+    var script: String?
+        get() = scriptDefinition?.value
+        set(value) {
+            scriptDefinition = WorkflowScript(value = value, encoded = false)
+        }
+
     @XmlElement(name = "display-name")
     var displayName: String? = displayName.CDATA
         set(value) {

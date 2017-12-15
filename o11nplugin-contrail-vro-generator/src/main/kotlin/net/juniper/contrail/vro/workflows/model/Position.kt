@@ -17,13 +17,13 @@ import javax.xml.bind.annotation.XmlValue
 )
 class Position (
     @XmlAttribute(name = "x")
-    var x: String? = null,
+    val x: String? = null,
 
     @XmlAttribute(name = "y")
-    var y: String? = null,
+    val y: String? = null,
 
     @XmlValue
-    var value: String? = null
+    val value: String? = null
 ) {
     constructor(x: Float, y: Float) : this(x = x.toString(), y = y.toString())
 }

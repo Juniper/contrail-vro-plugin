@@ -28,3 +28,17 @@ class Parameter(
     @XmlElement(required = true)
     val description: String? = description.CDATA
 }
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(
+    name = "parametersSetType",
+    propOrder = ["parameters"]
+)
+class ParameterSet {
+    @XmlElement(name = "param")
+    private val parameters: MutableList<Parameter> = mutableListOf()
+
+    fun addParameter(parameter: Parameter) =
+        this.parameters.add(parameter)
+}
+
