@@ -10,3 +10,4 @@ dist/
 target/
 o11nplugin-contrail-vro-package/src
 o11nplugin-contrail-vro-package/templates/main/resources/Workflow
+o11nplugin-contrail-vro-package/templates/main/resources/META-INF/dunes-meta-inf.xml

@@ -5,20 +5,39 @@
 package net.juniper.contrail.vro.workflows
 
 import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.parentClassName
 import net.juniper.contrail.vro.generator.splitCamel
+import net.juniper.contrail.vro.workflows.model.ElementType
 import net.juniper.contrail.vro.workflows.model.Properties
 import net.juniper.contrail.vro.workflows.model.Workflow
-import net.juniper.contrail.vro.workflows.model.properties
+import net.juniper.contrail.vro.workflows.model.createDunesProperties
+import net.juniper.contrail.vro.workflows.model.createElementInfoProperties
 import net.juniper.contrail.vro.workflows.model.workflow
 
-fun propertiesFor(workflow: Workflow, category: String) : Properties {
-    return properties {
-        categoryPath = "$libraryPackage.$category"
-        type = Workflow
-        name = workflow.displayName
-        id = workflow.id
-    }
+fun elementInfoPropertiesFor(workflow: Workflow, category: String) : Properties {
+    return createElementInfoProperties(
+        categoryPath = "$libraryPackage.$category",
+        type = ElementType.Workflow,
+        name = workflow.displayName,
+        id = workflow.id!!
+    )
+}
+
+fun dunesProp(
+    pkgDescriptionArg: String,
+    pkgNameArg: String,
+    usedPluginsArg: String,
+    pkgOwnerArg: String,
+    pkgIdArg: String
+): Properties {
+    return createDunesProperties(
+        pkgDescription = pkgDescriptionArg,
+        pkgName = pkgNameArg,
+        usedPlugins = usedPluginsArg,
+        pkgOwner = pkgOwnerArg,
+        pkgId = pkgIdArg
+    )
 }
 
 private val Connection = "Connection"
@@ -35,11 +54,11 @@ private val String.asFinder get() =
 private val <T : ApiObjectBase> Class<T>.parentName get() =
     parentClassName ?: Connection
 
-fun createConnectionWorkflow(): Workflow {
+fun createConnectionWorkflow(info: ProjectInfo): Workflow {
 
     val nameInputDescription = "Connection name"
 
-    return workflow("Create Contrail connection") {
+    return workflow(info, "Create Contrail connection") {
         input {
             parameter("name", "string", nameInputDescription)
         }
@@ -68,14 +87,14 @@ fun createConnectionWorkflow(): Workflow {
     }
 }
 
-fun createWorkflow(clazz: Class<out ApiObjectBase>): Workflow {
+fun createWorkflow(info: ProjectInfo, clazz: Class<out ApiObjectBase>): Workflow {
 
     val workflowName = "Create ${clazz.simpleName.inWorkflowName}"
     val nameInputDescription = "${clazz.simpleName.inDescription} name"
     val parentType = clazz.parentName.asFinder
     val parentInputDescription = "Parent ${clazz.parentName.inDescription}"
 
-    return workflow(workflowName) {
+    return workflow(info, workflowName) {
         input {
             parameter("name", "string", nameInputDescription)
             parameter("parent", parentType, parentInputDescription)
@@ -109,19 +128,19 @@ fun createWorkflow(clazz: Class<out ApiObjectBase>): Workflow {
     }
 }
 
-fun deleteConnectionWorkflow(): Workflow =
-    deleteWorkflow("Connection", deleteConnectionScriptBody)
+fun deleteConnectionWorkflow(info: ProjectInfo): Workflow =
+    deleteWorkflow(info, "Connection", deleteConnectionScriptBody)
 
-fun deleteWorkflow(clazz: Class<out ApiObjectBase>): Workflow =
-    deleteWorkflow(clazz.simpleName, clazz.deleteScript)
+fun deleteWorkflow(info: ProjectInfo, clazz: Class<out ApiObjectBase>): Workflow =
+    deleteWorkflow(info, clazz.simpleName, clazz.deleteScript)
 
-fun deleteWorkflow(clazz: String, scriptBody: String): Workflow {
+fun deleteWorkflow(info: ProjectInfo, clazz: String, scriptBody: String): Workflow {
 
     val workflowName = "Delete ${clazz.inWorkflowName}"
     val finderName = clazz.asFinder
     val inputDescription = "${clazz.inDescription} to delete"
 
-    return workflow(workflowName) {
+    return workflow(info, workflowName) {
         input {
             parameter("object", finderName, inputDescription)
         }

@@ -8,6 +8,7 @@
 
   <properties>
     <generator.main.class>net.juniper.contrail.vro.generator.Generator</generator.main.class>
+    <workflows.packageName>net.juniper.contrail.vro</workflows.packageName>
   </properties>
 
   <parent>

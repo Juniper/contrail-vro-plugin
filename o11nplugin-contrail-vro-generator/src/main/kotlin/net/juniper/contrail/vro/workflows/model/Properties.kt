@@ -41,53 +41,44 @@ private class Entry (
     val value: String?
 )
 
-fun properties(setup: PropertiesBuilder.() -> Unit) : Properties =
-    PropertiesBuilder().also(setup).build()
+val categoryPathKey = "categoryPath"
+val typeKey = "type"
+val nameKey = "name"
+val idKey = "id"
+val pkgDescriptionKey = "pkg-description"
+val pkgNameKey = "pkg-name"
+val usedPluginsKey = "used-plugins"
+val pkgOwnerKey = "pkg-owner"
+val pkgIdKey = "pkg-id"
 
-class PropertiesBuilder {
-    private val entries = LinkedHashMap<String, String>()
+fun createElementInfoProperties(
+    categoryPath: String,
+    type: ElementType,
+    name: String,
+    id: String
+): Properties {
+    val prop = Properties()
+    prop.addEntry(categoryPathKey, categoryPath)
+    prop.addEntry(typeKey, type.toString())
+    prop.addEntry(nameKey, name)
+    prop.addEntry(idKey, id)
+    return prop
+}
 
-    init {
-        entries[typeKey] = Workflow.toString()
-    }
-
-    var type: ElementType
-        get() = enumValueOf(entries[typeKey]!!)
-        set(value) {
-            entries[typeKey] = value.toString()
-        }
-
-    var categoryPath: String
-        get() = entries[categoryPathKey] ?: ""
-        set(value) {
-            entries[categoryPathKey] = value
-        }
-
-    var name: String?
-        get() = entries[nameKey]
-        set(value) {
-            entries[nameKey] = value ?: return
-        }
-
-    var id: String?
-        get() = entries[idKey]
-        set(value) {
-            entries[idKey] = value ?: return
-        }
-
-    val Workflow get() =
-        ElementType.Workflow
-
-    fun build(): Properties = Properties().apply {
-        entries.forEach(::addEntry)
-    }
-
-    private companion object {
-        val categoryPathKey = "categoryPath"
-        val typeKey = "type"
-        val nameKey = "name"
-        val idKey = "id"
-    }
+fun createDunesProperties(
+    pkgDescription: String,
+    pkgName: String,
+    usedPlugins: String,
+    pkgOwner: String,
+    pkgId: String
+): Properties {
+    val prop = Properties()
+    prop.addEntry(pkgDescriptionKey, pkgDescription)
+    prop.addEntry(pkgNameKey, pkgName)
+    prop.addEntry(usedPluginsKey, usedPlugins)
+    prop.addEntry(pkgOwnerKey, pkgOwner)
+    prop.addEntry(pkgIdKey, pkgId)
+    return prop
 }
 
 enum class ElementType {

@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.model
 
+import net.juniper.contrail.vro.generator.ProjectInfo
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -115,16 +116,13 @@ private val END = WorkflowItem("item0", type = "end").apply {
     position = Position(325.0f, 10.0f)
 }
 
-val API_VERSION = "6.0.0"
-val VERSION = "\${project.version}.\${build.number}"
-
-fun workflow(displayName: String, setup: Workflow.() -> Unit): Workflow {
+fun workflow(info: ProjectInfo, displayName: String, setup: Workflow.() -> Unit): Workflow {
     val workflow = Workflow(displayName)
-    workflow.id = displayName.hashCode().toString()
+    workflow.id = (info.workflowsPackageName + displayName).hashCode().toString()
     workflow.rootName = "item1"
     workflow.objectName = "workflow:name=generic"
-    workflow.version = VERSION
-    workflow.apiVersion = API_VERSION
+    workflow.version = "${info.baseVersion}.${info.buildNumber}"
+    workflow.apiVersion = "6.0.0"
     workflow.restartMode = "1"
     workflow.resumeFromFailedMode = "0"
     workflow.position = Position(100.0f, 100.0f)

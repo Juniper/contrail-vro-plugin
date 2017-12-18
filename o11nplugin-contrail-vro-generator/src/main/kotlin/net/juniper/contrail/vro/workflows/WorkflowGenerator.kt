@@ -16,9 +16,9 @@ import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
 
 fun runWorkflowGenerator(info: ProjectInfo, objectClasses: List<Class<out ApiObjectBase>>) {
-
-    createConnectionWorkflow().saveInConfiguration(info)
-    deleteConnectionWorkflow().saveInConfiguration(info)
+    createDunesMetaInfo(info)
+    createConnectionWorkflow(info).saveInConfiguration(info)
+    deleteConnectionWorkflow(info).saveInConfiguration(info)
 
     objectClasses.forEach {
         generateWorkflowsFor(it, info)
@@ -28,8 +28,8 @@ fun runWorkflowGenerator(info: ProjectInfo, objectClasses: List<Class<out ApiObj
 private fun generateWorkflowsFor(clazz: Class<out ApiObjectBase>, info: ProjectInfo) {
     val category = clazz.simpleName
 
-    createWorkflow(clazz).save(info, category)
-    deleteWorkflow(clazz).save(info, category)
+    createWorkflow(info, clazz).save(info, category)
+    deleteWorkflow(info, clazz).save(info, category)
 }
 
 val workflowContext = JAXBContext.newInstance(Workflow::class.java)
@@ -70,14 +70,17 @@ private fun Workflow.generateDefinition(info: ProjectInfo, category: String) {
 private fun Workflow.generateElementInfo(info: ProjectInfo, category: String) {
 
     val file = prepareElementInfoFile(info, category)
-    val properties = propertiesFor(this, category)
+    val properties = elementInfoPropertiesFor(this, category)
 
     propertiesMarshaller.marshal(properties, file)
 }
 
 val libraryPackage = "Library.Contrail"
 val libraryPath = libraryPackage.packageToPath()
-val workflowResources = "templates/main/resources/Workflow"
+val resourcesPath = "templates/main/resources"
+val workflowResources = "$resourcesPath/Workflow"
+val dunesInfoPath = "$resourcesPath/META-INF"
+val dunesFileName = "dunes-meta-inf.xml"
 
 private fun File.prepare()
 {
@@ -105,3 +108,16 @@ private fun Workflow.prepareDefinitionFile(info: ProjectInfo, category: String) 
 
 private fun Workflow.prepareElementInfoFile(info: ProjectInfo, category: String) : File =
     elementInfoFileName(info, category).asPreparedFile()
+
+private fun createDunesMetaInfo(info: ProjectInfo) {
+    val outputFile = "${info.packageRoot}/$dunesInfoPath/$dunesFileName".asPreparedFile()
+    val properties = dunesProp(
+        pkgDescriptionArg = "Contrail package",
+        pkgNameArg = info.workflowsPackageName,
+        usedPluginsArg = "Contrail#${info.baseVersion}",
+        pkgOwnerArg = "Juniper",
+        pkgIdArg = "4452345677834623546675023032605023032"
+    )
+
+    propertiesMarshaller.marshal(properties, outputFile)
+}

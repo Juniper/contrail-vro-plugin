@@ -60,6 +60,7 @@ fun readProjectInfo(): ProjectInfo {
     val packageRoot = generatorRoot.replace(generatorPattern, "-package")
     val version = props["project.version"] as String
     val buildNumber = props["build.number"] as String
+    val workflowsPackageName = props["workflows.packageName"] as String
     val baseVersion = version.replace("-SNAPSHOT", "")
 
     return ProjectInfo(
@@ -71,7 +72,8 @@ fun readProjectInfo(): ProjectInfo {
         staticRoot = staticRoot,
         version = version,
         baseVersion = baseVersion,
-        buildNumber = buildNumber)
+        buildNumber = buildNumber,
+        workflowsPackageName = workflowsPackageName)
 }
 
 data class ProjectInfo(
@@ -83,4 +85,5 @@ data class ProjectInfo(
     val staticRoot: String,
     val version: String,
     val baseVersion: String,
-    val buildNumber: String)
+    val buildNumber: String,
+    val workflowsPackageName: String)
