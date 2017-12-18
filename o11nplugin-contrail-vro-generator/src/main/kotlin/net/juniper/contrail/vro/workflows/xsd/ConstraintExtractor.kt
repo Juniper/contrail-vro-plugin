@@ -9,50 +9,40 @@ import net.juniper.contrail.vro.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.workflows.model.wrapConstraints
 import org.w3c.dom.Node
 
-class ConstraintExtractor {
-    private val SCHEMA_KNOWN_TYPES = arrayOf("xsd:string", "xsd:boolean", "xsd:integer")
-    private val SUPPORTED_STRING_RESTRICTION_REGEX = Regex("xsd:(length|pattern|enumeration)")
+private val VALUE = "value"
+private val NAME = "name"
+private val TYPE = "type"
+private val DEFAULT = "default"
+private val REQUIRED = "required"
 
-    private val complexTypes = HashSet<Node>()
-    private val simpleTypes = HashSet<Node>()
-    private val elements = HashSet<Node>()
-    private val idlComments = HashSet<IdlComment>()
+private val XSD_STRING = "xsd:string"
+private val XSD_BOOLEAN = "xsd:boolean"
+private val XSD_INTEGER = "xsd:integer"
 
-    fun loadSchemas(vararg schemas: Schema) {
-        loadSchemas(schemas.toList())
-    }
+private val SCHEMA_KNOWN_TYPES = arrayOf(XSD_STRING, XSD_BOOLEAN, XSD_INTEGER)
+private val SUPPORTED_STRING_RESTRICTION_REGEX = Regex("xsd:(length|pattern|enumeration)")
 
-    fun loadSchemas(schemas: List<Schema>) {
-        val idlCommentsFactory = IdlCommentsFactory()
-        for (schema in schemas) {
-            val (complexTypes, simpleTypes, elements, comments) = schema.schemaChildren
-            this.complexTypes += complexTypes
-            this.simpleTypes += simpleTypes
-            this.elements += elements
-            this.idlComments += comments.map { idlCommentsFactory.buildFromComment(it.nodeValue) }.flatten()
-        }
-    }
+class ConstraintExtractor(private val schema: Schema) {
 
-    fun findSimpleTypeQualifiers(clazz: Class<*>, fieldName: String): List<ParameterQualifier> {
-        return when {
+    fun findSimpleTypeQualifiers(clazz: Class<*>, fieldName: String): List<ParameterQualifier> =
+        when {
             ApiObjectBase::class.java.isAssignableFrom(clazz) -> objectFiledQualifiers(fieldName)
             else -> propertyFiledQualifiers(clazz, fieldName)
         }
-    }
 
     private fun objectFiledQualifiers(fieldName: String): List<ParameterQualifier> {
         val xsdFieldName = fieldName.replace("_", "-")
-        val matchingElements = elements.withAttribute("name", xsdFieldName)
+        val matchingElements = schema.elements.withAttribute(NAME, xsdFieldName)
         if (matchingElements.size > 1) throw IllegalStateException("Schema is not compatible with api")
         return qualifiersFromXsdElement(matchingElements.first())
     }
 
     private fun propertyFiledQualifiers(clazz: Class<*>, fieldName: String): List<ParameterQualifier> {
-        val complexType = complexTypes.find { it.attributesMap["name"] == clazz.simpleName }
+        val complexType = schema.complexTypes.find { it.attributesMap[NAME] == clazz.simpleName }
         val elements = getNestedElements(complexType)
 
         val matchingElements = elements
-            .withAttribute("name", fieldName.replace("_", "-"))
+            .withAttribute(NAME, fieldName.replace("_", "-"))
 
         if (matchingElements.size > 1) throw IllegalStateException()
 
@@ -72,16 +62,16 @@ class ConstraintExtractor {
     private fun qualifiersFromXsdElement(element: Node): List<ParameterQualifier> {
         val elementAttributes = element.attributesMap
         val xsdConstraints = HashMap<String, Any>()
-        xsdConstraints.putAll(elementAttributes.minus("name").minus("type"))
+        xsdConstraints.putAll(elementAttributes.minus(NAME).minus(TYPE))
 
-        val elementType = elementAttributes["type"] ?: throw IllegalStateException("Schema error")
+        val elementType = elementAttributes[TYPE] ?: throw IllegalStateException("Schema error")
 
-        if (elementAttributes["type"] == "xsd:boolean" && elementAttributes["default"] != null) {
-            xsdConstraints.put("default", elementAttributes["default"]!!.toBoolean())
+        if (elementAttributes[TYPE] == XSD_BOOLEAN && elementAttributes[DEFAULT] != null) {
+            xsdConstraints.put(DEFAULT, elementAttributes[DEFAULT]!!.toBoolean())
         }
 
-        if (elementAttributes["required"] != null) {
-            xsdConstraints.put("required", elementAttributes["required"]!!.toBoolean())
+        if (elementAttributes[REQUIRED] != null) {
+            xsdConstraints.put(REQUIRED, elementAttributes[REQUIRED]!!.toBoolean())
         }
 
         if (elementType !in SCHEMA_KNOWN_TYPES) {
@@ -94,10 +84,14 @@ class ConstraintExtractor {
         }
     }
 
-    private fun extractSimpleTypeConstraints(elementType: String): HashMap<String, Any> {
-        if (elementType.startsWith("smi:")) TODO("Implement constraints for smi namespace types")
+    private fun extractSimpleTypeConstraints(elementTypeName: String): HashMap<String, Any> {
+        val elementType =
+            if (elementTypeName.startsWith("smi:"))
+                elementTypeName.substring(4)
+            else
+                elementTypeName
 
-        val matchingSimpleTypes = simpleTypes.withAttribute("name", elementType)
+        val matchingSimpleTypes = schema.simpleTypes.withAttribute(NAME, elementType)
         if (matchingSimpleTypes.isEmpty()) throw IllegalArgumentException("Field is not a simple type")
         if (matchingSimpleTypes.size > 1) throw IllegalStateException("Error in schema") // error in schema
 
@@ -108,12 +102,11 @@ class ConstraintExtractor {
         val baseType = restrictionChild?.attributesMap?.get("base") ?: throw IllegalStateException("Base is mandatory attribute")
 
         val xsdConstraints = HashMap<String, Any>()
-        xsdConstraints.putAll(matchingNode.attributesMap.minus("name").minus("type"))
-        xsdConstraints.putAll(restrictionChild.attributesMap.minus("name").minus("type"))
+        xsdConstraints.putAll(matchingNode.attributesMap.minus(NAME).minus(TYPE))
+        xsdConstraints.putAll(restrictionChild.attributesMap.minus(NAME).minus(TYPE))
         return when (baseType) {
-            "xsd:string" -> stringConstraints(restrictionChild)
-            "xsd:integer" -> integerConstraints(restrictionChild)
-            "xsd:boolean" -> TODO("Not sure if boolean has any restrictions")
+            XSD_STRING -> stringConstraints(restrictionChild)
+            XSD_INTEGER -> integerConstraints(restrictionChild)
             else -> HashMap()
         }
 
@@ -124,11 +117,11 @@ class ConstraintExtractor {
         val children = restrictionChild.children
 
         val maxInclusive =
-            children.find { it.nodeName == "xsd:maxInclusive" }?.attributesMap?.get("value")?.toInt()
+            children.find { it.nodeName == "xsd:maxInclusive" }?.attributesMap?.get(VALUE)?.toInt()
         if (maxInclusive != null) constraints.put("maxInclusive", maxInclusive)
 
         val minInclusive =
-            children.find { it.nodeName == "xsd:minInclusive" }?.attributesMap?.get("value")?.toInt()
+            children.find { it.nodeName == "xsd:minInclusive" }?.attributesMap?.get(VALUE)?.toInt()
         if (minInclusive != null) constraints.put("minInclusive", minInclusive)
 
         return constraints
@@ -138,15 +131,19 @@ class ConstraintExtractor {
         val constraints = HashMap<String, Any>()
         val children = restrictionChild.children
 
-        if (children.any { !it.nodeName.matches(SUPPORTED_STRING_RESTRICTION_REGEX) })
-            TODO("Implement new restriction")
+        if (children.any { !it.nodeName.matches(SUPPORTED_STRING_RESTRICTION_REGEX) }) {
+            val unsupportedOperation = children
+                .find { !it.nodeName.matches(SUPPORTED_STRING_RESTRICTION_REGEX) }
+                ?.nodeName
+            throw UnsupportedOperationException("Implement restriction: $unsupportedOperation")
+        }
 
         val enumerations = children.filter { it.nodeName == "xsd:enumeration" }
         if (enumerations.isNotEmpty()) {
-            constraints.put("enumerations", enumerations.mapNotNull { it.attributesMap["value"] })
+            constraints.put("enumerations", enumerations.mapNotNull { it.attributesMap[VALUE] })
         }
 
-        val pattern = children.find { it.nodeName == "xsd:pattern" }?.attributesMap?.get("value")
+        val pattern = children.find { it.nodeName == "xsd:pattern" }?.attributesMap?.get(VALUE)
         if (pattern != null) constraints.put("pattern", pattern)
 
         return constraints

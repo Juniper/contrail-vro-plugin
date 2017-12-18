@@ -8,6 +8,7 @@ abstract class IdlComment(val comment: String) {
     lateinit var type: String
     lateinit var parentClassName: String
     lateinit var elementName: String
+    lateinit var description: String
     var isRequired = false
     val insideQuotesRegex = "'[^']+'".toRegex()
 
@@ -31,6 +32,7 @@ class Link(comment: String) : IdlComment(comment) {
         propertyClassName = properties[1].value
         parentClassName = properties[2].value
         isRequired = checkIsRequired()
+        description = properties.last().value
     }
 
     private fun checkIsRequired(): Boolean {
@@ -53,6 +55,7 @@ class Property(comment: String) : IdlComment(comment) {
         type = "Property"
         elementName = properties[0].value
         parentClassName = properties[1].value
+        description = properties.last().value
 
         if (properties.size > 2) {
             val prop = properties[2].value

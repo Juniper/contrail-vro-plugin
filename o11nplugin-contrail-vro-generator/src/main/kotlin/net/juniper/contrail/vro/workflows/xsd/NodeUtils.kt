@@ -47,6 +47,6 @@ fun findIdlComment(node: Node): Node? {
     return null
 }
 
-fun HashSet<Node>.withAttribute(attribute: String, name: String): List<Node> {
+fun Set<Node>.withAttribute(attribute: String, name: String): List<Node> {
     return this.filter { it.attributesMap[attribute]?.equals(name) ?: false }
 }
