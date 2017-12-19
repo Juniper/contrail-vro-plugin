@@ -5,8 +5,8 @@
 package net.juniper.contrail.vro.generator.workflows
 
 import com.sun.xml.internal.bind.marshaller.CharacterEscapeHandler
-import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.generator.ProjectInfo
+import net.juniper.contrail.vro.generator.model.RelationsModel
 import net.juniper.contrail.vro.generator.util.packageToPath
 import net.juniper.contrail.vro.generator.workflows.model.Workflow
 import net.juniper.contrail.vro.generator.workflows.model.Properties
@@ -15,21 +15,23 @@ import java.io.Writer
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
 
-fun generateWorkflows(info: ProjectInfo, objectClasses: List<Class<out ApiObjectBase>>) {
+fun generateWorkflows(info: ProjectInfo, relationsModel: RelationsModel) {
     generateDunesMetaInfo(info)
     createConnectionWorkflow(info).saveInConfiguration(info)
     deleteConnectionWorkflow(info).saveInConfiguration(info)
 
-    objectClasses.forEach {
-        generateWorkflowsFor(it, info)
+    relationsModel.rootClassNames.forEach {
+        generateLifecycleWorkflows(info, it)
+    }
+
+    relationsModel.relations.forEach {
+        generateLifecycleWorkflows(info, it.childName, it.parentName)
     }
 }
 
-private fun generateWorkflowsFor(clazz: Class<out ApiObjectBase>, info: ProjectInfo) {
-    val category = clazz.simpleName
-
-    createWorkflow(info, clazz).save(info, category)
-    deleteWorkflow(info, clazz).save(info, category)
+private fun generateLifecycleWorkflows(info: ProjectInfo, className: String, parentName: String = Connection) {
+    createWorkflow(info, className, parentName).save(info, className)
+    deleteWorkflow(info, className).save(info, className)
 }
 
 val workflowContext = JAXBContext.newInstance(Workflow::class.java)

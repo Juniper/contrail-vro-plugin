@@ -65,6 +65,10 @@ class CustomMapping: AbstractMapping() {
           .using(${klass}RefFinder::class.java)
           .withIcon("item-ref.png")
         </#list>
+
+        <#list propertyClassNames as klass>
+        wrap(${klass}::class.java)
+        </#list>
     }
 
     private fun doRelations() {

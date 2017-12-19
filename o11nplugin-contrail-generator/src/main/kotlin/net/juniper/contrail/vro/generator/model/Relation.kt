@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
 import net.juniper.contrail.vro.generator.util.collapsedNestedName
 import net.juniper.contrail.vro.generator.util.defaultParentType
@@ -38,6 +39,8 @@ class RefRelation (
     val childName: String = method.referenceName
     val childOriginalName: String = method.nameWithoutGetAndBackRefs
     val getter: String = method.propertyName
+    val referenceAttribute = method.objectReferenceAtrributeClassOrDefault
+    val simpleReference = referenceAttribute.isSimpleReference
     val folderName = method.nameWithoutGetAndBackRefs.folderName()
 }
 
@@ -147,7 +150,10 @@ private val <T: ApiObjectBase> Class<T>.referenceMethods: Sequence<Method> get()
         .filter { it.isRefMethod and it.returnsObjectReferences }
 
 private val Type.parameterClass: Class<*>? get() =
-    if (this is ParameterizedType) actualTypeArguments[0].unwrapped else null
+    parameterType?.unwrapped
+
+private val Type.parameterType: Type? get() =
+    if (this is ParameterizedType) actualTypeArguments[0] else null
 
 private val Type.unwrapped: Class<*> get() =
     if (this is ParameterizedType) rawType as Class<*> else this as Class<*>
@@ -160,6 +166,18 @@ private val Method.returnListGenericClass: Class<*>? get() =
 
 private val Method.returnsObjectReferences: Boolean get() =
     returnListGenericClass == ObjectReference::class.java
+
+private val Method.objectReferenceAttributeClass: Class<*>? get() =
+    genericReturnType?.parameterType?.parameterClass
+
+private val Method.objectReferenceAtrributeClassOrDefault: Class<*> get() =
+    objectReferenceAttributeClass ?: ApiPropertyBase::class.java
+
+private val Method.returnsSimpleReferences: Boolean get() =
+    objectReferenceAttributeClass?.isSimpleReference ?: false
+
+private val <T> Class<T>.isSimpleReference: Boolean get() =
+    this == ApiPropertyBase::class.java
 
 private val Method.returnsApiPropertyOrList: Boolean get() =
     if (returnType.isApiTypeClass) true

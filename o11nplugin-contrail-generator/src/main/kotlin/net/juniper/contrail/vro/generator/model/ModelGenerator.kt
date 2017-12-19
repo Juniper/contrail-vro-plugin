@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.generatedPackageName
 import net.juniper.contrail.vro.generator.generatedSourcesRoot
@@ -12,7 +13,11 @@ import net.juniper.contrail.vro.generator.templatePath
 import net.juniper.contrail.vro.generator.util.div
 import net.juniper.contrail.vro.generator.util.rootClasses
 
-fun generateModel(info: ProjectInfo, objectClasses: List<Class<out ApiObjectBase>>) {
+fun generateModel(
+    info: ProjectInfo,
+    objectClasses: List<Class<out ApiObjectBase>>,
+    propertyClasses: List<Class<out ApiPropertyBase>>
+): RelationsModel {
 
     val rootClasses = objectClasses.rootClasses()
 
@@ -22,7 +27,7 @@ fun generateModel(info: ProjectInfo, objectClasses: List<Class<out ApiObjectBase
     val referenceWrappers = generateReferenceWrappers(objectClasses)
 
     val relationsModel = generateRelationsModel(relations, refRelations, nestedRelations, rootClasses)
-    val customMappingModel = generateCustomMappingModel(objectClasses, rootClasses, relations, refRelations, nestedRelations)
+    val customMappingModel = generateCustomMappingModel(objectClasses, rootClasses, propertyClasses, relations, refRelations, nestedRelations)
     val wrappersModel = generateWrappersModel(referenceWrappers, nestedRelations)
     val findersModel = generateFindersModel(objectClasses, referenceWrappers, nestedRelations)
 
@@ -41,4 +46,6 @@ fun generateModel(info: ProjectInfo, objectClasses: List<Class<out ApiObjectBase
     coreGenerator.generate(findersModel, "Finders.kt")
     coreGenerator.generate(customMappingModel, "Executor.kt")
     coreGenerator.generate(wrappersModel, "Wrappers.kt")
+
+    return relationsModel
 }

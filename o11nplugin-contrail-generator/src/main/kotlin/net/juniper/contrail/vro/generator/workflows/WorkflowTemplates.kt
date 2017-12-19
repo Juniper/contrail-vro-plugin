@@ -29,7 +29,7 @@ fun dunesPropertiesFor(info: ProjectInfo) = createDunesProperties(
     pkgId = "4452345677834623546675023032605023032"
 )
 
-private val Connection = "Connection"
+val Connection = "Connection"
 
 private val String.inWorkflowName get() =
     splitCamel().toLowerCase()
@@ -113,12 +113,12 @@ fun createConnectionWorkflow(info: ProjectInfo): Workflow {
     }
 }
 
-fun createWorkflow(info: ProjectInfo, clazz: Class<out ApiObjectBase>): Workflow {
+fun createWorkflow(info: ProjectInfo, className: String, parentName: String): Workflow {
 
-    val workflowName = "Create ${clazz.simpleName.inWorkflowName}"
-    val nameInputDescription = "${clazz.simpleName.inDescription} name"
-    val parentType = clazz.parentName.asFinder
-    val parentInputDescription = "Parent ${clazz.parentName.inDescription}"
+    val workflowName = "Create ${className.inWorkflowName}"
+    val nameInputDescription = "${className.inDescription} name"
+    val parentType = parentName.asFinder
+    val parentInputDescription = "Parent ${parentName.inDescription}"
 
     return workflow(info, workflowName) {
         input {
@@ -132,7 +132,7 @@ fun createWorkflow(info: ProjectInfo, clazz: Class<out ApiObjectBase>): Workflow
 
         items {
             script {
-                body = clazz.createScript
+                body = createScriptBody(className, parentName)
 
                 inBinding("name", "string")
                 inBinding("parent", parentType)
@@ -157,8 +157,8 @@ fun createWorkflow(info: ProjectInfo, clazz: Class<out ApiObjectBase>): Workflow
 fun deleteConnectionWorkflow(info: ProjectInfo): Workflow =
     deleteWorkflow(info, "Connection", deleteConnectionScriptBody)
 
-fun deleteWorkflow(info: ProjectInfo, clazz: Class<out ApiObjectBase>): Workflow =
-    deleteWorkflow(info, clazz.simpleName, clazz.deleteScript)
+fun deleteWorkflow(info: ProjectInfo, className: String): Workflow =
+    deleteWorkflow(info, className, deleteScriptBody(className))
 
 fun deleteWorkflow(info: ProjectInfo, clazz: String, scriptBody: String): Workflow {
 
@@ -196,12 +196,6 @@ fun deleteWorkflow(info: ProjectInfo, clazz: String, scriptBody: String): Workfl
     }
 }
 
-private val <T : ApiObjectBase> Class<T>.createScript get() =
-    createScriptBody(simpleName)
-
-private val <T : ApiObjectBase> Class<T>.deleteScript get() =
-    deleteScriptBody(simpleName)
-
 private val createConnectionScriptBody = """
 var connectionId = ContrailConnectionManager.create(name, host, port, username, password, authServer, tenant);
 System.log("Created connection with ID: " + connectionId);
@@ -211,11 +205,11 @@ private val deleteConnectionScriptBody = """
 ContrailConnectionManager.delete(object);
 """.trimIndent()
 
-private fun createScriptBody(className: String) = """
+private fun createScriptBody(className: String, parentName: String) = """
 var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
 var element = new Contrail$className();
 element.setName(name);
-executor.create$className(element, parent);
+executor.create$className(element${if (parentName == Connection) "" else ", parent"});
 """.trimIndent()
 
 private fun deleteScriptBody(className: String) = """

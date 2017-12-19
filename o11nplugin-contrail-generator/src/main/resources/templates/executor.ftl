@@ -13,22 +13,25 @@ class Executor(private val connection: Connection) {
         obj.setParent(parent)
         connection.create(obj)
     }
-
-    @Throws(IOException::class)
-    fun delete${relation.childName}(obj: ${relation.childName}) {
-        connection.delete(obj::class.java, obj.uuid)
-    }
     </#list>
 
     <#list rootClasses as rootClass>
     @Throws(IOException::class)
-    fun create${rootClass.simpleName}(obj: ${rootClass.simpleName}, parent: Connection) {
+    fun create${rootClass.simpleName}(obj: ${rootClass.simpleName}) {
         connection.create(obj)
+    }
+    </#list>
+
+    <#list findableClassNames as klass>
+    @Throws(IOException::class)
+    fun update${klass}(obj: ${klass}) {
+        connection.update(obj)
     }
 
     @Throws(IOException::class)
-    fun delete${rootClass.simpleName}(obj: ${rootClass.simpleName}) {
-        connection.delete(obj::class.java, obj.uuid)
+    fun delete${klass}(obj: ${klass}) {
+        connection.delete(${klass}::class.java, obj.uuid)
     }
     </#list>
+
 }
