@@ -8,6 +8,6 @@
 #Ignore generated files
 dist/
 target/
-o11nplugin-contrail-vro-package/src
-o11nplugin-contrail-vro-package/templates/main/resources/Workflow
-o11nplugin-contrail-vro-package/templates/main/resources/META-INF/dunes-meta-inf.xml
+o11nplugin-contrail-package/src
+o11nplugin-contrail-package/templates/main/resources/Workflow
+o11nplugin-contrail-package/templates/main/resources/META-INF/dunes-meta-inf.xml

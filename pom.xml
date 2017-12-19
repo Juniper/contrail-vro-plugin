@@ -47,18 +47,18 @@
       </dependency>
       <dependency>
         <groupId>net.juniper.contrail.vro</groupId>
-        <artifactId>o11nplugin-contrail-vro-core</artifactId>
+        <artifactId>o11nplugin-contrail-core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>net.juniper.contrail.vro</groupId>
-        <artifactId>o11nplugin-contrail-vro-package</artifactId>
+        <artifactId>o11nplugin-contrail-package</artifactId>
         <version>${project.version}</version>
         <type>package</type>
       </dependency>
       <dependency>
         <groupId>net.juniper.contrail.vro</groupId>
-        <artifactId>o11nplugin-contrail-vro-generator</artifactId>
+        <artifactId>o11nplugin-contrail-generator</artifactId>
         <version>${project.version}</version>
         <type>provided</type>
       </dependency>
@@ -479,12 +479,12 @@
   </scm>
 
   <modules>
-    <module>o11nplugin-contrail-vro-generator</module>
-    <module>o11nplugin-contrail-vro-core</module>
-    <module>o11nplugin-contrail-vro-custom</module>
-    <module>o11nplugin-contrail-vro-gen</module>
-    <module>o11nplugin-contrail-vro-package</module>
-    <module>o11nplugin-contrail-vro</module>
+    <module>o11nplugin-contrail-generator</module>
+    <module>o11nplugin-contrail-core</module>
+    <module>o11nplugin-contrail-custom</module>
+    <module>o11nplugin-contrail-gen</module>
+    <module>o11nplugin-contrail-package</module>
+    <module>o11nplugin-contrail</module>
   </modules>
 
 </project>

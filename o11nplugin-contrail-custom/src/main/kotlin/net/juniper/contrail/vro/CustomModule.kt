@@ -18,7 +18,7 @@ class CustomModule : AbstractModule() {
         plugin.displayName = "Contrail"
         plugin.name = "Contrail"
         plugin.icon = "opencontrail-16x16.png"
-        plugin.packages = listOf("o11nplugin-contrail-vro-package-\${project.version}.package")
+        plugin.packages = listOf("o11nplugin-contrail-package-\${project.version}.package")
         plugin.adaptorClassName = ContrailPluginAdaptor::class.java.name
     }
 

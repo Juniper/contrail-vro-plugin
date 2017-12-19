@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>o11nplugin-contrail-vro-gen</artifactId>
+    <artifactId>o11nplugin-contrail-gen</artifactId>
     <packaging>jar</packaging>
 
     <parent>
@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>net.juniper.contrail.vro</groupId>
-            <artifactId>o11nplugin-contrail-vro-core</artifactId>
+            <artifactId>o11nplugin-contrail-core</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vmware.o11n</groupId>
@@ -43,7 +43,7 @@
                 <configuration>
                     <basePackage>net.juniper.contrail.vro.gen</basePackage>
                     <moduleClass>net.juniper.contrail.vro.CustomModule</moduleClass>
-                    <vsoXmlFile>../o11nplugin-contrail-vro/src/main/dar/VSO-INF/vso.xml</vsoXmlFile>
+                    <vsoXmlFile>../o11nplugin-contrail/src/main/dar/VSO-INF/vso.xml</vsoXmlFile>
                     <verbose>true</verbose>
                 </configuration>
                 <executions>
@@ -57,7 +57,7 @@
                 <dependencies>
                     <dependency>
                         <groupId>${project.groupId}</groupId>
-                        <artifactId>o11nplugin-contrail-vro-custom</artifactId>
+                        <artifactId>o11nplugin-contrail-custom</artifactId>
                         <version>${project.version}</version>
                     </dependency>
                 </dependencies>

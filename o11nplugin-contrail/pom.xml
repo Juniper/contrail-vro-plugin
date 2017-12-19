@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>o11nplugin-contrail-vro</artifactId>
+  <artifactId>o11nplugin-contrail</artifactId>
   <packaging>dar</packaging>
 
   <parent>
@@ -15,16 +15,16 @@
   <dependencies>
     <dependency>
       <groupId>net.juniper.contrail.vro</groupId>
-      <artifactId>o11nplugin-contrail-vro-core</artifactId>
+      <artifactId>o11nplugin-contrail-core</artifactId>
     </dependency>
     <dependency>
       <groupId>net.juniper.contrail.vro</groupId>
-      <artifactId>o11nplugin-contrail-vro-gen</artifactId>
+      <artifactId>o11nplugin-contrail-gen</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>net.juniper.contrail.vro</groupId>
-      <artifactId>o11nplugin-contrail-vro-package</artifactId>
+      <artifactId>o11nplugin-contrail-package</artifactId>
       <type>package</type>
     </dependency>
     <dependency>
@@ -34,7 +34,7 @@
   </dependencies>
 
   <build>
-    <finalName>o11nplugin-contrail-vro</finalName>
+    <finalName>o11nplugin-contrail</finalName>
     <testSourceDirectory>src/test</testSourceDirectory>
     <plugins>
       <!-- dar file generation -->
@@ -51,11 +51,11 @@
           <modules>
             <jarModule>
               <groupId>net.juniper.contrail.vro</groupId>
-              <artifactId>o11nplugin-contrail-vro-core</artifactId>
+              <artifactId>o11nplugin-contrail-core</artifactId>
             </jarModule>
             <packageModule>
               <groupId>net.juniper.contrail.vro</groupId>
-              <artifactId>o11nplugin-contrail-vro-package</artifactId>
+              <artifactId>o11nplugin-contrail-package</artifactId>
             </packageModule>
           </modules>
         </configuration>
