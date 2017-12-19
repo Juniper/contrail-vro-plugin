@@ -9,36 +9,25 @@ import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.parentClassName
 import net.juniper.contrail.vro.generator.splitCamel
 import net.juniper.contrail.vro.workflows.model.ElementType
-import net.juniper.contrail.vro.workflows.model.Properties
 import net.juniper.contrail.vro.workflows.model.Workflow
 import net.juniper.contrail.vro.workflows.model.createDunesProperties
 import net.juniper.contrail.vro.workflows.model.createElementInfoProperties
 import net.juniper.contrail.vro.workflows.model.workflow
 
-fun elementInfoPropertiesFor(workflow: Workflow, category: String) : Properties {
-    return createElementInfoProperties(
-        categoryPath = "$libraryPackage.$category",
-        type = ElementType.Workflow,
-        name = workflow.displayName,
-        id = workflow.id!!
-    )
-}
+fun elementInfoPropertiesFor(workflow: Workflow, category: String) = createElementInfoProperties(
+    categoryPath = "$libraryPackage.$category",
+    type = ElementType.Workflow,
+    name = workflow.displayName,
+    id = workflow.id!!
+)
 
-fun dunesProp(
-    pkgDescriptionArg: String,
-    pkgNameArg: String,
-    usedPluginsArg: String,
-    pkgOwnerArg: String,
-    pkgIdArg: String
-): Properties {
-    return createDunesProperties(
-        pkgDescription = pkgDescriptionArg,
-        pkgName = pkgNameArg,
-        usedPlugins = usedPluginsArg,
-        pkgOwner = pkgOwnerArg,
-        pkgId = pkgIdArg
-    )
-}
+fun dunesPropertiesFor(info: ProjectInfo) = createDunesProperties(
+    pkgDescription = "Contrail package",
+    pkgName = info.workflowsPackageName,
+    usedPlugins = "Contrail#${info.baseVersion}",
+    pkgOwner = "Juniper",
+    pkgId = "4452345677834623546675023032605023032"
+)
 
 private val Connection = "Connection"
 

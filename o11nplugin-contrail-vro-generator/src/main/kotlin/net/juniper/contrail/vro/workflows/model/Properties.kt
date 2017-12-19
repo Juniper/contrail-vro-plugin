@@ -56,13 +56,11 @@ fun createElementInfoProperties(
     type: ElementType,
     name: String,
     id: String
-): Properties {
-    val prop = Properties()
-    prop.addEntry(categoryPathKey, categoryPath)
-    prop.addEntry(typeKey, type.toString())
-    prop.addEntry(nameKey, name)
-    prop.addEntry(idKey, id)
-    return prop
+): Properties = Properties().apply {
+    addEntry(categoryPathKey, categoryPath)
+    addEntry(typeKey, type.toString())
+    addEntry(nameKey, name)
+    addEntry(idKey, id)
 }
 
 fun createDunesProperties(
@@ -71,14 +69,12 @@ fun createDunesProperties(
     usedPlugins: String,
     pkgOwner: String,
     pkgId: String
-): Properties {
-    val prop = Properties()
-    prop.addEntry(pkgDescriptionKey, pkgDescription)
-    prop.addEntry(pkgNameKey, pkgName)
-    prop.addEntry(usedPluginsKey, usedPlugins)
-    prop.addEntry(pkgOwnerKey, pkgOwner)
-    prop.addEntry(pkgIdKey, pkgId)
-    return prop
+): Properties = Properties().apply {
+    addEntry(pkgDescriptionKey, pkgDescription)
+    addEntry(pkgNameKey, pkgName)
+    addEntry(usedPluginsKey, usedPlugins)
+    addEntry(pkgOwnerKey, pkgOwner)
+    addEntry(pkgIdKey, pkgId)
 }
 
 enum class ElementType {

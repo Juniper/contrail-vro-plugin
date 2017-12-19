@@ -16,7 +16,7 @@ import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
 
 fun runWorkflowGenerator(info: ProjectInfo, objectClasses: List<Class<out ApiObjectBase>>) {
-    createDunesMetaInfo(info)
+    generateDunesMetaInfo(info)
     createConnectionWorkflow(info).saveInConfiguration(info)
     deleteConnectionWorkflow(info).saveInConfiguration(info)
 
@@ -62,17 +62,23 @@ private class DefaultCharacterEscapeHandler : CharacterEscapeHandler {
 }
 
 private fun Workflow.generateDefinition(info: ProjectInfo, category: String) {
-    val file = prepareDefinitionFile(info, category)
+    val outputFile = prepareDefinitionFile(info, category)
 
-    workflowMarshaller.marshal(this, file)
+    workflowMarshaller.marshal(this, outputFile)
 }
 
 private fun Workflow.generateElementInfo(info: ProjectInfo, category: String) {
-
-    val file = prepareElementInfoFile(info, category)
+    val outputFile = prepareElementInfoFile(info, category)
     val properties = elementInfoPropertiesFor(this, category)
 
-    propertiesMarshaller.marshal(properties, file)
+    propertiesMarshaller.marshal(properties, outputFile)
+}
+
+private fun generateDunesMetaInfo(info: ProjectInfo) {
+    val outputFile = dunesOutputPath(info).asPreparedFile()
+    val properties = dunesPropertiesFor(info)
+
+    propertiesMarshaller.marshal(properties, outputFile)
 }
 
 val libraryPackage = "Library.Contrail"
@@ -109,15 +115,5 @@ private fun Workflow.prepareDefinitionFile(info: ProjectInfo, category: String) 
 private fun Workflow.prepareElementInfoFile(info: ProjectInfo, category: String) : File =
     elementInfoFileName(info, category).asPreparedFile()
 
-private fun createDunesMetaInfo(info: ProjectInfo) {
-    val outputFile = "${info.packageRoot}/$dunesInfoPath/$dunesFileName".asPreparedFile()
-    val properties = dunesProp(
-        pkgDescriptionArg = "Contrail package",
-        pkgNameArg = info.workflowsPackageName,
-        usedPluginsArg = "Contrail#${info.baseVersion}",
-        pkgOwnerArg = "Juniper",
-        pkgIdArg = "4452345677834623546675023032605023032"
-    )
-
-    propertiesMarshaller.marshal(properties, outputFile)
-}
+private fun dunesOutputPath(info: ProjectInfo) =
+    "${info.packageRoot}/$dunesInfoPath/$dunesFileName"
