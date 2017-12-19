@@ -2,9 +2,10 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator
+package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.vro.generator.util.folderName
 
 data class CustomMappingModel (
     val findableClassNames: List<String>,
@@ -19,11 +20,10 @@ data class ClassInfoModel(
     val folderName: String
 )
 
-fun Class<*>.toClassInfoModel() =
-    ClassInfoModel(
-        simpleName,
-        simpleName.folderName()
-    )
+fun Class<*>.toClassInfoModel() = ClassInfoModel(
+    simpleName,
+    simpleName.folderName()
+)
 
 fun generateCustomMappingModel(
     objectClasses: List<Class<out ApiObjectBase>>,
@@ -31,11 +31,10 @@ fun generateCustomMappingModel(
     relations: List<Relation>,
     referenceRelations: List<RefRelation>,
     nestedRelations: List<NestedRelation>
-): CustomMappingModel =
-    CustomMappingModel(
-        objectClasses.map { it.simpleName },
-        rootClasses.map { it.toClassInfoModel() },
-        relations.map { it.toRelationModel() },
-        referenceRelations.map { it.toRefRelationModel() },
-        nestedRelations.map { it.toNestedRelationModel() }
-    )
+) = CustomMappingModel(
+    objectClasses.map { it.simpleName },
+    rootClasses.map { it.toClassInfoModel() },
+    relations.map { it.toRelationModel() },
+    referenceRelations.map { it.toRefRelationModel() },
+    nestedRelations.map { it.toNestedRelationModel() }
+)

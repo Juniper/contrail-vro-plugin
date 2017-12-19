@@ -2,11 +2,13 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator
+package net.juniper.contrail.vro.generator.model
 
 import freemarker.cache.ClassTemplateLoader
 import freemarker.template.Configuration
 import freemarker.template.TemplateExceptionHandler
+import net.juniper.contrail.vro.generator.util.append
+import net.juniper.contrail.vro.generator.util.packageToPath
 import java.io.FileWriter
 import java.io.IOException
 import java.nio.file.Files

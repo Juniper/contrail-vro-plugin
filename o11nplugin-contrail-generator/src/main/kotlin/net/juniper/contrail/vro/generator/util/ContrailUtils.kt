@@ -2,11 +2,12 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator
+package net.juniper.contrail.vro.generator.util
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.types.ConfigRoot
+import net.juniper.contrail.vro.generator.apiTypesPackageName
 
 fun propertyClasses() =
     ApiPropertyBase::class.java.nonAbstractSubclasses()

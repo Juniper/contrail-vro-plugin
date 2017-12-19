@@ -2,10 +2,22 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator
+package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ObjectReference
+import net.juniper.contrail.vro.generator.util.collapsedNestedName
+import net.juniper.contrail.vro.generator.util.defaultParentType
+import net.juniper.contrail.vro.generator.util.folderName
+import net.juniper.contrail.vro.generator.util.isApiTypeClass
+import net.juniper.contrail.vro.generator.util.isGetter
+import net.juniper.contrail.vro.generator.util.isRelatable
+import net.juniper.contrail.vro.generator.util.nameWithoutGet
+import net.juniper.contrail.vro.generator.util.nameWithoutGetAndBackRefs
+import net.juniper.contrail.vro.generator.util.objectType
+import net.juniper.contrail.vro.generator.util.propertyName
+import net.juniper.contrail.vro.generator.util.referenceName
+import net.juniper.contrail.vro.generator.util.typeToClassName
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -74,7 +86,7 @@ private fun relationName(parentType: String, childType: String) =
     "${parentType}To$childType"
 
 private fun RelationGraphNode.toRelationSequence(): Sequence<Relation> =
-    second.asSequence().map { Relation( first, it) }
+    second.asSequence().map { Relation(first, it) }
 
 fun generateReferenceRelations(classes: List<Class<out ApiObjectBase>>): List<RefRelation> =
     classes.asSequence()

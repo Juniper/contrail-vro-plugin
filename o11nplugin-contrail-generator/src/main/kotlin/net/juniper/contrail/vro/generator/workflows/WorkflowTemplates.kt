@@ -2,17 +2,17 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.workflows
+package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.generator.ProjectInfo
-import net.juniper.contrail.vro.generator.parentClassName
-import net.juniper.contrail.vro.generator.splitCamel
-import net.juniper.contrail.vro.workflows.model.ElementType
-import net.juniper.contrail.vro.workflows.model.Workflow
-import net.juniper.contrail.vro.workflows.model.createDunesProperties
-import net.juniper.contrail.vro.workflows.model.createElementInfoProperties
-import net.juniper.contrail.vro.workflows.model.workflow
+import net.juniper.contrail.vro.generator.util.parentClassName
+import net.juniper.contrail.vro.generator.util.splitCamel
+import net.juniper.contrail.vro.generator.workflows.model.ElementType
+import net.juniper.contrail.vro.generator.workflows.model.Workflow
+import net.juniper.contrail.vro.generator.workflows.model.createDunesProperties
+import net.juniper.contrail.vro.generator.workflows.model.createElementInfoProperties
+import net.juniper.contrail.vro.generator.workflows.model.workflow
 
 fun elementInfoPropertiesFor(workflow: Workflow, category: String) = createElementInfoProperties(
     categoryPath = "$libraryPackage.$category",

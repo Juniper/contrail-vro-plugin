@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator
+package net.juniper.contrail.vro.generator.model
 
 data class RelationsModel(
     val rootClassNames: List<String>,
@@ -44,42 +44,38 @@ data class GetterModel(
     val toMany: Boolean
 )
 
-fun Relation.toRelationModel(): RelationModel =
-    RelationModel(
-        parentName,
-        childName,
-        childName.decapitalize(),
-        name,
-        folderName
-    )
+fun Relation.toRelationModel() = RelationModel(
+    parentName,
+    childName,
+    childName.decapitalize(),
+    name,
+    folderName
+)
 
-fun RefRelation.toRefRelationModel() =
-    RefRelationModel(
-        parentName,
-        childName,
-        childOriginalName,
-        getter,
-        folderName
-    )
+fun RefRelation.toRefRelationModel() = RefRelationModel(
+    parentName,
+    childName,
+    childOriginalName,
+    getter,
+    folderName
+)
 
-fun NestedRelation.toNestedRelationModel() =
-    NestedRelationModel(
-        childWrapperName,
-        parentWrapperName,
-        name,
-        getter,
-        folderName,
-        toMany,
-        rootClass.simpleName,
-        getterChain.map { it.toGetterModel() }
-    )
+fun NestedRelation.toNestedRelationModel() = NestedRelationModel(
+    childWrapperName,
+    parentWrapperName,
+    name,
+    getter,
+    folderName,
+    toMany,
+    rootClass.simpleName,
+    getterChain.map { it.toGetterModel() }
+)
 
-fun Getter.toGetterModel() =
-    GetterModel(
-        name,
-        name.decapitalize(),
-        toMany
-    )
+fun Getter.toGetterModel() = GetterModel(
+    name,
+    name.decapitalize(),
+    toMany
+)
 
 fun generateRelationsModel(
     relations: List<Relation>,

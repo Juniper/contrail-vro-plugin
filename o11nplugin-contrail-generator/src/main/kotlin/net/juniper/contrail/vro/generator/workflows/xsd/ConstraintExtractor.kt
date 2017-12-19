@@ -2,11 +2,11 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.workflows.xsd
+package net.juniper.contrail.vro.generator.workflows.xsd
 
 import net.juniper.contrail.api.ApiObjectBase
-import net.juniper.contrail.vro.workflows.model.ParameterQualifier
-import net.juniper.contrail.vro.workflows.model.wrapConstraints
+import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
+import net.juniper.contrail.vro.generator.workflows.model.wrapConstraints
 import org.w3c.dom.Node
 
 private val VALUE = "value"

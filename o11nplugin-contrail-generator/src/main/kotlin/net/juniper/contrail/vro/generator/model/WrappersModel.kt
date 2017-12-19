@@ -2,9 +2,14 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator
+package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.vro.generator.util.isApiTypeClass
+import net.juniper.contrail.vro.generator.util.kotlinClassName
+import net.juniper.contrail.vro.generator.util.nestedName
+import net.juniper.contrail.vro.generator.util.referenceName
+import net.juniper.contrail.vro.generator.util.underscoredNestedName
 
 data class WrappersModel(
     val references: List<ReferenceWrapperModel>,
@@ -32,30 +37,27 @@ data class PropertyModel(
     val classLabel: String
 )
 
-fun Property.toPropertyModel() =
-    PropertyModel(
-        propertyName,
-        wrapperName,
-        componentName,
-        classLabel
-    )
+fun Property.toPropertyModel() = PropertyModel(
+    propertyName,
+    wrapperName,
+    componentName,
+    classLabel
+)
 
-fun ReferenceWrapper.toReferenceWrapperModel() =
-    ReferenceWrapperModel(
-        simpleName,
-        referenceName
-    )
+fun ReferenceWrapper.toReferenceWrapperModel() = ReferenceWrapperModel(
+    simpleName,
+    referenceName
+)
 
 class ReferenceWrapper(
     val simpleName: String,
     val referenceName: String
 )
 
-fun Class<*>.toReferenceWrapper() =
-    ReferenceWrapper(
-        simpleName,
-        referenceName
-    )
+fun Class<*>.toReferenceWrapper() = ReferenceWrapper(
+    simpleName,
+    referenceName
+)
 
 private fun wrapperName(rootClass: Class<*>, getterChain: List<Getter>) =
     rootClass.simpleName + getterChain.joinToString("") { "_" + it.name }

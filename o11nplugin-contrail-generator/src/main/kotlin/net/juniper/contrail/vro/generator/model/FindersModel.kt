@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator
+package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.api.ApiObjectBase
 
@@ -16,9 +16,8 @@ fun generateFindersModel(
     objectClasses: List<Class<out ApiObjectBase>>,
     referenceWrappers: List<ReferenceWrapper>,
     nestedRelations: List<NestedRelation>
-): FindersModel =
-    FindersModel(
-        objectClasses.map { it.simpleName },
-        referenceWrappers.map { it.toReferenceWrapperModel() },
-        nestedRelations.map { it.toNestedRelationModel() }
-    )
+) = FindersModel(
+    objectClasses.map { it.simpleName },
+    referenceWrappers.map { it.toReferenceWrapperModel() },
+    nestedRelations.map { it.toNestedRelationModel() }
+)

@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.workflows.xsd
+package net.juniper.contrail.vro.generator.workflows.xsd
 
 abstract class IdlComment(val comment: String) {
     lateinit var type: String

@@ -2,9 +2,9 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.workflows.model
+package net.juniper.contrail.vro.generator.workflows.model
 
-import net.juniper.contrail.vro.generator.CDATA
+import net.juniper.contrail.vro.generator.util.CDATA
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute

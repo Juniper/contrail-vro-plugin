@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.workflows.xsd
+package net.juniper.contrail.vro.generator.workflows.xsd
 
 import org.w3c.dom.Node
 

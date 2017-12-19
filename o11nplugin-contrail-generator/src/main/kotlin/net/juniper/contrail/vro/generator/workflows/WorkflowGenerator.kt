@@ -2,20 +2,20 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.workflows
+package net.juniper.contrail.vro.generator.workflows
 
 import com.sun.xml.internal.bind.marshaller.CharacterEscapeHandler
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.generator.ProjectInfo
-import net.juniper.contrail.vro.generator.packageToPath
-import net.juniper.contrail.vro.workflows.model.Workflow
-import net.juniper.contrail.vro.workflows.model.Properties
+import net.juniper.contrail.vro.generator.util.packageToPath
+import net.juniper.contrail.vro.generator.workflows.model.Workflow
+import net.juniper.contrail.vro.generator.workflows.model.Properties
 import java.io.File
 import java.io.Writer
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
 
-fun runWorkflowGenerator(info: ProjectInfo, objectClasses: List<Class<out ApiObjectBase>>) {
+fun generateWorkflows(info: ProjectInfo, objectClasses: List<Class<out ApiObjectBase>>) {
     generateDunesMetaInfo(info)
     createConnectionWorkflow(info).saveInConfiguration(info)
     deleteConnectionWorkflow(info).saveInConfiguration(info)
@@ -97,10 +97,10 @@ private fun File.prepare()
 private fun String.asPreparedFile(): File =
     File(this).apply { prepare( ) }
 
-private inline fun outputDirectory(info: ProjectInfo, category: String) =
+private fun outputDirectory(info: ProjectInfo, category: String) =
     "${info.packageRoot}/$workflowResources/$libraryPath/$category"
 
-private inline fun Workflow.outputFileBase(info: ProjectInfo, category: String) =
+private fun Workflow.outputFileBase(info: ProjectInfo, category: String) =
     outputDirectory(info, category) + "/" + displayName
 
 private fun Workflow.definitionFileName(info: ProjectInfo, category: String) =

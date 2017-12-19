@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator
+package net.juniper.contrail.vro.generator.util
 
 import com.google.common.reflect.ClassPath
 import net.juniper.contrail.api.ApiObjectBase

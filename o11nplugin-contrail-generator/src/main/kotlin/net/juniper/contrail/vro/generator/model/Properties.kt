@@ -2,8 +2,14 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator
+package net.juniper.contrail.vro.generator.model
 
+import net.juniper.contrail.vro.generator.util.isApiTypeClass
+import net.juniper.contrail.vro.generator.util.kotlinClassName
+import net.juniper.contrail.vro.generator.util.propertyName
+import net.juniper.contrail.vro.generator.util.underscoredNestedName
+import net.juniper.contrail.vro.generator.util.underscoredPropertyToCamelCase
+import net.juniper.contrail.vro.generator.util.wrapperName
 import java.lang.reflect.ParameterizedType
 
 class Property(val fieldName: String, val clazz: Class<*>, val parent: Class<*>, val wrapname: String? = null) {
@@ -18,7 +24,8 @@ open class ClassProperties(
     val listProperties: List<Property>
 )
 
-val <T> Class<T>.properties: ClassProperties get() {
+val <T> Class<T>.properties: ClassProperties
+    get() {
     val simpleProperties = mutableListOf<Property>()
     val listProperties = mutableListOf<Property>()
 
