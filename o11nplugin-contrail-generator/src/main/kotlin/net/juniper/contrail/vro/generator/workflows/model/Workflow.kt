@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.generator.workflows.model
 
+import com.google.common.hash.Hashing
 import net.juniper.contrail.vro.generator.ProjectInfo
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
@@ -116,9 +117,14 @@ private val END = WorkflowItem("item0", type = "end").apply {
     position = Position(325.0f, 10.0f)
 }
 
+private fun generateID(packageName: String, displayName: String) =
+    Hashing.md5().newHasher()
+        .putString("$packageName.$displayName", Charsets.UTF_8)
+        .hash().toString()
+
 fun workflow(info: ProjectInfo, displayName: String, setup: Workflow.() -> Unit): Workflow {
     val workflow = Workflow(displayName)
-    workflow.id = (info.workflowsPackageName + displayName).hashCode().toString()
+    workflow.id = generateID(info.workflowsPackageName, displayName)
     workflow.rootName = "item1"
     workflow.objectName = "workflow:name=generic"
     workflow.version = "${info.baseVersion}.${info.buildNumber}"
