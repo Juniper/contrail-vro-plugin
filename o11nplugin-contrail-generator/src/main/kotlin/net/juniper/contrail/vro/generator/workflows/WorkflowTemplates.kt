@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.generator.ProjectInfo
+import net.juniper.contrail.vro.generator.model.RefRelationModel
 import net.juniper.contrail.vro.generator.util.parentClassName
 import net.juniper.contrail.vro.generator.util.splitCamel
 import net.juniper.contrail.vro.generator.workflows.model.ElementType
@@ -196,6 +197,50 @@ fun deleteWorkflow(info: ProjectInfo, clazz: String, scriptBody: String): Workfl
     }
 }
 
+fun addReferenceWorkflow(info: ProjectInfo, relation: RefRelationModel): Workflow {
+
+    val parentName = relation.parentName
+    val childName = relation.childOriginalName
+    val workflowName = "Add ${childName.inWorkflowName} to ${parentName.inWorkflowName}"
+    val parentDescription = "${parentName.inDescription.capitalize()} to add to"
+    val childDescription = "${childName.inDescription.capitalize()} to be added"
+    val parentType = parentName.asFinder
+    val childType = childName.asFinder
+
+    return workflow(info, workflowName) {
+        input {
+            parameter("parent", parentType, parentDescription)
+            parameter("child", childType, childDescription)
+        }
+
+        output {
+            parameter("success", "boolean")
+        }
+
+        items {
+            script {
+                body = addReferenceRelationScriptBody(relation)
+
+                inBinding("parent", parentType)
+                inBinding("child", childType)
+
+                outBinding("success", "boolean")
+            }
+        }
+
+        presentation {
+            step {
+                parameter("parent", parentDescription) {
+                    mandatory = true
+                }
+                parameter("child", childDescription) {
+                    mandatory = true
+                }
+            }
+        }
+    }
+}
+
 private val createConnectionScriptBody = """
 var connectionId = ContrailConnectionManager.create(name, host, port, username, password, authServer, tenant);
 System.log("Created connection with ID: " + connectionId);
@@ -215,4 +260,15 @@ executor.create$className(element${if (parentName == Connection) "" else ", pare
 private fun deleteScriptBody(className: String) = """
 var executor = ContrailConnectionManager.getExecutor(object.getInternalId().toString());
 executor.delete$className(object);
+""".trimIndent()
+
+private fun addReferenceRelationScriptBody(relation: RefRelationModel) = """
+${if (relation.simpleReference)
+    "parent.add${relation.childOriginalName}(child);"
+else {
+    """var attribute = new Contrail${relation.referenceAttribute}();
+    parent.add${relation.childOriginalName}(child, attribute);"""
+}}
+var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
+executor.update${relation.parentName}(parent);
 """.trimIndent()

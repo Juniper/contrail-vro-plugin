@@ -11,6 +11,7 @@ import net.juniper.contrail.vro.generator.util.collapsedNestedName
 import net.juniper.contrail.vro.generator.util.defaultParentType
 import net.juniper.contrail.vro.generator.util.folderName
 import net.juniper.contrail.vro.generator.util.isApiTypeClass
+import net.juniper.contrail.vro.generator.util.isBackRef
 import net.juniper.contrail.vro.generator.util.isGetter
 import net.juniper.contrail.vro.generator.util.isRelatable
 import net.juniper.contrail.vro.generator.util.nameWithoutGet
@@ -41,6 +42,7 @@ class RefRelation (
     val getter: String = method.propertyName
     val referenceAttribute = method.objectReferenceAtrributeClassOrDefault
     val simpleReference = referenceAttribute.isSimpleReference
+    val backReference = method.isBackRef
     val folderName = method.nameWithoutGetAndBackRefs.folderName()
 }
 

@@ -26,6 +26,7 @@ data class RefRelationModel(
     val getter: String,
     val referenceAttribute: String,
     val simpleReference: Boolean,
+    val backReference: Boolean,
     val folderName: String
 )
 
@@ -61,6 +62,7 @@ fun RefRelation.toRefRelationModel() = RefRelationModel(
     getter,
     referenceAttribute.simpleName,
     simpleReference,
+    backReference,
     folderName
 )
 

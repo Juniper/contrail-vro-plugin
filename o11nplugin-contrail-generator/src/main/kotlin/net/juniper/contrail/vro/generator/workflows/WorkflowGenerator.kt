@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.generator.workflows
 
 import com.sun.xml.internal.bind.marshaller.CharacterEscapeHandler
 import net.juniper.contrail.vro.generator.ProjectInfo
+import net.juniper.contrail.vro.generator.model.RefRelationModel
 import net.juniper.contrail.vro.generator.model.RelationsModel
 import net.juniper.contrail.vro.generator.util.packageToPath
 import net.juniper.contrail.vro.generator.workflows.model.Workflow
@@ -27,11 +28,21 @@ fun generateWorkflows(info: ProjectInfo, relationsModel: RelationsModel) {
     relationsModel.relations.forEach {
         generateLifecycleWorkflows(info, it.childName, it.parentName)
     }
+
+    relationsModel.referenceRelations.asSequence()
+        .filter { !it.backReference }
+        .forEach {
+        generateReferenceWorkflows(info, it)
+    }
 }
 
 private fun generateLifecycleWorkflows(info: ProjectInfo, className: String, parentName: String = Connection) {
     createWorkflow(info, className, parentName).save(info, className)
     deleteWorkflow(info, className).save(info, className)
+}
+
+private fun generateReferenceWorkflows(info: ProjectInfo, relation: RefRelationModel) {
+    addReferenceWorkflow(info, relation).save(info, relation.parentName)
 }
 
 val workflowContext = JAXBContext.newInstance(Workflow::class.java)

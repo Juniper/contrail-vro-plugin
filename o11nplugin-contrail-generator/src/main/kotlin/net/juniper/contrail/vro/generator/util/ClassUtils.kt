@@ -45,6 +45,9 @@ val Method.propertyName get() =
 val Method.isGetter get() =
     name.startsWith("get")
 
+val Method.isBackRef get() =
+    isGetter and name.endsWith("BackRefs")
+
 val Method.referenceName get() =
     nameWithoutGetAndBackRefs.ref
 
