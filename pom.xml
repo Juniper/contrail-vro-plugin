@@ -37,7 +37,7 @@
       <dependency>
         <groupId>net.juniper.contrail</groupId>
         <artifactId>juniper-contrail-api</artifactId>
-        <version>3.0-VRO-SNAPSHOT</version>
+        <version>3.0-SNAPSHOT</version>
         <exclusions>
           <exclusion>
             <groupId>org.pacesys</groupId>
