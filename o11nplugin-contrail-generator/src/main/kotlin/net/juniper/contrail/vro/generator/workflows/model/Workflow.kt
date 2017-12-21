@@ -105,7 +105,7 @@ class Workflow(
             val scriptableItem = WorkflowItem("item$id", "task")
             scriptableItem.outName = "item$previousId"
             scriptableItem.displayName = "Scriptable task"
-            scriptableItem.position = Position(145.0f, 20.0f)
+            scriptableItem.position = Position(150.0f, 20.0f)
             scriptableItem.setup()
             workflow.workflowItems.add(scriptableItem)
         }
@@ -114,7 +114,7 @@ class Workflow(
 
 private val END = WorkflowItem("item0", type = "end").apply {
     endMode = "0"
-    position = Position(325.0f, 10.0f)
+    position = Position(330.0f, 10.0f)
 }
 
 private fun generateID(packageName: String, displayName: String) =
@@ -131,7 +131,7 @@ fun workflow(info: ProjectInfo, displayName: String, setup: Workflow.() -> Unit)
     workflow.apiVersion = "6.0.0"
     workflow.restartMode = "1"
     workflow.resumeFromFailedMode = "0"
-    workflow.position = Position(100.0f, 100.0f)
+    workflow.position = Position(50.0f, 10.0f)
 
     workflow.setup()
 
