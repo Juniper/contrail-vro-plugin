@@ -46,10 +46,22 @@ private val <T : ApiObjectBase> Class<T>.parentName get() =
 fun createConnectionWorkflow(info: ProjectInfo): Workflow {
 
     val nameInputDescription = "Connection name"
+    val hostInputDescription = "Contrail host"
+    val portInputDescription = "Contrail port"
+    val usernameInputDescription = "User name"
+    val passwordInputDescription = "User password"
+    val authServerInputDescription = "Authentication server"
+    val tenantInputDescription = "Tenant"
 
     return workflow(info, "Create Contrail connection") {
         input {
             parameter("name", "string", nameInputDescription)
+            parameter("host", "string", hostInputDescription)
+            parameter("port", "number", portInputDescription)
+            parameter("username", "string", usernameInputDescription)
+            parameter("password", "SecureString", passwordInputDescription)
+            parameter("authServer", "string", authServerInputDescription)
+            parameter("tenant", "string", tenantInputDescription)
         }
 
         output {
@@ -61,16 +73,41 @@ fun createConnectionWorkflow(info: ProjectInfo): Workflow {
                 body = createConnectionScriptBody
 
                 inBinding("name", "string")
+                inBinding("host", "string")
+                inBinding("port", "number")
+                inBinding("username", "string")
+                inBinding("password", "SecureString")
+                inBinding("authServer", "string")
+                inBinding("tenant", "string")
 
                 outBinding("success", "boolean")
             }
         }
 
         presentation {
-            step {
+            step("Controller") {
                 parameter("name", nameInputDescription) {
                     mandatory = true
+                    setDefaultValue("string", "Controller")
                 }
+                parameter("host", hostInputDescription) {
+                    mandatory = true
+                }
+                parameter("port", portInputDescription) {
+                    mandatory = true
+                    setDefaultValue(8082)
+                    numberFormat = "#0"
+                    minNumberValue = 0
+                    maxNumberValue = 65535
+                }
+            }
+            step("Credentials") {
+                parameter("username", usernameInputDescription)
+                parameter("password", passwordInputDescription)
+                parameter("authServer", authServerInputDescription)
+            }
+            step("Tenant") {
+                parameter("tenant", tenantInputDescription)
             }
         }
     }
@@ -152,6 +189,7 @@ fun deleteWorkflow(info: ProjectInfo, clazz: String, scriptBody: String): Workfl
             step {
                 parameter("object", inputDescription) {
                     mandatory = true
+                    showInInventory = true
                 }
             }
         }
@@ -170,7 +208,7 @@ System.log("Created connection with ID: " + connectionId);
 """.trimIndent()
 
 private val deleteConnectionScriptBody = """
-ContrailConnectionManager.delete(connection);
+ContrailConnectionManager.delete(object);
 """.trimIndent()
 
 private fun createScriptBody(className: String) = """

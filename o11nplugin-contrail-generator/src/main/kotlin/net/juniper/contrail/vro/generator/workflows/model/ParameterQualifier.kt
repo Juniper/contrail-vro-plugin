@@ -31,10 +31,32 @@ class ParameterQualifier (
     @XmlValue
     val value: String? = value.CDATA
 
-    companion object {
-        val mandatory = ParameterQualifier("static", "mandatory", "boolean", true.toString())
-    }
 }
+
+val staticKindName = "static"
+
+val mandatoryQualifierName = "mandatory"
+val defaultValueQualifierName = "defaultValue"
+val numberFormatQualifierName = "numberFormat"
+val minNumberValueQualifierName = "minNumberValue"
+val maxNumberValueQualifierName = "maxNumberValue"
+val showInInventoryQualifierName = "contextualParameter"
+
+val booleanTypeName = "boolean"
+val stringTypeName = "string"
+val voidTypeName = "void"
+
+val voidValue = "__NULL__"
+
+val showInInventoryQualifier = ParameterQualifier(name = showInInventoryQualifierName, type = voidTypeName, value = voidValue)
+val mandatoryQualifier = staticQualifier(mandatoryQualifierName, booleanTypeName, true.toString())
+fun defaultValueQualifier(type: String, value: String) = staticQualifier(defaultValueQualifierName, type, value)
+fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifierName, stringTypeName, value)
+fun minNumberValueQualifier(value: Int) = ParameterQualifier(name = minNumberValueQualifierName, value = value.toString())
+fun maxNumberValueQualifier(value: Int) = ParameterQualifier(name = maxNumberValueQualifierName, value = value.toString())
+
+private fun staticQualifier(name: String?, type: String?, value: String?) =
+    ParameterQualifier(staticKindName, name, type, value)
 
 fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQualifier? =
     when (xsdConstraint) {

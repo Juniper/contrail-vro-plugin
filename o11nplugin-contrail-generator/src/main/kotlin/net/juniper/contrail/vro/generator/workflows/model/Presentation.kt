@@ -40,7 +40,7 @@ class PresentationStep (
     @XmlElement(name = "p-param")
     private val presentationParameters: MutableList<PresentationParameter> = mutableListOf()
 
-    fun parameter(name: String, description: String, setup: PresentationParameter.() -> Unit) {
+    fun parameter(name: String, description: String, setup: PresentationParameter.() -> Unit = {}) {
         val parameter = PresentationParameter(name, description)
         parameter.setup()
         presentationParameters.add(parameter)
@@ -65,12 +65,52 @@ class PresentationParameter(
     private val parameterQualifiers: MutableList<ParameterQualifier> = mutableListOf()
 
     var mandatory: Boolean
-        get() = parameterQualifiers.contains(ParameterQualifier.mandatory)
+        get() = parameterQualifiers.contains(mandatoryQualifier)
+        set(value) =
+            addOrRemove(value, mandatoryQualifier)
+
+    var showInInventory: Boolean
+        get() = parameterQualifiers.contains(showInInventoryQualifier)
+        set(value) =
+            addOrRemove(value, showInInventoryQualifier)
+
+    fun setDefaultValue(type: String, value: String) =
+        addOrReplace(defaultValueQualifier(type, value))
+
+    fun setDefaultValue(value: String) =
+        setDefaultValue("string", value)
+
+    fun setDefaultValue(value: Int) =
+        setDefaultValue("number", value.toString())
+
+    var numberFormat: String?
+        get() = parameterQualifiers.find { it.name == numberFormatQualifierName }?.value
         set(value) {
-            if (value)
-                parameterQualifiers.addIfAbsent(ParameterQualifier.mandatory)
-            else
-                parameterQualifiers.remove(ParameterQualifier.mandatory)
+            addOrReplace(numberFormatQualifier(value ?: return))
         }
+
+    var minNumberValue: Int?
+        get() = parameterQualifiers.find { it.name == minNumberValueQualifierName }?.value?.toInt()
+        set(value) {
+            addOrReplace(minNumberValueQualifier(value ?: return))
+        }
+
+    var maxNumberValue: Int?
+        get() = parameterQualifiers.find { it.name == maxNumberValueQualifierName }?.value?.toInt()
+        set(value) {
+            addOrReplace(maxNumberValueQualifier(value ?: return))
+        }
+
+    private fun addOrRemove(add: Boolean, parameter: ParameterQualifier) {
+        if (add)
+            parameterQualifiers.addIfAbsent(parameter)
+        else
+            parameterQualifiers.remove(parameter)
+    }
+
+    private fun addOrReplace(parameter: ParameterQualifier) {
+        parameterQualifiers.removeIf { it.name == parameter.name }
+        parameterQualifiers.add(parameter)
+    }
 }
 
