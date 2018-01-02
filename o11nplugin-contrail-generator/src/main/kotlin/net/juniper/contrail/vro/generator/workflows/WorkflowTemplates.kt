@@ -10,9 +10,14 @@ import net.juniper.contrail.vro.generator.model.RefRelation
 import net.juniper.contrail.vro.generator.util.parentClassName
 import net.juniper.contrail.vro.generator.util.splitCamel
 import net.juniper.contrail.vro.generator.workflows.model.ElementType
+import net.juniper.contrail.vro.generator.workflows.model.SecureString
 import net.juniper.contrail.vro.generator.workflows.model.Workflow
+import net.juniper.contrail.vro.generator.workflows.model.boolean
 import net.juniper.contrail.vro.generator.workflows.model.createDunesProperties
 import net.juniper.contrail.vro.generator.workflows.model.createElementInfoProperties
+import net.juniper.contrail.vro.generator.workflows.model.number
+import net.juniper.contrail.vro.generator.workflows.model.reference
+import net.juniper.contrail.vro.generator.workflows.model.string
 import net.juniper.contrail.vro.generator.workflows.model.workflow
 
 fun elementInfoPropertiesFor(workflow: Workflow, category: String) = createElementInfoProperties(
@@ -56,32 +61,32 @@ fun createConnectionWorkflow(info: ProjectInfo): Workflow {
 
     return workflow(info, "Create Contrail connection") {
         input {
-            parameter("name", "string", nameInputDescription)
-            parameter("host", "string", hostInputDescription)
-            parameter("port", "number", portInputDescription)
-            parameter("username", "string", usernameInputDescription)
-            parameter("password", "SecureString", passwordInputDescription)
-            parameter("authServer", "string", authServerInputDescription)
-            parameter("tenant", "string", tenantInputDescription)
+            parameter("name", string, nameInputDescription)
+            parameter("host", string, hostInputDescription)
+            parameter("port", number, portInputDescription)
+            parameter("username", string, usernameInputDescription)
+            parameter("password", SecureString, passwordInputDescription)
+            parameter("authServer", string, authServerInputDescription)
+            parameter("tenant", string, tenantInputDescription)
         }
 
         output {
-            parameter("success", "boolean")
+            parameter("success", boolean)
         }
 
         items {
             script {
                 body = createConnectionScriptBody
 
-                inBinding("name", "string")
-                inBinding("host", "string")
-                inBinding("port", "number")
-                inBinding("username", "string")
-                inBinding("password", "SecureString")
-                inBinding("authServer", "string")
-                inBinding("tenant", "string")
+                inBinding("name", string)
+                inBinding("host", string)
+                inBinding("port", number)
+                inBinding("username", string)
+                inBinding("password", SecureString)
+                inBinding("authServer", string)
+                inBinding("tenant", string)
 
-                outBinding("success", "boolean")
+                outBinding("success", boolean)
             }
         }
 
@@ -89,7 +94,7 @@ fun createConnectionWorkflow(info: ProjectInfo): Workflow {
             step("Controller") {
                 parameter("name", nameInputDescription) {
                     mandatory = true
-                    setDefaultValue("string", "Controller")
+                    setDefaultValue("Controller")
                 }
                 parameter("host", hostInputDescription) {
                     mandatory = true
@@ -118,27 +123,26 @@ fun createWorkflow(info: ProjectInfo, className: String, parentName: String): Wo
 
     val workflowName = "Create ${className.inWorkflowName}"
     val nameInputDescription = "${className.inDescription} name"
-    val parentType = parentName.asFinder
     val parentInputDescription = "Parent ${parentName.inDescription}"
 
     return workflow(info, workflowName) {
         input {
-            parameter("name", "string", nameInputDescription)
-            parameter("parent", parentType, parentInputDescription)
+            parameter("name", string, nameInputDescription)
+            parameter("parent", parentName.reference, parentInputDescription)
         }
 
         output {
-            parameter("success", "boolean")
+            parameter("success", boolean)
         }
 
         items {
             script {
                 body = createScriptBody(className, parentName)
 
-                inBinding("name", "string")
-                inBinding("parent", parentType)
+                inBinding("name", string)
+                inBinding("parent", parentName.reference)
 
-                outBinding("success", "boolean")
+                outBinding("success", boolean)
             }
         }
 
@@ -156,7 +160,7 @@ fun createWorkflow(info: ProjectInfo, className: String, parentName: String): Wo
 }
 
 fun deleteConnectionWorkflow(info: ProjectInfo): Workflow =
-    deleteWorkflow(info, "Connection", deleteConnectionScriptBody)
+    deleteWorkflow(info, Connection, deleteConnectionScriptBody)
 
 fun deleteWorkflow(info: ProjectInfo, className: String): Workflow =
     deleteWorkflow(info, className, deleteScriptBody(className))
@@ -169,20 +173,20 @@ fun deleteWorkflow(info: ProjectInfo, clazz: String, scriptBody: String): Workfl
 
     return workflow(info, workflowName) {
         input {
-            parameter("object", finderName, inputDescription)
+            parameter("object", clazz.reference, inputDescription)
         }
 
         output {
-            parameter("success", "boolean")
+            parameter("success", boolean)
         }
 
         items {
             script {
                 body = scriptBody
 
-                inBinding("object", finderName)
+                inBinding("object", clazz.reference)
 
-                outBinding("success", "boolean")
+                outBinding("success", boolean)
             }
         }
 
@@ -209,22 +213,22 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow {
 
     return workflow(info, workflowName) {
         input {
-            parameter("parent", parentType, parentDescription)
-            parameter("child", childType, childDescription)
+            parameter("parent", parentName.reference, parentDescription)
+            parameter("child", childName.reference, childDescription)
         }
 
         output {
-            parameter("success", "boolean")
+            parameter("success", boolean)
         }
 
         items {
             script {
                 body = addReferenceRelationScriptBody(relation)
 
-                inBinding("parent", parentType)
-                inBinding("child", childType)
+                inBinding("parent", parentName.reference)
+                inBinding("child", childName.reference)
 
-                outBinding("success", "boolean")
+                outBinding("success", boolean)
             }
         }
 
@@ -253,22 +257,22 @@ fun removeReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow 
 
     return workflow(info, workflowName) {
         input {
-            parameter("parent", parentType, parentDescription)
-            parameter("child", childType, childDescription)
+            parameter("parent", parentName.reference, parentDescription)
+            parameter("child", childName.reference, childDescription)
         }
 
         output {
-            parameter("success", "boolean")
+            parameter("success", boolean)
         }
 
         items {
             script {
                 body = removeReferenceRelationScriptBody(relation)
 
-                inBinding("parent", parentType)
-                inBinding("child", childType)
+                inBinding("parent", parentName.reference)
+                inBinding("child", childName.reference)
 
-                outBinding("success", "boolean")
+                outBinding("success", boolean)
             }
         }
 

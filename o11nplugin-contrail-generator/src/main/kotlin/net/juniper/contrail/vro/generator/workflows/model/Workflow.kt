@@ -82,7 +82,7 @@ class Workflow(
 
     class ParametersBuilder(private val parameters: ParameterSet) {
 
-        fun parameter(name: String, type: String, description: String? = null) {
+        fun parameter(name: String, type: ParameterType, description: String? = null) {
             parameters.addParameter(Parameter(name, type, description))
         }
     }

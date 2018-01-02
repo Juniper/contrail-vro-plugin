@@ -57,14 +57,14 @@ class WorkflowItem(
     @XmlElement(name = "out-binding")
     var outBinding: Binding? = null
 
-    fun inBinding(name: String, type: String, exportName: String = name) {
+    fun inBinding(name: String, type: ParameterType, exportName: String = name) {
         inBinding = inBinding.safeBind(name, type, exportName)
     }
 
-    fun outBinding(name: String, type: String, exportName: String = name) {
+    fun outBinding(name: String, type: ParameterType, exportName: String = name) {
         outBinding = outBinding.safeBind(name, type, exportName)
     }
 
-    private fun Binding?.safeBind(name: String, type: String, exportName: String): Binding =
+    private fun Binding?.safeBind(name: String, type: ParameterType, exportName: String): Binding =
         (this ?: Binding()).apply { bind(name, type, exportName) }
 }

@@ -74,7 +74,7 @@ class PresentationParameter(
         set(value) =
             addOrRemove(value, showInInventoryQualifier)
 
-    fun setDefaultValue(type: String, value: String) =
+    private fun setDefaultValue(type: String, value: String) =
         addOrReplace(defaultValueQualifier(type, value))
 
     fun setDefaultValue(value: String) =
