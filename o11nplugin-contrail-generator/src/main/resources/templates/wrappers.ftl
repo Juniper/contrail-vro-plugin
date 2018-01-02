@@ -51,8 +51,7 @@ class ${wrapper.referenceName} @JvmOverloads constructor (
     }
 
     fun asObjectReference(): ObjectReference<ApiPropertyBase> {
-        val ref = ObjectReference<ApiPropertyBase>()
-        ref.setReference(null, null, null, uuid)
+        val ref = ObjectReference<ApiPropertyBase>(uuid)
         return ref
     }
 }

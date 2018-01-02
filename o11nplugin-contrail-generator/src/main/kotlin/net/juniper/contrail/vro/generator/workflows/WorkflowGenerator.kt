@@ -32,7 +32,7 @@ fun generateWorkflows(info: ProjectInfo, relationsModel: RelationsModel) {
     relationsModel.referenceRelations.asSequence()
         .filter { !it.backReference }
         .forEach {
-        generateReferenceWorkflows(info, it)
+            generateReferenceWorkflows(info, it)
     }
 }
 
@@ -43,6 +43,7 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, className: String, par
 
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: RefRelationModel) {
     addReferenceWorkflow(info, relation).save(info, relation.parentName)
+    removeReferenceWorkflow(info, relation).save(info, relation.parentName)
 }
 
 val workflowContext = JAXBContext.newInstance(Workflow::class.java)

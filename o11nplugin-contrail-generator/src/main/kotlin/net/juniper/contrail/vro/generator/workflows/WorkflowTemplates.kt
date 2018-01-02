@@ -241,6 +241,50 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: RefRelationModel): Workflo
     }
 }
 
+fun removeReferenceWorkflow(info: ProjectInfo, relation: RefRelationModel): Workflow {
+
+    val parentName = relation.parentName
+    val childName = relation.childOriginalName
+    val workflowName = "Remove ${childName.inWorkflowName} from ${parentName.inWorkflowName}"
+    val parentDescription = "${parentName.inDescription.capitalize()} to remove from"
+    val childDescription = "${childName.inDescription.capitalize()} to be removed"
+    val parentType = parentName.asFinder
+    val childType = childName.asFinder
+
+    return workflow(info, workflowName) {
+        input {
+            parameter("parent", parentType, parentDescription)
+            parameter("child", childType, childDescription)
+        }
+
+        output {
+            parameter("success", "boolean")
+        }
+
+        items {
+            script {
+                body = removeReferenceRelationScriptBody(relation)
+
+                inBinding("parent", parentType)
+                inBinding("child", childType)
+
+                outBinding("success", "boolean")
+            }
+        }
+
+        presentation {
+            step {
+                parameter("parent", parentDescription) {
+                    mandatory = true
+                }
+                parameter("child", childDescription) {
+                    mandatory = true
+                }
+            }
+        }
+    }
+}
+
 private val createConnectionScriptBody = """
 var connectionId = ContrailConnectionManager.create(name, host, port, username, password, authServer, tenant);
 System.log("Created connection with ID: " + connectionId);
@@ -268,6 +312,17 @@ ${if (relation.simpleReference)
 else {
     """var attribute = new Contrail${relation.referenceAttribute}();
     parent.add${relation.childOriginalName}(child, attribute);"""
+}}
+var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
+executor.update${relation.parentName}(parent);
+""".trimIndent()
+
+private fun removeReferenceRelationScriptBody(relation: RefRelationModel) = """
+${if (relation.simpleReference)
+    "parent.remove${relation.childOriginalName}(child);"
+else {
+    """var attribute = new Contrail${relation.referenceAttribute}();
+    parent.remove${relation.childOriginalName}(child, null);"""
 }}
 var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
 executor.update${relation.parentName}(parent);
