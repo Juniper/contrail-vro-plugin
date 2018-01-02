@@ -15,15 +15,16 @@ import net.juniper.contrail.vro.generator.util.rootClasses
 
 fun generateModel(
     info: ProjectInfo,
+    definition: RelationDefinition,
     objectClasses: List<Class<out ApiObjectBase>>,
     propertyClasses: List<Class<out ApiPropertyBase>>
-): RelationsModel {
+) {
 
     val rootClasses = objectClasses.rootClasses()
 
-    val relations = generateRelations(objectClasses)
-    val refRelations = generateReferenceRelations(objectClasses)
-    val nestedRelations = generateNestedRelations(objectClasses)
+    val relations = definition.relations
+    val refRelations = definition.referenceRelations
+    val nestedRelations = definition.nestedRelations
     val referenceWrappers = generateReferenceWrappers(objectClasses)
 
     val relationsModel = generateRelationsModel(relations, refRelations, nestedRelations, rootClasses)
@@ -46,6 +47,4 @@ fun generateModel(
     coreGenerator.generate(findersModel, "Finders.kt")
     coreGenerator.generate(customMappingModel, "Executor.kt")
     coreGenerator.generate(wrappersModel, "Wrappers.kt")
-
-    return relationsModel
 }

@@ -50,10 +50,8 @@ class ${wrapper.referenceName} @JvmOverloads constructor (
         return target
     }
 
-    fun asObjectReference(): ObjectReference<ApiPropertyBase> {
-        val ref = ObjectReference<ApiPropertyBase>(uuid)
-        return ref
-    }
+    fun asObjectReference() =
+        ObjectReference<ApiPropertyBase>(uuid)
 }
 
 fun ${wrapper.className}.as${wrapper.referenceName}(): ${wrapper.referenceName} =

@@ -6,7 +6,7 @@ package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.generator.ProjectInfo
-import net.juniper.contrail.vro.generator.model.RefRelationModel
+import net.juniper.contrail.vro.generator.model.RefRelation
 import net.juniper.contrail.vro.generator.util.parentClassName
 import net.juniper.contrail.vro.generator.util.splitCamel
 import net.juniper.contrail.vro.generator.workflows.model.ElementType
@@ -197,7 +197,7 @@ fun deleteWorkflow(info: ProjectInfo, clazz: String, scriptBody: String): Workfl
     }
 }
 
-fun addReferenceWorkflow(info: ProjectInfo, relation: RefRelationModel): Workflow {
+fun addReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow {
 
     val parentName = relation.parentName
     val childName = relation.childOriginalName
@@ -241,7 +241,7 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: RefRelationModel): Workflo
     }
 }
 
-fun removeReferenceWorkflow(info: ProjectInfo, relation: RefRelationModel): Workflow {
+fun removeReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow {
 
     val parentName = relation.parentName
     val childName = relation.childOriginalName
@@ -306,7 +306,7 @@ var executor = ContrailConnectionManager.getExecutor(object.getInternalId().toSt
 executor.delete$className(object);
 """.trimIndent()
 
-private fun addReferenceRelationScriptBody(relation: RefRelationModel) = """
+private fun addReferenceRelationScriptBody(relation: RefRelation) = """
 ${if (relation.simpleReference)
     "parent.add${relation.childOriginalName}(child);"
 else {
@@ -317,7 +317,7 @@ var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toSt
 executor.update${relation.parentName}(parent);
 """.trimIndent()
 
-private fun removeReferenceRelationScriptBody(relation: RefRelationModel) = """
+private fun removeReferenceRelationScriptBody(relation: RefRelation) = """
 ${if (relation.simpleReference)
     "parent.remove${relation.childOriginalName}(child);"
 else {

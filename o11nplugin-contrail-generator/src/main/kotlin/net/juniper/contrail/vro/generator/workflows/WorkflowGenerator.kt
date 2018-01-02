@@ -6,8 +6,8 @@ package net.juniper.contrail.vro.generator.workflows
 
 import com.sun.xml.internal.bind.marshaller.CharacterEscapeHandler
 import net.juniper.contrail.vro.generator.ProjectInfo
-import net.juniper.contrail.vro.generator.model.RefRelationModel
-import net.juniper.contrail.vro.generator.model.RelationsModel
+import net.juniper.contrail.vro.generator.model.RefRelation
+import net.juniper.contrail.vro.generator.model.RelationDefinition
 import net.juniper.contrail.vro.generator.util.packageToPath
 import net.juniper.contrail.vro.generator.workflows.model.Workflow
 import net.juniper.contrail.vro.generator.workflows.model.Properties
@@ -16,20 +16,20 @@ import java.io.Writer
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
 
-fun generateWorkflows(info: ProjectInfo, relationsModel: RelationsModel) {
+fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition) {
     generateDunesMetaInfo(info)
     createConnectionWorkflow(info).saveInConfiguration(info)
     deleteConnectionWorkflow(info).saveInConfiguration(info)
 
-    relationsModel.rootClassNames.forEach {
-        generateLifecycleWorkflows(info, it)
+    relations.rootClasses.forEach {
+        generateLifecycleWorkflows(info, it.simpleName)
     }
 
-    relationsModel.relations.forEach {
+    relations.relations.forEach {
         generateLifecycleWorkflows(info, it.childName, it.parentName)
     }
 
-    relationsModel.referenceRelations.asSequence()
+    relations.referenceRelations.asSequence()
         .filter { !it.backReference }
         .forEach {
             generateReferenceWorkflows(info, it)
@@ -41,7 +41,7 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, className: String, par
     deleteWorkflow(info, className).save(info, className)
 }
 
-private fun generateReferenceWorkflows(info: ProjectInfo, relation: RefRelationModel) {
+private fun generateReferenceWorkflows(info: ProjectInfo, relation: RefRelation) {
     addReferenceWorkflow(info, relation).save(info, relation.parentName)
     removeReferenceWorkflow(info, relation).save(info, relation.parentName)
 }

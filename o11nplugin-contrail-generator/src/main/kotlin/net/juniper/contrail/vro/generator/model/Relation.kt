@@ -40,7 +40,7 @@ class RefRelation (
     val childName: String = method.referenceName
     val childOriginalName: String = method.nameWithoutGetAndBackRefs
     val getter: String = method.propertyName
-    val referenceAttribute = method.objectReferenceAtrributeClassOrDefault
+    val referenceAttribute = method.objectReferenceAttributeClassOrDefault
     val simpleReference = referenceAttribute.isSimpleReference
     val backReference = method.isBackRef
     val folderName = method.nameWithoutGetAndBackRefs.folderName()
@@ -172,11 +172,8 @@ private val Method.returnsObjectReferences: Boolean get() =
 private val Method.objectReferenceAttributeClass: Class<*>? get() =
     genericReturnType?.parameterType?.parameterClass
 
-private val Method.objectReferenceAtrributeClassOrDefault: Class<*> get() =
+private val Method.objectReferenceAttributeClassOrDefault: Class<*> get() =
     objectReferenceAttributeClass ?: ApiPropertyBase::class.java
-
-private val Method.returnsSimpleReferences: Boolean get() =
-    objectReferenceAttributeClass?.isSimpleReference ?: false
 
 private val <T> Class<T>.isSimpleReference: Boolean get() =
     this == ApiPropertyBase::class.java

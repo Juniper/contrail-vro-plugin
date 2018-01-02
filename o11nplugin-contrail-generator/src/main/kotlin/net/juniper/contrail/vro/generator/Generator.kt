@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.generator
 
+import net.juniper.contrail.vro.generator.model.buildRelationDefinition
 import net.juniper.contrail.vro.generator.model.generateModel
 import net.juniper.contrail.vro.generator.util.objectClasses
 import net.juniper.contrail.vro.generator.util.propertyClasses
@@ -15,7 +16,8 @@ object Generator {
         val objectClasses = objectClasses()
         val propertyClasses = propertyClasses()
 
-        val model = generateModel(projectInfo, objectClasses, propertyClasses)
-        generateWorkflows(projectInfo, model)
+        val relations = buildRelationDefinition(objectClasses)
+        generateModel(projectInfo, relations, objectClasses, propertyClasses)
+        generateWorkflows(projectInfo, relations)
     }
 }
