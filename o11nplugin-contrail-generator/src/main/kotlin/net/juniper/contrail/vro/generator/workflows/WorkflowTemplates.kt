@@ -314,8 +314,9 @@ private fun addReferenceRelationScriptBody(relation: RefRelation) = """
 ${if (relation.simpleReference)
     "parent.add${relation.childOriginalName}(child);"
 else {
-    """var attribute = new Contrail${relation.referenceAttribute}();
-    parent.add${relation.childOriginalName}(child, attribute);"""
+    //TODO add to attribute properties to workflow parameters
+    """var attribute = new Contrail${relation.referenceAttributeSimpleName}();
+parent.add${relation.childOriginalName}(child, attribute);"""
 }}
 var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
 executor.update${relation.parentName}(parent);
@@ -324,10 +325,9 @@ executor.update${relation.parentName}(parent);
 private fun removeReferenceRelationScriptBody(relation: RefRelation) = """
 ${if (relation.simpleReference)
     "parent.remove${relation.childOriginalName}(child);"
-else {
-    """var attribute = new Contrail${relation.referenceAttribute}();
-    parent.remove${relation.childOriginalName}(child, null);"""
-}}
+else
+    "parent.remove${relation.childOriginalName}(child, null);"
+}
 var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
 executor.update${relation.parentName}(parent);
 """.trimIndent()

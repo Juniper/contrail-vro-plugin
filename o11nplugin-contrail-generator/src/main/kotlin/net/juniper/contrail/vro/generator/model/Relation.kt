@@ -41,6 +41,7 @@ class RefRelation (
     val childOriginalName: String = method.nameWithoutGetAndBackRefs
     val getter: String = method.propertyName
     val referenceAttribute = method.objectReferenceAttributeClassOrDefault
+    val referenceAttributeSimpleName = referenceAttribute.simpleName
     val simpleReference = referenceAttribute.isSimpleReference
     val backReference = method.isBackRef
     val folderName = method.nameWithoutGetAndBackRefs.folderName()
