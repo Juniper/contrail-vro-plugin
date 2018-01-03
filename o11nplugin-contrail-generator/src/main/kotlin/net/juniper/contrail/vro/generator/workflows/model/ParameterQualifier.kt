@@ -42,21 +42,19 @@ val minNumberValueQualifierName = "minNumberValue"
 val maxNumberValueQualifierName = "maxNumberValue"
 val showInInventoryQualifierName = "contextualParameter"
 
-val booleanTypeName = "boolean"
-val stringTypeName = "string"
 val voidTypeName = "void"
 
 val voidValue = "__NULL__"
 
 val showInInventoryQualifier = ParameterQualifier(name = showInInventoryQualifierName, type = voidTypeName, value = voidValue)
-val mandatoryQualifier = staticQualifier(mandatoryQualifierName, booleanTypeName, true.toString())
-fun defaultValueQualifier(type: String, value: String) = staticQualifier(defaultValueQualifierName, type, value)
-fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifierName, stringTypeName, value)
+val mandatoryQualifier = staticQualifier(mandatoryQualifierName, boolean, true)
+fun <T : Any> defaultValueQualifier(type: ParameterType<T>, value: T) = staticQualifier(defaultValueQualifierName, type, value)
+fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifierName, string, value)
 fun minNumberValueQualifier(value: Int) = ParameterQualifier(name = minNumberValueQualifierName, value = value.toString())
 fun maxNumberValueQualifier(value: Int) = ParameterQualifier(name = maxNumberValueQualifierName, value = value.toString())
 
-private fun staticQualifier(name: String?, type: String?, value: String?) =
-    ParameterQualifier(staticKindName, name, type, value)
+private fun <T : Any> staticQualifier(name: String, type: ParameterType<T>, value: T) =
+    ParameterQualifier(staticKindName, name, type.name, value.toString())
 
 fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQualifier? =
     when (xsdConstraint) {

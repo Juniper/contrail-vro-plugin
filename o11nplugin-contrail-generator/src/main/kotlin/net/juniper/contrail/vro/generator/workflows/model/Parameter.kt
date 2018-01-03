@@ -17,13 +17,13 @@ import javax.xml.bind.annotation.XmlType
     propOrder = ["description"]
 )
 class Parameter(
-    @XmlAttribute(name = "name")
-    val name: String,
-
-    type: ParameterType,
-
+    name: String,
+    type: ParameterType<Any>,
     description: String? = null
 ) {
+    @XmlAttribute(name = "name")
+    val name: String = name
+
     @XmlAttribute(name = "type")
     val type: String = type.name
 
@@ -44,31 +44,33 @@ class ParameterSet {
         this.parameters.add(parameter)
 }
 
-sealed class ParameterType {
+sealed class ParameterType<out Type : Any> {
     abstract val name: String
+    override fun toString() =
+        name
 }
 
-object boolean : ParameterType() {
+object boolean : ParameterType<Boolean>() {
     override val name get() =
         "boolean"
 }
 
-object number : ParameterType() {
+object number : ParameterType<Int>() {
     override val name get() =
         "number"
 }
 
-object string : ParameterType() {
+object string : ParameterType<String>() {
     override val name get() =
         "string"
 }
 
-object SecureString : ParameterType() {
+object SecureString : ParameterType<String>() {
     override val name get() =
         "SecureString"
 }
 
-class ReferenceParameter(val simpleName: String) : ParameterType() {
+class Reference(val simpleName: String) : ParameterType<Reference>() {
     constructor(clazz: Class<*>): this(clazz.simpleName)
 
     override val name: String get() =
@@ -76,11 +78,11 @@ class ReferenceParameter(val simpleName: String) : ParameterType() {
 }
 
 val String.reference get() =
-    ReferenceParameter(this)
+    Reference(this)
 
 val <T> Class<T>.reference get() =
-    ReferenceParameter(this)
+    Reference(this)
 
 inline fun <reified T> reference() =
-    ReferenceParameter(T::class.java)
+    Reference(T::class.java)
 

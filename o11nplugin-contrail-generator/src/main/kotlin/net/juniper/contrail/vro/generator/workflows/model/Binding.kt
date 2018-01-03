@@ -21,7 +21,7 @@ class Binding {
     @XmlElement(name = "bind")
     private val binds: MutableList<Bind> = mutableListOf()
 
-    fun bind(name: String, type: ParameterType, exportName: String = name) =
+    fun bind(name: String, type: ParameterType<Any>, exportName: String = name) =
         apply { binds.add(Bind(name, type, exportName)) }
 }
 
@@ -32,7 +32,7 @@ class Binding {
 )
 class Bind (
     name: String,
-    type: ParameterType,
+    type: ParameterType<Any>,
     exportName: String,
     description: String? = null
 ) {

@@ -12,13 +12,13 @@ import net.juniper.contrail.vro.generator.util.splitCamel
 import net.juniper.contrail.vro.generator.workflows.model.ElementType
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
 import net.juniper.contrail.vro.generator.workflows.model.Workflow
-import net.juniper.contrail.vro.generator.workflows.model.boolean
+import net.juniper.contrail.vro.generator.workflows.model.addSingleScript
+import net.juniper.contrail.vro.generator.workflows.model.createBasicWorkflow
 import net.juniper.contrail.vro.generator.workflows.model.createDunesProperties
 import net.juniper.contrail.vro.generator.workflows.model.createElementInfoProperties
 import net.juniper.contrail.vro.generator.workflows.model.number
 import net.juniper.contrail.vro.generator.workflows.model.reference
 import net.juniper.contrail.vro.generator.workflows.model.string
-import net.juniper.contrail.vro.generator.workflows.model.workflow
 
 fun elementInfoPropertiesFor(workflow: Workflow, category: String) = createElementInfoProperties(
     categoryPath = "$libraryPackage.$category",
@@ -51,69 +51,41 @@ private val <T : ApiObjectBase> Class<T>.parentName get() =
 
 fun createConnectionWorkflow(info: ProjectInfo): Workflow {
 
-    val nameInputDescription = "Connection name"
-    val hostInputDescription = "Contrail host"
-    val portInputDescription = "Contrail port"
-    val usernameInputDescription = "User name"
-    val passwordInputDescription = "User password"
-    val authServerInputDescription = "Authentication server"
-    val tenantInputDescription = "Tenant"
+    val workflowName = "Create Contrail connection"
 
-    return workflow(info, "Create Contrail connection") {
-        input {
-            parameter("name", string, nameInputDescription)
-            parameter("host", string, hostInputDescription)
-            parameter("port", number, portInputDescription)
-            parameter("username", string, usernameInputDescription)
-            parameter("password", SecureString, passwordInputDescription)
-            parameter("authServer", string, authServerInputDescription)
-            parameter("tenant", string, tenantInputDescription)
-        }
-
-        output {
-            parameter("success", boolean)
-        }
-
-        items {
-            script {
-                body = createConnectionScriptBody
-
-                inBinding("name", string)
-                inBinding("host", string)
-                inBinding("port", number)
-                inBinding("username", string)
-                inBinding("password", SecureString)
-                inBinding("authServer", string)
-                inBinding("tenant", string)
-
-                outBinding("success", boolean)
+    return createBasicWorkflow(info, workflowName).addSingleScript(createConnectionScriptBody) {
+        step("Controller") {
+            parameter("name", string) {
+                description = "Connection name"
+                mandatory = true
+                defaultValue = "Controller"
+            }
+            parameter("host", string) {
+                description = "Contrail host"
+                mandatory = true
+            }
+            parameter("port", number) {
+                description = "Contrail port"
+                mandatory = true
+                defaultValue = 8082
+                min = 0
+                max = 65535
             }
         }
-
-        presentation {
-            step("Controller") {
-                parameter("name", nameInputDescription) {
-                    mandatory = true
-                    setDefaultValue("Controller")
-                }
-                parameter("host", hostInputDescription) {
-                    mandatory = true
-                }
-                parameter("port", portInputDescription) {
-                    mandatory = true
-                    setDefaultValue(8082)
-                    numberFormat = "#0"
-                    minNumberValue = 0
-                    maxNumberValue = 65535
-                }
+        step("Credentials") {
+            parameter("username", string) {
+                description = "User name"
             }
-            step("Credentials") {
-                parameter("username", usernameInputDescription)
-                parameter("password", passwordInputDescription)
-                parameter("authServer", authServerInputDescription)
+            parameter("password", SecureString) {
+                description = "User password"
             }
-            step("Tenant") {
-                parameter("tenant", tenantInputDescription)
+            parameter("authServer", string) {
+                description = "Authentication server"
+            }
+        }
+        step("Tenant") {
+            parameter("tenant", string) {
+                description = "Tenant"
             }
         }
     }
@@ -122,38 +94,19 @@ fun createConnectionWorkflow(info: ProjectInfo): Workflow {
 fun createWorkflow(info: ProjectInfo, className: String, parentName: String): Workflow {
 
     val workflowName = "Create ${className.inWorkflowName}"
-    val nameInputDescription = "${className.inDescription} name"
-    val parentInputDescription = "Parent ${parentName.inDescription}"
 
-    return workflow(info, workflowName) {
-        input {
-            parameter("name", string, nameInputDescription)
-            parameter("parent", parentName.reference, parentInputDescription)
-        }
+    return createBasicWorkflow(info, workflowName).addSingleScript(createScriptBody(className, parentName)) {
+        step {
 
-        output {
-            parameter("success", boolean)
-        }
+            parameter("name", string) {
+                description = "${className.inDescription} name"
+                mandatory = true
 
-        items {
-            script {
-                body = createScriptBody(className, parentName)
-
-                inBinding("name", string)
-                inBinding("parent", parentName.reference)
-
-                outBinding("success", boolean)
             }
-        }
+            parameter("parent", parentName.reference) {
+                description = "Parent ${parentName.inDescription}"
+                mandatory = true
 
-        presentation {
-            step {
-                parameter("parent", parentInputDescription) {
-                    mandatory = true
-                }
-                parameter("name", nameInputDescription) {
-                    mandatory = true
-                }
             }
         }
     }
@@ -168,34 +121,13 @@ fun deleteWorkflow(info: ProjectInfo, className: String): Workflow =
 fun deleteWorkflow(info: ProjectInfo, clazz: String, scriptBody: String): Workflow {
 
     val workflowName = "Delete ${clazz.inWorkflowName}"
-    val finderName = clazz.asFinder
-    val inputDescription = "${clazz.inDescription} to delete"
 
-    return workflow(info, workflowName) {
-        input {
-            parameter("object", clazz.reference, inputDescription)
-        }
-
-        output {
-            parameter("success", boolean)
-        }
-
-        items {
-            script {
-                body = scriptBody
-
-                inBinding("object", clazz.reference)
-
-                outBinding("success", boolean)
-            }
-        }
-
-        presentation {
-            step {
-                parameter("object", inputDescription) {
-                    mandatory = true
-                    showInInventory = true
-                }
+    return createBasicWorkflow(info, workflowName).addSingleScript(scriptBody) {
+        step {
+            parameter("object", clazz.reference) {
+                description = "${clazz.inDescription} to delete"
+                mandatory = true
+                showInInventory = true
             }
         }
     }
@@ -206,40 +138,16 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow {
     val parentName = relation.parentName
     val childName = relation.childOriginalName
     val workflowName = "Add ${childName.inWorkflowName} to ${parentName.inWorkflowName}"
-    val parentDescription = "${parentName.inDescription.capitalize()} to add to"
-    val childDescription = "${childName.inDescription.capitalize()} to be added"
-    val parentType = parentName.asFinder
-    val childType = childName.asFinder
 
-    return workflow(info, workflowName) {
-        input {
-            parameter("parent", parentName.reference, parentDescription)
-            parameter("child", childName.reference, childDescription)
-        }
-
-        output {
-            parameter("success", boolean)
-        }
-
-        items {
-            script {
-                body = addReferenceRelationScriptBody(relation)
-
-                inBinding("parent", parentName.reference)
-                inBinding("child", childName.reference)
-
-                outBinding("success", boolean)
+    return createBasicWorkflow(info, workflowName).addSingleScript(relation.addReferenceRelationScriptBody()) {
+        step {
+            parameter("parent", parentName.reference) {
+                description = "${parentName.inDescription.capitalize()} to add to"
+                mandatory = true
             }
-        }
-
-        presentation {
-            step {
-                parameter("parent", parentDescription) {
-                    mandatory = true
-                }
-                parameter("child", childDescription) {
-                    mandatory = true
-                }
+            parameter("child", childName.reference) {
+                description = "${childName.inDescription.capitalize()} to be added"
+                mandatory = true
             }
         }
     }
@@ -250,40 +158,18 @@ fun removeReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow 
     val parentName = relation.parentName
     val childName = relation.childOriginalName
     val workflowName = "Remove ${childName.inWorkflowName} from ${parentName.inWorkflowName}"
-    val parentDescription = "${parentName.inDescription.capitalize()} to remove from"
-    val childDescription = "${childName.inDescription.capitalize()} to be removed"
-    val parentType = parentName.asFinder
-    val childType = childName.asFinder
 
-    return workflow(info, workflowName) {
-        input {
-            parameter("parent", parentName.reference, parentDescription)
-            parameter("child", childName.reference, childDescription)
-        }
+    return createBasicWorkflow(info, workflowName).addSingleScript(relation.removeReferenceRelationScriptBody()) {
 
-        output {
-            parameter("success", boolean)
-        }
+        step {
 
-        items {
-            script {
-                body = removeReferenceRelationScriptBody(relation)
-
-                inBinding("parent", parentName.reference)
-                inBinding("child", childName.reference)
-
-                outBinding("success", boolean)
+            parameter("parent", parentName.reference) {
+                description = "${parentName.inDescription.capitalize()} to remove from"
+                mandatory = true
             }
-        }
-
-        presentation {
-            step {
-                parameter("parent", parentDescription) {
-                    mandatory = true
-                }
-                parameter("child", childDescription) {
-                    mandatory = true
-                }
+            parameter("child", childName.reference) {
+                description = "${childName.inDescription.capitalize()} to be removed"
+                mandatory = true
             }
         }
     }
@@ -310,24 +196,24 @@ var executor = ContrailConnectionManager.getExecutor(object.getInternalId().toSt
 executor.delete$className(object);
 """.trimIndent()
 
-private fun addReferenceRelationScriptBody(relation: RefRelation) = """
-${if (relation.simpleReference)
-    "parent.add${relation.childOriginalName}(child);"
+private fun RefRelation.addReferenceRelationScriptBody() = """
+${if (simpleReference)
+    "parent.add$childOriginalName(child);"
 else {
     //TODO add to attribute properties to workflow parameters
-    """var attribute = new Contrail${relation.referenceAttributeSimpleName}();
-parent.add${relation.childOriginalName}(child, attribute);"""
+    """var attribute = new Contrail$referenceAttributeSimpleName();
+parent.add$childOriginalName(child, attribute);"""
 }}
 var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
-executor.update${relation.parentName}(parent);
+executor.update$parentName(parent);
 """.trimIndent()
 
-private fun removeReferenceRelationScriptBody(relation: RefRelation) = """
-${if (relation.simpleReference)
-    "parent.remove${relation.childOriginalName}(child);"
+private fun RefRelation.removeReferenceRelationScriptBody() = """
+${if (simpleReference)
+    "parent.remove$childOriginalName(child);"
 else
-    "parent.remove${relation.childOriginalName}(child, null);"
+    "parent.remove$childOriginalName(child, null);"
 }
 var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
-executor.update${relation.parentName}(parent);
+executor.update$parentName(parent);
 """.trimIndent()

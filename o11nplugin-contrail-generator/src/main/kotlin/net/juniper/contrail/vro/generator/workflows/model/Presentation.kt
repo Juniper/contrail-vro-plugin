@@ -21,6 +21,10 @@ class Presentation {
     @XmlElement(name = "p-step")
     private val presentationSteps: MutableList<PresentationStep> = mutableListOf()
 
+    fun addStep(step: PresentationStep) {
+        presentationSteps.add(step)
+    }
+
     fun step(title: String? = null, setup: PresentationStep.() -> Unit) {
         val step = PresentationStep(title)
         step.setup()
@@ -40,6 +44,10 @@ class PresentationStep (
     @XmlElement(name = "p-param")
     private val presentationParameters: MutableList<PresentationParameter> = mutableListOf()
 
+    fun addParameter(parameter: PresentationParameter) {
+        presentationParameters.add(parameter)
+    }
+
     fun parameter(name: String, description: String, setup: PresentationParameter.() -> Unit = {}) {
         val parameter = PresentationParameter(name, description)
         parameter.setup()
@@ -53,16 +61,19 @@ class PresentationStep (
     propOrder = ["description", "parameterQualifiers"]
 )
 class PresentationParameter(
-    @XmlAttribute(name = "name")
-    val name: String? = null,
-
-    descritpion: String? = null
+    name: String,
+    description: String? = null,
+    qualifiers: List<ParameterQualifier>? = null
 ) {
+    @XmlAttribute(name = "name")
+    val name: String = name
+
     @XmlElement(name = "desc", required = true)
-    val description: String? = descritpion.CDATA
+    val description: String? = description.CDATA ?: name
 
     @XmlElement(name = "p-qual")
-    private val parameterQualifiers: MutableList<ParameterQualifier> = mutableListOf()
+    private val parameterQualifiers: MutableList<ParameterQualifier> =
+        qualifiers?.toMutableList() ?: mutableListOf()
 
     var mandatory: Boolean
         get() = parameterQualifiers.contains(mandatoryQualifier)
@@ -74,14 +85,14 @@ class PresentationParameter(
         set(value) =
             addOrRemove(value, showInInventoryQualifier)
 
-    private fun setDefaultValue(type: String, value: String) =
+    private fun <T : Any> setDefaultValue(type: ParameterType<T>, value: T) =
         addOrReplace(defaultValueQualifier(type, value))
 
     fun setDefaultValue(value: String) =
-        setDefaultValue("string", value)
+        setDefaultValue(string, value)
 
     fun setDefaultValue(value: Int) =
-        setDefaultValue("number", value.toString())
+        setDefaultValue(number, value)
 
     var numberFormat: String?
         get() = parameterQualifiers.find { it.name == numberFormatQualifierName }?.value

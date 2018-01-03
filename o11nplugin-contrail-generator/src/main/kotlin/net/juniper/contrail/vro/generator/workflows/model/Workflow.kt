@@ -82,7 +82,7 @@ class Workflow(
 
     class ParametersBuilder(private val parameters: ParameterSet) {
 
-        fun parameter(name: String, type: ParameterType, description: String? = null) {
+        fun parameter(name: String, type: ParameterType<Any>, description: String? = null) {
             parameters.addParameter(Parameter(name, type, description))
         }
     }
@@ -99,22 +99,14 @@ class Workflow(
             includeEnd = true
         }
 
-        fun script(setup: WorkflowItem.() -> Unit) {
+        fun script(body: String, setup: WorkflowItem.() -> Unit) {
             val id = workflow.workflowItems.size
-            val previousId = id - 1
-            val scriptableItem = WorkflowItem("item$id", "task")
-            scriptableItem.outName = "item$previousId"
-            scriptableItem.displayName = "Scriptable task"
-            scriptableItem.position = Position(150.0f, 20.0f)
+            val scriptableItem = scriptWorkflowItem(id, body)
             scriptableItem.setup()
             workflow.workflowItems.add(scriptableItem)
         }
     }
-}
 
-private val END = WorkflowItem("item0", type = "end").apply {
-    endMode = "0"
-    position = Position(330.0f, 10.0f)
 }
 
 private fun generateID(packageName: String, displayName: String) =
@@ -122,18 +114,16 @@ private fun generateID(packageName: String, displayName: String) =
         .putString("$packageName.$displayName", Charsets.UTF_8)
         .hash().toString()
 
-fun workflow(info: ProjectInfo, displayName: String, setup: Workflow.() -> Unit): Workflow {
-    val workflow = Workflow(displayName)
-    workflow.id = generateID(info.workflowsPackageName, displayName)
-    workflow.rootName = "item1"
-    workflow.objectName = "workflow:name=generic"
-    workflow.version = "${info.baseVersion}.${info.buildNumber}"
-    workflow.apiVersion = "6.0.0"
-    workflow.restartMode = "1"
-    workflow.resumeFromFailedMode = "0"
-    workflow.position = Position(50.0f, 10.0f)
-
-    workflow.setup()
-
-    return workflow
+fun createBasicWorkflow(info: ProjectInfo, displayName: String) = Workflow(displayName).apply {
+    id = generateID(info.workflowsPackageName, displayName)
+    rootName = "item1"
+    objectName = "workflow:name=generic"
+    version = "${info.baseVersion}.${info.buildNumber}"
+    apiVersion = "6.0.0"
+    restartMode = "1"
+    resumeFromFailedMode = "0"
+    position = Position(50.0f, 10.0f)
 }
+
+fun workflow(info: ProjectInfo, displayName: String, setup: Workflow.() -> Unit) =
+    createBasicWorkflow(info, displayName).apply(setup)
