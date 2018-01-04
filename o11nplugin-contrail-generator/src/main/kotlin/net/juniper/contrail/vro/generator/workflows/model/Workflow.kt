@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.generator.workflows.model
 
+import net.juniper.contrail.vro.generator.util.CDATA
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -14,7 +15,7 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "workflow",
-    propOrder = ["displayName", "position", "input", "output", "workflowItems", "presentation"]
+    propOrder = ["displayName", "refTypes", "position", "input", "output", "workflowItems", "presentation"]
 )
 @XmlRootElement(name = "workflow")
 class Workflow(
@@ -23,6 +24,7 @@ class Workflow(
     version: String,
     presentation: Presentation = Presentation(),
     workflowItems: List<WorkflowItem> = emptyList(),
+    references: List<Reference>? = null,
     input: ParameterSet = ParameterSet(),
     output: ParameterSet = ParameterSet(),
     position: Position = Position(50.0f, 10.0f)
@@ -32,6 +34,11 @@ class Workflow(
 
     @XmlElement(name = "display-name", required = true)
     val displayName: String = displayName
+
+    @XmlElement(name = "ref-types")
+    val refTypes: String? = references?.run {
+        if (isEmpty()) null else joinToString(separator = ")(", prefix = "(", postfix = ")")
+    }.CDATA
 
     @XmlAttribute(name = "root-name")
     val rootName: String = "item${workflowItems.size - 1}"

@@ -10,6 +10,8 @@ import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.generator.workflows.model.ParameterSet
 import net.juniper.contrail.vro.generator.workflows.model.ParameterType
 import net.juniper.contrail.vro.generator.workflows.model.PresentationParameter
+import net.juniper.contrail.vro.generator.workflows.model.Reference
+import net.juniper.contrail.vro.generator.workflows.model.showInInventoryQualifier
 
 class ParameterInfo(
     val name: String,
@@ -41,3 +43,11 @@ fun ParameterInfo.asBindWithExportName(exportName: String) =
 
 val List<ParameterInfo>.asBinds get() =
     map { it.asBind }
+
+val List<ParameterInfo>.asReferences get() =
+    asSequence()
+        .filter { it.type is Reference }
+        .filter { it.qualifiers.contains(showInInventoryQualifier) }
+        .map { it.type as Reference }
+        .distinct()
+        .toList()

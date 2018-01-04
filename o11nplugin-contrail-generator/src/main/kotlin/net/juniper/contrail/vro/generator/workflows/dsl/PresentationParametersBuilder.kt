@@ -21,13 +21,15 @@ import net.juniper.contrail.vro.generator.workflows.model.string
 
 class PresentationParametersBuilder(
     private val steps: MutableList<PresentationStep>,
-    parameters: MutableList<ParameterInfo>
+    parameters: MutableList<ParameterInfo>,
+    private val accumulatedParameters: MutableList<ParameterInfo>
 ) : ParameterAggregator(parameters) {
 
     fun step(title: String, setup: ParameterAggregator.() -> Unit) {
         val stepParameters = mutableListOf<ParameterInfo>()
         ParameterAggregator(stepParameters).apply(setup).apply {
             steps.add(PresentationStep(title, stepParameters.asPresentationParameters))
+            accumulatedParameters.addAll(stepParameters)
         }
     }
 }

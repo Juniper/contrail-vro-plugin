@@ -20,13 +20,16 @@ infix fun SimpleWorkflowBuilder.andParameters(setup: PresentationParametersBuild
 
     val steps = mutableListOf<PresentationStep>()
     val parameters = mutableListOf<ParameterInfo>()
+    val allParameters = mutableListOf<ParameterInfo>()
 
-    PresentationParametersBuilder(steps, parameters).apply(setup)
+    PresentationParametersBuilder(steps, parameters, allParameters).apply(setup)
+
+    allParameters.addAll(parameters)
 
     val presentation = Presentation(steps, parameters.asPresentationParameters)
 
     val outBinding = Binding(listOf(success.asBind))
-    val inBinding = Binding(parameters.asBinds)
+    val inBinding = Binding(allParameters.asBinds)
 
     val script = WorkflowScript(scriptBody)
     val scriptItem = scriptWorkflowItem(script, inBinding, outBinding)
@@ -39,7 +42,8 @@ infix fun SimpleWorkflowBuilder.andParameters(setup: PresentationParametersBuild
         version = info.version,
         presentation = presentation,
         workflowItems = workflowItems,
-        input = parameters.asParameterSet,
+        references = allParameters.asReferences,
+        input = allParameters.asParameterSet,
         output = ParameterSet(output)
     )
 }

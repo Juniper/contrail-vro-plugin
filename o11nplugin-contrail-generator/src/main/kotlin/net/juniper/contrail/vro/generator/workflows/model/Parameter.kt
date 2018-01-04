@@ -67,11 +67,15 @@ object SecureString : ParameterType<String>() {
         "SecureString"
 }
 
-class Reference(val simpleName: String) : ParameterType<Reference>() {
+data class Reference(val simpleName: String) : ParameterType<Reference>() {
     constructor(clazz: Class<*>): this(clazz.simpleName)
 
     override val name: String get() =
         "Contrail:$simpleName"
+
+    //just to avoid the auto-generated data class version of toString()
+    override fun toString() =
+        name
 }
 
 val String.reference get() =
