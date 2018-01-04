@@ -10,10 +10,14 @@ import net.juniper.contrail.api.ApiConnector
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.IOException
 
 @Suppress("UNCHECKED_CAST")
 class Connection(public val info: ConnectionInfo, val connector: ApiConnector) : Findable {
+    private val log: Logger = LoggerFactory.getLogger(Connection::class.java)
+
     override fun getInternalId(): Sid =
         info.sid
 
@@ -32,68 +36,74 @@ class Connection(public val info: ConnectionInfo, val connector: ApiConnector) :
     val displayName: String get() =
         "$name (${info.username ?: "anonymous"}@$host:$port)"
 
-    @Throws(IOException::class)
-    fun create(obj: ApiObjectBase): Boolean {
-        return connector.create(obj)
-    }
+    @Throws(IOException::class, ConnectionException::class)
+    fun create(obj: ApiObjectBase) =
+        asserted("Create") { connector.create(obj) }
+
+    @Throws(IOException::class, ConnectionException::class)
+    fun read(obj: ApiObjectBase) =
+        asserted("Read") { connector.read(obj) }
+
+    @Throws(IOException::class, ConnectionException::class)
+    fun update(obj: ApiObjectBase) =
+        asserted("Update") { connector.update(obj) }
+
+    @Throws(IOException::class, ConnectionException::class)
+    fun sync(uri: String) =
+        asserted("Sync") { connector.sync(uri) }
 
     @Throws(IOException::class)
-    fun read(obj: ApiObjectBase): Boolean {
-        return connector.read(obj)
-    }
-
-    @Throws(IOException::class)
-    fun update(obj: ApiObjectBase): Boolean {
-        return connector.update(obj)
-    }
-
-    @Throws(IOException::class)
-    fun delete(obj: ApiObjectBase) {
+    fun delete(obj: ApiObjectBase) =
         connector.delete(obj)
-    }
 
     @Throws(IOException::class)
-    fun delete(clazz: Class<out ApiObjectBase>, objectId: String) {
+    fun delete(clazz: Class<out ApiObjectBase>, objectId: String) =
         connector.delete(clazz, objectId)
-    }
 
-    @Throws(IOException::class)
     fun findByName(clazz: Class<out ApiObjectBase>, parent: ApiObjectBase, name: String): String? =
-        connector.findByName(clazz, parent, name)
+        safe { connector.findByName(clazz, parent, name) }
 
-    @Throws(IOException::class)
     fun findByName(clazz: Class<out ApiObjectBase>, ancestorNames: List<String>): String? =
-        connector.findByName(clazz, ancestorNames)
+        safe { connector.findByName(clazz, ancestorNames) }
 
-    @Throws(IOException::class)
     fun <T : ApiObjectBase> find(clazz: Class<T>, parent: ApiObjectBase, name: String): T? =
-        connector.find(clazz, parent, name) as T?
+        safe { connector.find(clazz, parent, name) as T? }
 
-    @Throws(IOException::class)
     fun <T : ApiObjectBase> findById(clazz: Class<T>, objectId: String): T? =
-        connector.findById(clazz, objectId) as T?
+        safe { connector.findById(clazz, objectId) as T? }
 
-    @Throws(IOException::class)
     fun <T : ApiObjectBase> findByFQN(clazz: Class<T>, fqn: String): T? =
-        connector.findByFQN(clazz, fqn) as T?
+        safe { connector.findByFQN(clazz, fqn) as T? }
 
-    @Throws(IOException::class)
     fun <T : ApiObjectBase> list(clazz: Class<T>): List<T>? =
-        connector.list(clazz, null) as List<T>?
+        safe { connector.list(clazz, null) as List<T>? }
 
-    @Throws(IOException::class)
-    fun sync(uri: String): Boolean =
-        connector.sync(uri)
-
-    @Throws(IOException::class)
     fun <T : ApiObjectBase, U : ApiPropertyBase> getObjects(
         clazz: Class<T>,
         references: List<ObjectReference<U>>?
-    ): List<T>? {
-
-        return connector.getObjects(clazz, references ?: return null) as List<T>?
+    ): List<T>? = safe {
+        connector.getObjects(clazz, references ?: return@safe null) as List<T>?
     }
 
+    private fun <T> safe(unsafeOperation: () -> T?): T? {
+        return try {
+            unsafeOperation()
+        } catch (e: IOException) {
+            e.log()
+            null
+        }
+    }
+
+    @Throws(ConnectionException::class)
+    private fun asserted(operationName: String, operation: () -> Boolean) {
+        val success = operation()
+        if (!success) {
+            throw ConnectionException("$operationName operation failed.")
+        }
+    }
+
+    private fun IOException.log() =
+        log.error("IO error in Contrail API: {}", message)
 }
 
 data class ConnectionInfo @JvmOverloads constructor(
@@ -110,3 +120,5 @@ data class ConnectionInfo @JvmOverloads constructor(
     override fun toString(): String =
         "$username@$hostname:$port"
 }
+
+class ConnectionException(override var message: String) : Exception()

@@ -42,7 +42,6 @@ class ${klass}Finder
 
     override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${klass}? {
         val connection = connections.getConnection(sid)
-        //TODO handle IOException
         return connection?.findById(${klass}::class.java, sid.getString("${klass}"))
     }
 
@@ -61,7 +60,6 @@ class ${wrapper.referenceName}Finder
 
     override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${wrapper.referenceName}? {
         val connection = connections.getConnection(sid)
-        //TODO handle IOException
         return connection?.findById(${wrapper.className}::class.java, sid.getString("${wrapper.referenceName}"))?.as${wrapper.referenceName}()
     }
 
@@ -92,7 +90,6 @@ class ${relation.childWrapperName}Finder
     }
     override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${relation.childWrapperName}? {
         val connection = connections.getConnection(sid)
-        //TODO handle IOException
         val parent = connection?.findById(${relation.rootClassSimpleName}::class.java, sid.getString("${relation.rootClassSimpleName}"))
         val index = getIndex(sid, "${relation.getter}")
         return <@getterChain relation/>

@@ -34,7 +34,6 @@ class ConnectionHas${rootClass}
 
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${rootClass}>? {
         val connection = connections.getConnection(parentId)
-        //TODO handle IOException
         return connection?.list(${rootClass}::class.java)
     }
 }
@@ -46,7 +45,6 @@ class ${relation.parentName}Has${relation.childName}
 
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childName}>? {
         val connection = connections.getConnection(parentId)
-        //TODO handle IOException
         val parent = connection?.findById(${relation.parentName}::class.java, parentId.getString("${relation.parentName}"))
         return connection?.getObjects(${relation.childName}::class.java, parent?.${relation.childNameDecapitalized}s)
     }
@@ -60,7 +58,6 @@ class ${relation.parentName}Has${relation.childName}
 
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childName}>? {
         val connection = connections.getConnection(parentId)
-        //TODO handle IOException
         val parent = connection?.findById(${relation.parentName}::class.java, parentId.getString("${relation.parentName}"))
         return connection?.getObjects(${relation.childOriginalName}::class.java, parent?.${relation.getter})?.map { it.as${relation.childName}() }
     }
@@ -79,7 +76,6 @@ class ${relation.parentWrapperName}Has${relation.childWrapperName}
 
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childWrapperName}>? {
         val connection = connections.getConnection(parentId)
-        //TODO handle IOException
         val parent = connection?.findById(${relation.rootClassSimpleName}::class.java, parentId.getString("${relation.rootClassSimpleName}"))
         return <@getterChain relation/>
     }
