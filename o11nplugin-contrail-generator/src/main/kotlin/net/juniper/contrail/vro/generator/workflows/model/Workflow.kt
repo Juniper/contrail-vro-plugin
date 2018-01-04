@@ -4,8 +4,6 @@
 
 package net.juniper.contrail.vro.generator.workflows.model
 
-import com.google.common.hash.Hashing
-import net.juniper.contrail.vro.generator.ProjectInfo
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -20,110 +18,57 @@ import javax.xml.bind.annotation.XmlType
 )
 @XmlRootElement(name = "workflow")
 class Workflow(
-    displayName: String = "Workflow",
-
-    @XmlElement(required = true)
-    var position: Position? = null,
-
-    @XmlElement(required = true)
-    val input: ParameterSet = ParameterSet(),
-
-    @XmlElement(required = true)
-    val output: ParameterSet = ParameterSet(),
-
-    @XmlAttribute(name = "root-name")
-    var rootName: String? = null,
-
-    @XmlAttribute(name = "object-name")
-    var objectName: String? = null,
-
-    @XmlAttribute(name = "id")
-    var id: String? = null,
-
-    @XmlAttribute(name = "version")
-    var version: String? = null,
-
-    @XmlAttribute(name = "api-version")
-    var apiVersion: String? = null,
-
-    @XmlAttribute(name = "allowed-operations")
-    var allowedOperations: String? = null,
-
-    @XmlAttribute(name = "restartMode")
-    var restartMode: String? = null,
-
-    @XmlAttribute(name = "resumeFromFailedMode")
-    var resumeFromFailedMode: String? = null
+    displayName: String,
+    id: String,
+    version: String,
+    presentation: Presentation = Presentation(),
+    workflowItems: List<WorkflowItem> = emptyList(),
+    input: ParameterSet = ParameterSet(),
+    output: ParameterSet = ParameterSet(),
+    position: Position = Position(50.0f, 10.0f)
 ) {
+    // this constructor is only necessary to satisfy marshaller
+    constructor(): this("Workflow", "0", "0.0.0")
+
     @XmlElement(name = "display-name", required = true)
     val displayName: String = displayName
 
-    @XmlElement(name = "workflow-item")
-    val workflowItems: MutableList<WorkflowItem> = mutableListOf()
+    @XmlAttribute(name = "root-name")
+    val rootName: String = "item${workflowItems.size - 1}"
+
+    @XmlAttribute(name = "id")
+    val id: String = id
+
+    @XmlAttribute(name = "version")
+    val version: String = version
 
     @XmlElement(required = true)
-    val presentation = Presentation()
+    val input: ParameterSet = input
 
-    fun input(setup: ParametersBuilder.() -> Unit) {
-        ParametersBuilder(input).setup()
-    }
+    @XmlElement(required = true)
+    val output: ParameterSet = output
 
-    fun output(setup: ParametersBuilder.() -> Unit) {
-        ParametersBuilder(output).setup()
-    }
+    @XmlElement(name = "workflow-item")
+    val workflowItems: List<WorkflowItem> = workflowItems.toList()
 
-    fun items(setup: ItemBuilder.() -> Unit) {
-        ItemBuilder(this).setup()
-    }
+    @XmlElement(required = true)
+    val presentation: Presentation = presentation
 
-    fun presentation(setup: Presentation.() -> Unit) {
-        presentation.setup()
-    }
+    @XmlElement(required = true)
+    val position: Position = position
 
-    class ParametersBuilder(private val parameters: ParameterSet) {
+    @XmlAttribute(name = "object-name")
+    val objectName: String = "workflow:name=generic"
 
-        fun parameter(name: String, type: ParameterType<Any>, description: String? = null) {
-            parameters.addParameter(Parameter(name, type, description))
-        }
-    }
+    @XmlAttribute(name = "api-version")
+    val apiVersion: String = "6.0.0"
 
-    class ItemBuilder(private val workflow: Workflow) {
+    @XmlAttribute(name = "allowed-operations")
+    val allowedOperations: String = "vef"
 
-        var includeEnd: Boolean
-            get() = workflow.workflowItems.contains(END)
-            set(value) {
-                if (value) workflow.workflowItems.add(END) else workflow.workflowItems.remove(END)
-            }
+    @XmlAttribute(name = "restartMode")
+    val restartMode: String = "1"
 
-        init {
-            includeEnd = true
-        }
-
-        fun script(body: String, setup: WorkflowItem.() -> Unit) {
-            val id = workflow.workflowItems.size
-            val scriptableItem = scriptWorkflowItem(id, body)
-            scriptableItem.setup()
-            workflow.workflowItems.add(scriptableItem)
-        }
-    }
-
+    @XmlAttribute(name = "resumeFromFailedMode")
+    val resumeFromFailedMode: String = "0"
 }
-
-private fun generateID(packageName: String, displayName: String) =
-    Hashing.md5().newHasher()
-        .putString("$packageName.$displayName", Charsets.UTF_8)
-        .hash().toString()
-
-fun createBasicWorkflow(info: ProjectInfo, displayName: String) = Workflow(displayName).apply {
-    id = generateID(info.workflowsPackageName, displayName)
-    rootName = "item1"
-    objectName = "workflow:name=generic"
-    version = "${info.baseVersion}.${info.buildNumber}"
-    apiVersion = "6.0.0"
-    restartMode = "1"
-    resumeFromFailedMode = "0"
-    position = Position(50.0f, 10.0f)
-}
-
-fun workflow(info: ProjectInfo, displayName: String, setup: Workflow.() -> Unit) =
-    createBasicWorkflow(info, displayName).apply(setup)

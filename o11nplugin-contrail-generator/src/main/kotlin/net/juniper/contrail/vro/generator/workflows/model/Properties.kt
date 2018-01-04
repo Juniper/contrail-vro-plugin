@@ -20,12 +20,12 @@ import javax.xml.bind.annotation.XmlValue
 @XmlRootElement(name = "properties")
 class Properties {
     @XmlElement(name = "entry")
+    //TODO this property should be immutable
     private val entries: MutableList<Entry> = mutableListOf()
 
     fun addEntry(key: String, value: String) {
         entries.add(Entry(key, value))
     }
-
 }
 
 @XmlAccessorType(XmlAccessType.FIELD)

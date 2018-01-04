@@ -17,15 +17,16 @@ import javax.xml.bind.annotation.XmlType
     propOrder = ["displayName", "script", "inBinding", "outBinding", "position"]
 )
 class WorkflowItem(
-    name: String,
+    id: Int,
     type: WorkflowItemType,
     position: Position,
-    endMode: String? = null,
-    outName: String? = null,
-    displayName: String? = null
+    displayName: String? = null,
+    script: WorkflowScript? = null,
+    inBinding: Binding? = null,
+    outBinding: Binding? = null
 ) {
     @XmlAttribute(name = "name")
-    val name: String = name
+    val name: String = "item$id"
 
     @XmlAttribute(name = "type")
     val type: String = type.name
@@ -34,57 +35,25 @@ class WorkflowItem(
     val position: Position = position
 
     @XmlAttribute(name = "end-mode")
-    var endMode: String? = endMode
+    val endMode: String? = type.endMode
 
     @XmlAttribute(name = "out-name")
-    var outName: String? = outName
+    val outName: String? = if (id == 0) null else "item${id - 1}"
 
     @XmlElement(name = "script")
-    private var script: WorkflowScript? = null
+    val script: WorkflowScript? = script
 
     @XmlElement(name = "display-name")
-    var displayName: String? = displayName.CDATA
-        set(value) {
-            field = value.CDATA
-        }
+    val displayName: String? = displayName.CDATA
 
     @XmlElement(name = "in-binding")
-    var inBinding: Binding? = null
+    val inBinding: Binding? = inBinding
 
     @XmlElement(name = "out-binding")
-    var outBinding: Binding? = null
-
-    var body: String?
-        get() = script?.value
-        set(value) {
-            script = WorkflowScript(value = value, encoded = false)
-        }
-
-    fun inBinding(name: String, type: ParameterType<Any>, exportName: String = name) {
-        inBinding = inBinding.safeBind(name, type, exportName)
-    }
-
-    fun outBinding(name: String, type: ParameterType<Any>, exportName: String = name) {
-        outBinding = outBinding.safeBind(name, type, exportName)
-    }
-
-    private fun Binding?.safeBind(name: String, type: ParameterType<Any>, exportName: String): Binding =
-        (this ?: Binding()).apply { bind(name, type, exportName) }
+    val outBinding: Binding? = outBinding
 }
 
-enum class WorkflowItemType {
-    task,
-    end,
-    ;
+enum class WorkflowItemType(val endMode: String?) {
+    task(null),
+    end("0");
 }
-
-val END = WorkflowItem("item0", WorkflowItemType.end, Position(330.0f, 10.0f)).apply {
-    endMode = "0"
-}
-
-fun scriptWorkflowItem(id: Int, scriptBody: String) =
-    WorkflowItem("item$id", WorkflowItemType.task, Position(150.0f, 20.0f)) .apply {
-        body = scriptBody
-        displayName = "Scriptable task"
-        outName = "item${id-1}"
-    }

@@ -67,8 +67,11 @@ fun Path.append(subpath: String): Path =
 operator fun String.div(subpath: String): Path =
     Paths.get(this, subpath)
 
+val String.isCDATA get() =
+    startsWith("<![CDATA[") && endsWith("]]>")
+
 val String?.CDATA get() = when {
     this == null -> null
-    startsWith("<![CDATA[") -> this
+    this.isCDATA -> this
     else -> "<![CDATA[$this]]>"
 }

@@ -16,13 +16,9 @@ import javax.xml.bind.annotation.XmlType
     name = "bindingType",
     propOrder = ["binds"]
 )
-class Binding {
-
+class Binding(binds: List<Bind>) {
     @XmlElement(name = "bind")
-    private val binds: MutableList<Bind> = mutableListOf()
-
-    fun bind(name: String, type: ParameterType<Any>, exportName: String = name) =
-        apply { binds.add(Bind(name, type, exportName)) }
+    val binds: List<Bind> = binds.toList()
 }
 
 @XmlAccessorType(XmlAccessType.FIELD)

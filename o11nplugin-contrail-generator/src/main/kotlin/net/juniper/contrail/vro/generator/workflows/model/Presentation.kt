@@ -5,7 +5,6 @@
 package net.juniper.contrail.vro.generator.workflows.model
 
 import net.juniper.contrail.vro.generator.util.CDATA
-import net.juniper.contrail.vro.generator.util.addIfAbsent
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -15,21 +14,19 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "presentationType",
-    propOrder = ["presentationSteps"]
+    propOrder = ["presentationSteps", "presentationParameters"]
 )
-class Presentation {
+class Presentation (
+    presentationSteps: List<PresentationStep> = emptyList(),
+    presentationParameters: List<PresentationParameter> = emptyList()
+) {
     @XmlElement(name = "p-step")
-    private val presentationSteps: MutableList<PresentationStep> = mutableListOf()
+    val presentationSteps: List<PresentationStep> =
+        presentationSteps.toList()
 
-    fun addStep(step: PresentationStep) {
-        presentationSteps.add(step)
-    }
-
-    fun step(title: String? = null, setup: PresentationStep.() -> Unit) {
-        val step = PresentationStep(title)
-        step.setup()
-        presentationSteps.add(step)
-    }
+    @XmlElement(name = "p-param")
+    val presentationParameters: List<PresentationParameter> =
+        presentationParameters.toList()
 }
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -38,21 +35,15 @@ class Presentation {
     propOrder = ["title", "presentationParameters"]
 )
 class PresentationStep (
-    @XmlElement
-    val title: String? = null
+    title: String,
+    presentationParameters: List<PresentationParameter>
 ) {
+    @XmlElement
+    val title: String = title
+
     @XmlElement(name = "p-param")
-    private val presentationParameters: MutableList<PresentationParameter> = mutableListOf()
-
-    fun addParameter(parameter: PresentationParameter) {
-        presentationParameters.add(parameter)
-    }
-
-    fun parameter(name: String, description: String, setup: PresentationParameter.() -> Unit = {}) {
-        val parameter = PresentationParameter(name, description)
-        parameter.setup()
-        presentationParameters.add(parameter)
-    }
+    val presentationParameters: List<PresentationParameter> =
+        presentationParameters.toList()
 }
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -72,56 +63,7 @@ class PresentationParameter(
     val description: String? = description.CDATA ?: name
 
     @XmlElement(name = "p-qual")
-    private val parameterQualifiers: MutableList<ParameterQualifier> =
+    val parameterQualifiers: List<ParameterQualifier> =
         qualifiers?.toMutableList() ?: mutableListOf()
-
-    var mandatory: Boolean
-        get() = parameterQualifiers.contains(mandatoryQualifier)
-        set(value) =
-            addOrRemove(value, mandatoryQualifier)
-
-    var showInInventory: Boolean
-        get() = parameterQualifiers.contains(showInInventoryQualifier)
-        set(value) =
-            addOrRemove(value, showInInventoryQualifier)
-
-    private fun <T : Any> setDefaultValue(type: ParameterType<T>, value: T) =
-        addOrReplace(defaultValueQualifier(type, value))
-
-    fun setDefaultValue(value: String) =
-        setDefaultValue(string, value)
-
-    fun setDefaultValue(value: Int) =
-        setDefaultValue(number, value)
-
-    var numberFormat: String?
-        get() = parameterQualifiers.find { it.name == numberFormatQualifierName }?.value
-        set(value) {
-            addOrReplace(numberFormatQualifier(value ?: return))
-        }
-
-    var minNumberValue: Int?
-        get() = parameterQualifiers.find { it.name == minNumberValueQualifierName }?.value?.toInt()
-        set(value) {
-            addOrReplace(minNumberValueQualifier(value ?: return))
-        }
-
-    var maxNumberValue: Int?
-        get() = parameterQualifiers.find { it.name == maxNumberValueQualifierName }?.value?.toInt()
-        set(value) {
-            addOrReplace(maxNumberValueQualifier(value ?: return))
-        }
-
-    private fun addOrRemove(add: Boolean, parameter: ParameterQualifier) {
-        if (add)
-            parameterQualifiers.addIfAbsent(parameter)
-        else
-            parameterQualifiers.remove(parameter)
-    }
-
-    private fun addOrReplace(parameter: ParameterQualifier) {
-        parameterQualifiers.removeIf { it.name == parameter.name }
-        parameterQualifiers.add(parameter)
-    }
 }
 

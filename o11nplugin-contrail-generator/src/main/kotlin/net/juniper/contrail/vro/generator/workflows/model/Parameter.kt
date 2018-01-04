@@ -36,12 +36,9 @@ class Parameter(
     name = "parametersSetType",
     propOrder = ["parameters"]
 )
-class ParameterSet {
+class ParameterSet(parameters: List<Parameter> = emptyList()) {
     @XmlElement(name = "param")
-    private val parameters: MutableList<Parameter> = mutableListOf()
-
-    fun addParameter(parameter: Parameter) =
-        this.parameters.add(parameter)
+    val parameters: List<Parameter> = parameters.toList()
 }
 
 sealed class ParameterType<out Type : Any> {
@@ -79,10 +76,3 @@ class Reference(val simpleName: String) : ParameterType<Reference>() {
 
 val String.reference get() =
     Reference(this)
-
-val <T> Class<T>.reference get() =
-    Reference(this)
-
-inline fun <reified T> reference() =
-    Reference(T::class.java)
-

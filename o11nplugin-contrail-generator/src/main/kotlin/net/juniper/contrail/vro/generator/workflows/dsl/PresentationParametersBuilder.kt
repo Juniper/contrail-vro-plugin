@@ -2,37 +2,40 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator.workflows.model
+package net.juniper.contrail.vro.generator.workflows.dsl
 
-fun Workflow.addSingleScript(scriptBody: String, setup: SimpleWorkflowBuilder.() -> Unit): Workflow {
-    val script = scriptWorkflowItem(1, scriptBody)
-    workflowItems.add(END)
-    workflowItems.add(script)
-    output {
-        parameter("success", boolean)
-    }
-    script.outBinding("success", boolean)
-    val builder = SimpleWorkflowBuilder(this, script)
-    builder.setup()
-    return this
-}
+import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
+import net.juniper.contrail.vro.generator.workflows.model.ParameterType
+import net.juniper.contrail.vro.generator.workflows.model.PresentationStep
+import net.juniper.contrail.vro.generator.workflows.model.Reference
+import net.juniper.contrail.vro.generator.workflows.model.SecureString
+import net.juniper.contrail.vro.generator.workflows.model.boolean
+import net.juniper.contrail.vro.generator.workflows.model.defaultValueQualifier
+import net.juniper.contrail.vro.generator.workflows.model.mandatoryQualifier
+import net.juniper.contrail.vro.generator.workflows.model.maxNumberValueQualifier
+import net.juniper.contrail.vro.generator.workflows.model.minNumberValueQualifier
+import net.juniper.contrail.vro.generator.workflows.model.number
+import net.juniper.contrail.vro.generator.workflows.model.numberFormatQualifier
+import net.juniper.contrail.vro.generator.workflows.model.showInInventoryQualifier
+import net.juniper.contrail.vro.generator.workflows.model.string
 
-class SimpleWorkflowBuilder(private val workflow: Workflow, private val script: WorkflowItem) {
+class PresentationParametersBuilder(
+    private val steps: MutableList<PresentationStep>,
+    parameters: MutableList<ParameterInfo>
+) : ParameterAggregator(parameters) {
 
-    fun step(title: String? = null, setup: SimpleWorkflowStepBuilder.() -> Unit) {
-        val step = PresentationStep(title)
-        val builder = SimpleWorkflowStepBuilder(workflow, script, step)
-        builder.setup()
-        workflow.presentation.addStep(step)
+    fun step(title: String, setup: ParameterAggregator.() -> Unit) {
+        val stepParameters = mutableListOf<ParameterInfo>()
+        ParameterAggregator(stepParameters).apply(setup).apply {
+            steps.add(PresentationStep(title, stepParameters.asPresentationParameters))
+        }
     }
 }
 
 @Suppress("UNUSED_PARAMETER")
-class SimpleWorkflowStepBuilder(
-    private val workflow: Workflow,
-    private val script: WorkflowItem,
-    private val step: PresentationStep) {
-
+open class ParameterAggregator(
+    protected val parameters: MutableList<ParameterInfo>
+) {
     @JvmName("booleanParameter")
     fun parameter(name: String, type: boolean, setup: BooleanParameterBuilder.() -> Unit) =
         BooleanParameterBuilder(name).updateWith(setup)
@@ -46,35 +49,30 @@ class SimpleWorkflowStepBuilder(
         StringParameterBuilder(name).updateWith(setup)
 
     @JvmName("secureStringParameter")
-    fun parameter(name: String, type: SecureString, setup: StringParameterBuilder.() -> Unit) =
-        StringParameterBuilder(name).updateWith(setup)
+    fun parameter(name: String, type: SecureString, setup: SecureStringParameterBuilder.() -> Unit) =
+        SecureStringParameterBuilder(name).updateWith(setup)
 
     @JvmName("referenceParameter")
-    fun parameter(name: String, type: Reference, setup: ReferenceParameterBuilder.() -> Unit) =
-        //TODO add reference to workflow
+    fun parameter(name: String, type: Reference, setup: ReferenceParameterBuilder.() -> Unit) {
         ReferenceParameterBuilder(name, type).updateWith(setup)
+    }
 
     private fun <Builder : BasicParameterBuilder<T>, T : Any> Builder.updateWith(setup: Builder.() -> Unit) =
-        apply(setup).updateWorkflow()
+        apply(setup).append()
 
-    private fun BasicParameterBuilder<*>.updateWorkflow() {
-        val parameter = createPresentationParameter()
-        workflow.input.addParameter(Parameter(name, type, parameter.description))
-        step.addParameter(parameter)
-        script.inBinding(name, type)
+    private fun BasicParameterBuilder<*>.append() {
+        parameters.add(parameterInfo())
     }
 }
 
-private inline fun <T : Any> T?.ifDefined(block: T.() -> Unit) =
-    this?.block()
-
 abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: ParameterType<Type>) {
-    var description: String = name
+    var description: String = name.capitalize()
     var mandatory: Boolean = false
     var defaultValue: Type? = null
 
-    fun createPresentationParameter() = PresentationParameter (
+    fun parameterInfo() = ParameterInfo(
         name = name,
+        type = type,
         description = description,
         qualifiers = allQualifiers
     )
@@ -84,7 +82,9 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
 
     private val commonQualifiers get() = mutableListOf<ParameterQualifier>().apply {
         if (mandatory) add(mandatoryQualifier)
-        defaultValue.ifDefined { add(defaultValueQualifier(type, this)) }
+        defaultValue?.let {
+            add(defaultValueQualifier(type, it))
+        }
     }
 
     protected open val customQualifiers: List<ParameterQualifier> get() =
@@ -100,17 +100,18 @@ class IntParameterBuilder(name: String) : BasicParameterBuilder<Int>(name, numbe
     override val customQualifiers get(): List<ParameterQualifier> {
         val qualifiers = mutableListOf<ParameterQualifier>()
         qualifiers.add(numberFormatQualifier("#0"))
-        min.ifDefined {
-            qualifiers.add(minNumberValueQualifier(this))
+        min?.let {
+            qualifiers.add(minNumberValueQualifier(it))
         }
-        max.ifDefined {
-            qualifiers.add(maxNumberValueQualifier(this))
+        max?.let {
+            qualifiers.add(maxNumberValueQualifier(it))
         }
         return qualifiers
     }
 }
 
 class StringParameterBuilder(name: String) : BasicParameterBuilder<String>(name, string)
+
 class SecureStringParameterBuilder(name: String) : BasicParameterBuilder<String>(name, SecureString)
 
 class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterBuilder<Reference>(name, type) {

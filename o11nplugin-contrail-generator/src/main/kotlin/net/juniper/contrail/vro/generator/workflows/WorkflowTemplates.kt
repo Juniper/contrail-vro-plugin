@@ -12,8 +12,10 @@ import net.juniper.contrail.vro.generator.util.splitCamel
 import net.juniper.contrail.vro.generator.workflows.model.ElementType
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
 import net.juniper.contrail.vro.generator.workflows.model.Workflow
-import net.juniper.contrail.vro.generator.workflows.model.addSingleScript
-import net.juniper.contrail.vro.generator.workflows.model.createBasicWorkflow
+import net.juniper.contrail.vro.generator.workflows.dsl.andParameters
+import net.juniper.contrail.vro.generator.workflows.dsl.packagedIn
+import net.juniper.contrail.vro.generator.workflows.dsl.withScript
+import net.juniper.contrail.vro.generator.workflows.dsl.withVersion
 import net.juniper.contrail.vro.generator.workflows.model.createDunesProperties
 import net.juniper.contrail.vro.generator.workflows.model.createElementInfoProperties
 import net.juniper.contrail.vro.generator.workflows.model.number
@@ -24,7 +26,7 @@ fun elementInfoPropertiesFor(workflow: Workflow, category: String) = createEleme
     categoryPath = "$libraryPackage.$category",
     type = ElementType.Workflow,
     name = workflow.displayName,
-    id = workflow.id!!
+    id = workflow.id
 )
 
 fun dunesPropertiesFor(info: ProjectInfo) = createDunesProperties(
@@ -43,17 +45,20 @@ private val String.inWorkflowName get() =
 private val String.inDescription get() =
     splitCamel()
 
-private val String.asFinder get() =
-    "Contrail:$this"
-
 private val <T : ApiObjectBase> Class<T>.parentName get() =
     parentClassName ?: Connection
+
+val ProjectInfo.workfloWersion get() =
+    "$baseVersion.$buildNumber"
+
+fun ProjectInfo.versionOf(name: String) =
+    name packagedIn workflowsPackageName withVersion workfloWersion
 
 fun createConnectionWorkflow(info: ProjectInfo): Workflow {
 
     val workflowName = "Create Contrail connection"
 
-    return createBasicWorkflow(info, workflowName).addSingleScript(createConnectionScriptBody) {
+    return info.versionOf(workflowName) withScript createConnectionScriptBody andParameters {
         step("Controller") {
             parameter("name", string) {
                 description = "Connection name"
@@ -95,19 +100,16 @@ fun createWorkflow(info: ProjectInfo, className: String, parentName: String): Wo
 
     val workflowName = "Create ${className.inWorkflowName}"
 
-    return createBasicWorkflow(info, workflowName).addSingleScript(createScriptBody(className, parentName)) {
-        step {
+    return info.versionOf(workflowName) withScript createScriptBody(className, parentName) andParameters {
+        parameter("name", string) {
+            description = "${className.inDescription} name"
+            mandatory = true
 
-            parameter("name", string) {
-                description = "${className.inDescription} name"
-                mandatory = true
+        }
+        parameter("parent", parentName.reference) {
+            description = "Parent ${parentName.inDescription}"
+            mandatory = true
 
-            }
-            parameter("parent", parentName.reference) {
-                description = "Parent ${parentName.inDescription}"
-                mandatory = true
-
-            }
         }
     }
 }
@@ -118,17 +120,15 @@ fun deleteConnectionWorkflow(info: ProjectInfo): Workflow =
 fun deleteWorkflow(info: ProjectInfo, className: String): Workflow =
     deleteWorkflow(info, className, deleteScriptBody(className))
 
-fun deleteWorkflow(info: ProjectInfo, clazz: String, scriptBody: String): Workflow {
+fun deleteWorkflow(info: ProjectInfo, className: String, scriptBody: String): Workflow {
 
-    val workflowName = "Delete ${clazz.inWorkflowName}"
+    val workflowName = "Delete ${className.inWorkflowName}"
 
-    return createBasicWorkflow(info, workflowName).addSingleScript(scriptBody) {
-        step {
-            parameter("object", clazz.reference) {
-                description = "${clazz.inDescription} to delete"
-                mandatory = true
-                showInInventory = true
-            }
+    return info.versionOf(workflowName) withScript scriptBody andParameters {
+        parameter("object", className.reference) {
+            description = "${className.inDescription} to delete"
+            mandatory = true
+            showInInventory = true
         }
     }
 }
@@ -138,17 +138,16 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow {
     val parentName = relation.parentName
     val childName = relation.childOriginalName
     val workflowName = "Add ${childName.inWorkflowName} to ${parentName.inWorkflowName}"
+    val scriptBody = relation.addReferenceRelationScriptBody()
 
-    return createBasicWorkflow(info, workflowName).addSingleScript(relation.addReferenceRelationScriptBody()) {
-        step {
-            parameter("parent", parentName.reference) {
-                description = "${parentName.inDescription.capitalize()} to add to"
-                mandatory = true
-            }
-            parameter("child", childName.reference) {
-                description = "${childName.inDescription.capitalize()} to be added"
-                mandatory = true
-            }
+    return info.versionOf(workflowName) withScript scriptBody andParameters {
+        parameter("parent", parentName.reference) {
+            description = "${parentName.inDescription.capitalize()} to add to"
+            mandatory = true
+        }
+        parameter("child", childName.reference) {
+            description = "${childName.inDescription.capitalize()} to be added"
+            mandatory = true
         }
     }
 }
@@ -158,19 +157,16 @@ fun removeReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow 
     val parentName = relation.parentName
     val childName = relation.childOriginalName
     val workflowName = "Remove ${childName.inWorkflowName} from ${parentName.inWorkflowName}"
+    val scriptBody = relation.removeReferenceRelationScriptBody()
 
-    return createBasicWorkflow(info, workflowName).addSingleScript(relation.removeReferenceRelationScriptBody()) {
-
-        step {
-
-            parameter("parent", parentName.reference) {
-                description = "${parentName.inDescription.capitalize()} to remove from"
-                mandatory = true
-            }
-            parameter("child", childName.reference) {
-                description = "${childName.inDescription.capitalize()} to be removed"
-                mandatory = true
-            }
+    return info.versionOf(workflowName) withScript scriptBody andParameters {
+        parameter("parent", parentName.reference) {
+            description = "${parentName.inDescription.capitalize()} to remove from"
+            mandatory = true
+        }
+        parameter("child", childName.reference) {
+            description = "${childName.inDescription.capitalize()} to be removed"
+            mandatory = true
         }
     }
 }
@@ -200,7 +196,7 @@ private fun RefRelation.addReferenceRelationScriptBody() = """
 ${if (simpleReference)
     "parent.add$childOriginalName(child);"
 else {
-    //TODO add to attribute properties to workflow parameters
+    //TODO add attribute properties to workflow parameters
     """var attribute = new Contrail$referenceAttributeSimpleName();
 parent.add$childOriginalName(child, attribute);"""
 }}
