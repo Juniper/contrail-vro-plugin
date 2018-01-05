@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.generator.workflows.model
 
 import net.juniper.contrail.vro.generator.util.CDATA
+import net.juniper.contrail.vro.generator.workflows.model.QualifierKind.static
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -16,75 +17,80 @@ import javax.xml.bind.annotation.XmlValue
     name = "p-qualType",
     propOrder = ["value"]
 )
-class ParameterQualifier (
-    @XmlAttribute(name = "kind")
-    val kind: String? = null,
-
-    @XmlAttribute(name = "name")
-    val name: String? = null,
-
-    @XmlAttribute(name = "type")
-    val type: String? = null,
-
+class ParameterQualifier(
+    kind: QualifierKind,
+    name: String,
+    type: String? = null,
     value: String? = null
 ) {
+    @XmlAttribute(name = "kind")
+    val kind: String = kind.name
+
+    @XmlAttribute(name = "name")
+    val name: String = name
+
+    @XmlAttribute(name = "type")
+    val type: String? = type
+
     @XmlValue
     val value: String? = value.CDATA
 
 }
 
-val staticKindName = "static"
+enum class QualifierKind {
+    static
+}
 
+//TODO convert strings to sealed classes
 val mandatoryQualifierName = "mandatory"
 val defaultValueQualifierName = "defaultValue"
 val numberFormatQualifierName = "numberFormat"
 val minNumberValueQualifierName = "minNumberValue"
 val maxNumberValueQualifierName = "maxNumberValue"
 val showInInventoryQualifierName = "contextualParameter"
-
-val voidTypeName = "void"
+val genericEnumerationQualifierName = "genericEnumeration"
 
 val voidValue = "__NULL__"
 
-val showInInventoryQualifier = ParameterQualifier(name = showInInventoryQualifierName, type = voidTypeName, value = voidValue)
+val showInInventoryQualifier = staticQualifier(showInInventoryQualifierName, void, voidValue)
 val mandatoryQualifier = staticQualifier(mandatoryQualifierName, boolean, true)
 fun <T : Any> defaultValueQualifier(type: ParameterType<T>, value: T) = staticQualifier(defaultValueQualifierName, type, value)
 fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifierName, string, value)
-fun minNumberValueQualifier(value: Int) = ParameterQualifier(name = minNumberValueQualifierName, value = value.toString())
-fun maxNumberValueQualifier(value: Int) = ParameterQualifier(name = maxNumberValueQualifierName, value = value.toString())
+fun minNumberValueQualifier(value: Int) = staticQualifier(minNumberValueQualifierName, number, value)
+fun maxNumberValueQualifier(value: Int) = staticQualifier(maxNumberValueQualifierName, number, value)
 
 private fun <T : Any> staticQualifier(name: String, type: ParameterType<T>, value: T) =
-    ParameterQualifier(staticKindName, name, type.name, value.toString())
+    ParameterQualifier(static, name, type.name, value.toString())
 
 fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQualifier? =
     when (xsdConstraint) {
         "default" -> {
             ParameterQualifier(
-                "static",
-                "defaultValue",
+                static,
+                defaultValueQualifierName,
                 constraintValue.javaClass.xsdType,
                 constraintValue.toString()
             )
         }
         "minInclusive" -> {
             ParameterQualifier(
-                "minNumberValue",
-                null,
+                static,
+                minNumberValueQualifierName,
                 null,
                 constraintValue.toString()
             )
         }
         "maxInclusive" -> {
             ParameterQualifier(
-                "maxNumberValue",
-                null,
+                static,
+                maxNumberValueQualifierName,
                 null,
                 constraintValue.toString()
             )
         }
         "pattern" -> {
             ParameterQualifier(
-                "static",
+                static,
                 "regexp",
                 "Regexp",
                 constraintValue.toString()
@@ -93,16 +99,16 @@ fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQuali
         "enumerations" -> {
             val xsdArrayAsString = (constraintValue as List<String>).joinToString(";") { "#string#$it#" }
             ParameterQualifier(
-                "static",
-                "genericEnumeration",
+                static,
+                genericEnumerationQualifierName,
                 "Array/string",
-                xsdArrayAsString.toString()
+                xsdArrayAsString
             )
         }
         "required" -> {
             ParameterQualifier(
-                "static",
-                "mandatory",
+                static,
+                mandatoryQualifierName,
                 "boolean",
                 constraintValue.toString()
             )

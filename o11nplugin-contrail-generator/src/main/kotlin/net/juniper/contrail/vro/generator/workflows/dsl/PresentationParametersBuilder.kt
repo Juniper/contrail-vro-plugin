@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.generator.workflows.dsl
 
 import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.generator.workflows.model.ParameterType
+import net.juniper.contrail.vro.generator.workflows.model.PresentationGroup
 import net.juniper.contrail.vro.generator.workflows.model.PresentationStep
 import net.juniper.contrail.vro.generator.workflows.model.Reference
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
@@ -19,24 +20,43 @@ import net.juniper.contrail.vro.generator.workflows.model.numberFormatQualifier
 import net.juniper.contrail.vro.generator.workflows.model.showInInventoryQualifier
 import net.juniper.contrail.vro.generator.workflows.model.string
 
+@WorkflowBuilder
 class PresentationParametersBuilder(
     private val steps: MutableList<PresentationStep>,
     parameters: MutableList<ParameterInfo>,
-    private val accumulatedParameters: MutableList<ParameterInfo>
-) : ParameterAggregator(parameters) {
+    allParameters: MutableList<ParameterInfo>
+) : ParameterAggregator(parameters, allParameters) {
 
     fun step(title: String, setup: ParameterAggregator.() -> Unit) {
         val stepParameters = mutableListOf<ParameterInfo>()
-        ParameterAggregator(stepParameters).apply(setup).apply {
-            steps.add(PresentationStep(title, stepParameters.asPresentationParameters))
-            accumulatedParameters.addAll(stepParameters)
-        }
+        ParameterAggregator(stepParameters, allParameters).apply(setup)
+        steps.add(PresentationStep.fromParameters(title, stepParameters.asPresentationParameters))
+    }
+
+    fun groups(title: String, setup: PresentationGroupBuilder.() -> Unit) {
+        val stepGroups = mutableListOf<PresentationGroup>()
+        PresentationGroupBuilder(stepGroups, allParameters).apply(setup)
+        steps.add(PresentationStep.fromGroups(title, stepGroups))
     }
 }
 
+@WorkflowBuilder
+class PresentationGroupBuilder(
+    private val groups: MutableList<PresentationGroup>,
+    private val allParameters: MutableList<ParameterInfo>
+) {
+    fun group(title: String, setup: ParameterAggregator.() -> Unit) {
+        val groupParameters = mutableListOf<ParameterInfo>()
+        ParameterAggregator(groupParameters, allParameters).apply(setup)
+        groups.add(PresentationGroup(title, groupParameters.asPresentationParameters))
+    }
+}
+
+@WorkflowBuilder
 @Suppress("UNUSED_PARAMETER")
 open class ParameterAggregator(
-    protected val parameters: MutableList<ParameterInfo>
+    private val parameters: MutableList<ParameterInfo>,
+    protected val allParameters: MutableList<ParameterInfo>
 ) {
     @JvmName("booleanParameter")
     fun parameter(name: String, type: boolean, setup: BooleanParameterBuilder.() -> Unit) =
@@ -60,10 +80,13 @@ open class ParameterAggregator(
     }
 
     private fun <Builder : BasicParameterBuilder<T>, T : Any> Builder.updateWith(setup: Builder.() -> Unit) =
-        apply(setup).append()
+        apply(setup).appendParameterLists()
 
-    private fun BasicParameterBuilder<*>.append() {
-        parameters.add(parameterInfo())
+    private fun BasicParameterBuilder<*>.appendParameterLists() {
+        parameterInfo.also {
+            parameters.add(it)
+            allParameters.add(it)
+        }
     }
 }
 
@@ -72,7 +95,7 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
     var mandatory: Boolean = false
     var defaultValue: Type? = null
 
-    fun parameterInfo() = ParameterInfo(
+    val parameterInfo get() = ParameterInfo(
         name = name,
         type = type,
         description = description,
@@ -84,6 +107,7 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
 
     private val commonQualifiers get() = mutableListOf<ParameterQualifier>().apply {
         if (mandatory) add(mandatoryQualifier)
+
         defaultValue?.let {
             add(defaultValueQualifier(type, it))
         }

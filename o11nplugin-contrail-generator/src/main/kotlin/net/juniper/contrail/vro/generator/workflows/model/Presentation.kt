@@ -16,7 +16,7 @@ import javax.xml.bind.annotation.XmlType
     name = "presentationType",
     propOrder = ["presentationSteps", "presentationParameters"]
 )
-class Presentation (
+class Presentation(
     presentationSteps: List<PresentationStep> = emptyList(),
     presentationParameters: List<PresentationParameter> = emptyList()
 ) {
@@ -32,9 +32,43 @@ class Presentation (
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "p-stepType",
+    propOrder = ["title", "presentationParameters", "presentationGroups"]
+)
+class PresentationStep private constructor(
+    title: String,
+    presentationParameters: List<PresentationParameter>?,
+    presentationGroups: List<PresentationGroup>?
+) {
+    companion object {
+        fun fromParameters(
+            title: String,
+            presentationParameters: List<PresentationParameter>
+        ) = PresentationStep(title, presentationParameters, null)
+
+        fun fromGroups(
+            title: String,
+            presentationGroups: List<PresentationGroup>
+        ) = PresentationStep(title, null, presentationGroups)
+    }
+
+    @XmlElement
+    val title: String = title
+
+    @XmlElement(name = "p-param")
+    val presentationParameters: List<PresentationParameter>? =
+        presentationParameters?.toList()
+
+    @XmlElement(name = "p-group")
+    val presentationGroups: List<PresentationGroup>? =
+        presentationGroups?.toList()
+}
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(
+    name = "p-groupType",
     propOrder = ["title", "presentationParameters"]
 )
-class PresentationStep (
+class PresentationGroup(
     title: String,
     presentationParameters: List<PresentationParameter>
 ) {

@@ -12,6 +12,9 @@ import net.juniper.contrail.vro.generator.workflows.model.WorkflowItemType
 import net.juniper.contrail.vro.generator.workflows.model.WorkflowScript
 import net.juniper.contrail.vro.generator.workflows.model.boolean
 
+@DslMarker
+annotation class WorkflowBuilder
+
 fun generateID(packageName: String, displayName: String) =
     Hashing.md5().newHasher()
         .putString("$packageName.$displayName", Charsets.UTF_8)

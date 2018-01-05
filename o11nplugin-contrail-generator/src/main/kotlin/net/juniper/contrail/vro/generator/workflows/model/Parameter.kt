@@ -67,6 +67,11 @@ object SecureString : ParameterType<String>() {
         "SecureString"
 }
 
+object void : ParameterType<void>() {
+    override val name get() =
+        "void"
+}
+
 data class Reference(val simpleName: String) : ParameterType<Reference>() {
     constructor(clazz: Class<*>): this(clazz.simpleName)
 
