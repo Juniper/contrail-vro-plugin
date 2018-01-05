@@ -29,14 +29,16 @@ class PresentationParametersBuilder(
 
     fun step(title: String, setup: ParameterAggregator.() -> Unit) {
         val stepParameters = mutableListOf<ParameterInfo>()
-        ParameterAggregator(stepParameters, allParameters).apply(setup)
-        steps.add(PresentationStep.fromParameters(title, stepParameters.asPresentationParameters))
+        val aggregator = ParameterAggregator(stepParameters, allParameters)
+        aggregator.setup()
+        steps += PresentationStep.fromParameters(title, stepParameters.asPresentationParameters, aggregator.description)
     }
 
     fun groups(title: String, setup: PresentationGroupBuilder.() -> Unit) {
         val stepGroups = mutableListOf<PresentationGroup>()
-        PresentationGroupBuilder(stepGroups, allParameters).apply(setup)
-        steps.add(PresentationStep.fromGroups(title, stepGroups))
+        val groupBuilder = PresentationGroupBuilder(stepGroups, allParameters)
+        groupBuilder.setup()
+        steps += PresentationStep.fromGroups(title, stepGroups, groupBuilder.description)
     }
 }
 
@@ -45,10 +47,13 @@ class PresentationGroupBuilder(
     private val groups: MutableList<PresentationGroup>,
     private val allParameters: MutableList<ParameterInfo>
 ) {
+    var description: String? = null
+
     fun group(title: String, setup: ParameterAggregator.() -> Unit) {
         val groupParameters = mutableListOf<ParameterInfo>()
-        ParameterAggregator(groupParameters, allParameters).apply(setup)
-        groups.add(PresentationGroup(title, groupParameters.asPresentationParameters))
+        val aggregator = ParameterAggregator(groupParameters, allParameters)
+        aggregator.setup()
+        groups += PresentationGroup(title, groupParameters.asPresentationParameters, aggregator.description)
     }
 }
 
@@ -58,23 +63,20 @@ open class ParameterAggregator(
     private val parameters: MutableList<ParameterInfo>,
     protected val allParameters: MutableList<ParameterInfo>
 ) {
-    @JvmName("booleanParameter")
+    var description: String? = null
+
     fun parameter(name: String, type: boolean, setup: BooleanParameterBuilder.() -> Unit) =
         BooleanParameterBuilder(name).updateWith(setup)
 
-    @JvmName("intParameter")
     fun parameter(name: String, type: number, setup: IntParameterBuilder.() -> Unit) =
         IntParameterBuilder(name).updateWith(setup)
 
-    @JvmName("stringParameter")
     fun parameter(name: String, type: string, setup: StringParameterBuilder.() -> Unit) =
         StringParameterBuilder(name).updateWith(setup)
 
-    @JvmName("secureStringParameter")
     fun parameter(name: String, type: SecureString, setup: SecureStringParameterBuilder.() -> Unit) =
         SecureStringParameterBuilder(name).updateWith(setup)
 
-    @JvmName("referenceParameter")
     fun parameter(name: String, type: Reference, setup: ReferenceParameterBuilder.() -> Unit) {
         ReferenceParameterBuilder(name, type).updateWith(setup)
     }

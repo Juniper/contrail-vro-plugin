@@ -22,7 +22,7 @@ infix fun SimpleWorkflowBuilder.andParameters(setup: PresentationParametersBuild
     val parameters = mutableListOf<ParameterInfo>()
     val allParameters = mutableListOf<ParameterInfo>()
 
-    PresentationParametersBuilder(steps, parameters, allParameters).apply(setup)
+    PresentationParametersBuilder(steps, parameters, allParameters).setup()
 
     val presentation = Presentation(steps, parameters.asPresentationParameters)
 

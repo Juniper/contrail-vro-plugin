@@ -32,27 +32,33 @@ class Presentation(
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "p-stepType",
-    propOrder = ["title", "presentationParameters", "presentationGroups"]
+    propOrder = ["title", "description", "presentationParameters", "presentationGroups"]
 )
 class PresentationStep private constructor(
     title: String,
     presentationParameters: List<PresentationParameter>?,
-    presentationGroups: List<PresentationGroup>?
+    presentationGroups: List<PresentationGroup>?,
+    description: String?
 ) {
     companion object {
         fun fromParameters(
             title: String,
-            presentationParameters: List<PresentationParameter>
-        ) = PresentationStep(title, presentationParameters, null)
+            presentationParameters: List<PresentationParameter>,
+            description: String? = null
+        ) = PresentationStep(title, presentationParameters, null, description)
 
         fun fromGroups(
             title: String,
-            presentationGroups: List<PresentationGroup>
-        ) = PresentationStep(title, null, presentationGroups)
+            presentationGroups: List<PresentationGroup>,
+            description: String? = null
+        ) = PresentationStep(title, null, presentationGroups, description)
     }
 
     @XmlElement
     val title: String = title
+
+    @XmlElement(name = "desc")
+    val description: String? = description
 
     @XmlElement(name = "p-param")
     val presentationParameters: List<PresentationParameter>? =
@@ -66,14 +72,18 @@ class PresentationStep private constructor(
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "p-groupType",
-    propOrder = ["title", "presentationParameters"]
+    propOrder = ["title", "description", "presentationParameters"]
 )
 class PresentationGroup(
     title: String,
-    presentationParameters: List<PresentationParameter>
+    presentationParameters: List<PresentationParameter>,
+    description: String?
 ) {
     @XmlElement
     val title: String = title
+
+    @XmlElement(name = "desc")
+    val description: String? = description
 
     @XmlElement(name = "p-param")
     val presentationParameters: List<PresentationParameter> =
