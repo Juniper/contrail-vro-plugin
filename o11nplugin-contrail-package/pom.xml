@@ -49,12 +49,13 @@
         <version>${vco.version}</version>
         <extensions>true</extensions>
         <configuration>
-          <packageName>net.juniper.contrail.vro</packageName>
+          <packageName>${workflows.packageName}</packageName>
           <!-- Set the local path to the *.vmokeystore file used to sign the content -->
           <keystoreLocation>${keystoreLocation}</keystoreLocation>
           <keystorePassword>${keystorePassword}</keystorePassword>
           <includes>
-            <include>**/Library/Contrail/**/*.element_info.xml</include>
+            <include>**/Workflow/Library/**/*.element_info.xml</include>
+            <include>**/ScriptModule/**/*.element_info.xml</include>
           </includes>
           <packageFileName>o11nplugin-contrail-package-${project.version}</packageFileName>
           <allowedMask>vef</allowedMask>
@@ -67,7 +68,7 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>templates/main/resources/Workflow</directory>
+              <directory>templates/main/resources</directory>
               <followSymlinks>false</followSymlinks>
             </fileset>
             <fileset>

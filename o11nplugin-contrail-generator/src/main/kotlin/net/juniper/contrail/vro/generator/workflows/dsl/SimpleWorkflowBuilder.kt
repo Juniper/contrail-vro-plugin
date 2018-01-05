@@ -9,7 +9,7 @@ import net.juniper.contrail.vro.generator.workflows.model.ParameterSet
 import net.juniper.contrail.vro.generator.workflows.model.Presentation
 import net.juniper.contrail.vro.generator.workflows.model.PresentationStep
 import net.juniper.contrail.vro.generator.workflows.model.Workflow
-import net.juniper.contrail.vro.generator.workflows.model.WorkflowScript
+import net.juniper.contrail.vro.generator.workflows.model.Script
 
 infix fun WorkflowVersionInfo.withScript(body: String) =
     SimpleWorkflowBuilder(this, body)
@@ -29,7 +29,7 @@ infix fun SimpleWorkflowBuilder.andParameters(setup: PresentationParametersBuild
     val outBinding = Binding(listOf(success.asBind))
     val inBinding = Binding(allParameters.asBinds)
 
-    val script = WorkflowScript(scriptBody)
+    val script = Script(scriptBody)
     val scriptItem = scriptWorkflowItem(script, inBinding, outBinding)
     val workflowItems = listOf(END, scriptItem)
     val output = listOf(success.asParameter)

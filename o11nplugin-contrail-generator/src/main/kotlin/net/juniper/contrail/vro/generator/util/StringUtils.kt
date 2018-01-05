@@ -70,8 +70,15 @@ operator fun String.div(subpath: String): Path =
 val String.isCDATA get() =
     startsWith("<![CDATA[") && endsWith("]]>")
 
-val String?.CDATA get() = when {
-    this == null -> null
+val String.CDATA get() = when {
+    this.isBlank() -> this
     this.isCDATA -> this
     else -> "<![CDATA[$this]]>"
+}
+
+val String?.CDATA
+    @JvmName("getCDATANullable")
+    get() = when {
+    this == null -> null
+    else -> this.CDATA
 }

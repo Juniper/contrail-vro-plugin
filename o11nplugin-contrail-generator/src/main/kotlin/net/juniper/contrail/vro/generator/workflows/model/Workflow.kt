@@ -28,7 +28,7 @@ class Workflow(
     input: ParameterSet = ParameterSet(),
     output: ParameterSet = ParameterSet(),
     position: Position = Position(50.0f, 10.0f)
-) {
+) : Element {
     // this constructor is only necessary to satisfy marshaller
     constructor(): this("Workflow", "0", "0.0.0")
 
@@ -44,7 +44,7 @@ class Workflow(
     val rootName: String = "item${workflowItems.size - 1}"
 
     @XmlAttribute(name = "id")
-    val id: String = id
+    override val id: String = id
 
     @XmlAttribute(name = "version")
     val version: String = version
@@ -78,4 +78,10 @@ class Workflow(
 
     @XmlAttribute(name = "resumeFromFailedMode")
     val resumeFromFailedMode: String = "0"
+
+    override val outputName: String get() =
+        displayName
+
+    override val elementType: ElementType get() =
+        ElementType.Workflow
 }

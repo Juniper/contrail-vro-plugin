@@ -9,7 +9,7 @@ import net.juniper.contrail.vro.generator.workflows.model.Binding
 import net.juniper.contrail.vro.generator.workflows.model.Position
 import net.juniper.contrail.vro.generator.workflows.model.WorkflowItem
 import net.juniper.contrail.vro.generator.workflows.model.WorkflowItemType
-import net.juniper.contrail.vro.generator.workflows.model.WorkflowScript
+import net.juniper.contrail.vro.generator.workflows.model.Script
 import net.juniper.contrail.vro.generator.workflows.model.boolean
 
 @DslMarker
@@ -39,5 +39,5 @@ val success = ParameterInfo("success", boolean)
 
 val defaultScriptPosition = Position(150.0f, 20.0f)
 
-fun scriptWorkflowItem(script: WorkflowScript, inBinding: Binding, outBinding: Binding) =
+fun scriptWorkflowItem(script: Script, inBinding: Binding, outBinding: Binding) =
     WorkflowItem(1, WorkflowItemType.task, defaultScriptPosition, "Scriptable task", script, inBinding, outBinding)

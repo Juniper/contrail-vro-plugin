@@ -21,7 +21,7 @@ class WorkflowItem(
     type: WorkflowItemType,
     position: Position,
     displayName: String? = null,
-    script: WorkflowScript? = null,
+    script: Script? = null,
     inBinding: Binding? = null,
     outBinding: Binding? = null
 ) {
@@ -41,7 +41,7 @@ class WorkflowItem(
     val outName: String? = if (id == 0) null else "item${id - 1}"
 
     @XmlElement(name = "script")
-    val script: WorkflowScript? = script
+    val script: Script? = script
 
     @XmlElement(name = "display-name")
     val displayName: String? = displayName.CDATA

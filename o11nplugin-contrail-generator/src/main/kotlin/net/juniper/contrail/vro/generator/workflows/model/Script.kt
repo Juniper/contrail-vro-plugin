@@ -16,12 +16,12 @@ import javax.xml.bind.annotation.XmlValue
     name = "scriptType",
     propOrder = ["value"]
 )
-class WorkflowScript (
-    value: String? = null,
+class Script(
+    value: String,
     encoded: Boolean = false
 ) {
     @XmlValue
-    val value: String? = value.CDATA
+    val value: String = value.CDATA
 
     @XmlAttribute(name = "encoded")
     val encoded: String? = encoded.toString()

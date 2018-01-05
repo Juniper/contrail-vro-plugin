@@ -9,24 +9,24 @@ import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.RefRelation
 import net.juniper.contrail.vro.generator.util.parentClassName
 import net.juniper.contrail.vro.generator.util.splitCamel
-import net.juniper.contrail.vro.generator.workflows.model.ElementType
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
 import net.juniper.contrail.vro.generator.workflows.model.Workflow
 import net.juniper.contrail.vro.generator.workflows.dsl.andParameters
 import net.juniper.contrail.vro.generator.workflows.dsl.packagedIn
 import net.juniper.contrail.vro.generator.workflows.dsl.withScript
 import net.juniper.contrail.vro.generator.workflows.dsl.withVersion
+import net.juniper.contrail.vro.generator.workflows.model.Element
 import net.juniper.contrail.vro.generator.workflows.model.createDunesProperties
 import net.juniper.contrail.vro.generator.workflows.model.createElementInfoProperties
 import net.juniper.contrail.vro.generator.workflows.model.number
 import net.juniper.contrail.vro.generator.workflows.model.reference
 import net.juniper.contrail.vro.generator.workflows.model.string
 
-fun elementInfoPropertiesFor(workflow: Workflow, category: String) = createElementInfoProperties(
-    categoryPath = "$libraryPackage.$category",
-    type = ElementType.Workflow,
-    name = workflow.displayName,
-    id = workflow.id
+fun Element.elementInfoPropertiesFor(categoryPath: String) = createElementInfoProperties(
+    categoryPath = categoryPath,
+    type = elementType,
+    name = outputName,
+    id = id
 )
 
 fun dunesPropertiesFor(info: ProjectInfo) = createDunesProperties(

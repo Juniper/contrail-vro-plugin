@@ -77,8 +77,3 @@ fun createDunesProperties(
     addEntry(pkgIdKey, pkgId)
 }
 
-enum class ElementType {
-    Workflow
-    //Action
-}
-
