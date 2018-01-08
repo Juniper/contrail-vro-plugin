@@ -4,21 +4,16 @@
 
 package net.juniper.contrail.vro.generator.workflows.dsl
 
-import com.google.common.hash.Hashing
 import net.juniper.contrail.vro.generator.workflows.model.Binding
 import net.juniper.contrail.vro.generator.workflows.model.Position
 import net.juniper.contrail.vro.generator.workflows.model.WorkflowItem
 import net.juniper.contrail.vro.generator.workflows.model.WorkflowItemType
 import net.juniper.contrail.vro.generator.workflows.model.Script
 import net.juniper.contrail.vro.generator.workflows.model.boolean
+import net.juniper.contrail.vro.generator.workflows.generateID
 
 @DslMarker
 annotation class WorkflowBuilder
-
-fun generateID(packageName: String, displayName: String) =
-    Hashing.md5().newHasher()
-        .putString("$packageName.$displayName", Charsets.UTF_8)
-        .hash().toString()
 
 infix fun String.packagedIn(packageName: String) =
     WorkflowNameInfo(workflowName = this, workflowPackage = packageName)

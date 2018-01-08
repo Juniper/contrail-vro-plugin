@@ -72,6 +72,20 @@ object void : ParameterType<void>() {
         "void"
 }
 
+object any : ParameterType<Any>() {
+    override val name get() =
+        "any"
+}
+
+data class array<out Type : Any>(val type: ParameterType<Type>) : ParameterType<List<Type>>() {
+    override val name: String get() =
+        "Array/${type.name}"
+
+    //just to avoid the auto-generated data class version of toString()
+    override fun toString() =
+        name
+}
+
 data class Reference(val simpleName: String) : ParameterType<Reference>() {
     constructor(clazz: Class<*>): this(clazz.simpleName)
 

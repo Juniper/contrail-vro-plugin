@@ -15,6 +15,7 @@ import net.juniper.contrail.vro.generator.workflows.dsl.andParameters
 import net.juniper.contrail.vro.generator.workflows.dsl.packagedIn
 import net.juniper.contrail.vro.generator.workflows.dsl.withScript
 import net.juniper.contrail.vro.generator.workflows.dsl.withVersion
+import net.juniper.contrail.vro.generator.workflows.model.Action
 import net.juniper.contrail.vro.generator.workflows.model.Element
 import net.juniper.contrail.vro.generator.workflows.model.createDunesProperties
 import net.juniper.contrail.vro.generator.workflows.model.createElementInfoProperties
@@ -48,11 +49,11 @@ private val String.inDescription get() =
 private val <T : ApiObjectBase> Class<T>.parentName get() =
     parentClassName ?: Connection
 
-val ProjectInfo.workfloWersion get() =
+val ProjectInfo.workfloVersion get() =
     "$baseVersion.$buildNumber"
 
 fun ProjectInfo.versionOf(name: String) =
-    name packagedIn workflowsPackageName withVersion workfloWersion
+    name packagedIn workflowsPackageName withVersion workfloVersion
 
 fun createConnectionWorkflow(info: ProjectInfo): Workflow {
 
@@ -152,7 +153,7 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow {
     }
 }
 
-fun removeReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow {
+fun removeReferenceWorkflow(info: ProjectInfo, relation: RefRelation, action: Action): Workflow {
 
     val parentName = relation.parentName
     val childName = relation.childOriginalName
@@ -167,6 +168,8 @@ fun removeReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow 
         parameter("child", childName.reference) {
             description = "${childName.inDescription.capitalize()} to be removed"
             mandatory = true
+            dependsOn("parent")
+            listedBy(action)
         }
     }
 }

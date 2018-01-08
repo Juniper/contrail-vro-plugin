@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.generator.workflows.dsl
 
+import net.juniper.contrail.vro.generator.workflows.model.Action
 import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.generator.workflows.model.ParameterType
 import net.juniper.contrail.vro.generator.workflows.model.PresentationGroup
@@ -11,14 +12,18 @@ import net.juniper.contrail.vro.generator.workflows.model.PresentationStep
 import net.juniper.contrail.vro.generator.workflows.model.Reference
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
 import net.juniper.contrail.vro.generator.workflows.model.boolean
+import net.juniper.contrail.vro.generator.workflows.model.childOf
 import net.juniper.contrail.vro.generator.workflows.model.defaultValueQualifier
+import net.juniper.contrail.vro.generator.workflows.model.listFromAction
 import net.juniper.contrail.vro.generator.workflows.model.mandatoryQualifier
 import net.juniper.contrail.vro.generator.workflows.model.maxNumberValueQualifier
 import net.juniper.contrail.vro.generator.workflows.model.minNumberValueQualifier
 import net.juniper.contrail.vro.generator.workflows.model.number
 import net.juniper.contrail.vro.generator.workflows.model.numberFormatQualifier
+import net.juniper.contrail.vro.generator.workflows.model.selectAsTreeQualifier
 import net.juniper.contrail.vro.generator.workflows.model.showInInventoryQualifier
 import net.juniper.contrail.vro.generator.workflows.model.string
+import net.juniper.contrail.vro.generator.workflows.model.visibleWhenNonNull
 
 @WorkflowBuilder
 class PresentationParametersBuilder(
@@ -96,6 +101,8 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
     var description: String = name.capitalize()
     var mandatory: Boolean = false
     var defaultValue: Type? = null
+    private var dependsOn: String? = null
+    private var listedBy: Action? = null
 
     val parameterInfo get() = ParameterInfo(
         name = name,
@@ -103,6 +110,14 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
         description = description,
         qualifiers = allQualifiers
     )
+
+    fun listedBy(action: Action) {
+        listedBy = action
+    }
+
+    fun dependsOn(parameter: String) {
+        dependsOn = parameter
+    }
 
     private val allQualifiers get(): List<ParameterQualifier> =
         commonQualifiers + customQualifiers
@@ -112,6 +127,12 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
 
         defaultValue?.let {
             add(defaultValueQualifier(type, it))
+        }
+        dependsOn?.let {
+            add(visibleWhenNonNull(it))
+        }
+        listedBy?.let {
+            add(listFromAction(it))
         }
     }
 
@@ -145,10 +166,15 @@ class SecureStringParameterBuilder(name: String) : BasicParameterBuilder<String>
 class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterBuilder<Reference>(name, type) {
 
     var showInInventory: Boolean = false
+    var parent: String? = null
 
     override val customQualifiers get(): List<ParameterQualifier> {
         val qualifiers = mutableListOf<ParameterQualifier>()
+        qualifiers.add(selectAsTreeQualifier)
         if (showInInventory) qualifiers.add(showInInventoryQualifier)
+        parent?.let {
+            qualifiers.add(childOf(it))
+        }
         return qualifiers
     }
 }

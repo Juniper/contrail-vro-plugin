@@ -17,6 +17,7 @@ import net.juniper.contrail.vro.generator.util.isRelatable
 import net.juniper.contrail.vro.generator.util.nameWithoutGet
 import net.juniper.contrail.vro.generator.util.nameWithoutGetAndBackRefs
 import net.juniper.contrail.vro.generator.util.objectType
+import net.juniper.contrail.vro.generator.util.pluralize
 import net.juniper.contrail.vro.generator.util.propertyName
 import net.juniper.contrail.vro.generator.util.referenceName
 import net.juniper.contrail.vro.generator.util.typeToClassName
@@ -39,6 +40,7 @@ class RefRelation (
     val parentName: String = parentClass.simpleName
     val childName: String = method.referenceName
     val childOriginalName: String = method.nameWithoutGetAndBackRefs
+    val childNamePluralized = childOriginalName.pluralize()
     val getter: String = method.propertyName
     val referenceAttribute = method.objectReferenceAttributeClassOrDefault
     val referenceAttributeSimpleName = referenceAttribute.simpleName

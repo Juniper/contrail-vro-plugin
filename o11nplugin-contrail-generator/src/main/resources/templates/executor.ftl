@@ -22,16 +22,25 @@ class Executor(private val connection: Connection) {
     }
     </#list>
 
-    <#list findableClassNames as klass>
+    <#list findableClasses as klass>
     @Throws(IOException::class)
-    fun update${klass}(obj: ${klass}) {
+    fun update${klass.simpleName}(obj: ${klass.simpleName}) {
         connection.update(obj)
     }
 
     @Throws(IOException::class)
-    fun delete${klass}(obj: ${klass}) {
-        connection.delete(${klass}::class.java, obj.uuid)
+    fun read${klass.simpleName}(obj: ${klass.simpleName}) {
+        connection.read(obj)
+    }
+
+    @Throws(IOException::class)
+    fun delete${klass.simpleName}(obj: ${klass.simpleName}) {
+        connection.delete(obj)
     }
     </#list>
 
+    <#list referenceRelations as relation>
+    fun get${relation.childNamePluralized}Of${relation.parentName}(parent: ${relation.parentName}) =
+        connection.getObjects(${relation.childOriginalName}::class.java, parent.${relation.getter})
+    </#list>
 }

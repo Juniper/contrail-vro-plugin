@@ -19,6 +19,7 @@ import javax.xml.bind.annotation.XmlType
 @XmlRootElement(name = "dunes-script-module")
 class Action(
     name: String,
+    packageName: String,
     id: String,
     version: String,
     resultType: ParameterType<Any>,
@@ -27,10 +28,16 @@ class Action(
     description: String? = null
 ) : Element {
     // this constructor is only necessary to satisfy marshaller
-    constructor(): this("dummyAction", "123456789", "1.0.0", void, emptyList(), Script(""))
+    constructor(): this("dummyAction", "", "123456789", "1.0.0", void, emptyList(), Script(""))
 
     @XmlAttribute(name = "name")
     val name: String = name
+
+    @Transient
+    val packageName: String = packageName
+
+    @Transient
+    val resultType: ParameterType<Any> = resultType
 
     @XmlAttribute(name = "result-type")
     val resultTypeName: String = resultType.name

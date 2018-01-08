@@ -22,6 +22,7 @@ data class RelationModel(
 data class RefRelationModel(
     val parentName: String,
     val childName: String,
+    val childNamePluralized: String,
     val childOriginalName: String,
     val getter: String,
     val referenceAttribute: String,
@@ -58,6 +59,7 @@ fun Relation.toRelationModel() = RelationModel(
 fun RefRelation.toRefRelationModel() = RefRelationModel(
     parentName,
     childName,
+    childNamePluralized,
     childOriginalName,
     getter,
     referenceAttribute.simpleName,

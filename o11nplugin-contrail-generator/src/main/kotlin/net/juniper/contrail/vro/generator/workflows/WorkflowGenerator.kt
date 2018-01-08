@@ -44,8 +44,10 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, className: String, par
 }
 
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: RefRelation) {
+    val action = relation.findReferencesAction(info.workfloVersion, info.workflowsPackageName)
+    action.save(info)
     addReferenceWorkflow(info, relation).save(info, relation.parentName)
-    removeReferenceWorkflow(info, relation).save(info, relation.parentName)
+    removeReferenceWorkflow(info, relation, action).save(info, relation.parentName)
 }
 
 val workflowContext = JAXBContext.newInstance(Workflow::class.java)
