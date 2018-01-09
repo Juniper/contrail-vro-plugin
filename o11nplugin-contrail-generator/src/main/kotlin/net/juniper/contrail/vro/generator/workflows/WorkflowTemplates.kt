@@ -6,7 +6,7 @@ package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.generator.ProjectInfo
-import net.juniper.contrail.vro.generator.model.RefRelation
+import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.util.parentClassName
 import net.juniper.contrail.vro.generator.util.splitCamel
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
@@ -134,10 +134,10 @@ fun deleteWorkflow(info: ProjectInfo, className: String, scriptBody: String): Wo
     }
 }
 
-fun addReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow {
+fun addReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation): Workflow {
 
     val parentName = relation.parentName
-    val childName = relation.childOriginalName
+    val childName = relation.childName
     val workflowName = "Add ${childName.inWorkflowName} to ${parentName.inWorkflowName}"
     val scriptBody = relation.addReferenceRelationScriptBody()
 
@@ -153,10 +153,10 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: RefRelation): Workflow {
     }
 }
 
-fun removeReferenceWorkflow(info: ProjectInfo, relation: RefRelation, action: Action): Workflow {
+fun removeReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation, action: Action): Workflow {
 
     val parentName = relation.parentName
-    val childName = relation.childOriginalName
+    val childName = relation.childName
     val workflowName = "Remove ${childName.inWorkflowName} from ${parentName.inWorkflowName}"
     val scriptBody = relation.removeReferenceRelationScriptBody()
 
@@ -195,23 +195,23 @@ var executor = ContrailConnectionManager.getExecutor(object.getInternalId().toSt
 executor.delete$className(object);
 """.trimIndent()
 
-private fun RefRelation.addReferenceRelationScriptBody() = """
+private fun ForwardRelation.addReferenceRelationScriptBody() = """
 ${if (simpleReference)
-    "parent.add$childOriginalName(child);"
+    "parent.add$childName(child);"
 else {
     //TODO add attribute properties to workflow parameters
     """var attribute = new Contrail$referenceAttributeSimpleName();
-parent.add$childOriginalName(child, attribute);"""
+parent.add$childName(child, attribute);"""
 }}
 var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
 executor.update$parentName(parent);
 """.trimIndent()
 
-private fun RefRelation.removeReferenceRelationScriptBody() = """
+private fun ForwardRelation.removeReferenceRelationScriptBody() = """
 ${if (simpleReference)
-    "parent.remove$childOriginalName(child);"
+    "parent.remove$childName(child);"
 else
-    "parent.remove$childOriginalName(child, null);"
+    "parent.remove$childName(child, null);"
 }
 var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
 executor.update$parentName(parent);

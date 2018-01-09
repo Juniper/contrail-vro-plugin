@@ -13,7 +13,8 @@ data class CustomMappingModel (
     val rootClasses: List<ClassInfoModel>,
     val propertyClassNames: List<String>,
     val relations: List<RelationModel>,
-    val referenceRelations: List<RefRelationModel>,
+    val forwardRelations: List<ForwardRelation>,
+    val backwardRelations: List<BackwardRelation>,
     val nestedRelations: List<NestedRelationModel>
 ) : GenericModel()
 
@@ -32,13 +33,15 @@ fun generateCustomMappingModel(
     rootClasses: List<Class<out ApiObjectBase>>,
     propertyClasses: List<Class<out ApiPropertyBase>>,
     relations: List<Relation>,
-    referenceRelations: List<RefRelation>,
+    forwardRelations: List<ForwardRelation>,
+    backwardRelations: List<BackwardRelation>,
     nestedRelations: List<NestedRelation>
 ) = CustomMappingModel(
     objectClasses.map { it.simpleName },
     rootClasses.map { it.toClassInfoModel() },
     propertyClasses.map { it.simpleName },
     relations.map { it.toRelationModel() },
-    referenceRelations.map { it.toRefRelationModel() },
+    forwardRelations,
+    backwardRelations,
     nestedRelations.map { it.toNestedRelationModel() }
 )

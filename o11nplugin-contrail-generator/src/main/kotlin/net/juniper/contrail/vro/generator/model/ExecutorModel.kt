@@ -10,17 +10,17 @@ data class ExecutorModel (
     val rootClasses: List<ClassInfoModel>,
     val findableClasses: List<ClassInfoModel>,
     val relations: List<RelationModel>,
-    val referenceRelations: List<RefRelationModel>
+    val forwardRelations: List<ForwardRelation>
 ) : GenericModel()
 
 fun generateExecutorModel(
     objectClasses: List<Class<out ApiObjectBase>>,
     rootClasses: List<Class<out ApiObjectBase>>,
     relations: List<Relation>,
-    referenceRelations: List<RefRelation>
+    forwardRelations: List<ForwardRelation>
 ) = ExecutorModel(
     rootClasses.map { it.toClassInfoModel() },
     objectClasses.map { it.toClassInfoModel() },
     relations.map { it.toRelationModel() },
-    referenceRelations.filter { !it.backReference }.map { it.toRefRelationModel() }
+    forwardRelations
 )

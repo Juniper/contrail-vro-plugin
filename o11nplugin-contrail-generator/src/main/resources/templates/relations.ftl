@@ -52,14 +52,27 @@ class ${relation.parentName}Has${relation.childName}
 
 </#list>
 
-<#list referenceRelations as relation>
+<#list forwardRelations as relation>
 class ${relation.parentName}Has${relation.childName}
 @Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${relation.childName}> {
 
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childName}>? {
         val connection = connections.getConnection(parentId)
         val parent = connection?.findById(${relation.parentName}::class.java, parentId.getString("${relation.parentName}"))
-        return connection?.getObjects(${relation.childOriginalName}::class.java, parent?.${relation.getter})?.map { it.as${relation.childName}() }
+        return connection?.getObjects(${relation.childName}::class.java, parent?.${relation.getter})
+    }
+}
+
+</#list>
+
+<#list backwardRelations as relation>
+class ${relation.parentName}Has${relation.wrapperName}
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${relation.wrapperName}> {
+
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.wrapperName}>? {
+        val connection = connections.getConnection(parentId)
+        val parent = connection?.findById(${relation.parentName}::class.java, parentId.getString("${relation.parentName}"))
+        return connection?.getObjects(${relation.childName}::class.java, parent?.${relation.getter})?.map { it.as${relation.wrapperName}() }
     }
 }
 

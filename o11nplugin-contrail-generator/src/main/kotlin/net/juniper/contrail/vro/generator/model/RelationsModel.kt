@@ -7,7 +7,8 @@ package net.juniper.contrail.vro.generator.model
 data class RelationsModel(
     val rootClassNames: List<String>,
     val relations: List<RelationModel>,
-    val referenceRelations: List<RefRelationModel>,
+    val forwardRelations: List<ForwardRelation>,
+    val backwardRelations: List<BackwardRelation>,
     val nestedRelations: List<NestedRelationModel>
 ) : GenericModel()
 
@@ -16,18 +17,6 @@ data class RelationModel(
     val childName: String,
     val childNameDecapitalized: String,
     val name: String,
-    val folderName: String
-)
-
-data class RefRelationModel(
-    val parentName: String,
-    val childName: String,
-    val childNamePluralized: String,
-    val childOriginalName: String,
-    val getter: String,
-    val referenceAttribute: String,
-    val simpleReference: Boolean,
-    val backReference: Boolean,
     val folderName: String
 )
 
@@ -56,18 +45,6 @@ fun Relation.toRelationModel() = RelationModel(
     folderName
 )
 
-fun RefRelation.toRefRelationModel() = RefRelationModel(
-    parentName,
-    childName,
-    childNamePluralized,
-    childOriginalName,
-    getter,
-    referenceAttribute.simpleName,
-    simpleReference,
-    backReference,
-    folderName
-)
-
 fun NestedRelation.toNestedRelationModel() = NestedRelationModel(
     childWrapperName,
     parentWrapperName,
@@ -87,14 +64,14 @@ fun Getter.toGetterModel() = GetterModel(
 
 fun generateRelationsModel(
     relations: List<Relation>,
-    refRelations: List<RefRelation>,
+    forwardRelations: List<ForwardRelation>,
+    backwardRelations: List<BackwardRelation>,
     nestedRelations: List<NestedRelation>,
     rootClasses: List<Class<*>>
 ): RelationsModel {
     val relationModels = relations.map { it.toRelationModel() }
-    val refRelationModels = refRelations.map { it.toRefRelationModel() }
     val nestedRelationModels = nestedRelations.map { it.toNestedRelationModel() }
     val rootClassNames = rootClasses.map { it.simpleName }
 
-    return RelationsModel(rootClassNames, relationModels, refRelationModels, nestedRelationModels)
+    return RelationsModel(rootClassNames, relationModels, forwardRelations, backwardRelations, nestedRelationModels)
 }

@@ -60,6 +60,9 @@ val <T> Class<T>.isAbstract: Boolean get() =
 val <T> Class<T>.isNotAbstract: Boolean get() =
     !isAbstract
 
+inline fun <reified P : Any, reified C : P> List<P>.select(clazz: Class<C>) =
+    asSequence().map { it as? C }.filterNotNull().toList()
+
 private val loader get(): ClassLoader =
     Thread.currentThread().contextClassLoader
 

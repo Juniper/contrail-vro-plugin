@@ -33,21 +33,35 @@ open class Relation (
     val folderName = childName.folderName()
 }
 
-class RefRelation (
+abstract class RefRelation (
     parentClass: Class<out ApiObjectBase>,
     method: Method
 ) {
     val parentName: String = parentClass.simpleName
-    val childName: String = method.referenceName
-    val childOriginalName: String = method.nameWithoutGetAndBackRefs
-    val childNamePluralized = childOriginalName.pluralize()
+    val childName: String = method.nameWithoutGetAndBackRefs
+    val childNamePluralized = childName.pluralize()
     val getter: String = method.propertyName
+    val folderName = method.nameWithoutGetAndBackRefs.folderName()
+}
+
+class ForwardRelation (
+    parentClass: Class<out ApiObjectBase>,
+    method: Method
+) : RefRelation(parentClass, method) {
     val referenceAttribute = method.objectReferenceAttributeClassOrDefault
     val referenceAttributeSimpleName = referenceAttribute.simpleName
     val simpleReference = referenceAttribute.isSimpleReference
-    val backReference = method.isBackRef
-    val folderName = method.nameWithoutGetAndBackRefs.folderName()
 }
+
+class BackwardRelation (
+    parentClass: Class<out ApiObjectBase>,
+    method: Method
+) : RefRelation(parentClass, method) {
+    val wrapperName: String = method.referenceName
+}
+
+fun refRelation(parentClass: Class<out ApiObjectBase>, method: Method) =
+    if (method.isBackRef) BackwardRelation(parentClass, method) else ForwardRelation(parentClass, method)
 
 class NestedRelation(
     val parent: Class<*>,
@@ -148,7 +162,7 @@ private fun Method.recursiveRelations(
 }
 
 private val <T: ApiObjectBase> Class<T>.refRelations: Sequence<RefRelation> get() =
-    referenceMethods.distinctBy { it.referenceName }.map { RefRelation(this, it) }
+    referenceMethods.distinctBy { it.referenceName }.map { refRelation(this, it) }
 
 private val <T: ApiObjectBase> Class<T>.referenceMethods: Sequence<Method> get() =
     declaredMethods.asSequence()

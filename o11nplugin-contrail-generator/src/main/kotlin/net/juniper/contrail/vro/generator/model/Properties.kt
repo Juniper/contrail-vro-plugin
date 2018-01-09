@@ -24,8 +24,7 @@ open class ClassProperties(
     val listProperties: List<Property>
 )
 
-val <T> Class<T>.properties: ClassProperties
-    get() {
+val <T> Class<T>.properties: ClassProperties get() {
     val simpleProperties = mutableListOf<Property>()
     val listProperties = mutableListOf<Property>()
 

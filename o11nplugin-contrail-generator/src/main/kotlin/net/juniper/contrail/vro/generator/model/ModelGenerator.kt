@@ -23,15 +23,16 @@ fun generateModel(
     val rootClasses = objectClasses.rootClasses()
 
     val relations = definition.relations
-    val refRelations = definition.referenceRelations
+    val forwardRelations = definition.forwardRelations
+    val backwardRelations = definition.backwardRelations
     val nestedRelations = definition.nestedRelations
     val referenceWrappers = generateReferenceWrappers(objectClasses)
 
-    val relationsModel = generateRelationsModel(relations, refRelations, nestedRelations, rootClasses)
-    val customMappingModel = generateCustomMappingModel(objectClasses, rootClasses, propertyClasses, relations, refRelations, nestedRelations)
+    val relationsModel = generateRelationsModel(relations, forwardRelations, backwardRelations, nestedRelations, rootClasses)
+    val customMappingModel = generateCustomMappingModel(objectClasses, rootClasses, propertyClasses, relations, forwardRelations, backwardRelations, nestedRelations)
     val wrappersModel = generateWrappersModel(referenceWrappers, nestedRelations)
     val findersModel = generateFindersModel(objectClasses, referenceWrappers, nestedRelations)
-    val executorModel = generateExecutorModel(objectClasses, rootClasses, relations, refRelations)
+    val executorModel = generateExecutorModel(objectClasses, rootClasses, relations, forwardRelations)
 
     val customMappingConfig = GeneratorConfig(
         baseDir = info.customRoot / generatedSourcesRoot,

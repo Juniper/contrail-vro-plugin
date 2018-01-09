@@ -39,8 +39,9 @@ class Executor(private val connection: Connection) {
     }
     </#list>
 
-    <#list referenceRelations as relation>
+    <#list forwardRelations as relation>
     fun get${relation.childNamePluralized}Of${relation.parentName}(parent: ${relation.parentName}) =
-        connection.getObjects(${relation.childOriginalName}::class.java, parent.${relation.getter})
+        connection.getObjects(${relation.childName}::class.java, parent.${relation.getter})
+
     </#list>
 }
