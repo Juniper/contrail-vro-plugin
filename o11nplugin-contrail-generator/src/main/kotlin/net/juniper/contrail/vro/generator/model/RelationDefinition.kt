@@ -5,7 +5,6 @@
 package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.api.ApiObjectBase
-import net.juniper.contrail.vro.generator.util.rootClasses
 import net.juniper.contrail.vro.generator.util.select
 
 class RelationDefinition(
@@ -18,8 +17,11 @@ class RelationDefinition(
     val backwardRelations = referenceRelations.select(BackwardRelation::class.java)
 }
 
-fun buildRelationDefinition(objectClasses: List<Class<out ApiObjectBase>>) = RelationDefinition(
-    objectClasses.rootClasses(),
+fun buildRelationDefinition(
+    objectClasses: List<Class<out ApiObjectBase>>,
+    rootClasses: List<Class<out ApiObjectBase>>
+) = RelationDefinition(
+    rootClasses,
     generateRelations(objectClasses),
     generateReferenceRelations(objectClasses),
     generateNestedRelations(objectClasses)

@@ -11,17 +11,14 @@ import net.juniper.contrail.vro.generator.generatedPackageName
 import net.juniper.contrail.vro.generator.generatedSourcesRoot
 import net.juniper.contrail.vro.generator.templatePath
 import net.juniper.contrail.vro.generator.util.div
-import net.juniper.contrail.vro.generator.util.rootClasses
 
 fun generateModel(
     info: ProjectInfo,
     definition: RelationDefinition,
     objectClasses: List<Class<out ApiObjectBase>>,
+    rootClasses: List<Class<out ApiObjectBase>>,
     propertyClasses: List<Class<out ApiPropertyBase>>
 ) {
-
-    val rootClasses = objectClasses.rootClasses()
-
     val relations = definition.relations
     val forwardRelations = definition.forwardRelations
     val backwardRelations = definition.backwardRelations

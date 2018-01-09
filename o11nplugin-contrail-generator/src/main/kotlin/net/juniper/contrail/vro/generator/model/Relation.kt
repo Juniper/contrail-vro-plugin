@@ -6,24 +6,24 @@ package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
-import net.juniper.contrail.api.ObjectReference
+import net.juniper.contrail.vro.generator.util.asApiClass
 import net.juniper.contrail.vro.generator.util.collapsedNestedName
 import net.juniper.contrail.vro.generator.util.defaultParentType
 import net.juniper.contrail.vro.generator.util.folderName
 import net.juniper.contrail.vro.generator.util.isApiTypeClass
 import net.juniper.contrail.vro.generator.util.isBackRef
 import net.juniper.contrail.vro.generator.util.isGetter
-import net.juniper.contrail.vro.generator.util.isRelatable
 import net.juniper.contrail.vro.generator.util.nameWithoutGet
 import net.juniper.contrail.vro.generator.util.nameWithoutGetAndBackRefs
+import net.juniper.contrail.vro.generator.util.objectReferenceAttributeClass
 import net.juniper.contrail.vro.generator.util.objectType
 import net.juniper.contrail.vro.generator.util.pluralize
 import net.juniper.contrail.vro.generator.util.propertyName
 import net.juniper.contrail.vro.generator.util.referenceName
+import net.juniper.contrail.vro.generator.util.returnListGenericClass
+import net.juniper.contrail.vro.generator.util.returnsObjectReferences
 import net.juniper.contrail.vro.generator.util.typeToClassName
 import java.lang.reflect.Method
-import java.lang.reflect.ParameterizedType
-import java.lang.reflect.Type
 
 open class Relation (
     val parentName: String,
@@ -39,6 +39,7 @@ abstract class RefRelation (
 ) {
     val parentName: String = parentClass.simpleName
     val childName: String = method.nameWithoutGetAndBackRefs
+    val childClass: Class<*> = childName.asApiClass!!
     val childNamePluralized = childName.pluralize()
     val getter: String = method.propertyName
     val folderName = method.nameWithoutGetAndBackRefs.folderName()
@@ -88,7 +89,6 @@ typealias RelationGraphNode = Pair<String, List<String>>
 fun generateRelations(classes: List<Class<out ApiObjectBase>>): List<Relation> {
     val parentToChildren = classes.groupBy { it.defaultParentType }
     return classes.asSequence()
-        .filter { it.isRelatable }
         .map { createRelationGraphNode(it, parentToChildren) }
         .map { it.toRelationSequence() }
         .flatten().toList()
@@ -100,8 +100,8 @@ private fun createRelationGraphNode(
 ): RelationGraphNode {
     val parentType = parentClass.objectType
     val children = parentToChildren.getOrElse(parentType) { listOf() }
-    val childrenTypes = children.map { it.objectType.typeToClassName() }
-    return RelationGraphNode(parentType.typeToClassName(), childrenTypes)
+    val childrenTypes = children.map { it.objectType.typeToClassName }
+    return RelationGraphNode(parentType.typeToClassName, childrenTypes)
 }
 
 private fun relationName(parentType: String, childType: String) =
@@ -114,6 +114,7 @@ fun generateReferenceRelations(classes: List<Class<out ApiObjectBase>>): List<Re
     classes.asSequence()
         .map { it.refRelations }
         .flatten()
+        .filter { classes.contains(it.childClass) }
         .toList()
 
 fun generateNestedRelations(classes: List<Class<*>>): List<NestedRelation> =
@@ -168,29 +169,11 @@ private val <T: ApiObjectBase> Class<T>.referenceMethods: Sequence<Method> get()
     declaredMethods.asSequence()
         .filter { it.isRefMethod and it.returnsObjectReferences }
 
-private val Type.parameterClass: Class<*>? get() =
-    parameterType?.unwrapped
-
-private val Type.parameterType: Type? get() =
-    if (this is ParameterizedType) actualTypeArguments[0] else null
-
-private val Type.unwrapped: Class<*> get() =
-    if (this is ParameterizedType) rawType as Class<*> else this as Class<*>
-
-private val Method.isRefMethod get() =
-    isGetter and nameWithoutGetAndBackRefs.isApiTypeClass
-
-private val Method.returnListGenericClass: Class<*>? get() =
-    if (returnType == List::class.java) genericReturnType.parameterClass else null
-
-private val Method.returnsObjectReferences: Boolean get() =
-    returnListGenericClass == ObjectReference::class.java
-
-private val Method.objectReferenceAttributeClass: Class<*>? get() =
-    genericReturnType?.parameterType?.parameterClass
-
 private val Method.objectReferenceAttributeClassOrDefault: Class<*> get() =
     objectReferenceAttributeClass ?: ApiPropertyBase::class.java
+
+val Method.isRefMethod get() =
+    isGetter and nameWithoutGetAndBackRefs.isApiTypeClass
 
 private val <T> Class<T>.isSimpleReference: Boolean get() =
     this == ApiPropertyBase::class.java

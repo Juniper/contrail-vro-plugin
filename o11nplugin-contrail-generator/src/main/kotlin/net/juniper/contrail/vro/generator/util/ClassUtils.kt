@@ -5,9 +5,10 @@
 package net.juniper.contrail.vro.generator.util
 
 import com.google.common.reflect.ClassPath
-import net.juniper.contrail.api.ApiObjectBase
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
 
 val <T> Class<T>.nestedName get() =
     canonicalName.replace("${`package`?.name}.", "")
@@ -51,6 +52,21 @@ val Method.isBackRef get() =
 val Method.referenceName get() =
     nameWithoutGetAndBackRefs.ref
 
+val Type.parameterClass: Class<*>? get() =
+    parameterType?.unwrapped
+
+val Type.parameterType: Type? get() =
+    if (this is ParameterizedType) actualTypeArguments[0] else null
+
+val Type.unwrapped: Class<*> get() =
+    if (this is ParameterizedType) rawType as Class<*> else this as Class<*>
+
+val Method.returnListGenericClass: Class<*>? get() =
+    if (returnType == List::class.java) genericReturnType.parameterClass else null
+
+val Method.objectReferenceAttributeClass: Class<*>? get() =
+    genericReturnType?.parameterType?.parameterClass
+
 val <T> Class<T>.referenceName: String get() =
     simpleName.ref
 
@@ -60,7 +76,7 @@ val <T> Class<T>.isAbstract: Boolean get() =
 val <T> Class<T>.isNotAbstract: Boolean get() =
     !isAbstract
 
-inline fun <reified P : Any, reified C : P> List<P>.select(clazz: Class<C>) =
+inline fun <P : Any, reified C : P> List<P>.select(clazz: Class<C>) =
     asSequence().map { it as? C }.filterNotNull().toList()
 
 private val loader get(): ClassLoader =
@@ -88,16 +104,3 @@ private fun classesIn(packageName: String): Sequence<Class<*>> =
 
 fun classForName(name: String): Class<*>? =
     try { Class.forName(name) } catch (e: ClassNotFoundException) { null }
-
-val Class<*>.xsdName : String
-    get() = simpleName.splitCamel().toLowerCase().replace(" ", "-")
-
-val <T> Class<T>.xsdType: String get() = when (this.simpleName) {
-    "String" -> "string"
-    "Boolean" -> "boolean"
-    "Int" -> "number"
-    else -> ""
-}
-
-val Class<out ApiObjectBase>.hasParent
-    get() = this.newInstance().defaultParentType != null

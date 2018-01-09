@@ -13,11 +13,12 @@ import net.juniper.contrail.vro.generator.workflows.generateWorkflows
 object Generator {
     @JvmStatic fun main(args: Array<String>) {
         val projectInfo = readProjectInfo()
-        val objectClasses = objectClasses()
-        val propertyClasses = propertyClasses()
+        val objectClasses = objectClasses().filter { it.isModelClass }
+        val rootClasses = objectClasses.filter { it.isRootClass }
+        val propertyClasses = objectClasses.propertyClasses()
 
-        val relations = buildRelationDefinition(objectClasses)
-        generateModel(projectInfo, relations, objectClasses, propertyClasses)
+        val relations = buildRelationDefinition(objectClasses, rootClasses)
+        generateModel(projectInfo, relations, objectClasses, rootClasses, propertyClasses)
         generateWorkflows(projectInfo, relations)
     }
 }

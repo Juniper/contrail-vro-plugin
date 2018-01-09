@@ -11,7 +11,7 @@ val CAMEL_CASE_REGEX = "(?<=[a-z])(?=[A-Z])".toRegex()
 val ES_SUFFIXES = ".*(s|x|z|ch|sh)$".toRegex()
 val NON_IES_SUFFIXES_REGEX = "(ay|ey|iy|oy|uy)$".toRegex()
 
-fun String.typeToClassName(): String =
+val String.typeToClassName: String get() =
     split("-").joinToString("") { it.toLowerCase().capitalize() }
 
 fun String.underscoredPropertyToCamelCase(): String {
