@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.generator.workflows.model
 
 import net.juniper.contrail.vro.generator.util.CDATA
+import java.util.Date
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -65,6 +66,11 @@ object string : ParameterType<String>() {
 object SecureString : ParameterType<String>() {
     override val name get() =
         "SecureString"
+}
+
+object date : ParameterType<Date>() {
+    override val name get() =
+        "Date"
 }
 
 object void : ParameterType<void>() {

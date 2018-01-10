@@ -51,9 +51,9 @@ class ForwardRelation (
     parentClass: ObjectClass,
     method: Method
 ) : RefRelation(parentClass, method) {
-    val referenceAttribute = method.objectReferenceAttributeClassOrDefault
-    val referenceAttributeSimpleName = referenceAttribute.simpleName
-    val simpleReference = referenceAttribute.isSimpleReference
+    val attribute = method.objectReferenceAttributeClassOrDefault
+    val attributeSimpleName = attribute.simpleName
+    val simpleReference = attribute.isSimpleReference
 }
 
 class BackwardRelation (

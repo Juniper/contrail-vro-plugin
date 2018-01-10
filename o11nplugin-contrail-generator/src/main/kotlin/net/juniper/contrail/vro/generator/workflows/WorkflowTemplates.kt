@@ -7,8 +7,13 @@ package net.juniper.contrail.vro.generator.workflows
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
+import net.juniper.contrail.vro.generator.model.Property
+import net.juniper.contrail.vro.generator.model.properties
+import net.juniper.contrail.vro.generator.util.isApiTypeClass
 import net.juniper.contrail.vro.generator.util.parentClassName
 import net.juniper.contrail.vro.generator.util.splitCamel
+import net.juniper.contrail.vro.generator.util.underscoredPropertyToCamelCase
+import net.juniper.contrail.vro.generator.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
 import net.juniper.contrail.vro.generator.workflows.model.Workflow
 import net.juniper.contrail.vro.generator.workflows.dsl.andParameters
@@ -22,6 +27,7 @@ import net.juniper.contrail.vro.generator.workflows.model.createElementInfoPrope
 import net.juniper.contrail.vro.generator.workflows.model.number
 import net.juniper.contrail.vro.generator.workflows.model.reference
 import net.juniper.contrail.vro.generator.workflows.model.string
+import java.lang.reflect.Field
 
 fun Element.elementInfoPropertiesFor(categoryPath: String) = createElementInfoProperties(
     categoryPath = categoryPath,
@@ -40,10 +46,12 @@ fun dunesPropertiesFor(info: ProjectInfo) = createDunesProperties(
 
 val Connection = "Connection"
 
-private val String.inWorkflowName get() =
+private val String.workflowNameFormat
+    get() =
     splitCamel().toLowerCase()
 
-private val String.inDescription get() =
+private val String.descriptionFormat
+    get() =
     splitCamel()
 
 private val <T : ApiObjectBase> Class<T>.parentName get() =
@@ -99,16 +107,16 @@ fun createConnectionWorkflow(info: ProjectInfo): Workflow {
 
 fun createWorkflow(info: ProjectInfo, className: String, parentName: String): Workflow {
 
-    val workflowName = "Create ${className.inWorkflowName}"
+    val workflowName = "Create ${className.workflowNameFormat}"
 
     return info.versionOf(workflowName) withScript createScriptBody(className, parentName) andParameters {
         parameter("name", string) {
-            description = "${className.inDescription} name"
+            description = "${className.descriptionFormat} name"
             mandatory = true
 
         }
         parameter("parent", parentName.reference) {
-            description = "Parent ${parentName.inDescription}"
+            description = "Parent ${parentName.descriptionFormat}"
             mandatory = true
 
         }
@@ -123,14 +131,25 @@ fun deleteWorkflow(info: ProjectInfo, className: String): Workflow =
 
 fun deleteWorkflow(info: ProjectInfo, className: String, scriptBody: String): Workflow {
 
-    val workflowName = "Delete ${className.inWorkflowName}"
+    val workflowName = "Delete ${className.workflowNameFormat}"
 
     return info.versionOf(workflowName) withScript scriptBody andParameters {
         parameter("object", className.reference) {
-            description = "${className.inDescription} to delete"
+            description = "${className.descriptionFormat} to delete"
             mandatory = true
             showInInventory = true
         }
+    }
+}
+
+private val typeSuffix = "Type$".toRegex()
+
+private val Property.title get() =
+    clazz.simpleName.replace(typeSuffix, "").descriptionFormat
+
+private fun Property.toParameter(builder: ParameterAggregator) {
+    builder.parameter(propertyName, clazz) {
+        description = propertyName.splitCamel().capitalize()
     }
 }
 
@@ -138,17 +157,44 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation): Workflow
 
     val parentName = relation.parentName
     val childName = relation.childName
-    val workflowName = "Add ${childName.inWorkflowName} to ${parentName.inWorkflowName}"
+    val workflowName = "Add ${childName.workflowNameFormat} to ${parentName.workflowNameFormat}"
     val scriptBody = relation.addReferenceRelationScriptBody()
 
     return info.versionOf(workflowName) withScript scriptBody andParameters {
         parameter("parent", parentName.reference) {
-            description = "${parentName.inDescription.capitalize()} to add to"
+            description = "${parentName.descriptionFormat.capitalize()} to add to"
             mandatory = true
         }
         parameter("child", childName.reference) {
-            description = "${childName.inDescription.capitalize()} to be added"
+            description = "${childName.descriptionFormat.capitalize()} to be added"
             mandatory = true
+        }
+        if ( ! relation.simpleReference) {
+            val properties = relation.attribute.properties
+            for (prop in properties.simpleProperties) {
+                if (prop.clazz.isApiTypeClass) {
+                    val propProperties = prop.clazz.properties
+                    val primitives = propProperties.simpleProperties.filter { ! it.clazz.isApiTypeClass }
+                    val complex = propProperties.simpleProperties.filter { it.clazz.isApiTypeClass }
+
+                    when {
+                        primitives.isEmpty() -> groups(prop.title) {
+                            for (propProp in complex) {
+                                group(propProp.title) {
+                                    propProp.clazz.properties.simpleProperties.forEach { it.toParameter(this@group) }
+                                }
+                            }
+                        }
+                        complex.isEmpty() -> step(prop.title) {
+                            primitives.forEach { it.toParameter(this@step) }
+                        }
+                        else -> TODO("Add support for attributes with mixed structure.")
+                    }
+
+                } else {
+                    prop.toParameter(this)
+                }
+            }
         }
     }
 }
@@ -157,16 +203,16 @@ fun removeReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation, action
 
     val parentName = relation.parentName
     val childName = relation.childName
-    val workflowName = "Remove ${childName.inWorkflowName} from ${parentName.inWorkflowName}"
+    val workflowName = "Remove ${childName.workflowNameFormat} from ${parentName.workflowNameFormat}"
     val scriptBody = relation.removeReferenceRelationScriptBody()
 
     return info.versionOf(workflowName) withScript scriptBody andParameters {
         parameter("parent", parentName.reference) {
-            description = "${parentName.inDescription.capitalize()} to remove from"
+            description = "${parentName.descriptionFormat.capitalize()} to remove from"
             mandatory = true
         }
         parameter("child", childName.reference) {
-            description = "${childName.inDescription.capitalize()} to be removed"
+            description = "${childName.descriptionFormat.capitalize()} to be removed"
             mandatory = true
             dependsOn("parent")
             listedBy(action)
@@ -195,17 +241,42 @@ var executor = ContrailConnectionManager.getExecutor(object.getInternalId().toSt
 executor.delete$className(object);
 """.trimIndent()
 
-private fun ForwardRelation.addReferenceRelationScriptBody() = """
-${if (simpleReference)
-    "parent.add$childName(child);"
-else {
-    //TODO add attribute properties to workflow parameters
-    """var attribute = new Contrail$referenceAttributeSimpleName();
-parent.add$childName(child, attribute);"""
-}}
-var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
-executor.update$parentName(parent);
-""".trimIndent()
+private fun ForwardRelation.addReferenceRelationScriptBody() =
+    if (simpleReference)
+        addSimpleReferenceRelationScriptBody()
+    else
+        addRelationWithAttributeScriptBody()
+
+private val Field.parameterName get() =
+    name.underscoredPropertyToCamelCase()
+
+private fun Field.setCode(ref: String) =
+    "\n$ref.set${parameterName.capitalize()}($parameterName);"
+
+private fun Class<*>.attributeCode(ref: String) =
+    declaredFields.joinToString("\n") { it.attributeCode(ref) }
+
+private fun Field.attributeCode(ref: String): String =
+    if (type.isApiTypeClass) {
+        """
+var $parameterName = new Contrail${type.simpleName}();
+${type.attributeCode(parameterName)}
+        """.trimIndent()
+    } else {
+        ""
+    } + setCode(ref)
+
+private fun ForwardRelation.addRelationWithAttributeScriptBody() = """
+var attribute = new Contrail$attributeSimpleName();
+${ attribute.attributeCode("attribute") }
+parent.add$childName(child, attribute);
+$updateParent
+"""
+
+private fun ForwardRelation.addSimpleReferenceRelationScriptBody() = """
+parent.add$childName(child);
+$updateParent
+"""
 
 private fun ForwardRelation.removeReferenceRelationScriptBody() = """
 ${if (simpleReference)
@@ -213,6 +284,10 @@ ${if (simpleReference)
 else
     "parent.remove$childName(child, null);"
 }
+$updateParent
+""".trimIndent()
+
+private val ForwardRelation.updateParent get() = """
 var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
 executor.update$parentName(parent);
 """.trimIndent()

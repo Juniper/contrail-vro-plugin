@@ -61,14 +61,14 @@ val Method.returnsListOfProperties: Boolean get() =
     returnListGenericClass?.superclass == ApiPropertyBase::class.java
 
 private val Method.deepestReturnType: Class<*>? get() =
-    if (returnType == List::class)
-        returnListGenericClass ?: objectReferenceAttributeClass
+    if (returnType == List::class.java)
+        objectReferenceAttributeClass ?: returnListGenericClass
     else
         returnType
 
 private val Method.apiPropertyReturn get() =
     deepestReturnType?.let {
-        if (it.superclass == ApiPropertyBase::class) it as PropertyClass else null
+        if (it.superclass == ApiPropertyBase::class.java) it as PropertyClass else null
     }
 
 private val Array<Method>.asProperties get() =

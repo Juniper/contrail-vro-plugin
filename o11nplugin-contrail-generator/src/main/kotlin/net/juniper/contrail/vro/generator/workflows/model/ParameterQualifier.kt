@@ -56,6 +56,8 @@ val linkedEnumerationQualifierName = "linkedEnumeration"
 val dataBindingQualifierName = "dataBinding"
 val sdkRootObjectQualifierName = "sdkRootObject"
 val selectAsQualifierName = "show-select-as"
+val beforeDateQualifierName = "beforeDate"
+val afterDateQualifierName = "afterDate"
 
 val voidValue = "__NULL__"
 

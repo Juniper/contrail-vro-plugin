@@ -13,6 +13,7 @@ import net.juniper.contrail.vro.generator.workflows.model.Reference
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
 import net.juniper.contrail.vro.generator.workflows.model.boolean
 import net.juniper.contrail.vro.generator.workflows.model.childOf
+import net.juniper.contrail.vro.generator.workflows.model.date
 import net.juniper.contrail.vro.generator.workflows.model.defaultValueQualifier
 import net.juniper.contrail.vro.generator.workflows.model.listFromAction
 import net.juniper.contrail.vro.generator.workflows.model.mandatoryQualifier
@@ -24,6 +25,7 @@ import net.juniper.contrail.vro.generator.workflows.model.selectAsTreeQualifier
 import net.juniper.contrail.vro.generator.workflows.model.showInInventoryQualifier
 import net.juniper.contrail.vro.generator.workflows.model.string
 import net.juniper.contrail.vro.generator.workflows.model.visibleWhenNonNull
+import java.util.Date
 
 @WorkflowBuilder
 class PresentationParametersBuilder(
@@ -82,8 +84,28 @@ open class ParameterAggregator(
     fun parameter(name: String, type: SecureString, setup: SecureStringParameterBuilder.() -> Unit) =
         SecureStringParameterBuilder(name).updateWith(setup)
 
+    fun parameter(name: String, type: date, setup: DateParameterBuilder.() -> Unit) =
+        DateParameterBuilder(name).updateWith(setup)
+
     fun parameter(name: String, type: Reference, setup: ReferenceParameterBuilder.() -> Unit) {
         ReferenceParameterBuilder(name, type).updateWith(setup)
+    }
+
+    fun parameter(name: String, type: Class<*>, setup: BasicParameterBuilder<*>.() -> Unit) = when (type) {
+        java.lang.Boolean::class.java, java.lang.Boolean.TYPE -> {
+            BooleanParameterBuilder(name).updateWith(setup)
+        }
+        String::class.java -> {
+            StringParameterBuilder(name).updateWith(setup)
+        }
+        java.lang.Integer::class.java, java.lang.Integer.TYPE,
+        java.lang.Long::class.java, java.lang.Long.TYPE -> {
+            IntParameterBuilder(name).updateWith(setup)
+        }
+        Date::class.java -> {
+            DateParameterBuilder(name).updateWith(setup)
+        }
+        else -> throw UnsupportedOperationException("Unsupported parameter class: ${type.simpleName}")
     }
 
     private fun <Builder : BasicParameterBuilder<T>, T : Any> Builder.updateWith(setup: Builder.() -> Unit) =
@@ -162,6 +184,8 @@ class IntParameterBuilder(name: String) : BasicParameterBuilder<Int>(name, numbe
 class StringParameterBuilder(name: String) : BasicParameterBuilder<String>(name, string)
 
 class SecureStringParameterBuilder(name: String) : BasicParameterBuilder<String>(name, SecureString)
+
+class DateParameterBuilder(name: String) : BasicParameterBuilder<Date>(name, date)
 
 class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterBuilder<Reference>(name, type) {
 

@@ -24,7 +24,7 @@ infix fun SimpleWorkflowBuilder.andParameters(setup: PresentationParametersBuild
 
     PresentationParametersBuilder(steps, parameters, allParameters).setup()
 
-    val presentation = Presentation(steps, parameters.asPresentationParameters)
+    val presentation = Presentation(parameters.asPresentationParameters, steps)
 
     val outBinding = Binding(listOf(success.asBind))
     val inBinding = Binding(allParameters.asBinds)

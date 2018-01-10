@@ -14,19 +14,20 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "presentationType",
-    propOrder = ["presentationSteps", "presentationParameters"]
+    propOrder = ["presentationParameters", "presentationSteps"]
 )
 class Presentation(
-    presentationSteps: List<PresentationStep> = emptyList(),
-    presentationParameters: List<PresentationParameter> = emptyList()
+    presentationParameters: List<PresentationParameter> = emptyList(),
+    presentationSteps: List<PresentationStep> = emptyList()
 ) {
-    @XmlElement(name = "p-step")
-    val presentationSteps: List<PresentationStep> =
-        presentationSteps.toList()
 
     @XmlElement(name = "p-param")
     val presentationParameters: List<PresentationParameter> =
         presentationParameters.toList()
+
+    @XmlElement(name = "p-step")
+    val presentationSteps: List<PresentationStep> =
+        presentationSteps.toList()
 }
 
 @XmlAccessorType(XmlAccessType.FIELD)
