@@ -4,7 +4,6 @@
 
 package net.juniper.contrail.vro.generator.model
 
-import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.vro.generator.util.asApiClass
 import net.juniper.contrail.vro.generator.util.collapsedNestedName
@@ -37,7 +36,7 @@ open class Relation (
 }
 
 abstract class RefRelation (
-    parentClass: Class<out ApiObjectBase>,
+    parentClass: ObjectClass,
     method: Method
 ) {
     val parentName: String = parentClass.simpleName
@@ -49,7 +48,7 @@ abstract class RefRelation (
 }
 
 class ForwardRelation (
-    parentClass: Class<out ApiObjectBase>,
+    parentClass: ObjectClass,
     method: Method
 ) : RefRelation(parentClass, method) {
     val referenceAttribute = method.objectReferenceAttributeClassOrDefault
@@ -58,18 +57,18 @@ class ForwardRelation (
 }
 
 class BackwardRelation (
-    parentClass: Class<out ApiObjectBase>,
+    parentClass: ObjectClass,
     method: Method
 ) : RefRelation(parentClass, method) {
     val wrapperName: String = method.referenceName
 }
 
-fun refRelation(parentClass: Class<out ApiObjectBase>, method: Method) =
+fun refRelation(parentClass: ObjectClass, method: Method) =
     if (method.isBackRef) BackwardRelation(parentClass, method) else ForwardRelation(parentClass, method)
 
 class NestedRelation(
     val parent: Class<*>,
-    val child: Class<out ApiPropertyBase>,
+    val child: PropertyClass,
     val simpleProperties: List<Property>,
     val listProperties: List<Property>,
     val getterChain: List<Getter>,
@@ -124,26 +123,24 @@ fun List<ObjectClass>.generateReferenceRelations(): List<RefRelation> =
 
 fun List<ObjectClass>.generateNestedRelations(propertyFilter: PropertyClassFilter): List<NestedRelation> =
     asSequence()
-        .map { it.nestedRelations(this, listOf(), it, propertyFilter) }
+        .map { it.nestedRelations(listOf(), it, propertyFilter) }
         .flatten()
         .toList()
 
 private fun Class<*>.nestedRelations(
-    baseClasses: List<Class<*>>,
     chainSoFar: List<Getter>,
-    rootClass: Class<*>,
+    rootClass: ObjectClass,
     propertyFilter: PropertyClassFilter
 ): Sequence<NestedRelation> =
     methods.asSequence()
         .filter { it.isGetter and it.returnsApiPropertyOrList }
         .filter { propertyFilter(it.returnType as PropertyClass) }
-        .map { it.recursiveRelations(baseClasses, chainSoFar, rootClass, propertyFilter) }
+        .map { it.recursiveRelations(chainSoFar, rootClass, propertyFilter) }
         .flatten()
 
 private fun Method.recursiveRelations(
-    baseClasses: List<Class<*>>,
     chainSoFar: List<Getter>,
-    rootClass: Class<*>,
+    rootClass: ObjectClass,
     propertyFilter: PropertyClassFilter
 ): Sequence<NestedRelation> {
     val newChain = chainSoFar.toMutableList()
@@ -163,7 +160,7 @@ private fun Method.recursiveRelations(
                 it
             }
         }
-    } as Class<out ApiPropertyBase>
+    } as PropertyClass
 
     val relation = NestedRelation(
         declaringClass,
@@ -176,10 +173,7 @@ private fun Method.recursiveRelations(
         nameWithoutGet
     )
 
-    return if (baseClasses.contains(childType))
-        sequenceOf(relation)
-    else
-        childType.nestedRelations(baseClasses, newChain, rootClass, propertyFilter) + relation
+    return childType.nestedRelations(newChain, rootClass, propertyFilter) + relation
 }
 
 private val ObjectClass.refRelations: Sequence<RefRelation> get() =

@@ -4,7 +4,6 @@
 
 package net.juniper.contrail.vro.generator.model
 
-import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.generator.util.isApiTypeClass
 import net.juniper.contrail.vro.generator.util.isListWrapper
 import net.juniper.contrail.vro.generator.util.kotlinClassName
@@ -97,7 +96,7 @@ private fun NestedRelation.toWrapperModel() : WrapperModel {
     )
 }
 
-fun generateReferenceWrappers(objectClasses: List<Class<out ApiObjectBase>>) =
+fun generateReferenceWrappers(objectClasses: List<ObjectClass>) =
     objectClasses.map { it.toReferenceWrapper() }
 
 fun generateWrappersModel(referenceWrappers: List<ReferenceWrapper>, nestedRelations: List<NestedRelation>): WrappersModel {

@@ -32,8 +32,8 @@ fun String.folderName() : String = when (this) {
 }
 
 fun pluralizeCamelCases(name: String) : String {
-    val splitted = name.split(CAMEL_CASE_REGEX)
-    val uppercasedWords = splitted.map { uppercaseAcronyms(it) }.run {
+    val nameParts = name.split(CAMEL_CASE_REGEX)
+    val uppercasedWords = nameParts.map { uppercaseAcronyms(it) }.run {
         if (last() == "List") dropLast(1) else this
     }
     val pluralWord = uppercasedWords.last().pluralize()

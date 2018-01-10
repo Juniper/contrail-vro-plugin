@@ -8,6 +8,8 @@ import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
 import net.juniper.contrail.vro.generator.apiTypesPackageName
+import net.juniper.contrail.vro.generator.model.ObjectClass
+import net.juniper.contrail.vro.generator.model.PropertyClass
 import java.lang.reflect.Method
 
 fun objectClasses() =
@@ -22,13 +24,13 @@ val String.asApiClass get() =
 val String.isApiTypeClass get() =
     this.asApiClass != null
 
-val Class<out ApiObjectBase>.defaultParentType: String? get() =
+val ObjectClass.defaultParentType: String? get() =
     newInstance().defaultParentType
 
-val Class<out ApiObjectBase>.objectType: String get() =
+val ObjectClass.objectType: String get() =
     newInstance().objectType
 
-val Class<out ApiObjectBase>.parentClassName: String? get() =
+val ObjectClass.parentClassName: String? get() =
     defaultParentType?.typeToClassName
 
 val Method.returnsObjectReferences: Boolean get() =
@@ -43,12 +45,16 @@ val Class<*>.listWrapperGetter get() =
 val Class<*>.listWrapperGetterType get() =
     listWrapperGetter?.returnListGenericClass
 
-val Class<*>.listOfPropertiesGetters get() = methods.asSequence()
+val Class<*>.declaredGetters get() = methods.asSequence()
     .filter { it.isGetter }
     .filter { it.declaredIn(this) }
+
+val Class<*>.listOfPropertiesGetters get() =
+    declaredGetters
     .filter { it.returnsListOfProperties }
 
 val Class<*>.hasOnlyListOfProperties: Boolean get() =
+    declaredGetters.count() == 1 &&
     listOfPropertiesGetters.count() == 1
 
 val Method.returnsListOfProperties: Boolean get() =
@@ -62,22 +68,22 @@ private val Method.deepestReturnType: Class<*>? get() =
 
 private val Method.apiPropertyReturn get() =
     deepestReturnType?.let {
-        if (it.superclass == ApiPropertyBase::class) it as Class<out ApiPropertyBase> else null
+        if (it.superclass == ApiPropertyBase::class) it as PropertyClass else null
     }
 
 private val Array<Method>.asProperties get() =
     asSequence().filter { it.isGetter }.map { it.apiPropertyReturn }.filterNotNull()
 
-private val Sequence<Class<out ApiPropertyBase>>.recursed get() =
+private val Sequence<PropertyClass>.recursed get() =
     map { it.apiProperties }.flatten()
 
-private val Class<out ApiPropertyBase>.apiProperties: Sequence<Class<out ApiPropertyBase>> get() =
+private val PropertyClass.apiProperties: Sequence<PropertyClass> get() =
     sequenceOf(this) + methods.asProperties.recursed
 
-val Class<out ApiObjectBase>.apiPropertyClasses get() =
+val ObjectClass.apiPropertyClasses get() =
     methods.asProperties.recursed
 
-fun List<Class<out ApiObjectBase>>.propertyClasses() = asSequence()
+fun List<ObjectClass>.propertyClasses() = asSequence()
     .map { it.apiPropertyClasses }
     .flatten()
     .distinct()

@@ -4,9 +4,9 @@
 
 package net.juniper.contrail.vro.generator
 
-import net.juniper.contrail.api.ApiObjectBase
-import net.juniper.contrail.api.ApiPropertyBase
+import net.juniper.contrail.vro.generator.model.ObjectClass
 import net.juniper.contrail.vro.generator.model.ObjectClassFilter
+import net.juniper.contrail.vro.generator.model.PropertyClass
 import net.juniper.contrail.vro.generator.model.PropertyClassFilter
 import net.juniper.contrail.vro.generator.util.defaultParentType
 import net.juniper.contrail.vro.generator.util.typeToClassName
@@ -27,13 +27,13 @@ val String.isInventoryPropertyClassName get() = when (this) {
     else -> true
 }
 
-val Class<out ApiObjectBase>.isModelClass get() =
+val ObjectClass.isModelClass get() =
     simpleName.isModelClassName
 
-val Class<out ApiPropertyBase>.isInventoryProperty get() =
+val PropertyClass.isInventoryProperty get() =
     simpleName.isInventoryPropertyClassName
 
-val Class<out ApiObjectBase>.isRootClass: Boolean get() {
+val ObjectClass.isRootClass: Boolean get() {
     val parentType = defaultParentType
     if (parentType == null || parentType == "config-root") return true
 

@@ -67,7 +67,7 @@ fun generateRelationsModel(
     forwardRelations: List<ForwardRelation>,
     backwardRelations: List<BackwardRelation>,
     nestedRelations: List<NestedRelation>,
-    rootClasses: List<Class<*>>
+    rootClasses: List<ObjectClass>
 ): RelationsModel {
     val relationModels = relations.map { it.toRelationModel() }
     val nestedRelationModels = nestedRelations.map { it.toNestedRelationModel() }
