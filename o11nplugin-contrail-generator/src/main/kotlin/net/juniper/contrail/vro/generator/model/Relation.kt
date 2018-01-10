@@ -13,6 +13,9 @@ import net.juniper.contrail.vro.generator.util.folderName
 import net.juniper.contrail.vro.generator.util.isApiTypeClass
 import net.juniper.contrail.vro.generator.util.isBackRef
 import net.juniper.contrail.vro.generator.util.isGetter
+import net.juniper.contrail.vro.generator.util.isListWrapper
+import net.juniper.contrail.vro.generator.util.listWrapperGetter
+import net.juniper.contrail.vro.generator.util.listWrapperGetterType
 import net.juniper.contrail.vro.generator.util.nameWithoutGet
 import net.juniper.contrail.vro.generator.util.nameWithoutGetAndBackRefs
 import net.juniper.contrail.vro.generator.util.objectReferenceAttributeClass
@@ -66,19 +69,21 @@ fun refRelation(parentClass: Class<out ApiObjectBase>, method: Method) =
 
 class NestedRelation(
     val parent: Class<*>,
-    val child: Class<*>,
+    val child: Class<out ApiPropertyBase>,
     val simpleProperties: List<Property>,
     val listProperties: List<Property>,
     val getterChain: List<Getter>,
-    val rootClass: Class<*>
+    parentGetterChain: List<Getter>,
+    val rootClass: Class<*>,
+    folderNameBase: String
 ) {
     val parentCollapsedName = parent.collapsedNestedName
     val getter: String = getterChain.last().name
     val getterDecapitalized = getter.decapitalize()
     val name: String = relationName(parentCollapsedName, getter)
     val childWrapperName = rootClass.simpleName + getterChain.joinToString("") { "_" + it.name }
-    val parentWrapperName = rootClass.simpleName + getterChain.dropLast(1).joinToString("") { "_" + it.name }
-    val folderName = child.simpleName.folderName()
+    val parentWrapperName = rootClass.simpleName + parentGetterChain.joinToString("") { "_" + it.name }
+    val folderName = folderNameBase.folderName()
     val toMany: Boolean = getterChain.last().toMany
 }
 
@@ -86,17 +91,17 @@ class Getter(val name: String, val toMany: Boolean)
 
 typealias RelationGraphNode = Pair<String, List<String>>
 
-fun generateRelations(classes: List<Class<out ApiObjectBase>>): List<Relation> {
-    val parentToChildren = classes.groupBy { it.defaultParentType }
-    return classes.asSequence()
+fun List<ObjectClass>.generateRelations(): List<Relation> {
+    val parentToChildren = groupBy { it.defaultParentType }
+    return asSequence()
         .map { createRelationGraphNode(it, parentToChildren) }
         .map { it.toRelationSequence() }
         .flatten().toList()
 }
 
 private fun createRelationGraphNode(
-    parentClass: Class<out ApiObjectBase>,
-    parentToChildren: Map<String?, List<Class<out ApiObjectBase>>>
+    parentClass: ObjectClass,
+    parentToChildren: Map<String?, List<ObjectClass>>
 ): RelationGraphNode {
     val parentType = parentClass.objectType
     val children = parentToChildren.getOrElse(parentType) { listOf() }
@@ -110,42 +115,55 @@ private fun relationName(parentType: String, childType: String) =
 private fun RelationGraphNode.toRelationSequence(): Sequence<Relation> =
     second.asSequence().map { Relation(first, it) }
 
-fun generateReferenceRelations(classes: List<Class<out ApiObjectBase>>): List<RefRelation> =
-    classes.asSequence()
+fun List<ObjectClass>.generateReferenceRelations(): List<RefRelation> =
+    asSequence()
         .map { it.refRelations }
         .flatten()
-        .filter { classes.contains(it.childClass) }
+        .filter { contains(it.childClass) }
         .toList()
 
-fun generateNestedRelations(classes: List<Class<*>>): List<NestedRelation> =
-    classes.asSequence()
-        .map { it.nestedRelations(classes, listOf(), it) }
+fun List<ObjectClass>.generateNestedRelations(propertyFilter: PropertyClassFilter): List<NestedRelation> =
+    asSequence()
+        .map { it.nestedRelations(this, listOf(), it, propertyFilter) }
         .flatten()
         .toList()
 
 private fun Class<*>.nestedRelations(
     baseClasses: List<Class<*>>,
     chainSoFar: List<Getter>,
-    rootClass: Class<*>
+    rootClass: Class<*>,
+    propertyFilter: PropertyClassFilter
 ): Sequence<NestedRelation> =
     methods.asSequence()
         .filter { it.isGetter and it.returnsApiPropertyOrList }
-        .map { it.recursiveRelations(baseClasses, chainSoFar, rootClass) }
+        .filter { propertyFilter(it.returnType as PropertyClass) }
+        .map { it.recursiveRelations(baseClasses, chainSoFar, rootClass, propertyFilter) }
         .flatten()
 
 private fun Method.recursiveRelations(
     baseClasses: List<Class<*>>,
     chainSoFar: List<Getter>,
-    rootClass: Class<*>
+    rootClass: Class<*>,
+    propertyFilter: PropertyClassFilter
 ): Sequence<NestedRelation> {
-    val wrapperChildName = nameWithoutGet
-
-    val (childType, toMany) = when (returnType) {
-        List::class.java -> Pair(returnListGenericClass!!, true)
-        else -> Pair(returnType, false)
-    }
-
-    val newChain = chainSoFar + Getter(wrapperChildName, toMany)
+    val newChain = chainSoFar.toMutableList()
+    val childType = returnType.let {
+        when {
+            it.isListWrapper -> {
+                newChain += Getter(nameWithoutGet, false)
+                newChain += Getter(it.listWrapperGetter!!.nameWithoutGet, true)
+                it.listWrapperGetterType!!
+            }
+            it == List::class.java -> {
+                newChain += Getter(nameWithoutGet, true)
+                returnListGenericClass!!
+            }
+            else -> {
+                newChain += Getter(nameWithoutGet, false)
+                it
+            }
+        }
+    } as Class<out ApiPropertyBase>
 
     val relation = NestedRelation(
         declaringClass,
@@ -153,19 +171,21 @@ private fun Method.recursiveRelations(
         childType.properties.simpleProperties,
         childType.properties.listProperties,
         newChain,
-        rootClass
+        chainSoFar,
+        rootClass,
+        nameWithoutGet
     )
 
     return if (baseClasses.contains(childType))
         sequenceOf(relation)
     else
-        childType.nestedRelations(baseClasses, newChain, rootClass) + relation
+        childType.nestedRelations(baseClasses, newChain, rootClass, propertyFilter) + relation
 }
 
-private val <T: ApiObjectBase> Class<T>.refRelations: Sequence<RefRelation> get() =
+private val ObjectClass.refRelations: Sequence<RefRelation> get() =
     referenceMethods.distinctBy { it.referenceName }.map { refRelation(this, it) }
 
-private val <T: ApiObjectBase> Class<T>.referenceMethods: Sequence<Method> get() =
+private val ObjectClass.referenceMethods: Sequence<Method> get() =
     declaredMethods.asSequence()
         .filter { it.isRefMethod and it.returnsObjectReferences }
 
@@ -177,6 +197,10 @@ val Method.isRefMethod get() =
 
 private val <T> Class<T>.isSimpleReference: Boolean get() =
     this == ApiPropertyBase::class.java
+
+private val Method.returnsListWrapperOrList: Boolean get() =
+    if (returnType.isListWrapper) true
+    else returnListGenericClass?.isApiTypeClass ?: false
 
 private val Method.returnsApiPropertyOrList: Boolean get() =
     if (returnType.isApiTypeClass) true

@@ -4,11 +4,10 @@
 
 package net.juniper.contrail.vro.generator.model
 
-import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.generator.util.select
 
 class RelationDefinition(
-    val rootClasses: List<Class<out ApiObjectBase>>,
+    val rootClasses: List<ObjectClass>,
     val relations: List<Relation>,
     referenceRelations: List<RefRelation>,
     val nestedRelations: List<NestedRelation>
@@ -18,11 +17,12 @@ class RelationDefinition(
 }
 
 fun buildRelationDefinition(
-    objectClasses: List<Class<out ApiObjectBase>>,
-    rootClasses: List<Class<out ApiObjectBase>>
+    objectClasses: List<ObjectClass>,
+    rootClasses: List<ObjectClass>,
+    inventoryPropertyFilter: PropertyClassFilter
 ) = RelationDefinition(
     rootClasses,
-    generateRelations(objectClasses),
-    generateReferenceRelations(objectClasses),
-    generateNestedRelations(objectClasses)
+    objectClasses.generateRelations(),
+    objectClasses.generateReferenceRelations(),
+    objectClasses.generateNestedRelations(inventoryPropertyFilter)
 )

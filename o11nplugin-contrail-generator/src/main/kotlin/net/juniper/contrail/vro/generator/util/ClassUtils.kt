@@ -64,6 +64,9 @@ val Type.unwrapped: Class<*> get() =
 val Method.returnListGenericClass: Class<*>? get() =
     if (returnType == List::class.java) genericReturnType.parameterClass else null
 
+fun Method.declaredIn(clazz: Class<*>) =
+    declaringClass == clazz
+
 val Method.objectReferenceAttributeClass: Class<*>? get() =
     genericReturnType?.parameterType?.parameterClass
 

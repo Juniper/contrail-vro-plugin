@@ -66,7 +66,7 @@ fun ObjectReference<*>.as${wrapper.referenceName}(): ${wrapper.referenceName} =
 class ${wrapper.name} {
     var listIdx: Int? = null
         set(value) { field = value }
-    val displayName: String get() = "${wrapper.property}"
+    val displayName: String get() = "${wrapper.displayName}"
 
     <#list wrapper.simpleProperties as property>
     var ${property.propertyName}: ${property.wrapperName}? = null

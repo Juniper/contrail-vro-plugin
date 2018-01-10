@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.generator.util.isApiTypeClass
+import net.juniper.contrail.vro.generator.util.isListWrapper
 import net.juniper.contrail.vro.generator.util.kotlinClassName
 import net.juniper.contrail.vro.generator.util.nestedName
 import net.juniper.contrail.vro.generator.util.referenceName
@@ -24,6 +25,7 @@ data class ReferenceWrapperModel(
 data class WrapperModel(
     val name: String,
     val property: String,
+    val displayName: String,
     val simpleProperties: List<PropertyModel>,
     val listProperties: List<PropertyModel>,
     val unwrappedName: String,
@@ -78,7 +80,7 @@ private fun List<Property>.toWrapperProperties(wrapperName: String) : List<Prope
 
 private fun NestedRelation.toWrapperModel() : WrapperModel {
     val wrapperName = wrapperName(rootClass, getterChain)
-    val newSimpleProperties = simpleProperties.toWrapperProperties(wrapperName)
+    val newSimpleProperties = simpleProperties.filter { !it.clazz.isListWrapper }.toWrapperProperties(wrapperName)
     val newListProperties = listProperties.toWrapperProperties(wrapperName)
 
     val name = wrapperName(rootClass, getterChain)
@@ -87,6 +89,7 @@ private fun NestedRelation.toWrapperModel() : WrapperModel {
     return WrapperModel(
         name,
         getterDecapitalized,
+        folderName,
         newSimpleProperties.map { it.toPropertyModel() },
         newListProperties.map { it.toPropertyModel() },
         unwrappedName,

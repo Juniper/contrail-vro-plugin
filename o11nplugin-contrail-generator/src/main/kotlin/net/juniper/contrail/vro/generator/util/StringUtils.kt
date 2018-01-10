@@ -33,7 +33,9 @@ fun String.folderName() : String = when (this) {
 
 fun pluralizeCamelCases(name: String) : String {
     val splitted = name.split(CAMEL_CASE_REGEX)
-    val uppercasedWords = splitted.map { uppercaseAcronyms(it) }
+    val uppercasedWords = splitted.map { uppercaseAcronyms(it) }.run {
+        if (last() == "List") dropLast(1) else this
+    }
     val pluralWord = uppercasedWords.last().pluralize()
     return (uppercasedWords.dropLast(1).plus(pluralWord)).joinToString(" ")
 }
@@ -42,16 +44,21 @@ fun uppercaseAcronyms(name: String): String = when (name) {
     "Ip", "ip" -> "IP"
     "Bgp", "bgp" -> "BGP"
     "Vpn", "vpn" -> "VPN"
+    "Src" -> "Source"
+    "Dst" -> "Destination"
+    "Entries" -> "Rules"
+    "mgmt" -> "Management"
     else -> name
 }
 
-private val String.nonPluralizable get() = when (this) {
-    "Pairs", "Details", "Fields", "Type2" -> true
+private val String.alreadyPlural get() = when (this) {
+    "Pairs", "Details", "Fields", "Type2", "Subnets", "Pools", "Routes", "Rules",
+    "Ports", "Annotations", "Addresses", "Entries" -> true
     else -> false
 }
 
 fun String.pluralize(): String = when {
-    nonPluralizable -> this
+    alreadyPlural -> this
     matches(ES_SUFFIXES) -> this + "es"
     endsWith("y") && !matches(NON_IES_SUFFIXES_REGEX) -> dropLast(1) + "ies"
     endsWith("list", true) -> this

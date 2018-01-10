@@ -34,6 +34,26 @@ val Class<out ApiObjectBase>.parentClassName: String? get() =
 val Method.returnsObjectReferences: Boolean get() =
     returnListGenericClass == ObjectReference::class.java
 
+val Class<*>.isListWrapper get() =
+    superclass == ApiPropertyBase::class.java && hasOnlyListOfProperties
+
+val Class<*>.listWrapperGetter get() =
+    listOfPropertiesGetters.firstOrNull()
+
+val Class<*>.listWrapperGetterType get() =
+    listWrapperGetter?.returnListGenericClass
+
+val Class<*>.listOfPropertiesGetters get() = methods.asSequence()
+    .filter { it.isGetter }
+    .filter { it.declaredIn(this) }
+    .filter { it.returnsListOfProperties }
+
+val Class<*>.hasOnlyListOfProperties: Boolean get() =
+    listOfPropertiesGetters.count() == 1
+
+val Method.returnsListOfProperties: Boolean get() =
+    returnListGenericClass?.superclass == ApiPropertyBase::class.java
+
 private val Method.deepestReturnType: Class<*>? get() =
     if (returnType == List::class)
         returnListGenericClass ?: objectReferenceAttributeClass
