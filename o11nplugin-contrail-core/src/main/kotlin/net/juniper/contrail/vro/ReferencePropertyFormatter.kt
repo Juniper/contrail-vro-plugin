@@ -36,10 +36,6 @@ class ReferencePropertyFormatter(val factory: ContrailPluginFactory) {
                     builder.append(prefix)
                     prefix = "\n"
                     builder.append((element.__getTarget() as ApiObjectBase).name)
-                    val properties = this.convert(ref.attr)
-                    if (!properties.matches(blankSpacesRegex)) {
-                        builder.append(":\n").append(properties)
-                    }
                 }
             }
         } catch (e: IllegalArgumentException) {

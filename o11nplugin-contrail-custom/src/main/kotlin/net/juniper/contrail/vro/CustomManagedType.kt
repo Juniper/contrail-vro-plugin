@@ -18,7 +18,7 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
             val fields = delegate.modelClass.declaredFields
             return fields
                 .asSequence()
-                .filter { it.name.endsWith("_refs") }
+                .filter { it.name.endsWith("back_refs") }
                 .map { CustomRefsField.wrapField(it) }
                 .toList()
         }

@@ -101,14 +101,6 @@ class CustomMapping: AbstractMapping() {
             .`in`(FolderDef("${relation.folderName}__in__${relation.parentName}_${relation.getter}", "folder-ref.png"))
         </#list>
 
-        <#list backwardRelations as relation>
-        relate(${relation.parentName}::class.java)
-            .to(${relation.wrapperName}::class.java)
-            .using(${relation.parentName}Has${relation.wrapperName}::class.java)
-            .`as`("${relation.parentName}To${relation.wrapperName}")
-            .`in`(FolderDef("${relation.folderName}__in__${relation.parentName}_${relation.getter}", "folder-ref.png"))
-        </#list>
-
         <#list nestedRelations as relation>
         relate(${relation.parentWrapperName}::class.java)
             .to(${relation.childWrapperName}::class.java)
