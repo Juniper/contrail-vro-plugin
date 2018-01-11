@@ -1,9 +1,7 @@
 ${editWarning}
 package ${packageName}
 
-import net.juniper.contrail.api.ApiObjectBase
-import net.juniper.contrail.api.ApiPropertyBase
-import net.juniper.contrail.api.ObjectReference
+import net.juniper.contrail.api.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 import java.util.Date
 

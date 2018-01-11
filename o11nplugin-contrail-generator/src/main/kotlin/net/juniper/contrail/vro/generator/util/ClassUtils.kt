@@ -85,8 +85,10 @@ private val loader get(): ClassLoader =
 fun <T> Class<T>.nonAbstractSubclassesIn(packageName: String): List<Class<out T>> {
     val classes = subclassesIn(packageName)
     @Suppress("UNCHECKED_CAST")
-    return classes.map { it as Class<out T> }
+    return classes.asSequence()
+        .map { it as Class<out T> }
         .filter { it.isNotAbstract }
+        .toList()
 }
 
 fun <T> Class<T>.nonAbstractSubclasses(): List<Class<out T>> =
@@ -94,7 +96,7 @@ fun <T> Class<T>.nonAbstractSubclasses(): List<Class<out T>> =
 
 private fun <T> Class<T>.subclassesIn(packageName: String): List<Class<*>> =
     classesIn(packageName)
-        .filter { it.superclass == this }
+        .filter { this.isAssignableFrom(it) }
         .toList()
 
 private fun classesIn(packageName: String): Sequence<Class<*>> =

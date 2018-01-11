@@ -4,6 +4,7 @@ package ${packageName}
 import com.vmware.o11n.sdk.modeldriven.ObjectRelater
 import com.vmware.o11n.sdk.modeldriven.PluginContext
 import com.vmware.o11n.sdk.modeldriven.Sid
+import net.juniper.contrail.api.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.config.ConnectionRepository
@@ -37,6 +38,7 @@ class ConnectionHas${rootClass}
         return connection?.list(${rootClass}::class.java)
     }
 }
+
 </#list>
 
 <#list relations as relation>

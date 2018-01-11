@@ -1,6 +1,7 @@
 ${editWarning}
 package net.juniper.contrail.vro.generated
 
+import net.juniper.contrail.api.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.vro.model.Connection
 import java.io.IOException

@@ -9,6 +9,7 @@ import net.juniper.contrail.vro.generator.util.asApiClass
 import net.juniper.contrail.vro.generator.util.collapsedNestedName
 import net.juniper.contrail.vro.generator.util.defaultParentType
 import net.juniper.contrail.vro.generator.util.folderName
+import net.juniper.contrail.vro.generator.util.isApiPropertyClass
 import net.juniper.contrail.vro.generator.util.isApiTypeClass
 import net.juniper.contrail.vro.generator.util.isBackRef
 import net.juniper.contrail.vro.generator.util.isGetter
@@ -179,10 +180,6 @@ val Method.isRefMethod get() =
 private val <T> Class<T>.isSimpleReference: Boolean get() =
     this == ApiPropertyBase::class.java
 
-private val Method.returnsListWrapperOrList: Boolean get() =
-    if (returnType.isListWrapper) true
-    else returnListGenericClass?.isApiTypeClass ?: false
-
 private val Method.returnsApiPropertyOrList: Boolean get() =
-    if (returnType.isApiTypeClass) true
-    else returnListGenericClass?.isApiTypeClass ?: false
+    if (returnType.isApiPropertyClass) true
+    else returnListGenericClass?.isApiPropertyClass ?: false

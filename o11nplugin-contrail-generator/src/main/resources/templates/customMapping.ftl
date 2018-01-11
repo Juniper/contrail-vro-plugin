@@ -3,6 +3,7 @@ package ${packageName}
 
 /* ktlint-disable no-wildcard-imports */
 import com.vmware.o11n.sdk.modeldrivengen.mapping.*
+import net.juniper.contrail.api.*
 import net.juniper.contrail.api.types.*
 import net.juniper.contrail.vro.config.*
 import net.juniper.contrail.vro.model.*

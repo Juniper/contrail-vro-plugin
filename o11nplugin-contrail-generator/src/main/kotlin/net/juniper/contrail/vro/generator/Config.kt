@@ -8,13 +8,14 @@ import net.juniper.contrail.vro.generator.model.ObjectClass
 import net.juniper.contrail.vro.generator.model.ObjectClassFilter
 import net.juniper.contrail.vro.generator.model.PropertyClass
 import net.juniper.contrail.vro.generator.model.PropertyClassFilter
-import net.juniper.contrail.vro.generator.util.defaultParentType
 import net.juniper.contrail.vro.generator.util.typeToClassName
 
 val String.isModelClassName get() = when (this) {
     "Project",
     "VirtualNetwork",
     "NetworkIpam",
+    "FloatingIp",
+    "FloatingIpPool",
     "NetworkPolicy",
     "SecurityGroup" -> true
     else -> false
@@ -34,8 +35,9 @@ val PropertyClass.isInventoryProperty get() =
     simpleName.isInventoryPropertyClassName
 
 val ObjectClass.isRootClass: Boolean get() {
-    val parentType = defaultParentType
+    val parentType = newInstance().defaultParentType
     if (parentType == null || parentType == "config-root") return true
+    if (simpleName == "Port") return true
 
     return ! parentType.typeToClassName.isModelClassName
 }

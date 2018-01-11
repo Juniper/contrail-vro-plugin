@@ -3,7 +3,7 @@ package ${packageName}
 
 import net.juniper.contrail.vro.config.ConnectionRepository
 import net.juniper.contrail.vro.model.Connection
-import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.api.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 import com.vmware.o11n.sdk.modeldriven.FoundObject
 import com.vmware.o11n.sdk.modeldriven.ObjectFinder
