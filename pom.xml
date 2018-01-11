@@ -112,6 +112,12 @@
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>${spring.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
         <artifactId>spring-beans</artifactId>
         <version>${spring.version}</version>
         <scope>provided</scope>
@@ -486,6 +492,7 @@
     <module>o11nplugin-contrail-gen</module>
     <module>o11nplugin-contrail-package</module>
     <module>o11nplugin-contrail</module>
+    <module>tests</module>
   </modules>
 
 </project>
