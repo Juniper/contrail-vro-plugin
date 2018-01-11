@@ -14,7 +14,6 @@ import org.springframework.web.client.RestTemplate
 import java.lang.Exception
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
-import java.util.Properties
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
@@ -24,11 +23,9 @@ import javax.net.ssl.X509TrustManager
 fun disableCertificateValidation() {
     // Create a trust manager that does not validate certificate chains
     val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
-        override fun getAcceptedIssuers(): Array<X509Certificate?> =
-            arrayOfNulls(0)
-
-        override fun checkClientTrusted(certs: Array<X509Certificate>, authType: String) {}
-        override fun checkServerTrusted(certs: Array<X509Certificate>, authType: String) {}
+        override fun getAcceptedIssuers(): Array<X509Certificate?> = arrayOfNulls(0)
+        override fun checkClientTrusted(certs: Array<X509Certificate>, authType: String) = Unit
+        override fun checkServerTrusted(certs: Array<X509Certificate>, authType: String) = Unit
     })
     // Ignore differences between given hostname and certificate hostname
     val hv = HostnameVerifier { _, _ -> true }
@@ -111,36 +108,10 @@ fun JsonObject.getCategoryId(): String? {
 
 fun main(args: Array<String>) {
     if (args.isEmpty()) {
-        throw IllegalArgumentException("Orchestrator url must be passes as the first argument.")
+        throw IllegalArgumentException("Orchestrator hostname must be passes as the first argument.")
     }
     disableCertificateValidation()
-    println(deleteContrailWorkflowsCategory("https://${args[0]}:8281"))
-    println(deleteContrailActionsCategory("https://${args[0]}:8281"))
-
-}
-
-fun getOrchestratorUrl(invokingClass: Class<*>): String {
-    val port = "8281"
-    val props = Properties()
-    props.load(invokingClass.getResourceAsStream("/maven.properties"))
-    val url = props["orchestrator.url"] as String
-    return "https://$url:$port"
-}
-
-class WorkflowCleaner {
-    fun cleanWorkflows() {
-        disableCertificateValidation()
-        val url = getOrchestratorUrl(this::class.java)
-        println("Cleaning all workflows from orchestrator at $url")
-        println(deleteContrailWorkflowsCategory(url))
-    }
-}
-
-class ActionCleaner {
-    fun cleanActions() {
-        disableCertificateValidation()
-        val url = getOrchestratorUrl(this::class.java)
-        println("Cleaning all actions from orchestrator at $url")
-        println(deleteContrailActionsCategory(url))
-    }
+    val url = "https://${args[0]}:8281"
+    println(deleteContrailWorkflowsCategory(url))
+    println(deleteContrailActionsCategory(url))
 }

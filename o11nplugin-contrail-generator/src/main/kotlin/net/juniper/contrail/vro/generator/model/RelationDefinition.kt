@@ -4,7 +4,6 @@
 
 package net.juniper.contrail.vro.generator.model
 
-
 class RelationDefinition(
     val rootClasses: List<ObjectClass>,
     val relations: List<Relation>,

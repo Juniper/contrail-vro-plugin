@@ -8,7 +8,6 @@
 
     <properties>
         <tests.main.class>net.juniper.contrail.vro.tests.TestRunner</tests.main.class>
-        <orchestrator.url>${repo.host}</orchestrator.url>
     </properties>
 
     <parent>
@@ -127,6 +126,9 @@
                         </goals>
                         <configuration>
                             <mainClass>${tests.main.class}</mainClass>
+                            <arguments>
+                                <argument>${repo.host}</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                 </executions>
