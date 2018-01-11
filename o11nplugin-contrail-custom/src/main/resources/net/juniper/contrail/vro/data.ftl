@@ -147,7 +147,7 @@ public class ${className}
 	</#if>
 
     <#list refsFields as field>
-    public String get${field.methodName}() {
+    public String get${field.wrapperMethodName}() {
         List<${field.returnTypeName}> ref_list = __getTarget().get${field.methodName}();
 
         return propertyFormatter.getRefString(this, ref_list, "${field.refObjectType}");

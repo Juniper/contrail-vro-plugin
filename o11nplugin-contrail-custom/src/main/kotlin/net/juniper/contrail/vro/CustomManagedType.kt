@@ -136,8 +136,8 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         val methods = this.methods
 
         for (customField in this.refsFields) {
-            val name = "get" + customField.methodName
-            val propertyName = customField.methodName.decapitalize()
+            val name = "get" + customField.wrapperMethodName
+            val propertyName = customField.wrapperMethodName.decapitalize()
             val returnParameter = createReturnsFormalParameter()
 
             val method = ManagedMethod()
