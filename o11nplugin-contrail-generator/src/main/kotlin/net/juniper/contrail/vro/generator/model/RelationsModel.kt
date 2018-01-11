@@ -8,7 +8,6 @@ data class RelationsModel(
     val rootClassNames: List<String>,
     val relations: List<RelationModel>,
     val forwardRelations: List<ForwardRelation>,
-    val backwardRelations: List<BackwardRelation>,
     val nestedRelations: List<NestedRelationModel>
 ) : GenericModel()
 
@@ -65,7 +64,6 @@ fun Getter.toGetterModel() = GetterModel(
 fun generateRelationsModel(
     relations: List<Relation>,
     forwardRelations: List<ForwardRelation>,
-    backwardRelations: List<BackwardRelation>,
     nestedRelations: List<NestedRelation>,
     rootClasses: List<ObjectClass>
 ): RelationsModel {
@@ -73,5 +71,5 @@ fun generateRelationsModel(
     val nestedRelationModels = nestedRelations.map { it.toNestedRelationModel() }
     val rootClassNames = rootClasses.map { it.simpleName }
 
-    return RelationsModel(rootClassNames, relationModels, forwardRelations, backwardRelations, nestedRelationModels)
+    return RelationsModel(rootClassNames, relationModels, forwardRelations, nestedRelationModels)
 }

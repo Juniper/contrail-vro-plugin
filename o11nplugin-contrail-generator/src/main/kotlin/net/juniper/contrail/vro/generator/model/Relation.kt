@@ -35,7 +35,7 @@ open class Relation (
     val folderName = childName.folderName()
 }
 
-abstract class RefRelation (
+class ForwardRelation (
     parentClass: ObjectClass,
     method: Method
 ) {
@@ -45,26 +45,10 @@ abstract class RefRelation (
     val childNamePluralized = childName.pluralize()
     val getter: String = method.propertyName
     val folderName = method.nameWithoutGetAndBackRefs.folderName()
-}
-
-class ForwardRelation (
-    parentClass: ObjectClass,
-    method: Method
-) : RefRelation(parentClass, method) {
     val attribute = method.objectReferenceAttributeClassOrDefault
     val attributeSimpleName = attribute.simpleName
     val simpleReference = attribute.isSimpleReference
 }
-
-class BackwardRelation (
-    parentClass: ObjectClass,
-    method: Method
-) : RefRelation(parentClass, method) {
-    val wrapperName: String = method.referenceName
-}
-
-fun refRelation(parentClass: ObjectClass, method: Method) =
-    if (method.isBackRef) BackwardRelation(parentClass, method) else ForwardRelation(parentClass, method)
 
 class NestedRelation(
     val parent: Class<*>,
@@ -114,7 +98,7 @@ private fun relationName(parentType: String, childType: String) =
 private fun RelationGraphNode.toRelationSequence(): Sequence<Relation> =
     second.asSequence().map { Relation(first, it) }
 
-fun List<ObjectClass>.generateReferenceRelations(): List<RefRelation> =
+fun List<ObjectClass>.generateReferenceRelations(): List<ForwardRelation> =
     asSequence()
         .map { it.refRelations }
         .flatten()
@@ -176,8 +160,11 @@ private fun Method.recursiveRelations(
     return childType.nestedRelations(newChain, rootClass, propertyFilter) + relation
 }
 
-private val ObjectClass.refRelations: Sequence<RefRelation> get() =
-    referenceMethods.distinctBy { it.referenceName }.map { refRelation(this, it) }
+private val ObjectClass.refRelations: Sequence<ForwardRelation> get() =
+    referenceMethods
+        .distinctBy { it.referenceName }
+        .filter { ! it.isBackRef }
+        .map { ForwardRelation(this, it) }
 
 private val ObjectClass.referenceMethods: Sequence<Method> get() =
     declaredMethods.asSequence()
