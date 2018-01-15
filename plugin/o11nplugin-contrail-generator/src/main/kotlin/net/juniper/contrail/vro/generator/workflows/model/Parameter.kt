@@ -103,6 +103,9 @@ data class Reference(val simpleName: String) : ParameterType<Reference>() {
         name
 }
 
+val <Type : Any> ParameterType<Type>.array get() =
+    array<Type>(this)
+
 val <T : Any> ParameterType<T>.unArrayed get() =
     if (this is array<Any>) this.type else this
 

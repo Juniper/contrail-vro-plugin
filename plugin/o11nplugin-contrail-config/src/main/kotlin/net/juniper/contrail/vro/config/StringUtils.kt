@@ -31,6 +31,11 @@ fun String.folderName() : String = when (this) {
     else -> pluralizeCamelCases(this)
 }
 
+val String.pluralParameterName get(): String =
+    folderName().replace(" ", "").run {
+        if (startsWith("BGP")) this else decapitalize()
+    }
+
 fun pluralizeCamelCases(name: String) : String {
     val nameParts = name.split(CAMEL_CASE_REGEX)
     val uppercasedWords = nameParts.map { uppercaseAcronyms(it) }.run {

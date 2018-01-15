@@ -5,12 +5,14 @@
 package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.generator.model.properties
 import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.parentClassName
+import net.juniper.contrail.vro.config.pluralParameterName
 import net.juniper.contrail.vro.config.splitCamel
 import net.juniper.contrail.vro.config.underscoredPropertyToCamelCase
 import net.juniper.contrail.vro.generator.workflows.dsl.ParameterAggregator
@@ -22,6 +24,8 @@ import net.juniper.contrail.vro.generator.workflows.dsl.withScript
 import net.juniper.contrail.vro.generator.workflows.dsl.withVersion
 import net.juniper.contrail.vro.generator.workflows.model.Action
 import net.juniper.contrail.vro.generator.workflows.model.Element
+import net.juniper.contrail.vro.generator.workflows.model.Reference
+import net.juniper.contrail.vro.generator.workflows.model.array
 import net.juniper.contrail.vro.generator.workflows.model.createDunesProperties
 import net.juniper.contrail.vro.generator.workflows.model.createElementInfoProperties
 import net.juniper.contrail.vro.generator.workflows.model.number
@@ -105,11 +109,11 @@ fun createConnectionWorkflow(info: ProjectInfo): Workflow {
     }
 }
 
-fun createWorkflow(info: ProjectInfo, className: String, parentName: String): Workflow {
+fun createWorkflow(info: ProjectInfo, className: String, parentName: String, refs: List<String>): Workflow {
 
     val workflowName = "Create ${className.workflowNameFormat}"
 
-    return info.versionOf(workflowName) withScript createScriptBody(className, parentName) andParameters {
+    return info.versionOf(workflowName) withScript createScriptBody(className, parentName, refs) andParameters {
         parameter("name", string) {
             description = "${className.descriptionFormat} name"
             mandatory = true
@@ -119,6 +123,16 @@ fun createWorkflow(info: ProjectInfo, className: String, parentName: String): Wo
             description = "Parent ${parentName.descriptionFormat}"
             mandatory = true
 
+        }
+
+        if (!refs.isEmpty()) {
+            step("References") {
+                for (ref in refs) {
+                    parameter(ref.pluralParameterName, Reference(ref).array) {
+                        description = ref.folderName()
+                    }
+                }
+            }
         }
     }
 }
@@ -229,12 +243,25 @@ private val deleteConnectionScriptBody = """
 ContrailConnectionManager.delete(object);
 """.trimIndent()
 
-private fun createScriptBody(className: String, parentName: String) = """
+private fun createScriptBody(className: String, parentName: String, references: List<String>) = """
 var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
 var element = new Contrail$className();
 element.setName(name);
+${references.addAllReferences}
 executor.create$className(element${if (parentName == Connection) "" else ", parent"});
 """.trimIndent()
+
+private val List<String>.addAllReferences get() =
+    joinToString("\n") { it.addReferenceEntry }
+
+private val String.addReferenceEntry get() =
+"""
+if($pluralParameterName) {
+    for each (ref in $pluralParameterName) {
+        element.add$this(ref);
+    }
+}
+"""
 
 private fun deleteScriptBody(className: String) = """
 var executor = ContrailConnectionManager.getExecutor(object.getInternalId().toString());

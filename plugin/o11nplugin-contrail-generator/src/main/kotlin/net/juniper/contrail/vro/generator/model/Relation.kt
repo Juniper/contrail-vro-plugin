@@ -8,7 +8,7 @@ import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.PropertyClass
 import net.juniper.contrail.vro.config.PropertyClassFilter
-import net.juniper.contrail.vro.config.asApiClass
+import net.juniper.contrail.vro.config.asObjectClass
 import net.juniper.contrail.vro.config.collapsedNestedName
 import net.juniper.contrail.vro.config.defaultParentType
 import net.juniper.contrail.vro.config.folderName
@@ -28,24 +28,26 @@ import net.juniper.contrail.vro.config.propertyName
 import net.juniper.contrail.vro.config.referenceName
 import net.juniper.contrail.vro.config.returnListGenericClass
 import net.juniper.contrail.vro.config.returnsObjectReferences
-import net.juniper.contrail.vro.config.typeToClassName
+import net.juniper.contrail.vro.config.typeToObjectClass
 import java.lang.reflect.Method
 
 open class Relation (
-    val parentName: String,
-    val childName: String
+    val parentClass: ObjectClass,
+    val childClass: ObjectClass
 ) {
+    val parentName: String = parentClass.simpleName
+    val childName: String = childClass.simpleName
     val name: String = relationName(parentName, childName)
     val folderName = childName.folderName()
 }
 
 class ForwardRelation (
-    parentClass: ObjectClass,
+    val parentClass: ObjectClass,
     method: Method
 ) {
     val parentName: String = parentClass.simpleName
     val childName: String = method.nameWithoutGetAndBackRefs
-    val childClass: Class<*> = childName.asApiClass!!
+    val childClass: ObjectClass = childName.asObjectClass!!
     val childNamePluralized = childName.pluralize()
     val getter: String = method.propertyName
     val folderName = method.nameWithoutGetAndBackRefs.folderName()
@@ -76,7 +78,7 @@ class NestedRelation(
 
 class Getter(val name: String, val toMany: Boolean)
 
-typealias RelationGraphNode = Pair<String, List<String>>
+typealias RelationGraphNode = Pair<ObjectClass, List<ObjectClass>>
 
 fun List<ObjectClass>.generateRelations(): List<Relation> {
     val parentToChildren = groupBy { it.defaultParentType }
@@ -92,8 +94,8 @@ private fun createRelationGraphNode(
 ): RelationGraphNode {
     val parentType = parentClass.objectType
     val children = parentToChildren.getOrElse(parentType) { listOf() }
-    val childrenTypes = children.map { it.objectType.typeToClassName }
-    return RelationGraphNode(parentType.typeToClassName, childrenTypes)
+    val childrenTypes = children.map { it.objectType.typeToObjectClass!! }
+    return RelationGraphNode(parentType.typeToObjectClass!!, childrenTypes)
 }
 
 private fun relationName(parentType: String, childType: String) =

@@ -5,6 +5,8 @@
 package net.juniper.contrail.vro.generator.workflows
 
 import com.sun.xml.internal.bind.marshaller.CharacterEscapeHandler
+import net.juniper.contrail.vro.config.ObjectClass
+import net.juniper.contrail.vro.config.isRequiredAttributeClass
 import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
@@ -24,11 +26,13 @@ fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition) {
     deleteConnectionWorkflow(info).saveInConfiguration(info)
 
     relations.rootClasses.forEach {
-        generateLifecycleWorkflows(info, it.simpleName)
+        val refs = relations.referencesOf(it)
+        generateLifecycleWorkflows(info, it.simpleName, refs)
     }
 
     relations.relations.forEach {
-        generateLifecycleWorkflows(info, it.childName, it.parentName)
+        val refs = relations.referencesOf(it.childClass)
+        generateLifecycleWorkflows(info, it.childName, it.parentName, refs)
     }
 
     relations.forwardRelations.forEach {
@@ -36,10 +40,20 @@ fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition) {
     }
 }
 
-private fun generateLifecycleWorkflows(info: ProjectInfo, className: String, parentName: String = Connection) {
-    createWorkflow(info, className, parentName).save(info, className)
+fun RelationDefinition.referencesOf(clazz: ObjectClass) =
+    forwardRelations.asSequence()
+        .filter { it.parentClass == clazz }
+        .filter { it.simpleReference || ! it.attribute.isRequiredAttributeClass }
+        .map { it.childClass.simpleName }
+        .toList()
+
+private fun generateLifecycleWorkflows(info: ProjectInfo, className: String, parentName: String, refs: List<String>) {
+    createWorkflow(info, className, parentName, refs).save(info, className)
     deleteWorkflow(info, className).save(info, className)
 }
+
+private fun generateLifecycleWorkflows(info: ProjectInfo, className: String, refs: List<String>) =
+    generateLifecycleWorkflows(info, className, Connection, refs)
 
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation) {
     val action = relation.findReferencesAction(info.workflowVersion, info.workflowsPackageName)

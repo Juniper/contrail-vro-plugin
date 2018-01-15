@@ -15,12 +15,22 @@ val String.isModelClassName get() = when (this) {
     else -> false
 }
 
-val String.isInventoryPropertyClassName get() = when (this) {
-    "IdPermsType",
-    "PermType2",
-    "KeyValuePairs" -> false
-    else -> true
-}
+val inventoryProperties = setOf(
+    "QuotaType"
+)
+
+val nonEssentialAttributes = setOf(
+    "VirtualNetworkPolicyType"
+)
+
+val String.isInventoryPropertyClassName get() =
+    inventoryProperties.contains(this)
+
+val String.isRequiredAttribute get() =
+    ! nonEssentialAttributes.contains(this)
+
+val Class<*>.isRequiredAttributeClass get() =
+    simpleName.isRequiredAttribute
 
 val ObjectClass.isModelClass get() =
     simpleName.isModelClassName

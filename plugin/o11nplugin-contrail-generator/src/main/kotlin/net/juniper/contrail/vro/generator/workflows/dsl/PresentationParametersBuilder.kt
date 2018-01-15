@@ -11,6 +11,7 @@ import net.juniper.contrail.vro.generator.workflows.model.PresentationGroup
 import net.juniper.contrail.vro.generator.workflows.model.PresentationStep
 import net.juniper.contrail.vro.generator.workflows.model.Reference
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
+import net.juniper.contrail.vro.generator.workflows.model.array
 import net.juniper.contrail.vro.generator.workflows.model.boolean
 import net.juniper.contrail.vro.generator.workflows.model.childOf
 import net.juniper.contrail.vro.generator.workflows.model.date
@@ -90,6 +91,10 @@ open class ParameterAggregator(
 
     fun parameter(name: String, type: Reference, setup: ReferenceParameterBuilder.() -> Unit) {
         ReferenceParameterBuilder(name, type).updateWith(setup)
+    }
+
+    fun parameter(name: String, type: array<Reference>, setup: ReferenceArrayParameterBuilder.() -> Unit = {}) {
+        ReferenceArrayParameterBuilder(name, type).updateWith(setup)
     }
 
     fun parameter(name: String, type: Class<*>, setup: BasicParameterBuilder<*>.() -> Unit) = when (type) {
@@ -207,3 +212,5 @@ class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterB
         return qualifiers
     }
 }
+
+class ReferenceArrayParameterBuilder(name: String, type: array<Reference>) : BasicParameterBuilder<List<Reference>>(name, type)

@@ -24,6 +24,12 @@ val Class<*>.isApiTypeClass get() =
 val String.asApiClass get() =
     classForName("$apiTypesPackageName.$this") ?: classForName("$apiPackageName.$this")
 
+val String.asObjectClass get() =
+    asApiClass as? ObjectClass?
+
+val String.typeToObjectClass get() =
+    typeToClassName.asObjectClass
+
 val String.isApiTypeClass get() =
     this.asApiClass != null
 
