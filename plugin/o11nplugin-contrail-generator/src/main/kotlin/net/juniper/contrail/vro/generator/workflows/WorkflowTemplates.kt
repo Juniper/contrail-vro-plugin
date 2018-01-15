@@ -57,11 +57,11 @@ private val String.descriptionFormat
 private val <T : ApiObjectBase> Class<T>.parentName get() =
     parentClassName ?: Connection
 
-val ProjectInfo.workfloVersion get() =
-    "$baseVersion.$buildNumber"
+val ProjectInfo.workflowVersion
+    get() = "$baseVersion.$buildNumber"
 
 fun ProjectInfo.versionOf(name: String) =
-    name packagedIn workflowsPackageName withVersion workfloVersion
+    name packagedIn workflowsPackageName withVersion workflowVersion
 
 fun createConnectionWorkflow(info: ProjectInfo): Workflow {
 

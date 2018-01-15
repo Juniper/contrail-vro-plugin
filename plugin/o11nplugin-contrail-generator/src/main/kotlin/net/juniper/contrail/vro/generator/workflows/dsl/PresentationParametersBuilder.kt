@@ -21,6 +21,7 @@ import net.juniper.contrail.vro.generator.workflows.model.maxNumberValueQualifie
 import net.juniper.contrail.vro.generator.workflows.model.minNumberValueQualifier
 import net.juniper.contrail.vro.generator.workflows.model.number
 import net.juniper.contrail.vro.generator.workflows.model.numberFormatQualifier
+import net.juniper.contrail.vro.generator.workflows.model.predefinedAnswersQualifier
 import net.juniper.contrail.vro.generator.workflows.model.selectAsTreeQualifier
 import net.juniper.contrail.vro.generator.workflows.model.showInInventoryQualifier
 import net.juniper.contrail.vro.generator.workflows.model.string
@@ -123,6 +124,7 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
     var description: String = name.capitalize()
     var mandatory: Boolean = false
     var defaultValue: Type? = null
+    var predefinedAnswers: List<Type>? = null
     private var dependsOn: String? = null
     private var listedBy: Action? = null
 
@@ -149,6 +151,9 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
 
         defaultValue?.let {
             add(defaultValueQualifier(type, it))
+        }
+        predefinedAnswers?.let {
+            add(predefinedAnswersQualifier(type, it))
         }
         dependsOn?.let {
             add(visibleWhenNonNull(it))

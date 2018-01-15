@@ -42,7 +42,7 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, className: String, par
 }
 
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation) {
-    val action = relation.findReferencesAction(info.workfloVersion, info.workflowsPackageName)
+    val action = relation.findReferencesAction(info.workflowVersion, info.workflowsPackageName)
     action.save(info)
     addReferenceWorkflow(info, relation).save(info, relation.parentName)
     removeReferenceWorkflow(info, relation, action).save(info, relation.parentName)

@@ -66,6 +66,10 @@ val mandatoryQualifier = staticQualifier(mandatoryQualifierName, boolean, true)
 val selectAsListQualifier = staticQualifier(selectAsQualifierName, string, "list")
 val selectAsTreeQualifier = staticQualifier(selectAsQualifierName, string, "tree")
 fun <T : Any> defaultValueQualifier(type: ParameterType<T>, value: T) = staticQualifier(defaultValueQualifierName, type, value)
+fun <T : Any> predefinedAnswersQualifier(type: ParameterType<T>, values: List<T>): ParameterQualifier {
+    val simpleType = type.unArrayed
+    return staticQualifier(genericEnumerationQualifierName, array(simpleType), cDATAListFormat(simpleType, values))
+}
 fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifierName, string, value)
 fun minNumberValueQualifier(value: Int) = staticQualifier(minNumberValueQualifierName, number, value)
 fun maxNumberValueQualifier(value: Int) = staticQualifier(maxNumberValueQualifierName, number, value)
@@ -88,6 +92,11 @@ private fun <T : Any> staticQualifier(name: String, type: ParameterType<T>, valu
 
 private fun ognlQualifier(name: String, type: ParameterType<Any>, value: String) =
     ParameterQualifier(ognl, name, type.name, value)
+
+private fun <T : Any> cDATAListFormat(type: ParameterType<T>, values: List<T>): String {
+    val elements = values.joinToString(";") { "#$type#$it#" }
+    return "#{$elements}#"
+}
 
 fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQualifier? =
     when (xsdConstraint) {
