@@ -5,7 +5,6 @@
 package net.juniper.contrail.vro.spring
 
 import ch.dunes.vso.sdk.IServiceRegistry
-import ch.dunes.vso.sdk.api.IPluginNotificationHandler
 import ch.dunes.vso.sdk.api.IPluginPublisher
 import ch.dunes.vso.sdk.endpoints.IEndpointConfiguration
 import ch.dunes.vso.sdk.endpoints.IEndpointConfigurationService
@@ -13,15 +12,14 @@ import com.vmware.o11n.plugin.sdk.spring.platform.GlobalPluginNotificationHandle
 import com.vmware.o11n.sdk.modeldriven.Sid
 import net.juniper.contrail.api.ApiConnectorMock
 import net.juniper.contrail.vro.ContrailPluginAdaptor
-import net.juniper.contrail.vro.config.ConnectionManager
-import net.juniper.contrail.vro.config.DefaultConnectionRepository
-import net.juniper.contrail.vro.gen.Connection_Wrapper
+import net.juniper.contrail.vro.base.ConnectionManager
+import net.juniper.contrail.vro.base.DefaultConnectionRepository
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.ConnectionInfo
 import spock.lang.Shared
 import spock.lang.Specification
 
-import static net.juniper.contrail.vro.config.ConstantsKt.*
+import static net.juniper.contrail.vro.base.ConstantsKt.*
 
 class SpringContextSpec extends Specification {
     static def info = new ConnectionInfo("connection name", "host", 8080, "user", "secret")

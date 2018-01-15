@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.config
+package net.juniper.contrail.vro.base
 
 import com.vmware.o11n.sdk.modeldriven.impl.DefaultCollectionFactory
 import com.vmware.o11n.sdk.modeldriven.impl.DefaultInventoryService
@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.core.io.ClassPathResource
 
 @Configuration
-@ComponentScan("net.juniper.contrail.vro.config")
+@ComponentScan("net.juniper.contrail.vro.base")
 @ImportResource("classpath:com/vmware/o11n/plugin/sdk/spring/pluginEnv.xml")
 class SpringConfig {
     @Bean

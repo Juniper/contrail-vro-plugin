@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.config
+package net.juniper.contrail.vro.base
 
 val NAME = "name"
 val HOST = "host"

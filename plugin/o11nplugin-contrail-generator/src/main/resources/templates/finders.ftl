@@ -1,15 +1,15 @@
 ${editWarning}
 package ${packageName}
 
-import net.juniper.contrail.vro.config.ConnectionRepository
-import net.juniper.contrail.vro.model.Connection
-import net.juniper.contrail.api.* // ktlint-disable no-wildcard-imports
-import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 import com.vmware.o11n.sdk.modeldriven.FoundObject
 import com.vmware.o11n.sdk.modeldriven.ObjectFinder
 import com.vmware.o11n.sdk.modeldriven.PluginContext
 import com.vmware.o11n.sdk.modeldriven.Sid
 import org.springframework.beans.factory.annotation.Autowired
+import net.juniper.contrail.vro.base.ConnectionRepository
+import net.juniper.contrail.vro.model.Connection
+import net.juniper.contrail.api.* // ktlint-disable no-wildcard-imports
+import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 
 <#macro getterChain relation>
   <@compress single_line=true>

@@ -7,8 +7,8 @@ package net.juniper.contrail.vro.generator.model
 import freemarker.cache.ClassTemplateLoader
 import freemarker.template.Configuration
 import freemarker.template.TemplateExceptionHandler
-import net.juniper.contrail.vro.generator.util.append
-import net.juniper.contrail.vro.generator.util.packageToPath
+import net.juniper.contrail.vro.config.append
+import net.juniper.contrail.vro.config.packageToPath
 import java.io.FileWriter
 import java.io.IOException
 import java.nio.file.Files

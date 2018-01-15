@@ -8,7 +8,7 @@ import com.vmware.o11n.sdk.modeldriven.FoundObject
 import com.vmware.o11n.sdk.modeldriven.ObjectFinder
 import com.vmware.o11n.sdk.modeldriven.PluginContext
 import com.vmware.o11n.sdk.modeldriven.Sid
-import net.juniper.contrail.vro.config.ConnectionRepository
+import net.juniper.contrail.vro.base.ConnectionRepository
 import org.springframework.beans.factory.annotation.Autowired
 
 class ConnectionFinder

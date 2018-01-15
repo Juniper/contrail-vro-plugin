@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator.util
+package net.juniper.contrail.vro.config
 
 import java.nio.file.Path
 import java.nio.file.Paths

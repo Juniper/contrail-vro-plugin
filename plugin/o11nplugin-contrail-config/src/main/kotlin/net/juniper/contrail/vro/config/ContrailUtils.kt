@@ -2,16 +2,11 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator.util
+package net.juniper.contrail.vro.config
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
-import net.juniper.contrail.vro.generator.apiPackageName
-import net.juniper.contrail.vro.generator.apiTypesPackageName
-import net.juniper.contrail.vro.generator.isRootClass
-import net.juniper.contrail.vro.generator.model.ObjectClass
-import net.juniper.contrail.vro.generator.model.PropertyClass
 import java.lang.reflect.Method
 
 fun objectClasses() =

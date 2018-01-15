@@ -2,13 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator
-
-import net.juniper.contrail.vro.generator.model.ObjectClass
-import net.juniper.contrail.vro.generator.model.ObjectClassFilter
-import net.juniper.contrail.vro.generator.model.PropertyClass
-import net.juniper.contrail.vro.generator.model.PropertyClassFilter
-import net.juniper.contrail.vro.generator.util.typeToClassName
+package net.juniper.contrail.vro.config
 
 val String.isModelClassName get() = when (this) {
     "Project",

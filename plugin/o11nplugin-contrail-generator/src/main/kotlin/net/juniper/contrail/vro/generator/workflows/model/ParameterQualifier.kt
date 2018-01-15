@@ -4,7 +4,7 @@
 
 package net.juniper.contrail.vro.generator.workflows.model
 
-import net.juniper.contrail.vro.generator.util.CDATA
+import net.juniper.contrail.vro.config.CDATA
 import net.juniper.contrail.vro.generator.workflows.model.QualifierKind.ognl
 import net.juniper.contrail.vro.generator.workflows.model.QualifierKind.static
 import javax.xml.bind.annotation.XmlAccessType

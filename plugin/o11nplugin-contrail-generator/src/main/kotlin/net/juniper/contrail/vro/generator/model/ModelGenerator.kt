@@ -4,11 +4,13 @@
 
 package net.juniper.contrail.vro.generator.model
 
+import net.juniper.contrail.vro.config.ObjectClass
+import net.juniper.contrail.vro.config.PropertyClass
 import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.generatedPackageName
 import net.juniper.contrail.vro.generator.generatedSourcesRoot
 import net.juniper.contrail.vro.generator.templatePath
-import net.juniper.contrail.vro.generator.util.div
+import net.juniper.contrail.vro.config.div
 
 fun generateModel(
     info: ProjectInfo,

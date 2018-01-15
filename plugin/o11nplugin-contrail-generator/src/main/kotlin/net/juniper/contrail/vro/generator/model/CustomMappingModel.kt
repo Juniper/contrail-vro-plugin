@@ -4,7 +4,9 @@
 
 package net.juniper.contrail.vro.generator.model
 
-import net.juniper.contrail.vro.generator.util.folderName
+import net.juniper.contrail.vro.config.ObjectClass
+import net.juniper.contrail.vro.config.PropertyClass
+import net.juniper.contrail.vro.config.folderName
 
 data class CustomMappingModel (
     val findableClassNames: List<String>,

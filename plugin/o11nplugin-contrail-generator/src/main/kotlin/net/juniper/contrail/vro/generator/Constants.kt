@@ -5,8 +5,6 @@
 package net.juniper.contrail.vro.generator
 
 val generatedPackageName = "net.juniper.contrail.vro.generated"
-val apiPackageName = "net.juniper.contrail.api"
-val apiTypesPackageName = "net.juniper.contrail.api.types"
 
 val generatedSourcesRoot = "/target/generated-sources"
 val generatedTestsRoot = "/target/generated-tests"

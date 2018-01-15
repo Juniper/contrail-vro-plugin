@@ -4,12 +4,13 @@
 
 package net.juniper.contrail.vro.generator.model
 
-import net.juniper.contrail.vro.generator.util.isApiTypeClass
-import net.juniper.contrail.vro.generator.util.isListWrapper
-import net.juniper.contrail.vro.generator.util.kotlinClassName
-import net.juniper.contrail.vro.generator.util.nestedName
-import net.juniper.contrail.vro.generator.util.referenceName
-import net.juniper.contrail.vro.generator.util.underscoredNestedName
+import net.juniper.contrail.vro.config.ObjectClass
+import net.juniper.contrail.vro.config.isApiTypeClass
+import net.juniper.contrail.vro.config.isListWrapper
+import net.juniper.contrail.vro.config.kotlinClassName
+import net.juniper.contrail.vro.config.nestedName
+import net.juniper.contrail.vro.config.referenceName
+import net.juniper.contrail.vro.config.underscoredNestedName
 
 data class WrappersModel(
     val references: List<ReferenceWrapperModel>,

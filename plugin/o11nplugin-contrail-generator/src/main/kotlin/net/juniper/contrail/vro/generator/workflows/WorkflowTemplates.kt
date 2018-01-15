@@ -9,10 +9,10 @@ import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.generator.model.properties
-import net.juniper.contrail.vro.generator.util.isApiTypeClass
-import net.juniper.contrail.vro.generator.util.parentClassName
-import net.juniper.contrail.vro.generator.util.splitCamel
-import net.juniper.contrail.vro.generator.util.underscoredPropertyToCamelCase
+import net.juniper.contrail.vro.config.isApiTypeClass
+import net.juniper.contrail.vro.config.parentClassName
+import net.juniper.contrail.vro.config.splitCamel
+import net.juniper.contrail.vro.config.underscoredPropertyToCamelCase
 import net.juniper.contrail.vro.generator.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
 import net.juniper.contrail.vro.generator.workflows.model.Workflow

@@ -4,7 +4,7 @@
 
 package net.juniper.contrail.vro.generator.workflows.model
 
-import net.juniper.contrail.vro.generator.util.CDATA
+import net.juniper.contrail.vro.config.CDATA
 import java.util.Date
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType

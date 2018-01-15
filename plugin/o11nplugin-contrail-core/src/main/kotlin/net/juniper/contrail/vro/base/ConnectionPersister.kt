@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.config
+package net.juniper.contrail.vro.base
 
 import ch.dunes.vso.sdk.endpoints.IEndpointConfiguration
 import ch.dunes.vso.sdk.endpoints.IEndpointConfigurationService

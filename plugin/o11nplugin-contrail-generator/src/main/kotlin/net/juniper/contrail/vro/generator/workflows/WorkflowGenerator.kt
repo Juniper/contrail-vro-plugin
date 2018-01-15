@@ -8,7 +8,7 @@ import com.sun.xml.internal.bind.marshaller.CharacterEscapeHandler
 import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
-import net.juniper.contrail.vro.generator.util.packageToPath
+import net.juniper.contrail.vro.config.packageToPath
 import net.juniper.contrail.vro.generator.workflows.model.Action
 import net.juniper.contrail.vro.generator.workflows.model.Element
 import net.juniper.contrail.vro.generator.workflows.model.Workflow

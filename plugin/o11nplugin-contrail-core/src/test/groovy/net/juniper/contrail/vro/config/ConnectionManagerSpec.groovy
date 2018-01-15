@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.config
+package net.juniper.contrail.vro.base
 
 import com.vmware.o11n.plugin.sdk.spring.platform.GlobalPluginNotificationHandler
 import net.juniper.contrail.api.ApiConnectorMock

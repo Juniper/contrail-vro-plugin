@@ -4,12 +4,12 @@
 
 package net.juniper.contrail.vro.generator.model
 
-import net.juniper.contrail.vro.generator.util.isApiTypeClass
-import net.juniper.contrail.vro.generator.util.kotlinClassName
-import net.juniper.contrail.vro.generator.util.propertyName
-import net.juniper.contrail.vro.generator.util.underscoredNestedName
-import net.juniper.contrail.vro.generator.util.underscoredPropertyToCamelCase
-import net.juniper.contrail.vro.generator.util.wrapperName
+import net.juniper.contrail.vro.config.isApiTypeClass
+import net.juniper.contrail.vro.config.kotlinClassName
+import net.juniper.contrail.vro.config.propertyName
+import net.juniper.contrail.vro.config.underscoredNestedName
+import net.juniper.contrail.vro.config.underscoredPropertyToCamelCase
+import net.juniper.contrail.vro.config.wrapperName
 import java.lang.reflect.ParameterizedType
 
 class Property(val fieldName: String, val clazz: Class<*>, val parent: Class<*>, val wrapname: String? = null) {

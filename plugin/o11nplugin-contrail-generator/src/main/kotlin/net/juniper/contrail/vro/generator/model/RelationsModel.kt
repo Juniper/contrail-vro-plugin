@@ -4,6 +4,8 @@
 
 package net.juniper.contrail.vro.generator.model
 
+import net.juniper.contrail.vro.config.ObjectClass
+
 data class RelationsModel(
     val rootClassNames: List<String>,
     val relations: List<RelationModel>,
