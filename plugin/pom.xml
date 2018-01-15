@@ -492,7 +492,7 @@
     <module>o11nplugin-contrail-gen</module>
     <module>o11nplugin-contrail-package</module>
     <module>o11nplugin-contrail</module>
-    <module>tests</module>
+    <module>o11nplugin-contrail-tests</module>
   </modules>
 
 </project>
