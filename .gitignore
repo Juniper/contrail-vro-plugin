@@ -12,3 +12,8 @@ plugin/o11nplugin-contrail-package/src
 plugin/o11nplugin-contrail-package/templates/main/resources/Workflow
 plugin/o11nplugin-contrail-package/templates/main/resources/ScriptModule
 plugin/o11nplugin-contrail-package/templates/main/resources/META-INF/dunes-meta-inf.xml
+
+#Ignore dependencies
+controller/
+generateds/
+contrail-java-api/
