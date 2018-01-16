@@ -12,7 +12,6 @@ import net.juniper.contrail.vro.config.asObjectClass
 import net.juniper.contrail.vro.config.collapsedNestedName
 import net.juniper.contrail.vro.config.defaultParentType
 import net.juniper.contrail.vro.config.folderName
-import net.juniper.contrail.vro.config.isApiPropertyClass
 import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isBackRef
 import net.juniper.contrail.vro.config.isGetter
@@ -27,6 +26,7 @@ import net.juniper.contrail.vro.config.pluralize
 import net.juniper.contrail.vro.config.propertyName
 import net.juniper.contrail.vro.config.referenceName
 import net.juniper.contrail.vro.config.returnListGenericClass
+import net.juniper.contrail.vro.config.returnsApiPropertyOrList
 import net.juniper.contrail.vro.config.returnsObjectReferences
 import net.juniper.contrail.vro.config.typeToObjectClass
 import java.lang.reflect.Method
@@ -185,8 +185,3 @@ val Method.isRefMethod get() =
 private val <T> Class<T>.isSimpleReference: Boolean get() =
     this == ApiPropertyBase::class.java
 
-private val Method.returnTypeOrListType get() =
-    if (returnType == List::class.java) returnListGenericClass else returnType
-
-private val Method.returnsApiPropertyOrList: Boolean get() =
-    returnTypeOrListType?.isApiPropertyClass ?: false

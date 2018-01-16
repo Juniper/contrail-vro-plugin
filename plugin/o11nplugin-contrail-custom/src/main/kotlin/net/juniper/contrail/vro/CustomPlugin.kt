@@ -4,8 +4,10 @@
 
 package net.juniper.contrail.vro
 
+import com.vmware.o11n.sdk.modeldrivengen.model.ManagedFinder
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
 import com.vmware.o11n.sdk.modeldrivengen.model.Plugin
+import net.juniper.contrail.vro.config.isApiObjectClass
 
 class CustomPlugin : Plugin() {
 
@@ -18,6 +20,12 @@ class CustomPlugin : Plugin() {
         return list
     }
 
+    override fun getFinders(): MutableList<ManagedFinder> {
+        val finders = super.getFinders()
+        cleanFinders(finders)
+        return finders
+    }
+
     private fun maybeWrap(types: MutableList<ManagedType>) {
         val iterator = types.listIterator()
         while (iterator.hasNext()) {
@@ -26,5 +34,14 @@ class CustomPlugin : Plugin() {
                 iterator.set(CustomManagedType.wrap(type))
             }
         }
+    }
+
+    private fun cleanFinders(finders: MutableList<ManagedFinder>) {
+        finders.asSequence()
+            .filter { it.managedType?.modelClass?.isApiObjectClass ?: false }
+            .map { it.attributes.asSequence() }
+            .flatten()
+            .filter { it.displayName?.endsWith(displayedPropertySuffix) ?: false }
+            .forEach { it.displayName = it.displayName.replace(displayedPropertyPattern, "") }
     }
 }

@@ -58,20 +58,20 @@ val Type.parameterClass: Class<*>? get() =
 val Type.parameterType: Type? get() =
     if (this is ParameterizedType) actualTypeArguments[0] else null
 
-val Type.unwrapped: Class<*> get() =
-    if (this is ParameterizedType) rawType as Class<*> else this as Class<*>
+val Type.unwrapped: Class<*>? get() =
+    if (this is ParameterizedType) rawType as? Class<*> else this as? Class<*>
 
 val Method.returnListGenericClass: Class<*>? get() =
     if (returnType == List::class.java) genericReturnType.parameterClass else null
+
+val Method.returnTypeOrListType get() =
+    if (returnType == List::class.java) returnListGenericClass else returnType
 
 fun Method.declaredIn(clazz: Class<*>) =
     declaringClass == clazz
 
 val Method.objectReferenceAttributeClass: Class<*>? get() =
     genericReturnType?.parameterType?.parameterClass
-
-val <T> Class<T>.referenceName: String get() =
-    simpleName.ref
 
 val <T> Class<T>.isAbstract: Boolean get() =
     Modifier.isAbstract(modifiers)

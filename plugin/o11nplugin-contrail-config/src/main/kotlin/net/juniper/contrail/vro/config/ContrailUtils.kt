@@ -69,6 +69,9 @@ val Class<*>.hasOnlyListOfProperties: Boolean get() =
 val Method.returnsListOfProperties: Boolean get() =
     returnListGenericClass?.superclass == ApiPropertyBase::class.java
 
+val Method.returnsApiPropertyOrList: Boolean get() =
+    returnTypeOrListType?.isApiPropertyClass ?: false
+
 private val Method.deepestReturnType: Class<*>? get() =
     if (returnType == List::class.java)
         objectReferenceAttributeClass ?: returnListGenericClass

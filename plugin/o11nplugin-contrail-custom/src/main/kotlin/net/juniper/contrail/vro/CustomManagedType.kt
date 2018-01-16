@@ -9,21 +9,37 @@ import com.vmware.o11n.sdk.modeldrivengen.model.FormalParameter
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedConstructor
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedMethod
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
-import java.util.ArrayList
+import net.juniper.contrail.vro.config.isApiObjectClass
+import net.juniper.contrail.vro.config.isApiPropertyClass
+import net.juniper.contrail.vro.config.returnTypeOrListType
+import net.juniper.contrail.vro.config.returnsApiPropertyOrList
+import java.lang.reflect.Method
 
 class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
 
-    val refsFields: List<CustomRefsField>
-        get() {
-            val fields = delegate.modelClass.declaredFields
-            return fields
-                .asSequence()
-                .filter { it.name.endsWith("back_refs") }
-                .map { CustomRefsField.wrapField(it) }
+    val refsFields: List<CustomRefsField> = delegate.modelClass.declaredFields
+        .asSequence()
+        .filter { it.name.endsWith("back_refs") }
+        .map { CustomRefsField.wrapField(it) }
+        .toList()
+
+    val propertyViews: List<CustomProperty> = delegate.modelClass.run {
+        if (isApiObjectClass)
+            methods.asSequence()
+                .filter { it.name.startsWith("get") }
+                .filter { it.returnsApiPropertyOrList }
+                .map { it.toCustomProperty() }
                 .toList()
-        }
+        else
+            emptyList()
+    }
+
+
+    private fun Method.toCustomProperty() =
+        CustomProperty(returnTypeOrListType!!.simpleName, name)
 
     init {
+        generatePropertyMethods()
         generateRefsMethods()
     }
 
@@ -87,7 +103,7 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         delegate.fullClassName = className
     }
 
-    override fun getMethods(): MutableList<ManagedMethod?> =
+    override fun getMethods(): MutableList<ManagedMethod> =
         delegate.methods
 
     override fun setMethods(methods: List<ManagedMethod>) {
@@ -133,8 +149,6 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
     }
 
     private fun generateRefsMethods() {
-        val methods = this.methods
-
         for (customField in this.refsFields) {
             val name = "get" + customField.wrapperMethodName
             val propertyName = customField.wrapperMethodName.decapitalize()
@@ -144,7 +158,24 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
             method.setName(name, name)
             method.originalPropertyName = propertyName
             method.propertyName = propertyName
-            method.params = ArrayList()
+            method.params = emptyList()
+            method.setIsInheritedWrapperMethod(true)
+            method.isPropertyReadOnly = true
+            method.returns = returnParameter
+
+            methods.add(method)
+        }
+    }
+
+    private fun generatePropertyMethods() {
+        for (property in propertyViews) {
+            val returnParameter = createReturnsFormalParameter()
+
+            val method = ManagedMethod()
+            method.setName(property.viewMethodName, property.viewMethodName)
+            method.propertyName = property.viewPropertyName
+            method.originalPropertyName = property.viewPropertyName
+            method.params = emptyList()
             method.setIsInheritedWrapperMethod(true)
             method.isPropertyReadOnly = true
             method.returns = returnParameter

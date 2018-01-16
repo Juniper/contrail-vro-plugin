@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.List;
 import net.juniper.contrail.vro.ContrailPluginFactory;
 import net.juniper.contrail.vro.format.ReferenceFormatter;
+import net.juniper.contrail.vro.format.PropertyFormatter;
 import net.juniper.contrail.api.*;
 import net.juniper.contrail.api.types.*;
 
@@ -23,7 +24,7 @@ public class ${className}
 </@compress>
 
     private static final long serialVersionUID = 1L;
-    private ReferenceFormatter propertyFormatter;
+    private ReferenceFormatter referenceFormatter;
 
     @Override
     public void setContext(PluginContext ctx) {
@@ -34,7 +35,7 @@ public class ${className}
 		</#if>
         BeanFactory beanFactory = _ctx.getPluginContext().getApplicationContext().getAutowireCapableBeanFactory();
         ContrailPluginFactory factory = beanFactory.getBean(ContrailPluginFactory.class);
-		propertyFormatter = new ReferenceFormatter(factory);
+		referenceFormatter = new ReferenceFormatter(factory);
     }
 
     <#if findable>
@@ -148,7 +149,18 @@ public class ${className}
     public String get${field.wrapperMethodName}() {
         List<${field.returnTypeName}> ref_list = __getTarget().get${field.methodName}();
 
-        return propertyFormatter.getRefString(this, ref_list, "${field.refObjectType}");
+        return referenceFormatter.getRefString(this, ref_list, "${field.refObjectType}");
+    }
+
+    </#list>
+    <#list propertyViews as property>
+    public String ${property.viewMethodName}() {
+        ${property.propertyType} prop = __getTarget().${property.methodName}();
+        if (prop != null) {
+            return PropertyFormatter.INSTANCE.format(prop);
+        } else {
+            return null;
+        }
     }
 
     </#list>
