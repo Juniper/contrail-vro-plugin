@@ -35,31 +35,6 @@ val fqnPattern = ":?([\\d\\w\\-\\s_]+)$".toRegex()
 private val String.unqualifiedName get() =
     fqnPattern.matchEntire(this)?.groupValues?.get(1)
 
-<#list references as wrapper>
-class ${wrapper.referenceName} @JvmOverloads constructor (
-    val name:String? = null,
-    val fqn:String? = null,
-    val uuid:String? = null
-) {
-    fun as${wrapper.className}(): ${wrapper.className} {
-        val target = ${wrapper.className}()
-        target.name = name
-        target.uuid = uuid
-        return target
-    }
-
-    fun asObjectReference() =
-        ObjectReference<ApiPropertyBase>(uuid)
-}
-
-fun ${wrapper.className}.as${wrapper.referenceName}(): ${wrapper.referenceName} =
-    ${wrapper.referenceName}(name, referenceName, uuid)
-
-fun ObjectReference<*>.as${wrapper.referenceName}(): ${wrapper.referenceName} =
-    ${wrapper.referenceName}(uuid = uuid)
-
-</#list>
-
 <#list wrappers as wrapper>
 class ${wrapper.name} {
     var listIdx: Int? = null

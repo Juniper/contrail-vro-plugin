@@ -52,10 +52,6 @@ class CustomMapping: AbstractMapping() {
           .using(${klass}Finder::class.java)
           .hiding(*propertiesToHide)
           .withIcon("item.png")
-        wrap(${klass}Ref::class.java)
-          .andFind()
-          .using(${klass}RefFinder::class.java)
-          .withIcon("item-ref.png")
         </#list>
 
         <#list propertyClassNames as klass>

@@ -4,23 +4,15 @@
 
 package net.juniper.contrail.vro.generator.model
 
-import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isListWrapper
 import net.juniper.contrail.vro.config.kotlinClassName
 import net.juniper.contrail.vro.config.nestedName
-import net.juniper.contrail.vro.config.referenceName
 import net.juniper.contrail.vro.config.underscoredNestedName
 
 data class WrappersModel(
-    val references: List<ReferenceWrapperModel>,
     val wrappers: List<WrapperModel>
 ) : GenericModel()
-
-data class ReferenceWrapperModel(
-    val className: String,
-    val referenceName: String
-)
 
 data class WrapperModel(
     val name: String,
@@ -44,21 +36,6 @@ fun Property.toPropertyModel() = PropertyModel(
     wrapperName,
     componentName,
     classLabel
-)
-
-fun ReferenceWrapper.toReferenceWrapperModel() = ReferenceWrapperModel(
-    simpleName,
-    referenceName
-)
-
-class ReferenceWrapper(
-    val simpleName: String,
-    val referenceName: String
-)
-
-fun Class<*>.toReferenceWrapper() = ReferenceWrapper(
-    simpleName,
-    referenceName
 )
 
 private fun wrapperName(rootClass: Class<*>, getterChain: List<Getter>) =
@@ -97,14 +74,10 @@ private fun NestedRelation.toWrapperModel() : WrapperModel {
     )
 }
 
-fun generateReferenceWrappers(objectClasses: List<ObjectClass>) =
-    objectClasses.map { it.toReferenceWrapper() }
-
-fun generateWrappersModel(referenceWrappers: List<ReferenceWrapper>, nestedRelations: List<NestedRelation>): WrappersModel {
-    val references = referenceWrappers.map { it.toReferenceWrapperModel() }
+fun generateWrappersModel(nestedRelations: List<NestedRelation>): WrappersModel {
 
     val wrappers = nestedRelations
         .map { it.toWrapperModel() }
 
-    return WrappersModel(references, wrappers)
+    return WrappersModel(wrappers)
 }
