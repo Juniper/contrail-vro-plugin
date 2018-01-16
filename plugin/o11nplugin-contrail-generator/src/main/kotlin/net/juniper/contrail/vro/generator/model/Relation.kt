@@ -185,6 +185,8 @@ val Method.isRefMethod get() =
 private val <T> Class<T>.isSimpleReference: Boolean get() =
     this == ApiPropertyBase::class.java
 
+private val Method.returnTypeOrListType get() =
+    if (returnType == List::class.java) returnListGenericClass else returnType
+
 private val Method.returnsApiPropertyOrList: Boolean get() =
-    if (returnType.isApiPropertyClass) true
-    else returnListGenericClass?.isApiPropertyClass ?: false
+    returnTypeOrListType?.isApiPropertyClass ?: false

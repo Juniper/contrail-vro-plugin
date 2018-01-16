@@ -35,7 +35,7 @@ val Class<*>.isRequiredAttributeClass get() =
 val ObjectClass.isModelClass get() =
     simpleName.isModelClassName
 
-val PropertyClass.isInventoryProperty get() =
+val Class<*>.isInventoryProperty get() =
     simpleName.isInventoryPropertyClassName
 
 val ObjectClass.isRootClass: Boolean get() {

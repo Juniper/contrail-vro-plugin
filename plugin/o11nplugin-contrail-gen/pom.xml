@@ -22,6 +22,10 @@
             <artifactId>o11nplugin-contrail-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>net.juniper.contrail.vro</groupId>
+            <artifactId>o11nplugin-contrail-format</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.vmware.o11n</groupId>
             <artifactId>o11n-plugin-modeldriven-runtime</artifactId>
             <version>${vco.version}</version>

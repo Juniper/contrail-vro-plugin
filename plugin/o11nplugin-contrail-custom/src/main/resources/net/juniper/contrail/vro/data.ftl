@@ -2,15 +2,13 @@
 package ${packageName};
 
 import com.vmware.o11n.sdk.modeldriven.*;
-
+import org.springframework.beans.factory.BeanFactory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
-
 import net.juniper.contrail.vro.ContrailPluginFactory;
-import net.juniper.contrail.vro.ReferencePropertyFormatter;
-import org.springframework.beans.factory.BeanFactory;
+import net.juniper.contrail.vro.format.ReferenceFormatter;
 import net.juniper.contrail.api.*;
 import net.juniper.contrail.api.types.*;
 
@@ -25,7 +23,7 @@ public class ${className}
 </@compress>
 
     private static final long serialVersionUID = 1L;
-    private ReferencePropertyFormatter propertyFormatter;
+    private ReferenceFormatter propertyFormatter;
 
     @Override
     public void setContext(PluginContext ctx) {
@@ -36,7 +34,7 @@ public class ${className}
 		</#if>
         BeanFactory beanFactory = _ctx.getPluginContext().getApplicationContext().getAutowireCapableBeanFactory();
         ContrailPluginFactory factory = beanFactory.getBean(ContrailPluginFactory.class);
-		propertyFormatter = new ReferencePropertyFormatter(factory);
+		propertyFormatter = new ReferenceFormatter(factory);
     }
 
     <#if findable>

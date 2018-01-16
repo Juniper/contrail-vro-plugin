@@ -59,6 +59,11 @@
       </dependency>
       <dependency>
         <groupId>net.juniper.contrail.vro</groupId>
+        <artifactId>o11nplugin-contrail-format</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.juniper.contrail.vro</groupId>
         <artifactId>o11nplugin-contrail-core</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -495,6 +500,7 @@
     <module>o11nplugin-contrail-generator</module>
     <module>o11nplugin-contrail-core</module>
     <module>o11nplugin-contrail-custom</module>
+    <module>o11nplugin-contrail-format</module>
     <module>o11nplugin-contrail-gen</module>
     <module>o11nplugin-contrail-package</module>
     <module>o11nplugin-contrail</module>

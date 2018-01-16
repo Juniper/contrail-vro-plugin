@@ -2,8 +2,9 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro
+package net.juniper.contrail.vro.format
 
+import ch.dunes.vso.sdk.api.IPluginFactory
 import com.vmware.o11n.sdk.modeldriven.AbstractWrapper
 import com.vmware.o11n.sdk.modeldriven.Findable
 import com.vmware.o11n.sdk.modeldriven.ModelWrapper
@@ -14,7 +15,7 @@ import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
 
-class ReferencePropertyFormatter(val factory: ContrailPluginFactory) {
+class ReferenceFormatter(val factory: IPluginFactory) {
 
     private val blankSpacesRegex = "^\\s*$".toRegex()
     private val lineFormat = "%s%s:\t%s\n"
@@ -26,7 +27,7 @@ class ReferencePropertyFormatter(val factory: ContrailPluginFactory) {
         var prefix = ""
 
         val wrapperSid: Sid?
-        if (wrapper is Findable) wrapperSid = wrapper.getInternalId() else return ""
+        if (wrapper is Findable) wrapperSid = wrapper.internalId else return ""
 
         try {
             for (ref in ref_list) {
