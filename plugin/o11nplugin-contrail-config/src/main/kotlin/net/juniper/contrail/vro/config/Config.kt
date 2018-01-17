@@ -40,11 +40,15 @@ val Class<*>.isInventoryProperty get() =
 
 val ObjectClass.isRootClass: Boolean get() {
     val parentType = newInstance().defaultParentType
-    if (parentType == null || parentType == "config-root") return true
-    if (simpleName == "Port") return true
+
+    if (parentType == null) return false
+    if (parentType == "config-root") return true
 
     return ! parentType.typeToClassName.isModelClassName
 }
+
+val ObjectClass.isRelateable: Boolean get() =
+    newInstance().defaultParent != null
 
 val inventoryPropertyFilter: PropertyClassFilter = { it.isInventoryProperty }
 val modelClassFilter: ObjectClassFilter = { it.isModelClass }
