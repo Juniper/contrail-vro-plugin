@@ -13,7 +13,6 @@ import net.juniper.contrail.vro.generator.workflows.model.Reference
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
 import net.juniper.contrail.vro.generator.workflows.model.array
 import net.juniper.contrail.vro.generator.workflows.model.boolean
-import net.juniper.contrail.vro.generator.workflows.model.childOf
 import net.juniper.contrail.vro.generator.workflows.model.date
 import net.juniper.contrail.vro.generator.workflows.model.defaultValueQualifier
 import net.juniper.contrail.vro.generator.workflows.model.listFromAction
@@ -200,15 +199,11 @@ class DateParameterBuilder(name: String) : BasicParameterBuilder<Date>(name, dat
 class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterBuilder<Reference>(name, type) {
 
     var showInInventory: Boolean = false
-    var parent: String? = null
 
     override val customQualifiers get(): List<ParameterQualifier> {
         val qualifiers = mutableListOf<ParameterQualifier>()
         qualifiers.add(selectAsTreeQualifier)
         if (showInInventory) qualifiers.add(showInInventoryQualifier)
-        parent?.let {
-            qualifiers.add(childOf(it))
-        }
         return qualifiers
     }
 }

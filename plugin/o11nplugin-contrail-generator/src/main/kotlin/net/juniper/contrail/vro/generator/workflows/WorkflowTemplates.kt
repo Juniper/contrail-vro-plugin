@@ -4,14 +4,12 @@
 
 package net.juniper.contrail.vro.generator.workflows
 
-import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.generator.model.properties
 import net.juniper.contrail.vro.config.isApiTypeClass
-import net.juniper.contrail.vro.config.parentClassName
 import net.juniper.contrail.vro.config.pluralParameterName
 import net.juniper.contrail.vro.config.splitCamel
 import net.juniper.contrail.vro.config.underscoredPropertyToCamelCase
@@ -49,20 +47,20 @@ fun dunesPropertiesFor(info: ProjectInfo) = createDunesProperties(
 )
 
 val Connection = "Connection"
+val parent = "parent"
+val child = "child"
+val item = "item"
+val attribute = "attribute"
+val executor = "executor"
 
-private val String.workflowNameFormat
-    get() =
+private val String.workflowNameFormat get() =
     splitCamel().toLowerCase()
 
-private val String.descriptionFormat
-    get() =
+private val String.descriptionFormat get() =
     splitCamel()
 
-private val <T : ApiObjectBase> Class<T>.parentName get() =
-    parentClassName ?: Connection
-
-val ProjectInfo.workflowVersion
-    get() = "$baseVersion.$buildNumber"
+val ProjectInfo.workflowVersion get() =
+    "$baseVersion.$buildNumber"
 
 fun ProjectInfo.versionOf(name: String) =
     name packagedIn workflowsPackageName withVersion workflowVersion
@@ -119,7 +117,7 @@ fun createWorkflow(info: ProjectInfo, className: String, parentName: String, ref
             mandatory = true
 
         }
-        parameter("parent", parentName.reference) {
+        parameter(parent, parentName.reference) {
             description = "Parent ${parentName.descriptionFormat}"
             mandatory = true
 
@@ -148,7 +146,7 @@ fun deleteWorkflow(info: ProjectInfo, className: String, scriptBody: String): Wo
     val workflowName = "Delete ${className.workflowNameFormat}"
 
     return info.versionOf(workflowName) withScript scriptBody andParameters {
-        parameter("object", className.reference) {
+        parameter(item, className.reference) {
             description = "${className.descriptionFormat} to delete"
             mandatory = true
             showInInventory = true
@@ -175,11 +173,11 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation): Workflow
     val scriptBody = relation.addReferenceRelationScriptBody()
 
     return info.versionOf(workflowName) withScript scriptBody andParameters {
-        parameter("parent", parentName.reference) {
+        parameter(parent, parentName.reference) {
             description = "${parentName.descriptionFormat.capitalize()} to add to"
             mandatory = true
         }
-        parameter("child", childName.reference) {
+        parameter(child, childName.reference) {
             description = "${childName.descriptionFormat.capitalize()} to be added"
             mandatory = true
         }
@@ -221,14 +219,14 @@ fun removeReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation, action
     val scriptBody = relation.removeReferenceRelationScriptBody()
 
     return info.versionOf(workflowName) withScript scriptBody andParameters {
-        parameter("parent", parentName.reference) {
+        parameter(parent, parentName.reference) {
             description = "${parentName.descriptionFormat.capitalize()} to remove from"
             mandatory = true
         }
-        parameter("child", childName.reference) {
+        parameter(child, childName.reference) {
             description = "${childName.descriptionFormat.capitalize()} to be removed"
             mandatory = true
-            dependsOn("parent")
+            dependsOn(parent)
             listedBy(action)
         }
     }
@@ -240,15 +238,16 @@ System.log("Created connection with ID: " + connectionId);
 """.trimIndent()
 
 private val deleteConnectionScriptBody = """
-ContrailConnectionManager.delete(object);
+ContrailConnectionManager.delete($item);
 """.trimIndent()
 
 private fun createScriptBody(className: String, parentName: String, references: List<String>) = """
-var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
-var element = new Contrail$className();
-element.setName(name);
+${parent.retrieveExecutor}
+var $item = new Contrail$className();
+$item.setName(name);
+$executor.create$className($item${if (parentName == Connection) "" else ", $parent"});
 ${references.addAllReferences}
-executor.create$className(element${if (parentName == Connection) "" else ", parent"});
+${item.updateAsClass(className)}
 """.trimIndent()
 
 private val List<String>.addAllReferences get() =
@@ -258,14 +257,14 @@ private val String.addReferenceEntry get() =
 """
 if($pluralParameterName) {
     for each (ref in $pluralParameterName) {
-        element.add$this(ref);
+        $item.add$this(ref);
     }
 }
 """
 
 private fun deleteScriptBody(className: String) = """
-var executor = ContrailConnectionManager.getExecutor(object.getInternalId().toString());
-executor.delete$className(object);
+${item.retrieveExecutor}
+${item.deleteAsClass(className)}
 """.trimIndent()
 
 private fun ForwardRelation.addReferenceRelationScriptBody() =
@@ -296,25 +295,38 @@ ${type.attributeCode(parameterName)}
 private fun ForwardRelation.addRelationWithAttributeScriptBody() = """
 var attribute = new Contrail$attributeSimpleName();
 ${ attribute.attributeCode("attribute") }
-parent.add$childName(child, attribute);
-$updateParent
+$parent.add$childName($child, attribute);
+$retrieveExecutorAndUpdateParent
 """
 
 private fun ForwardRelation.addSimpleReferenceRelationScriptBody() = """
-parent.add$childName(child);
-$updateParent
+$parent.add$childName($child);
+$retrieveExecutorAndUpdateParent
 """
 
 private fun ForwardRelation.removeReferenceRelationScriptBody() = """
 ${if (simpleReference)
-    "parent.remove$childName(child);"
+    "$parent.remove$childName($child);"
 else
-    "parent.remove$childName(child, null);"
+    "$parent.remove$childName($child, null);"
 }
-$updateParent
+$retrieveExecutorAndUpdateParent
 """.trimIndent()
 
-private val ForwardRelation.updateParent get() = """
-var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
-executor.update$parentName(parent);
+private val String.retrieveExecutor get() =
+    "var $executor = ContrailConnectionManager.getExecutor($this.getInternalId().toString());"
+
+private fun String.updateAsClass(className: String) =
+    "$executor.update$className($this);"
+
+private fun String.deleteAsClass(className: String) =
+    "$executor.delete$className($this);"
+
+private val ForwardRelation.updateParent get() =
+    parent.updateAsClass(parentName)
+
+private val ForwardRelation.retrieveExecutorAndUpdateParent get() =
+"""
+${parent.retrieveExecutor}
+$updateParent
 """.trimIndent()
