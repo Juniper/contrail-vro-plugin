@@ -12,7 +12,7 @@ import net.juniper.contrail.vro.config.underscoredPropertyToCamelCase
 import net.juniper.contrail.vro.config.wrapperName
 import java.lang.reflect.ParameterizedType
 
-class Property(val fieldName: String, val clazz: Class<*>, val parent: Class<*>, val wrapname: String? = null) {
+class Property(val fieldName: String, val clazz: Class<*>, val parent: Class<*>, val declaringClass: Class<*>, val wrapname: String? = null) {
     val propertyName = fieldName.underscoredPropertyToCamelCase()
     val componentName get() = propertyName.replace("List$".toRegex(), "").capitalize()
     val classLabel get() = if (clazz.isApiTypeClass) clazz.underscoredNestedName else clazz.kotlinClassName
@@ -34,9 +34,9 @@ val <T> Class<T>.properties: ClassProperties get() {
         if (type == java.util.List::class.java) {
             val genericType = method.genericReturnType as ParameterizedType
             val genericArg = genericType.actualTypeArguments[0] as? Class<*> ?: continue
-            listProperties.add(Property(propertyName, genericArg, this))
+            listProperties.add(Property(propertyName, genericArg, this, method.declaringClass))
         } else {
-            simpleProperties.add(Property(propertyName, type, this))
+            simpleProperties.add(Property(propertyName, type, this, method.declaringClass))
         }
     }
 

@@ -39,17 +39,17 @@ val ObjectClass.defaultParentType: String? get() =
 val ObjectClass.objectType: String get() =
     newInstance().objectType
 
-val ObjectClass.parentClassName: String? get() =
-    defaultParentType?.typeToClassName
-
 val Method.returnsObjectReferences: Boolean get() =
     returnListGenericClass == ObjectReference::class.java
 
-val Class<*>.isListWrapper get() =
+val Class<*>.isPropertyListWrapper get() =
     superclass == ApiPropertyBase::class.java && hasOnlyListOfProperties
 
+val Class<*>.isPropertyOrStringListWrapper get() =
+    superclass == ApiPropertyBase::class.java && hasOnlyListOfPropertiesOrStrings
+
 val Class<*>.listWrapperGetter get() =
-    listOfPropertiesGetters.firstOrNull()
+    declaredGetters.firstOrNull { it.returnsListOfProperties }
 
 val Class<*>.listWrapperGetterType get() =
     listWrapperGetter?.returnListGenericClass
@@ -57,17 +57,25 @@ val Class<*>.listWrapperGetterType get() =
 val Class<*>.declaredGetters get() = methods.asSequence()
     .filter { it.isGetter }
     .filter { it.declaredIn(this) }
-
-val Class<*>.listOfPropertiesGetters get() =
-    declaredGetters
-    .filter { it.returnsListOfProperties }
+    .toList()
 
 val Class<*>.hasOnlyListOfProperties: Boolean get() =
-    declaredGetters.count() == 1 &&
-    listOfPropertiesGetters.count() == 1
+    declaredGetters.run {
+        count() == 1 && this[0].returnsListOfProperties
+    }
+
+val Class<*>.hasOnlyListOfPropertiesOrStrings: Boolean get() =
+    declaredGetters.run {
+        count() == 1 && this[0].returnsListOpPropertiesOrStrings
+    }
 
 val Method.returnsListOfProperties: Boolean get() =
     returnListGenericClass?.superclass == ApiPropertyBase::class.java
+
+val Method.returnsListOpPropertiesOrStrings: Boolean get() =
+    returnListGenericClass?.run {
+        this == String::class.java || superclass == ApiPropertyBase::class.java
+    } ?: false
 
 val Method.returnsApiPropertyOrList: Boolean get() =
     returnTypeOrListType?.isApiPropertyClass ?: false

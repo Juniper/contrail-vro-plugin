@@ -15,7 +15,7 @@ import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isBackRef
 import net.juniper.contrail.vro.config.isGetter
-import net.juniper.contrail.vro.config.isListWrapper
+import net.juniper.contrail.vro.config.isPropertyListWrapper
 import net.juniper.contrail.vro.config.listWrapperGetter
 import net.juniper.contrail.vro.config.listWrapperGetterType
 import net.juniper.contrail.vro.config.nameWithoutGet
@@ -136,7 +136,7 @@ private fun Method.recursiveRelations(
     val newChain = chainSoFar.toMutableList()
     val childType = returnType.let {
         when {
-            it.isListWrapper -> {
+            it.isPropertyListWrapper -> {
                 newChain += Getter(nameWithoutGet, false)
                 newChain += Getter(it.listWrapperGetter!!.nameWithoutGet, true)
                 it.listWrapperGetterType!!

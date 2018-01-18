@@ -4,16 +4,21 @@
 
 package net.juniper.contrail.vro.generator.workflows
 
+import net.juniper.contrail.vro.config.asApiClass
 import net.juniper.contrail.vro.config.folderName
+import net.juniper.contrail.vro.config.ignoredInWorkflow
 import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.generator.model.properties
 import net.juniper.contrail.vro.config.isApiTypeClass
+import net.juniper.contrail.vro.config.isEditableProperty
+import net.juniper.contrail.vro.config.isPropertyOrStringListWrapper
 import net.juniper.contrail.vro.config.pluralParameterName
 import net.juniper.contrail.vro.config.splitCamel
-import net.juniper.contrail.vro.config.underscoredPropertyToCamelCase
+import net.juniper.contrail.vro.generator.model.ClassProperties
 import net.juniper.contrail.vro.generator.workflows.dsl.ParameterAggregator
+import net.juniper.contrail.vro.generator.workflows.dsl.PresentationParametersBuilder
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
 import net.juniper.contrail.vro.generator.workflows.model.Workflow
 import net.juniper.contrail.vro.generator.workflows.dsl.andParameters
@@ -29,7 +34,6 @@ import net.juniper.contrail.vro.generator.workflows.model.createElementInfoPrope
 import net.juniper.contrail.vro.generator.workflows.model.number
 import net.juniper.contrail.vro.generator.workflows.model.reference
 import net.juniper.contrail.vro.generator.workflows.model.string
-import java.lang.reflect.Field
 
 fun Element.elementInfoPropertiesFor(categoryPath: String) = createElementInfoProperties(
     categoryPath = categoryPath,
@@ -52,12 +56,15 @@ val child = "child"
 val item = "item"
 val attribute = "attribute"
 val executor = "executor"
+val tab = "    "
 
 private val String.workflowNameFormat get() =
     splitCamel().toLowerCase()
 
 private val String.descriptionFormat get() =
-    splitCamel()
+    replace(typeSuffix, "").splitCamel()
+
+private val typeSuffix = "Type$".toRegex()
 
 val ProjectInfo.workflowVersion get() =
     "$baseVersion.$buildNumber"
@@ -111,7 +118,9 @@ fun createWorkflow(info: ProjectInfo, className: String, parentName: String, ref
 
     val workflowName = "Create ${className.workflowNameFormat}"
 
-    return info.versionOf(workflowName) withScript createScriptBody(className, parentName, refs) andParameters {
+    val clazz = className.asApiClass!!
+
+    return info.versionOf(workflowName) withScript createScriptBody(className, parentName, refs, clazz) andParameters {
         parameter("name", string) {
             description = "${className.descriptionFormat} name"
             mandatory = true
@@ -132,6 +141,8 @@ fun createWorkflow(info: ProjectInfo, className: String, parentName: String, ref
                 }
             }
         }
+
+        addProperties(clazz)
     }
 }
 
@@ -154,15 +165,60 @@ fun deleteWorkflow(info: ProjectInfo, className: String, scriptBody: String): Wo
     }
 }
 
-private val typeSuffix = "Type$".toRegex()
-
 private val Property.title get() =
-    clazz.simpleName.replace(typeSuffix, "").descriptionFormat
+    propertyName.descriptionFormat.capitalize()
 
 private fun Property.toParameter(builder: ParameterAggregator) {
     builder.parameter(propertyName, clazz) {
         description = propertyName.splitCamel().capitalize()
     }
+}
+
+val workflowPropertiesFilter: (Property) -> Boolean =
+    { it.declaringClass == it.parent &&
+        ! it.clazz.isPropertyOrStringListWrapper &&
+        ! it.clazz.ignoredInWorkflow &&
+        it.propertyName.isEditableProperty }
+
+val List<Property>.onlyPrimitives get() =
+    filter { workflowPropertiesFilter(it) && ! it.clazz.isApiTypeClass }
+
+val List<Property>.onlyComplex get() =
+    filter { workflowPropertiesFilter(it) && it.clazz.isApiTypeClass }
+
+private fun PresentationParametersBuilder.addProperties(properties: ClassProperties) {
+    val topPrimitives = properties.simpleProperties.onlyPrimitives
+    val topComplex = properties.simpleProperties.onlyComplex
+
+    if (!topPrimitives.isEmpty()) {
+        step("Custom Parameters") {
+            topPrimitives.forEach { it.toParameter(this@step) }
+        }
+    }
+
+    for (prop in topComplex) {
+        val propProperties = prop.clazz.properties
+        val primitives = propProperties.simpleProperties.onlyPrimitives
+        val complex = propProperties.simpleProperties.onlyComplex
+
+        when {
+            primitives.isEmpty() -> groups(prop.title) {
+                for (propProp in complex) {
+                    group(propProp.title) {
+                        propProp.clazz.properties.simpleProperties.forEach { it.toParameter(this@group) }
+                    }
+                }
+            }
+            complex.isEmpty() -> step(prop.title) {
+                primitives.forEach { it.toParameter(this@step) }
+            }
+            else -> Unit // TODO("Add support for attributes with mixed structure.")
+        }
+    }
+}
+
+private fun PresentationParametersBuilder.addProperties(clazz: Class<*>) {
+    addProperties(clazz.properties)
 }
 
 fun addReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation): Workflow {
@@ -182,31 +238,7 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation): Workflow
             mandatory = true
         }
         if ( ! relation.simpleReference) {
-            val properties = relation.attribute.properties
-            for (prop in properties.simpleProperties) {
-                if (prop.clazz.isApiTypeClass) {
-                    val propProperties = prop.clazz.properties
-                    val primitives = propProperties.simpleProperties.filter { ! it.clazz.isApiTypeClass }
-                    val complex = propProperties.simpleProperties.filter { it.clazz.isApiTypeClass }
-
-                    when {
-                        primitives.isEmpty() -> groups(prop.title) {
-                            for (propProp in complex) {
-                                group(propProp.title) {
-                                    propProp.clazz.properties.simpleProperties.forEach { it.toParameter(this@group) }
-                                }
-                            }
-                        }
-                        complex.isEmpty() -> step(prop.title) {
-                            primitives.forEach { it.toParameter(this@step) }
-                        }
-                        else -> TODO("Add support for attributes with mixed structure.")
-                    }
-
-                } else {
-                    prop.toParameter(this)
-                }
-            }
+            addProperties(relation.attribute)
         }
     }
 }
@@ -241,10 +273,11 @@ private val deleteConnectionScriptBody = """
 ContrailConnectionManager.delete($item);
 """.trimIndent()
 
-private fun createScriptBody(className: String, parentName: String, references: List<String>) = """
+private fun createScriptBody(className: String, parentName: String, references: List<String>, clazz: Class<*>) = """
 ${parent.retrieveExecutor}
 var $item = new Contrail$className();
 $item.setName(name);
+${ clazz.attributeCode(item) }
 $executor.create$className($item${if (parentName == Connection) "" else ", $parent"});
 ${references.addAllReferences}
 ${item.updateAsClass(className)}
@@ -273,27 +306,42 @@ private fun ForwardRelation.addReferenceRelationScriptBody() =
     else
         addRelationWithAttributeScriptBody()
 
-private val Field.parameterName get() =
-    name.underscoredPropertyToCamelCase()
+private fun Property.setCode(ref: String) =
+    "$ref.set${propertyName.capitalize()}($propertyName);"
 
-private fun Field.setCode(ref: String) =
-    "\n$ref.set${parameterName.capitalize()}($parameterName);"
+private fun Property.propertyCode(prefix: String): String =
+    if (clazz.isApiTypeClass) clazz.attributeCode(propertyName, prefix, true) else ""
 
-private fun Class<*>.attributeCode(ref: String) =
-    declaredFields.joinToString("\n") { it.attributeCode(ref) }
+private fun Class<*>.attributeCode(ref: String, prefix: String = "", init: Boolean = false) =
+    properties.simpleProperties
+        .filter(workflowPropertiesFilter)
+        .run {
+if (init)
+"""
+${prepare(prefix)}
+var $ref = null;
+if ($condition) {
+    $ref = new Contrail$simpleName();
+    ${assign(ref, prefix+tab)}
+}
+"""
+else
+"""
+${prepare(prefix)}
+${assign(ref, prefix)}
+"""
+}.trimStart().prependIndent(prefix)
 
-private fun Field.attributeCode(ref: String): String =
-    if (type.isApiTypeClass) {
-        """
-var $parameterName = new Contrail${type.simpleName}();
-${type.attributeCode(parameterName)}
-        """.trimIndent()
-    } else {
-        ""
-    } + setCode(ref)
+val List<Property>.condition get() =
+    joinToString(" ||\n$tab") { "${it.propertyName} != null" }
+
+fun List<Property>.assign(ref: String, prefix: String = tab) =
+    joinToString(separator = "\n$prefix") { it.setCode(ref) }
+
+fun List<Property>.prepare(prefix: String) =
+    joinToString(separator = "") { it.propertyCode(prefix) }
 
 private fun ForwardRelation.addRelationWithAttributeScriptBody() = """
-var attribute = new Contrail$attributeSimpleName();
 ${ attribute.attributeCode("attribute") }
 $parent.add$childName($child, attribute);
 $retrieveExecutorAndUpdateParent

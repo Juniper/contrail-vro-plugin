@@ -23,11 +23,31 @@ val nonEssentialAttributes = setOf(
     "VirtualNetworkPolicyType"
 )
 
+val ignoredInWorkflows = setOf(
+    "KeyValuePairs",
+    "PermType2",
+    "IdPermsType"
+)
+
+val nonEditableProperties = setOf(
+    "displayName",
+    "parentType",
+    "defaultParentType",
+    "objectType",
+    "networkId"
+)
+
 val String.isInventoryPropertyClassName get() =
     inventoryProperties.contains(this)
 
 val String.isRequiredAttribute get() =
     ! nonEssentialAttributes.contains(this)
+
+val String.isIgnoredInWorkflow get() =
+    ignoredInWorkflows.contains(this)
+
+val String.isEditableProperty get() =
+    ! nonEditableProperties.contains(this)
 
 val Class<*>.isRequiredAttributeClass get() =
     simpleName.isRequiredAttribute
@@ -37,6 +57,9 @@ val ObjectClass.isModelClass get() =
 
 val Class<*>.isInventoryProperty get() =
     simpleName.isInventoryPropertyClassName
+
+val Class<*>.ignoredInWorkflow get() =
+    simpleName.isIgnoredInWorkflow
 
 val ObjectClass.isRootClass: Boolean get() {
     val parentType = newInstance().defaultParentType
