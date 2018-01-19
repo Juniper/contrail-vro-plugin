@@ -79,6 +79,9 @@ val <T> Class<T>.isAbstract: Boolean get() =
 val <T> Class<T>.isNotAbstract: Boolean get() =
     !isAbstract
 
+fun Class<*>.isSubclassOf(other: Class<*>) =
+    other.isAssignableFrom(this)
+
 private val loader get(): ClassLoader =
     Thread.currentThread().contextClassLoader
 
@@ -96,7 +99,7 @@ fun <T> Class<T>.nonAbstractSubclasses(): List<Class<out T>> =
 
 private fun <T> Class<T>.subclassesIn(packageName: String): List<Class<*>> =
     classesIn(packageName)
-        .filter { this.isAssignableFrom(it) }
+        .filter { it.isSubclassOf(this) }
         .toList()
 
 private fun classesIn(packageName: String): Sequence<Class<*>> =

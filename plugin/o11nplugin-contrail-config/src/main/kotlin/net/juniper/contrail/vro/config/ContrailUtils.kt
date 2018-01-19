@@ -13,10 +13,10 @@ fun objectClasses() =
     ApiObjectBase::class.java.nonAbstractSubclasses()
 
 val Class<*>.isApiObjectClass get() =
-    ApiObjectBase::class.java.isAssignableFrom(this)
+    isSubclassOf(ApiObjectBase::class.java)
 
 val Class<*>.isApiPropertyClass get() =
-    ApiPropertyBase::class.java.isAssignableFrom(this)
+    isSubclassOf(ApiPropertyBase::class.java)
 
 val Class<*>.isApiTypeClass get() =
     isApiObjectClass || isApiPropertyClass

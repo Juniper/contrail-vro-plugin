@@ -27,6 +27,7 @@ import net.juniper.contrail.vro.generator.workflows.dsl.withScript
 import net.juniper.contrail.vro.generator.workflows.dsl.withVersion
 import net.juniper.contrail.vro.generator.workflows.model.Action
 import net.juniper.contrail.vro.generator.workflows.model.Element
+import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.generator.workflows.model.Reference
 import net.juniper.contrail.vro.generator.workflows.model.array
 import net.juniper.contrail.vro.generator.workflows.model.createDunesProperties
@@ -57,6 +58,12 @@ val item = "item"
 val attribute = "attribute"
 val executor = "executor"
 val tab = "    "
+
+typealias Constraints = (Class<*>, String) -> List<ParameterQualifier>
+interface SchemaInfo {
+    fun constraints(clazz: Class<*>, field: String): List<ParameterQualifier>
+    fun description(clazz: Class<*>, field: String): String
+}
 
 private val String.workflowNameFormat get() =
     splitCamel().toLowerCase()

@@ -6,40 +6,38 @@ package net.juniper.contrail.vro.generator.workflows.xsd
 
 import org.w3c.dom.Node
 
-val Node.children: List<Node> get() {
-    val childNodeList = childNodes
-    val list = ArrayList<Node>()
-    var child: Node
-    for (temp in 0 until childNodeList.length) {
-        child = childNodeList.item(temp)
-        if ("#text" != child.nodeName) {
-            list.add(child)
-        }
-    }
-    return list
+val Node.children: Sequence<Node> get() = childNodes.run {
+    (0 until length).asSequence()
+        .map { item(it) }
+        .filter { "#text" != it.nodeName }
 }
 
-val Node.attributesMap: HashMap<String, String>
-    get() {
-        if (attributes == null) return HashMap()
+val Node.nestedElements: Sequence<Node> get() = children
+    .filter { it.nodeName == xsdElement }
+    .map { it.nestedElements + it }
+    .flatten()
 
-        val map = HashMap<String, String>()
-        var attribute: Node
-        for (temp in 0 until attributes.length) {
-            attribute = attributes.item(temp)
-            map.put(attribute.nodeName, attribute.nodeValue)
-        }
+val Node.attributesMap: Map<String, String> get() =
+    attributeNodes.associateBy(Node::getNodeName, Node::getNodeValue)
 
-        return map
-    }
+val Node.attributeNodes: Sequence<Node> get() = attributes?.run {
+    (0 until length).asSequence()
+        .map { item(it) }
+} ?: emptySequence()
 
-val Node.idlComment: Node?
-    get() = findIdlComment(this)
+fun Node.attribute(name: String): Node? =
+    attributeNodes.find { it.nodeName == name }
 
-fun findIdlComment(node: Node): Node? {
-    var currentNode = node.nextSibling
-    while (!XSD_TYPES.contains(currentNode.nodeName)) {
-        if (currentNode.nodeName == "#comment" && currentNode.nodeValue.contains("#IFMAP-SEMANTICS-IDL")) {
+val Node.description: String? get() =
+    attributeValue("description")
+
+fun Node.attributeValue(name: String): String? =
+    attribute(name)?.nodeValue
+
+val Node.idlComment: Node? get() {
+    var currentNode = nextSibling
+    while (!xsdTypes.contains(currentNode.nodeName)) {
+        if (currentNode.nodeName == commentName && currentNode.nodeValue.contains(ifmapIdlName)) {
             return currentNode
         }
         currentNode = currentNode.nextSibling
@@ -47,6 +45,8 @@ fun findIdlComment(node: Node): Node? {
     return null
 }
 
-fun Set<Node>.withAttribute(attribute: String, name: String): List<Node> {
-    return this.filter { it.attributesMap[attribute]?.equals(name) ?: false }
-}
+fun Iterable<Node>.withAttribute(attribute: String, name: String) =
+    asSequence().withAttribute(attribute, name).toList()
+
+fun Sequence<Node>.withAttribute(attribute: String, value: String): Sequence<Node> =
+    filter { it.attributeValue(attribute) == value }

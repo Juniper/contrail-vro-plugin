@@ -9,6 +9,7 @@ val generatedPackageName = "net.juniper.contrail.vro.generated"
 val generatedSourcesRoot = "/target/generated-sources"
 val generatedTestsRoot = "/target/generated-tests"
 val templatePath = "/templates"
+val schemaFilePath = "/controller/src/schema/vnc_cfg.xsd"
 
 val editWarningMessage: String =
 """

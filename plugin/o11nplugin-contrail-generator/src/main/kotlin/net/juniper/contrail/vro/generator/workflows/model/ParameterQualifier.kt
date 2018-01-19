@@ -108,22 +108,8 @@ fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQuali
                 constraintValue.toString()
             )
         }
-        "minInclusive" -> {
-            ParameterQualifier(
-                static,
-                minNumberValueQualifierName,
-                null,
-                constraintValue.toString()
-            )
-        }
-        "maxInclusive" -> {
-            ParameterQualifier(
-                static,
-                maxNumberValueQualifierName,
-                null,
-                constraintValue.toString()
-            )
-        }
+        "minInclusive" -> maxNumberValueQualifier(constraintValue.toString().toInt())
+        "maxInclusive" -> minNumberValueQualifier(constraintValue.toString().toInt())
         "pattern" -> {
             ParameterQualifier(
                 static,
@@ -132,25 +118,10 @@ fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQuali
                 constraintValue.toString()
             )
         }
-        "enumerations" -> {
-            val xsdArrayAsString = (constraintValue as List<String>).joinToString(";") { "#string#$it#" }
-            ParameterQualifier(
-                static,
-                genericEnumerationQualifierName,
-                "Array/string",
-                xsdArrayAsString
-            )
-        }
-        "required" -> {
-            ParameterQualifier(
-                static,
-                mandatoryQualifierName,
-                "boolean",
-                constraintValue.toString()
-            )
-        }
+        "enumerations" -> predefinedAnswersQualifier(string, constraintValue as List<String>)
+        "required" -> mandatoryQualifier
         else -> null
     }
 
-private val <T> Class<T>.xsdType: String?
-    get() = TODO()
+private val <T> Class<T>.xsdType: String get() =
+    simpleName.decapitalize()

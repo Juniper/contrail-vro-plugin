@@ -22,7 +22,10 @@ fun String.underscoredPropertyToCamelCase(): String {
 }
 
 fun String.splitCamel(): String =
-    split(CAMEL_CASE_REGEX).joinToString(" ")
+    camelChunks.joinToString(" ")
+
+val String.camelChunks get() =
+    split(CAMEL_CASE_REGEX)
 
 fun String.folderName() : String = when (this) {
     "BgpAsAService" -> "BGPs As Services"
@@ -78,6 +81,9 @@ fun Path.append(subpath: String): Path =
 
 operator fun String.div(subpath: String): Path =
     Paths.get(this, subpath)
+
+operator fun Path.div(subpath: String): Path =
+    Paths.get(toFile().absolutePath, subpath)
 
 val String.isCDATA get() =
     startsWith("<![CDATA[") && endsWith("]]>")

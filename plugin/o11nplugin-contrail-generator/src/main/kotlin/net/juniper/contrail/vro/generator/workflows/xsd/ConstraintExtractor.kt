@@ -4,148 +4,126 @@
 
 package net.juniper.contrail.vro.generator.workflows.xsd
 
-import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.generator.workflows.model.wrapConstraints
 import org.w3c.dom.Node
 
-private val VALUE = "value"
-private val NAME = "name"
-private val TYPE = "type"
-private val DEFAULT = "default"
-private val REQUIRED = "required"
+fun Schema.simpleTypeQualifiers(clazz: Class<*>, propertyName: String): List<ParameterQualifier> = when {
+    clazz.isApiObjectClass -> objectFieldQualifiers(propertyName.propertyToXsd)
+    else -> propertyFieldQualifiers(clazz, propertyName.propertyToXsd)
+}
 
-private val XSD_STRING = "xsd:string"
-private val XSD_BOOLEAN = "xsd:boolean"
-private val XSD_INTEGER = "xsd:integer"
+fun Schema.propertyDescription(clazz: Class<*>, propertyName: String): String? =
+    definitionNode(clazz, propertyName.propertyToXsd).description
 
-private val SCHEMA_KNOWN_TYPES = arrayOf(XSD_STRING, XSD_BOOLEAN, XSD_INTEGER)
-private val SUPPORTED_STRING_RESTRICTION_REGEX = Regex("xsd:(length|pattern|enumeration)")
+fun Schema.propertyFieldQualifiers(clazz: Class<*>, xsdFieldName: String): List<ParameterQualifier> =
+    qualifiersOf(definitionNode(clazz, xsdFieldName))
 
-class ConstraintExtractor(private val schema: Schema) {
+fun Schema.definitionNode(clazz: Class<*>): Node =
+    complexTypes.find { it.attributeValue(name) == clazz.simpleName } ?:
+        throw IllegalArgumentException("Class ${clazz.simpleName} was not found in the schema.")
 
-    fun findSimpleTypeQualifiers(clazz: Class<*>, fieldName: String): List<ParameterQualifier> =
-        when {
-            ApiObjectBase::class.java.isAssignableFrom(clazz) -> objectFiledQualifiers(fieldName)
-            else -> propertyFiledQualifiers(clazz, fieldName)
-        }
+private fun Schema.definitionNode(clazz: Class<*>, xsdFieldName: String): Node {
+    val complexType = definitionNode(clazz)
 
-    private fun objectFiledQualifiers(fieldName: String): List<ParameterQualifier> {
-        val xsdFieldName = fieldName.replace("_", "-")
-        val matchingElements = schema.elements.withAttribute(NAME, xsdFieldName)
-        if (matchingElements.size > 1) throw IllegalStateException("Schema is not compatible with api")
-        return qualifiersFromXsdElement(matchingElements.first())
+    val nestedElements = complexType.nestedElements.toList()
+    val matchingElements = nestedElements.withAttribute(name, xsdFieldName).toList()
+
+    if (matchingElements.size > 1)
+        throw IllegalStateException("Multiple definitions of ${clazz.simpleName} in the schema.")
+
+    return matchingElements.firstOrNull() ?:
+        throw IllegalArgumentException("Property $xsdFieldName of class ${clazz.simpleName} was not found in the schema.")
+}
+
+fun Schema.qualifiersOf(element: Node): List<ParameterQualifier> {
+    val elementAttributes = element.attributesMap
+    val xsdConstraints = HashMap<String, Any>()
+    xsdConstraints.putAll(elementAttributes.minus(name).minus(type))
+
+    val elementType = elementAttributes[type] ?: throw IllegalStateException("Schema error")
+
+    if (elementAttributes[type] == xsdBoolean && elementAttributes[default] != null) {
+        xsdConstraints.put(default, elementAttributes[default]!!.toBoolean())
     }
 
-    private fun propertyFiledQualifiers(clazz: Class<*>, fieldName: String): List<ParameterQualifier> {
-        val complexType = schema.complexTypes.find { it.attributesMap[NAME] == clazz.simpleName }
-        val elements = getNestedElements(complexType)
-
-        val matchingElements = elements
-            .withAttribute(NAME, fieldName.replace("_", "-"))
-
-        if (matchingElements.size > 1) throw IllegalStateException()
-
-        val matchingElement = matchingElements.first()
-        return qualifiersFromXsdElement(matchingElement)
+    if (elementAttributes[required] != null) {
+        xsdConstraints.put(required, elementAttributes[required]!!.toBoolean())
     }
 
-    private fun getNestedElements(complexType: Node?): HashSet<Node> {
-        val children = complexType?.children ?: HashSet<Node>()
-        val elements = HashSet<Node>()
-        elements.addAll(children)
-        children.forEach { elements.addAll(getNestedElements(it)) }
-
-        return elements.filter { it.nodeName == "xsd:element" }.toHashSet()
+    if (elementType !in knownSchemaTypes) {
+        val simpleTypeConstraints = simpleTypeConstraints(elementType)
+        xsdConstraints.putAll(simpleTypeConstraints)
     }
 
-    private fun qualifiersFromXsdElement(element: Node): List<ParameterQualifier> {
-        val elementAttributes = element.attributesMap
-        val xsdConstraints = HashMap<String, Any>()
-        xsdConstraints.putAll(elementAttributes.minus(NAME).minus(TYPE))
+    return xsdConstraints.mapNotNull { (xsdConstraint, value) ->
+        wrapConstraints(xsdConstraint, value)
+    }
+}
 
-        val elementType = elementAttributes[TYPE] ?: throw IllegalStateException("Schema error")
+private fun Schema.simpleTypeConstraints(elementTypeName: String): HashMap<String, Any> {
+    val elementType = elementTypeName.stripSmi
 
-        if (elementAttributes[TYPE] == XSD_BOOLEAN && elementAttributes[DEFAULT] != null) {
-            xsdConstraints.put(DEFAULT, elementAttributes[DEFAULT]!!.toBoolean())
-        }
+    val matchingSimpleTypes = simpleTypes.withAttribute(name, elementType)
+    if (matchingSimpleTypes.isEmpty()) throw IllegalArgumentException("Field is not a simple type")
+    if (matchingSimpleTypes.size > 1) throw IllegalStateException("Error in schema") // error in schema
 
-        if (elementAttributes[REQUIRED] != null) {
-            xsdConstraints.put(REQUIRED, elementAttributes[REQUIRED]!!.toBoolean())
-        }
+    val matchingNode = matchingSimpleTypes.first()
+    val restrictionChild = matchingNode
+        .children
+        .find { it.nodeName == xsdRestriction }
+    val baseType = restrictionChild?.attributesMap?.get("base") ?: throw IllegalStateException("Base is mandatory attribute")
 
-        if (elementType !in SCHEMA_KNOWN_TYPES) {
-            val simpleTypeConstraints = extractSimpleTypeConstraints(elementType)
-            xsdConstraints.putAll(simpleTypeConstraints)
-        }
+    val xsdConstraints = HashMap<String, Any>()
+    xsdConstraints.putAll(matchingNode.attributesMap.minus(name).minus(type))
+    xsdConstraints.putAll(restrictionChild.attributesMap.minus(name).minus(type))
+    return when (baseType) {
+        xsdString -> stringConstraints(restrictionChild)
+        xsdInteger -> integerConstraints(restrictionChild)
+        else -> HashMap()
+    }
+}
 
-        return xsdConstraints.mapNotNull { (xsdConstraint, value) ->
-            wrapConstraints(xsdConstraint, value)
-        }
+private fun integerConstraints(restrictionChild: Node): HashMap<String, Any> {
+    val constraints = HashMap<String, Any>()
+    val children = restrictionChild.children
+
+    val maxInclusive =
+        children.find { it.nodeName == "xsd:maxInclusive" }?.attributesMap?.get(value)?.toInt()
+    if (maxInclusive != null) constraints.put("maxInclusive", maxInclusive)
+
+    val minInclusive =
+        children.find { it.nodeName == "xsd:minInclusive" }?.attributesMap?.get(value)?.toInt()
+    if (minInclusive != null) constraints.put("minInclusive", minInclusive)
+
+    return constraints
+}
+
+private fun stringConstraints(restrictionChild: Node): HashMap<String, Any> {
+    val constraints = HashMap<String, Any>()
+    val children = restrictionChild.children
+
+    if (children.any { !it.nodeName.matches(stringRestrictionRegex) }) {
+        val unsupportedOperation = children
+            .find { !it.nodeName.matches(stringRestrictionRegex) }
+            ?.nodeName
+        throw UnsupportedOperationException("Implement restriction: $unsupportedOperation")
     }
 
-    private fun extractSimpleTypeConstraints(elementTypeName: String): HashMap<String, Any> {
-        val elementType =
-            if (elementTypeName.startsWith("smi:"))
-                elementTypeName.substring(4)
-            else
-                elementTypeName
-
-        val matchingSimpleTypes = schema.simpleTypes.withAttribute(NAME, elementType)
-        if (matchingSimpleTypes.isEmpty()) throw IllegalArgumentException("Field is not a simple type")
-        if (matchingSimpleTypes.size > 1) throw IllegalStateException("Error in schema") // error in schema
-
-        val matchingNode = matchingSimpleTypes.first()
-        val restrictionChild = matchingNode
-            .children
-            .find { it.nodeName == "xsd:restriction" }
-        val baseType = restrictionChild?.attributesMap?.get("base") ?: throw IllegalStateException("Base is mandatory attribute")
-
-        val xsdConstraints = HashMap<String, Any>()
-        xsdConstraints.putAll(matchingNode.attributesMap.minus(NAME).minus(TYPE))
-        xsdConstraints.putAll(restrictionChild.attributesMap.minus(NAME).minus(TYPE))
-        return when (baseType) {
-            XSD_STRING -> stringConstraints(restrictionChild)
-            XSD_INTEGER -> integerConstraints(restrictionChild)
-            else -> HashMap()
-        }
-
+    val enumerations = children.filter { it.nodeName == xsdEnumeration }.toList()
+    if (enumerations.isNotEmpty()) {
+        constraints.put("enumerations", enumerations.mapNotNull { it.attributesMap[value] })
     }
 
-    private fun integerConstraints(restrictionChild: Node): HashMap<String, Any> {
-        val constraints = HashMap<String, Any>()
-        val children = restrictionChild.children
+    val pattern = children.find { it.nodeName == "xsd:pattern" }?.attributesMap?.get(value)
+    if (pattern != null) constraints.put("pattern", pattern)
 
-        val maxInclusive =
-            children.find { it.nodeName == "xsd:maxInclusive" }?.attributesMap?.get(VALUE)?.toInt()
-        if (maxInclusive != null) constraints.put("maxInclusive", maxInclusive)
+    return constraints
+}
 
-        val minInclusive =
-            children.find { it.nodeName == "xsd:minInclusive" }?.attributesMap?.get(VALUE)?.toInt()
-        if (minInclusive != null) constraints.put("minInclusive", minInclusive)
-
-        return constraints
-    }
-
-    private fun stringConstraints(restrictionChild: Node): HashMap<String, Any> {
-        val constraints = HashMap<String, Any>()
-        val children = restrictionChild.children
-
-        if (children.any { !it.nodeName.matches(SUPPORTED_STRING_RESTRICTION_REGEX) }) {
-            val unsupportedOperation = children
-                .find { !it.nodeName.matches(SUPPORTED_STRING_RESTRICTION_REGEX) }
-                ?.nodeName
-            throw UnsupportedOperationException("Implement restriction: $unsupportedOperation")
-        }
-
-        val enumerations = children.filter { it.nodeName == "xsd:enumeration" }
-        if (enumerations.isNotEmpty()) {
-            constraints.put("enumerations", enumerations.mapNotNull { it.attributesMap[VALUE] })
-        }
-
-        val pattern = children.find { it.nodeName == "xsd:pattern" }?.attributesMap?.get(VALUE)
-        if (pattern != null) constraints.put("pattern", pattern)
-
-        return constraints
-    }
+private fun Schema.objectFieldQualifiers(xsdFieldName: String): List<ParameterQualifier> {
+    val matchingElements = elements.withAttribute(name, xsdFieldName)
+    if (matchingElements.size > 1) throw IllegalStateException("Schema is not compatible with api")
+    return qualifiersOf(matchingElements.first())
 }

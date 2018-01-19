@@ -4,13 +4,20 @@
 
 package net.juniper.contrail.vro.generator.workflows.xsd
 
-abstract class IdlComment(val comment: String) {
+private val insideQuotesRegex = "'[^']+'".toRegex()
+
+private val String.commentProperties get() =
+    insideQuotesRegex.findAll(this)
+        .map { it.value }
+        .map { it.replace("'", "") }
+        .toList()
+
+sealed class IdlComment(val comment: String) {
     lateinit var type: String
     lateinit var parentClassName: String
     lateinit var elementName: String
     lateinit var description: String
     var isRequired = false
-    val insideQuotesRegex = "'[^']+'".toRegex()
 
     init {
         setProperties()
@@ -23,16 +30,16 @@ class Link(comment: String) : IdlComment(comment) {
     lateinit var propertyClassName: String
 
     override fun setProperties() {
-        val properties = insideQuotesRegex.findAll(comment).toList()
+        val properties = comment.commentProperties
 
         if (properties.isEmpty()) throw IllegalArgumentException()
 
         type = "Link"
-        elementName = properties[0].value
-        propertyClassName = properties[1].value
-        parentClassName = properties[2].value
+        elementName = properties[0]
+        propertyClassName = properties[1]
+        parentClassName = properties[2]
         isRequired = checkIsRequired()
-        description = properties.last().value
+        description = properties.last()
     }
 
     private fun checkIsRequired(): Boolean {
@@ -41,32 +48,30 @@ class Link(comment: String) : IdlComment(comment) {
         if (!splitedString.matches(insideQuotesRegex)) return false
 
         val properties = insideQuotesRegex.findAll(splitedString).toList()
-        return properties[0].value != "'optional'"
+        return properties[0].value != optional
     }
 }
 
 class Property(comment: String) : IdlComment(comment) {
 
     override fun setProperties() {
-        val properties = insideQuotesRegex.findAll(comment).toList()
+        val properties = comment.commentProperties
 
         if (properties.isEmpty()) throw IllegalArgumentException()
 
         type = "Property"
-        elementName = properties[0].value
-        parentClassName = properties[1].value
-        description = properties.last().value
+        elementName = properties[0]
+        parentClassName = properties[1]
+        description = properties.last()
 
         if (properties.size > 2) {
-            val prop = properties[2].value
-            isRequired = properties[2].value != "'optional'" // system-only is also required
+            isRequired = properties[2] != optional // system-only is also required
         }
     }
 }
 
-fun extractType(comment: String): String =
-    comment
-        .replace("#IFMAP-SEMANTICS-IDL", "")
-        .trim()
-        .split("(")
-        .first()
+fun String.extractCommentType(): String =
+    replace(ifmapIdlName, "")
+    .trim()
+    .split("(")
+    .first()
