@@ -26,6 +26,8 @@ fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: 
     createConnectionWorkflow(info).saveInConfiguration(info)
     deleteConnectionWorkflow(info).saveInConfiguration(info)
 
+    addRuleToPolicyWorkflow(info).save(info, "NetworkPolicy")
+
     relations.rootClasses.forEach {
         val refs = relations.referencesOf(it)
         generateLifecycleWorkflows(info, it, refs, schema)

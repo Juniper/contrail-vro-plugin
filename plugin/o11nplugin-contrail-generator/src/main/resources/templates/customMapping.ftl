@@ -32,12 +32,11 @@ class CustomMapping: AbstractMapping() {
     }
 
     private fun doSingletons() {
-
+        singleton(Utils::class.java)
         singleton(ConnectionManager::class.java)
     }
 
     private fun doWrapping() {
-
         wrap(Connection::class.java)
            .andFind()
            .using(ConnectionFinder::class.java)
