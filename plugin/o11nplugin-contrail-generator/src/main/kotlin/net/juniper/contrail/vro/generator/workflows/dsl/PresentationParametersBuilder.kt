@@ -5,12 +5,15 @@
 package net.juniper.contrail.vro.generator.workflows.dsl
 
 import net.juniper.contrail.vro.generator.workflows.model.Action
+import net.juniper.contrail.vro.generator.workflows.model.BooleanVisibilityCondition
 import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.generator.workflows.model.ParameterType
 import net.juniper.contrail.vro.generator.workflows.model.PresentationGroup
 import net.juniper.contrail.vro.generator.workflows.model.PresentationStep
 import net.juniper.contrail.vro.generator.workflows.model.Reference
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
+import net.juniper.contrail.vro.generator.workflows.model.StringVisibilityCondition
+import net.juniper.contrail.vro.generator.workflows.model.VisibilityCondition
 import net.juniper.contrail.vro.generator.workflows.model.array
 import net.juniper.contrail.vro.generator.workflows.model.boolean
 import net.juniper.contrail.vro.generator.workflows.model.date
@@ -25,7 +28,9 @@ import net.juniper.contrail.vro.generator.workflows.model.predefinedAnswersQuali
 import net.juniper.contrail.vro.generator.workflows.model.selectAsTreeQualifier
 import net.juniper.contrail.vro.generator.workflows.model.showInInventoryQualifier
 import net.juniper.contrail.vro.generator.workflows.model.string
-import net.juniper.contrail.vro.generator.workflows.model.visibleWhenNonNull
+import net.juniper.contrail.vro.generator.workflows.model.visibleWhenBooleanSwitchedQualifier
+import net.juniper.contrail.vro.generator.workflows.model.visibleWhenNonNullQualifier
+import net.juniper.contrail.vro.generator.workflows.model.visibleWhenVariableHasValueQualifier
 import java.util.Date
 
 @WorkflowBuilder
@@ -39,14 +44,14 @@ class PresentationParametersBuilder(
         val stepParameters = mutableListOf<ParameterInfo>()
         val aggregator = ParameterAggregator(stepParameters, allParameters)
         aggregator.setup()
-        steps += PresentationStep.fromParameters(title, stepParameters.asPresentationParameters, aggregator.description)
+        steps += PresentationStep.fromParameters(title, stepParameters.asPresentationParameters, aggregator.description, aggregator.qualifiers)
     }
 
     fun groups(title: String, setup: PresentationGroupBuilder.() -> Unit) {
         val stepGroups = mutableListOf<PresentationGroup>()
         val groupBuilder = PresentationGroupBuilder(stepGroups, allParameters)
         groupBuilder.setup()
-        steps += PresentationStep.fromGroups(title, stepGroups, groupBuilder.description)
+        steps += PresentationStep.fromGroups(title, stepGroups, groupBuilder.description, groupBuilder.qualifiers)
     }
 }
 
@@ -56,12 +61,22 @@ class PresentationGroupBuilder(
     private val allParameters: MutableList<ParameterInfo>
 ) {
     var description: String? = null
+    var visible: VisibilityCondition? = null
 
     fun group(title: String, setup: ParameterAggregator.() -> Unit) {
         val groupParameters = mutableListOf<ParameterInfo>()
         val aggregator = ParameterAggregator(groupParameters, allParameters)
         aggregator.setup()
-        groups += PresentationGroup(title, groupParameters.asPresentationParameters, aggregator.description)
+        groups += PresentationGroup(title, groupParameters.asPresentationParameters, aggregator.description, aggregator.qualifiers)
+    }
+
+    val qualifiers get() = mutableListOf<ParameterQualifier>().apply {
+        visible?.let {
+            when (it) {
+                is BooleanVisibilityCondition -> add(visibleWhenBooleanSwitchedQualifier(it.name))
+                is StringVisibilityCondition -> add(visibleWhenVariableHasValueQualifier(it.name, it.value))
+            }
+        }
     }
 }
 
@@ -72,6 +87,7 @@ open class ParameterAggregator(
     protected val allParameters: MutableList<ParameterInfo>
 ) {
     var description: String? = null
+    var visible: VisibilityCondition? = null
 
     fun parameter(name: String, type: boolean, setup: BooleanParameterBuilder.() -> Unit) =
         BooleanParameterBuilder(name).updateWith(setup)
@@ -113,6 +129,15 @@ open class ParameterAggregator(
         else -> throw UnsupportedOperationException("Unsupported parameter class: ${type.simpleName}")
     }
 
+    val qualifiers get() = mutableListOf<ParameterQualifier>().apply {
+        visible?.let {
+            when (it) {
+                is BooleanVisibilityCondition -> add(visibleWhenBooleanSwitchedQualifier(it.name))
+                is StringVisibilityCondition -> add(visibleWhenVariableHasValueQualifier(it.name, it.value))
+            }
+        }
+    }
+
     private fun <Builder : BasicParameterBuilder<T>, T : Any> Builder.updateWith(setup: Builder.() -> Unit) =
         apply(setup).appendParameterLists()
 
@@ -131,6 +156,7 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
     var predefinedAnswers: List<Type>? = null
     private var dependsOn: String? = null
     private var listedBy: Action? = null
+    var visible: VisibilityCondition? = null
 
     val parameterInfo get() = ParameterInfo(
         name = name,
@@ -160,10 +186,16 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
             add(predefinedAnswersQualifier(type, it))
         }
         dependsOn?.let {
-            add(visibleWhenNonNull(it))
+            add(visibleWhenNonNullQualifier(it))
         }
         listedBy?.let {
             add(listFromAction(it))
+        }
+        visible?.let {
+            when (it) {
+                is BooleanVisibilityCondition -> add(visibleWhenBooleanSwitchedQualifier(it.name))
+                is StringVisibilityCondition -> add(visibleWhenVariableHasValueQualifier(it.name, it.value))
+            }
         }
     }
 

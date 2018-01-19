@@ -36,26 +36,29 @@ class Presentation(
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "p-stepType",
-    propOrder = ["title", "description", "presentationParameters", "presentationGroups"]
+    propOrder = ["title", "description", "qualifiers", "presentationParameters", "presentationGroups"]
 )
 class PresentationStep private constructor(
     title: String,
     presentationParameters: List<PresentationParameter>?,
     presentationGroups: List<PresentationGroup>?,
-    description: String?
+    description: String?,
+    qualifiers: List<ParameterQualifier>?
 ) {
     companion object {
         fun fromParameters(
             title: String,
             presentationParameters: List<PresentationParameter>,
-            description: String? = null
-        ) = PresentationStep(title, presentationParameters, null, description)
+            description: String? = null,
+            qualifiers: List<ParameterQualifier>?
+        ) = PresentationStep(title, presentationParameters, null, description, qualifiers)
 
         fun fromGroups(
             title: String,
             presentationGroups: List<PresentationGroup>,
-            description: String? = null
-        ) = PresentationStep(title, null, presentationGroups, description)
+            description: String? = null,
+            qualifiers: List<ParameterQualifier>?
+        ) = PresentationStep(title, null, presentationGroups, description, qualifiers)
     }
 
     @XmlElement
@@ -63,6 +66,10 @@ class PresentationStep private constructor(
 
     @XmlElement(name = "desc")
     val description: String? = description.CDATA
+
+    @XmlElement(name = "p-qual")
+    val qualifiers: List<ParameterQualifier> =
+            qualifiers?.toMutableList() ?: mutableListOf()
 
     @XmlElement(name = "p-param")
     val presentationParameters: List<PresentationParameter>? =
@@ -76,18 +83,23 @@ class PresentationStep private constructor(
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "p-groupType",
-    propOrder = ["title", "description", "presentationParameters"]
+    propOrder = ["title", "description", "qualifiers", "presentationParameters"]
 )
 class PresentationGroup(
-    title: String,
-    presentationParameters: List<PresentationParameter>,
-    description: String?
+        title: String,
+        presentationParameters: List<PresentationParameter>,
+        description: String?,
+        qualifiers: List<ParameterQualifier>? = null
 ) {
     @XmlElement
     val title: String = title
 
     @XmlElement(name = "desc")
     val description: String? = description.CDATA
+
+    @XmlElement(name = "p-qual")
+    val qualifiers: List<ParameterQualifier> =
+        qualifiers?.toMutableList() ?: mutableListOf()
 
     @XmlElement(name = "p-param")
     val presentationParameters: List<PresentationParameter> =

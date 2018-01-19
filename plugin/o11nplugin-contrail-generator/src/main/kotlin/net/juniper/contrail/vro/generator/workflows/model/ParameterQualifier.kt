@@ -73,8 +73,12 @@ fun <T : Any> predefinedAnswersQualifier(type: ParameterType<T>, values: List<T>
 fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifierName, string, value)
 fun minNumberValueQualifier(value: Int) = staticQualifier(minNumberValueQualifierName, number, value)
 fun maxNumberValueQualifier(value: Int) = staticQualifier(maxNumberValueQualifierName, number, value)
-fun visibleWhenNonNull(otherName: String) =
+fun visibleWhenNonNullQualifier(otherName: String) =
     ognlQualifier(visibleQualifierName, boolean, "#$otherName != null")
+fun visibleWhenVariableHasValueQualifier(otherName: String, requiredValue: String) =
+    ognlQualifier(visibleQualifierName, boolean, "#$otherName == \"$requiredValue\"")
+fun visibleWhenBooleanSwitchedQualifier(otherName: String) =
+    ognlQualifier(visibleQualifierName, boolean, "#$otherName")
 fun listFromAction(action: Action) =
     ognlQualifier(linkedEnumerationQualifierName, action.resultType, action.ognl)
 fun childOf(parent: String) =
