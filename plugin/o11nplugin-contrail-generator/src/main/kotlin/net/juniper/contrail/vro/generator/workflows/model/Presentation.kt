@@ -14,12 +14,15 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "presentationType",
-    propOrder = ["presentationParameters", "presentationSteps"]
+    propOrder = ["description", "presentationParameters", "presentationSteps"]
 )
 class Presentation(
     presentationParameters: List<PresentationParameter> = emptyList(),
-    presentationSteps: List<PresentationStep> = emptyList()
+    presentationSteps: List<PresentationStep> = emptyList(),
+    description: String? = null
 ) {
+    @XmlElement(name = "desc")
+    val description: String? = description.CDATA
 
     @XmlElement(name = "p-param")
     val presentationParameters: List<PresentationParameter> =
@@ -59,7 +62,7 @@ class PresentationStep private constructor(
     val title: String = title
 
     @XmlElement(name = "desc")
-    val description: String? = description
+    val description: String? = description.CDATA
 
     @XmlElement(name = "p-param")
     val presentationParameters: List<PresentationParameter>? =
@@ -84,7 +87,7 @@ class PresentationGroup(
     val title: String = title
 
     @XmlElement(name = "desc")
-    val description: String? = description
+    val description: String? = description.CDATA
 
     @XmlElement(name = "p-param")
     val presentationParameters: List<PresentationParameter> =

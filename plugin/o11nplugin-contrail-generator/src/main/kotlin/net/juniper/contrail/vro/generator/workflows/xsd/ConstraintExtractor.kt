@@ -4,18 +4,27 @@
 
 package net.juniper.contrail.vro.generator.workflows.xsd
 
+import net.juniper.contrail.vro.config.ObjectClass
+import net.juniper.contrail.vro.config.defaultParentType
 import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.generator.workflows.model.wrapConstraints
 import org.w3c.dom.Node
 
 fun Schema.simpleTypeQualifiers(clazz: Class<*>, propertyName: String): List<ParameterQualifier> = when {
-    clazz.isApiObjectClass -> objectFieldQualifiers(propertyName.propertyToXsd)
-    else -> propertyFieldQualifiers(clazz, propertyName.propertyToXsd)
+    clazz.isApiObjectClass -> objectFieldQualifiers(propertyName.asXsd)
+    else -> propertyFieldQualifiers(clazz, propertyName.asXsd)
 }
 
 fun Schema.propertyDescription(clazz: Class<*>, propertyName: String): String? =
-    definitionNode(clazz, propertyName.propertyToXsd).description
+    definitionNode(clazz, propertyName.asXsd).description
+
+fun Schema.objectDescription(clazz: ObjectClass): String? {
+    return relationDefinitionComment(clazz.defaultParentType ?: return null, clazz.xsdName).description
+}
+
+fun Schema.relationDescription(from: Class<*>, to: Class<*>) =
+    relationDefinitionComment(from, to).description
 
 fun Schema.propertyFieldQualifiers(clazz: Class<*>, xsdFieldName: String): List<ParameterQualifier> =
     qualifiersOf(definitionNode(clazz, xsdFieldName))
@@ -35,6 +44,15 @@ private fun Schema.definitionNode(clazz: Class<*>, xsdFieldName: String): Node {
 
     return matchingElements.firstOrNull() ?:
         throw IllegalArgumentException("Property $xsdFieldName of class ${clazz.simpleName} was not found in the schema.")
+}
+
+private fun Schema.relationDefinitionComment(from: Class<*>, to: Class<*>): IdlComment =
+    relationDefinitionComment(from.xsdName, to .xsdName)
+
+private fun Schema.relationDefinitionComment(from: String, to: String): IdlComment {
+    val elementName = "$from-$to"
+    return comments.find { it.elementName == elementName } ?:
+        throw IllegalArgumentException("Relation $elementName was not found in the schema.")
 }
 
 fun Schema.qualifiersOf(element: Node): List<ParameterQualifier> {

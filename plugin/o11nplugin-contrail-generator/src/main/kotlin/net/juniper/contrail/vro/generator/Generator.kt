@@ -31,7 +31,8 @@ object Generator {
         val schemaPath = repositoryRoot / schemaFilePath
         val schema = buildSchema(schemaPath)
         val relations = buildRelationDefinition(objectClasses, rootClasses, inventoryPropertyFilter)
+
         generateModel(projectInfo, relations, objectClasses, rootClasses, propertyClasses)
-        generateWorkflows(projectInfo, relations)
+        generateWorkflows(projectInfo, relations, schema)
     }
 }

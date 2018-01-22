@@ -111,3 +111,6 @@ val <T : Any> ParameterType<T>.unArrayed get() =
 
 val String.reference get() =
     Reference(this)
+
+val Class<*>.reference get() =
+    Reference(this)

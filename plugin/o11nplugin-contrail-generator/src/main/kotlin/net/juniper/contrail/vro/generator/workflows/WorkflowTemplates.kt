@@ -4,7 +4,8 @@
 
 package net.juniper.contrail.vro.generator.workflows
 
-import net.juniper.contrail.vro.config.asApiClass
+import net.juniper.contrail.vro.config.ObjectClass
+import net.juniper.contrail.vro.config.bold
 import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.ignoredInWorkflow
 import net.juniper.contrail.vro.generator.ProjectInfo
@@ -35,6 +36,9 @@ import net.juniper.contrail.vro.generator.workflows.model.createElementInfoPrope
 import net.juniper.contrail.vro.generator.workflows.model.number
 import net.juniper.contrail.vro.generator.workflows.model.reference
 import net.juniper.contrail.vro.generator.workflows.model.string
+import net.juniper.contrail.vro.generator.workflows.xsd.Schema
+import net.juniper.contrail.vro.generator.workflows.xsd.objectDescription
+import net.juniper.contrail.vro.generator.workflows.xsd.relationDescription
 
 fun Element.elementInfoPropertiesFor(categoryPath: String) = createElementInfoProperties(
     categoryPath = categoryPath,
@@ -68,8 +72,14 @@ interface SchemaInfo {
 private val String.workflowNameFormat get() =
     splitCamel().toLowerCase()
 
+private val Class<*>.workflowNameFormat get() =
+    simpleName.workflowNameFormat
+
 private val String.descriptionFormat get() =
     replace(typeSuffix, "").splitCamel()
+
+private val Class<*>.descriptionFormat get() =
+    simpleName.descriptionFormat
 
 private val typeSuffix = "Type$".toRegex()
 
@@ -121,15 +131,31 @@ fun createConnectionWorkflow(info: ProjectInfo): Workflow {
     }
 }
 
-fun createWorkflow(info: ProjectInfo, className: String, parentName: String, refs: List<String>): Workflow {
+private fun Schema.createWorkflowDescription(clazz: ObjectClass) : String? {
+    val objectDescription = objectDescription(clazz) ?: return null
+    return """
+        ${clazz.descriptionFormat.bold}
+        $objectDescription
+    """.trimIndent()
+}
 
-    val workflowName = "Create ${className.workflowNameFormat}"
+private fun Schema.relationInCreateWorkflowDescription(parentClazz: ObjectClass, clazz: ObjectClass) : String {
+    val relationDescription = relationDescription(parentClazz, clazz)
+    return """
+        ${clazz.folderName.bold}
+        $relationDescription
+    """.trimIndent()
+}
 
-    val clazz = className.asApiClass!!
+fun createWorkflow(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<ObjectClass>, schema: Schema): Workflow {
 
-    return info.versionOf(workflowName) withScript createScriptBody(className, parentName, refs, clazz) andParameters {
+    val workflowName = "Create ${clazz.workflowNameFormat}"
+    val parentName = parentClazz?.simpleName ?: Connection
+
+    return info.versionOf(workflowName) withScript createScriptBody(clazz, parentClazz, refs) andParameters {
+        description = schema.createWorkflowDescription(clazz)
         parameter("name", string) {
-            description = "${className.descriptionFormat} name"
+            description = "${clazz.descriptionFormat} name"
             mandatory = true
 
         }
@@ -143,7 +169,7 @@ fun createWorkflow(info: ProjectInfo, className: String, parentName: String, ref
             step("References") {
                 for (ref in refs) {
                     parameter(ref.pluralParameterName, Reference(ref).array) {
-                        description = ref.folderName()
+                        description = schema.relationInCreateWorkflowDescription(clazz, ref)
                     }
                 }
             }
@@ -156,8 +182,8 @@ fun createWorkflow(info: ProjectInfo, className: String, parentName: String, ref
 fun deleteConnectionWorkflow(info: ProjectInfo): Workflow =
     deleteWorkflow(info, Connection, deleteConnectionScriptBody)
 
-fun deleteWorkflow(info: ProjectInfo, className: String): Workflow =
-    deleteWorkflow(info, className, deleteScriptBody(className))
+fun deleteWorkflow(info: ProjectInfo, clazz: ObjectClass): Workflow =
+    deleteWorkflow(info, clazz.simpleName, deleteScriptBody(clazz.simpleName))
 
 fun deleteWorkflow(info: ProjectInfo, className: String, scriptBody: String): Workflow {
 
@@ -228,7 +254,15 @@ private fun PresentationParametersBuilder.addProperties(clazz: Class<*>) {
     addProperties(clazz.properties)
 }
 
-fun addReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation): Workflow {
+private fun Schema.descriptionInCreateRelationWorkflow(parentClazz: ObjectClass, clazz: ObjectClass) : String {
+    val relationDescription = relationDescription(parentClazz, clazz)
+    return """
+        ${clazz.descriptionFormat.capitalize()} to be added.
+        $relationDescription
+    """.trimIndent()
+}
+
+fun addReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation, schema: Schema): Workflow {
 
     val parentName = relation.parentName
     val childName = relation.childName
@@ -241,7 +275,7 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation): Workflow
             mandatory = true
         }
         parameter(child, childName.reference) {
-            description = "${childName.descriptionFormat.capitalize()} to be added"
+            description = schema.descriptionInCreateRelationWorkflow(relation.parentClass, relation.childClass)
             mandatory = true
         }
         if ( ! relation.simpleReference) {
@@ -280,24 +314,24 @@ private val deleteConnectionScriptBody = """
 ContrailConnectionManager.delete($item);
 """.trimIndent()
 
-private fun createScriptBody(className: String, parentName: String, references: List<String>, clazz: Class<*>) = """
+private fun createScriptBody(clazz: Class<*>, parentClazz: ObjectClass?, references: List<ObjectClass>) = """
 ${parent.retrieveExecutor}
-var $item = new Contrail$className();
+var $item = new Contrail${clazz.simpleName}();
 $item.setName(name);
 ${ clazz.attributeCode(item) }
-$executor.create$className($item${if (parentName == Connection) "" else ", $parent"});
+$executor.create${clazz.simpleName}($item${if (parentClazz == null) "" else ", $parent"});
 ${references.addAllReferences}
-${item.updateAsClass(className)}
+${item.updateAsClass(clazz.simpleName)}
 """.trimIndent()
 
-private val List<String>.addAllReferences get() =
+private val List<ObjectClass>.addAllReferences get() =
     joinToString("\n") { it.addReferenceEntry }
 
-private val String.addReferenceEntry get() =
+private val Class<*>.addReferenceEntry get() =
 """
 if($pluralParameterName) {
     for each (ref in $pluralParameterName) {
-        $item.add$this(ref);
+        $item.add${this.simpleName}(ref);
     }
 }
 """
