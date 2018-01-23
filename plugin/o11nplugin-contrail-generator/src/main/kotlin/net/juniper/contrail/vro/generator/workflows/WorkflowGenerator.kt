@@ -132,7 +132,7 @@ private fun generateDunesMetaInfo(info: ProjectInfo) {
 }
 
 val libraryPackage = "Library.Contrail"
-val resourcesPath = "templates/main/resources"
+val resourcesPath = "src/main/resources"
 val dunesInfoPath = "$resourcesPath/META-INF"
 val dunesFileName = "dunes-meta-inf.xml"
 
