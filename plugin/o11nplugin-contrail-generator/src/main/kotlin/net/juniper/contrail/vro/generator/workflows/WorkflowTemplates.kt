@@ -17,7 +17,6 @@ import net.juniper.contrail.vro.config.isEditableProperty
 import net.juniper.contrail.vro.config.isPropertyOrStringListWrapper
 import net.juniper.contrail.vro.config.pluralParameterName
 import net.juniper.contrail.vro.config.splitCamel
-import net.juniper.contrail.vro.generator.model.ClassProperties
 import net.juniper.contrail.vro.generator.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.generator.workflows.dsl.PresentationParametersBuilder
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
@@ -28,7 +27,6 @@ import net.juniper.contrail.vro.generator.workflows.dsl.withScript
 import net.juniper.contrail.vro.generator.workflows.dsl.withVersion
 import net.juniper.contrail.vro.generator.workflows.model.Action
 import net.juniper.contrail.vro.generator.workflows.model.Element
-import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.generator.workflows.model.Reference
 import net.juniper.contrail.vro.generator.workflows.model.array
 import net.juniper.contrail.vro.generator.workflows.model.createDunesProperties
@@ -38,6 +36,7 @@ import net.juniper.contrail.vro.generator.workflows.model.reference
 import net.juniper.contrail.vro.generator.workflows.model.string
 import net.juniper.contrail.vro.generator.workflows.xsd.Schema
 import net.juniper.contrail.vro.generator.workflows.xsd.objectDescription
+import net.juniper.contrail.vro.generator.workflows.xsd.propertyDescription
 import net.juniper.contrail.vro.generator.workflows.xsd.relationDescription
 
 fun Element.elementInfoPropertiesFor(categoryPath: String) = createElementInfoProperties(
@@ -62,12 +61,6 @@ val item = "item"
 val attribute = "attribute"
 val executor = "executor"
 val tab = "    "
-
-typealias Constraints = (Class<*>, String) -> List<ParameterQualifier>
-interface SchemaInfo {
-    fun constraints(clazz: Class<*>, field: String): List<ParameterQualifier>
-    fun description(clazz: Class<*>, field: String): String
-}
 
 private val String.workflowNameFormat get() =
     splitCamel().toLowerCase()
@@ -175,7 +168,7 @@ fun createWorkflow(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectCla
             }
         }
 
-        addProperties(clazz)
+        addProperties(clazz, schema)
     }
 }
 
@@ -201,9 +194,15 @@ fun deleteWorkflow(info: ProjectInfo, className: String, scriptBody: String): Wo
 private val Property.title get() =
     propertyName.descriptionFormat.capitalize()
 
-private fun Property.toParameter(builder: ParameterAggregator) {
+private fun Property.description(schema: Schema) =
+    """
+    ${propertyName.splitCamel().capitalize()}
+    ${schema.propertyDescription(parent, propertyName) ?: ""}
+    """.trimIndent()
+
+private fun Property.toParameter(builder: ParameterAggregator, schema: Schema) {
     builder.parameter(propertyName, clazz) {
-        description = propertyName.splitCamel().capitalize()
+        description = description(schema)
     }
 }
 
@@ -219,13 +218,14 @@ val List<Property>.onlyPrimitives get() =
 val List<Property>.onlyComplex get() =
     filter { workflowPropertiesFilter(it) && it.clazz.isApiTypeClass }
 
-private fun PresentationParametersBuilder.addProperties(properties: ClassProperties) {
+private fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema: Schema) {
+    val properties = clazz.properties
     val topPrimitives = properties.simpleProperties.onlyPrimitives
     val topComplex = properties.simpleProperties.onlyComplex
 
     if (!topPrimitives.isEmpty()) {
         step("Custom Parameters") {
-            topPrimitives.forEach { it.toParameter(this@step) }
+            topPrimitives.forEach { it.toParameter(this@step, schema) }
         }
     }
 
@@ -236,22 +236,21 @@ private fun PresentationParametersBuilder.addProperties(properties: ClassPropert
 
         when {
             primitives.isEmpty() -> groups(prop.title) {
+                description = schema.propertyDescription(clazz, prop.propertyName)
                 for (propProp in complex) {
                     group(propProp.title) {
-                        propProp.clazz.properties.simpleProperties.forEach { it.toParameter(this@group) }
+                        description = schema.propertyDescription(propProp.parent, propProp.propertyName)
+                        propProp.clazz.properties.simpleProperties.forEach { it.toParameter(this@group, schema) }
                     }
                 }
             }
             complex.isEmpty() -> step(prop.title) {
-                primitives.forEach { it.toParameter(this@step) }
+                description = schema.propertyDescription(clazz, prop.propertyName)
+                primitives.forEach { it.toParameter(this@step, schema) }
             }
             else -> Unit // TODO("Add support for attributes with mixed structure.")
         }
     }
-}
-
-private fun PresentationParametersBuilder.addProperties(clazz: Class<*>) {
-    addProperties(clazz.properties)
 }
 
 private fun Schema.descriptionInCreateRelationWorkflow(parentClazz: ObjectClass, clazz: ObjectClass) : String {
@@ -279,7 +278,7 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation, schema: S
             mandatory = true
         }
         if ( ! relation.simpleReference) {
-            addProperties(relation.attribute)
+            addProperties(relation.attribute, schema)
         }
     }
 }

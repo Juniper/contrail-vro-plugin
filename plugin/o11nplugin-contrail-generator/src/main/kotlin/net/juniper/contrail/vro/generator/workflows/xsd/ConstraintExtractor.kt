@@ -12,12 +12,14 @@ import net.juniper.contrail.vro.generator.workflows.model.wrapConstraints
 import org.w3c.dom.Node
 
 fun Schema.simpleTypeQualifiers(clazz: Class<*>, propertyName: String): List<ParameterQualifier> = when {
-    clazz.isApiObjectClass -> objectFieldQualifiers(propertyName.asXsd)
-    else -> propertyFieldQualifiers(clazz, propertyName.asXsd)
+    clazz.isApiObjectClass -> objectFieldQualifiers(propertyName.xsdName)
+    else -> propertyFieldQualifiers(clazz, propertyName.xsdName)
 }
 
-fun Schema.propertyDescription(clazz: Class<*>, propertyName: String): String? =
-    definitionNode(clazz, propertyName.asXsd).description
+fun Schema.propertyDescription(clazz: Class<*>, propertyName: String): String? = when {
+    clazz.isApiObjectClass -> propertyDefinitionComment(clazz.xsdName, propertyName.xsdName).description
+    else -> definitionNode(clazz, propertyName.xsdName).attributeValue(description)
+}
 
 fun Schema.objectDescription(clazz: ObjectClass): String? {
     return relationDefinitionComment(clazz.defaultParentType ?: return null, clazz.xsdName).description
@@ -54,6 +56,10 @@ private fun Schema.relationDefinitionComment(from: String, to: String): IdlComme
     return comments.find { it.elementName == elementName } ?:
         throw IllegalArgumentException("Relation $elementName was not found in the schema.")
 }
+
+private fun Schema.propertyDefinitionComment(parent: String, propertyName: String): IdlComment =
+    comments.firstOrNull { it.parentClassName == parent && (it.elementName == propertyName || it.elementName == "$parent-$propertyName") } ?:
+        throw IllegalArgumentException("Property $propertyName of class $parent was not found in the schema.")
 
 fun Schema.qualifiersOf(element: Node): List<ParameterQualifier> {
     val elementAttributes = element.attributesMap

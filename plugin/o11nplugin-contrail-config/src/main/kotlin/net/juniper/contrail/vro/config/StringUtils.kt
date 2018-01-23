@@ -7,7 +7,7 @@ package net.juniper.contrail.vro.config
 import java.nio.file.Path
 import java.nio.file.Paths
 
-val CAMEL_CASE_REGEX = "(?<=[a-z])(?=[A-Z])".toRegex()
+val CAMEL_CASE_REGEX = "(?<=[a-z0-9])(?=[A-Z])".toRegex()
 val ES_SUFFIXES = ".*(s|x|z|ch|sh)$".toRegex()
 val NON_IES_SUFFIXES_REGEX = "(ay|ey|iy|oy|uy)$".toRegex()
 

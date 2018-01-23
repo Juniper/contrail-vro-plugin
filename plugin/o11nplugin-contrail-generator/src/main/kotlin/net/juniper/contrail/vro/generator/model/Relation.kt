@@ -10,7 +10,7 @@ import net.juniper.contrail.vro.config.PropertyClass
 import net.juniper.contrail.vro.config.PropertyClassFilter
 import net.juniper.contrail.vro.config.asObjectClass
 import net.juniper.contrail.vro.config.collapsedNestedName
-import net.juniper.contrail.vro.config.defaultParentType
+import net.juniper.contrail.vro.config.parentType
 import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isBackRef
@@ -81,7 +81,7 @@ class Getter(val name: String, val toMany: Boolean)
 typealias RelationGraphNode = Pair<ObjectClass, List<ObjectClass>>
 
 fun List<ObjectClass>.generateRelations(): List<Relation> {
-    val parentToChildren = groupBy { it.defaultParentType }
+    val parentToChildren = groupBy { it.parentType }
     return asSequence()
         .map { createRelationGraphNode(it, parentToChildren) }
         .map { it.toRelationSequence() }

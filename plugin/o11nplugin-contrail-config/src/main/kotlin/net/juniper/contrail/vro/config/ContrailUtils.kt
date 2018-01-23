@@ -34,7 +34,10 @@ val String.isApiTypeClass get() =
     this.asApiClass != null
 
 val ObjectClass.defaultParentType: String? get() =
-    if (isRootClass) null else newInstance().defaultParentType
+    newInstance().defaultParentType
+
+val ObjectClass.parentType: String? get() =
+    if (isRootClass) null else defaultParentType
 
 val ObjectClass.objectType: String get() =
     newInstance().objectType

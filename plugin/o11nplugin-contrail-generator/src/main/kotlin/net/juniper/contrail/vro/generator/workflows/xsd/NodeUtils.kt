@@ -9,13 +9,13 @@ import org.w3c.dom.Node
 val Node.children: Sequence<Node> get() = childNodes.run {
     (0 until length).asSequence()
         .map { item(it) }
-        .filter { "#text" != it.nodeName }
+        .filter { it.nodeName != textName }
 }
 
 val Node.nestedElements: Sequence<Node> get() = children
-    .filter { it.nodeName == xsdElement }
     .map { it.nestedElements + it }
     .flatten()
+    .filter { it.nodeName == xsdElement }
 
 val Node.attributesMap: Map<String, String> get() =
     attributeNodes.associateBy(Node::getNodeName, Node::getNodeValue)

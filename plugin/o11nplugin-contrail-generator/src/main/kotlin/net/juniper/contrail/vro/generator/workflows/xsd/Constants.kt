@@ -19,6 +19,7 @@ val xsdInteger = "xsd:integer"
 val xsdElement = "xsd:element"
 val xsdSimpleType = "xsd:simpleType"
 val xsdComplexType = "xsd:complexType"
+val xsdAll = "xsd:all"
 
 val xsdInclude = "xsd:include"
 val xsdRestriction = "xsd:restriction"
@@ -29,6 +30,7 @@ val knownSchemaTypes = listOf(xsdString, xsdBoolean, xsdInteger)
 
 val ifmapIdlName = "#IFMAP-SEMANTICS-IDL"
 val commentName = "#comment"
+val textName = "#text"
 val idlLink = "Link"
 val idlProperty = "Property"
 
