@@ -5,15 +5,17 @@
 package net.juniper.contrail.vro.generator.workflows.dsl
 
 import net.juniper.contrail.vro.generator.workflows.model.Action
-import net.juniper.contrail.vro.generator.workflows.model.BooleanVisibilityCondition
+import net.juniper.contrail.vro.generator.workflows.model.AlwaysVisible
+import net.juniper.contrail.vro.generator.workflows.model.FromBooleanParameter
 import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.generator.workflows.model.ParameterType
 import net.juniper.contrail.vro.generator.workflows.model.PresentationGroup
 import net.juniper.contrail.vro.generator.workflows.model.PresentationStep
 import net.juniper.contrail.vro.generator.workflows.model.Reference
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
-import net.juniper.contrail.vro.generator.workflows.model.StringVisibilityCondition
+import net.juniper.contrail.vro.generator.workflows.model.FromStringParameter
 import net.juniper.contrail.vro.generator.workflows.model.VisibilityCondition
+import net.juniper.contrail.vro.generator.workflows.model.WhenNonNull
 import net.juniper.contrail.vro.generator.workflows.model.array
 import net.juniper.contrail.vro.generator.workflows.model.boolean
 import net.juniper.contrail.vro.generator.workflows.model.date
@@ -59,9 +61,7 @@ class PresentationParametersBuilder(
 class PresentationGroupBuilder(
     private val groups: MutableList<PresentationGroup>,
     private val allParameters: MutableList<ParameterInfo>
-) {
-    var description: String? = null
-    var visible: VisibilityCondition? = null
+) : BasicBuilder() {
 
     fun group(title: String, setup: ParameterAggregator.() -> Unit) {
         val groupParameters = mutableListOf<ParameterInfo>()
@@ -70,14 +70,7 @@ class PresentationGroupBuilder(
         groups += PresentationGroup(title, groupParameters.asPresentationParameters, aggregator.description, aggregator.qualifiers)
     }
 
-    val qualifiers get() = mutableListOf<ParameterQualifier>().apply {
-        visible?.let {
-            when (it) {
-                is BooleanVisibilityCondition -> add(visibleWhenBooleanSwitchedQualifier(it.name))
-                is StringVisibilityCondition -> add(visibleWhenVariableHasValueQualifier(it.name, it.value))
-            }
-        }
-    }
+    val qualifiers get() = basicQualifiers
 }
 
 @WorkflowBuilder
@@ -85,9 +78,7 @@ class PresentationGroupBuilder(
 open class ParameterAggregator(
     private val parameters: MutableList<ParameterInfo>,
     protected val allParameters: MutableList<ParameterInfo>
-) {
-    var description: String? = null
-    var visible: VisibilityCondition? = null
+) : BasicBuilder() {
 
     fun parameter(name: String, type: boolean, setup: BooleanParameterBuilder.() -> Unit) =
         BooleanParameterBuilder(name).updateWith(setup)
@@ -129,14 +120,7 @@ open class ParameterAggregator(
         else -> throw UnsupportedOperationException("Unsupported parameter class: ${type.simpleName}")
     }
 
-    val qualifiers get() = mutableListOf<ParameterQualifier>().apply {
-        visible?.let {
-            when (it) {
-                is BooleanVisibilityCondition -> add(visibleWhenBooleanSwitchedQualifier(it.name))
-                is StringVisibilityCondition -> add(visibleWhenVariableHasValueQualifier(it.name, it.value))
-            }
-        }
-    }
+    val qualifiers get() = basicQualifiers
 
     private fun <Builder : BasicParameterBuilder<T>, T : Any> Builder.updateWith(setup: Builder.() -> Unit) =
         apply(setup).appendParameterLists()
@@ -149,14 +133,27 @@ open class ParameterAggregator(
     }
 }
 
-abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: ParameterType<Type>) {
-    var description: String = name.capitalize()
+abstract class BasicBuilder {
+    var description: String? = null
+    var visibility: VisibilityCondition = AlwaysVisible
+
+    protected val basicQualifiers get() = mutableListOf<ParameterQualifier>().apply {
+        visibility.let {
+            when (it) {
+                is AlwaysVisible -> Unit
+                is WhenNonNull -> add(visibleWhenNonNullQualifier(it.name))
+                is FromBooleanParameter -> add(visibleWhenBooleanSwitchedQualifier(it.name))
+                is FromStringParameter -> add(visibleWhenVariableHasValueQualifier(it.name, it.value))
+            }
+        }
+    }
+}
+
+abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: ParameterType<Type>) : BasicBuilder() {
     var mandatory: Boolean = false
     var defaultValue: Type? = null
     var predefinedAnswers: List<Type>? = null
-    private var dependsOn: String? = null
     private var listedBy: Action? = null
-    var visible: VisibilityCondition? = null
 
     val parameterInfo get() = ParameterInfo(
         name = name,
@@ -169,12 +166,8 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
         listedBy = action
     }
 
-    fun dependsOn(parameter: String) {
-        dependsOn = parameter
-    }
-
     private val allQualifiers get(): List<ParameterQualifier> =
-        commonQualifiers + customQualifiers
+        basicQualifiers + commonQualifiers + customQualifiers
 
     private val commonQualifiers get() = mutableListOf<ParameterQualifier>().apply {
         if (mandatory) add(mandatoryQualifier)
@@ -185,17 +178,8 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
         predefinedAnswers?.let {
             add(predefinedAnswersQualifier(type, it))
         }
-        dependsOn?.let {
-            add(visibleWhenNonNullQualifier(it))
-        }
         listedBy?.let {
             add(listFromAction(it))
-        }
-        visible?.let {
-            when (it) {
-                is BooleanVisibilityCondition -> add(visibleWhenBooleanSwitchedQualifier(it.name))
-                is StringVisibilityCondition -> add(visibleWhenVariableHasValueQualifier(it.name, it.value))
-            }
         }
     }
 

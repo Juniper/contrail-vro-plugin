@@ -28,6 +28,7 @@ import net.juniper.contrail.vro.generator.workflows.dsl.withVersion
 import net.juniper.contrail.vro.generator.workflows.model.Action
 import net.juniper.contrail.vro.generator.workflows.model.Element
 import net.juniper.contrail.vro.generator.workflows.model.Reference
+import net.juniper.contrail.vro.generator.workflows.model.WhenNonNull
 import net.juniper.contrail.vro.generator.workflows.model.array
 import net.juniper.contrail.vro.generator.workflows.model.createDunesProperties
 import net.juniper.contrail.vro.generator.workflows.model.createElementInfoProperties
@@ -298,7 +299,7 @@ fun removeReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation, action
         parameter(child, childName.reference) {
             description = "${childName.descriptionFormat.capitalize()} to be removed"
             mandatory = true
-            dependsOn(parent)
+            visibility = WhenNonNull(parent)
             listedBy(action)
         }
     }

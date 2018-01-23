@@ -6,6 +6,10 @@ package net.juniper.contrail.vro.generator.workflows.model
 
 sealed class VisibilityCondition
 
-data class BooleanVisibilityCondition(val name: String) : VisibilityCondition()
+object AlwaysVisible : VisibilityCondition()
 
-data class StringVisibilityCondition(val name: String, val value: String) : VisibilityCondition()
+class WhenNonNull(val name: String) : VisibilityCondition()
+
+class FromBooleanParameter(val name: String) : VisibilityCondition()
+
+class FromStringParameter(val name: String, val value: String) : VisibilityCondition()
