@@ -153,6 +153,7 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
     var mandatory: Boolean = false
     var defaultValue: Type? = null
     var predefinedAnswers: List<Type>? = null
+    val additionalQualifiers = mutableListOf<ParameterQualifier>()
     private var listedBy: Action? = null
 
     val parameterInfo get() = ParameterInfo(
@@ -167,7 +168,7 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
     }
 
     private val allQualifiers get(): List<ParameterQualifier> =
-        basicQualifiers + commonQualifiers + customQualifiers
+        basicQualifiers + commonQualifiers + customQualifiers + additionalQualifiers
 
     private val commonQualifiers get() = mutableListOf<ParameterQualifier>().apply {
         if (mandatory) add(mandatoryQualifier)

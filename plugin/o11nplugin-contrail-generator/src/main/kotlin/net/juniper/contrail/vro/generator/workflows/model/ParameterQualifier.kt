@@ -108,12 +108,12 @@ fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQuali
             ParameterQualifier(
                 static,
                 defaultValueQualifierName,
-                constraintValue.javaClass.xsdType,
+                constraintValue.javaClass.parameterType.name,
                 constraintValue.toString()
             )
         }
-        "minInclusive" -> maxNumberValueQualifier(constraintValue.toString().toInt())
-        "maxInclusive" -> minNumberValueQualifier(constraintValue.toString().toInt())
+        "minInclusive" -> minNumberValueQualifier(constraintValue.toString().toInt())
+        "maxInclusive" -> maxNumberValueQualifier(constraintValue.toString().toInt())
         "pattern" -> {
             ParameterQualifier(
                 static,
@@ -127,5 +127,3 @@ fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQuali
         else -> null
     }
 
-private val <T> Class<T>.xsdType: String get() =
-    simpleName.decapitalize()

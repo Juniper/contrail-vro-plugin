@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.bold
+import net.juniper.contrail.vro.config.camelChunks
 import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.ignoredInWorkflow
 import net.juniper.contrail.vro.generator.ProjectInfo
@@ -27,9 +28,11 @@ import net.juniper.contrail.vro.generator.workflows.dsl.withScript
 import net.juniper.contrail.vro.generator.workflows.dsl.withVersion
 import net.juniper.contrail.vro.generator.workflows.model.Action
 import net.juniper.contrail.vro.generator.workflows.model.Element
+import net.juniper.contrail.vro.generator.workflows.model.FromBooleanParameter
 import net.juniper.contrail.vro.generator.workflows.model.Reference
 import net.juniper.contrail.vro.generator.workflows.model.WhenNonNull
 import net.juniper.contrail.vro.generator.workflows.model.array
+import net.juniper.contrail.vro.generator.workflows.model.boolean
 import net.juniper.contrail.vro.generator.workflows.model.createDunesProperties
 import net.juniper.contrail.vro.generator.workflows.model.createElementInfoProperties
 import net.juniper.contrail.vro.generator.workflows.model.number
@@ -39,6 +42,7 @@ import net.juniper.contrail.vro.generator.workflows.xsd.Schema
 import net.juniper.contrail.vro.generator.workflows.xsd.objectDescription
 import net.juniper.contrail.vro.generator.workflows.xsd.propertyDescription
 import net.juniper.contrail.vro.generator.workflows.xsd.relationDescription
+import net.juniper.contrail.vro.generator.workflows.xsd.simpleTypeQualifiers
 
 fun Element.elementInfoPropertiesFor(categoryPath: String) = createElementInfoProperties(
     categoryPath = categoryPath,
@@ -63,17 +67,17 @@ val attribute = "attribute"
 val executor = "executor"
 val tab = "    "
 
-private val String.workflowNameFormat get() =
+private val String.allLowerCase get() =
     splitCamel().toLowerCase()
 
-private val Class<*>.workflowNameFormat get() =
-    simpleName.workflowNameFormat
+private val Class<*>.allLowerCase get() =
+    simpleName.allLowerCase
 
-private val String.descriptionFormat get() =
-    replace(typeSuffix, "").splitCamel()
+private val String.allCapitalized get() =
+    replace(typeSuffix, "").camelChunks.joinToString(" ") { it.capitalize() }
 
-private val Class<*>.descriptionFormat get() =
-    simpleName.descriptionFormat
+private val Class<*>.allCapitalized get() =
+    simpleName.allCapitalized
 
 private val typeSuffix = "Type$".toRegex()
 
@@ -128,7 +132,7 @@ fun createConnectionWorkflow(info: ProjectInfo): Workflow {
 private fun Schema.createWorkflowDescription(clazz: ObjectClass) : String? {
     val objectDescription = objectDescription(clazz) ?: return null
     return """
-        ${clazz.descriptionFormat.bold}
+        ${clazz.allCapitalized.bold}
         $objectDescription
     """.trimIndent()
 }
@@ -143,18 +147,18 @@ private fun Schema.relationInCreateWorkflowDescription(parentClazz: ObjectClass,
 
 fun createWorkflow(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<ObjectClass>, schema: Schema): Workflow {
 
-    val workflowName = "Create ${clazz.workflowNameFormat}"
+    val workflowName = "Create ${clazz.allLowerCase}"
     val parentName = parentClazz?.simpleName ?: Connection
 
     return info.versionOf(workflowName) withScript createScriptBody(clazz, parentClazz, refs) andParameters {
         description = schema.createWorkflowDescription(clazz)
         parameter("name", string) {
-            description = "${clazz.descriptionFormat} name"
+            description = "${clazz.allCapitalized} name"
             mandatory = true
 
         }
         parameter(parent, parentName.reference) {
-            description = "Parent ${parentName.descriptionFormat}"
+            description = "Parent ${parentName.allCapitalized}"
             mandatory = true
 
         }
@@ -181,11 +185,11 @@ fun deleteWorkflow(info: ProjectInfo, clazz: ObjectClass): Workflow =
 
 fun deleteWorkflow(info: ProjectInfo, className: String, scriptBody: String): Workflow {
 
-    val workflowName = "Delete ${className.workflowNameFormat}"
+    val workflowName = "Delete ${className.allLowerCase}"
 
     return info.versionOf(workflowName) withScript scriptBody andParameters {
         parameter(item, className.reference) {
-            description = "${className.descriptionFormat} to delete"
+            description = "${className.allCapitalized} to delete"
             mandatory = true
             showInInventory = true
         }
@@ -193,17 +197,24 @@ fun deleteWorkflow(info: ProjectInfo, className: String, scriptBody: String): Wo
 }
 
 private val Property.title get() =
-    propertyName.descriptionFormat.capitalize()
+    propertyName.allCapitalized
 
 private fun Property.description(schema: Schema) =
-    """
-    ${propertyName.splitCamel().capitalize()}
-    ${schema.propertyDescription(parent, propertyName) ?: ""}
-    """.trimIndent()
+"""
+${propertyName.allCapitalized}
+${schema.propertyDescription(parent, propertyName) ?: ""}
+""".trim()
+
+private fun Property.conditionDescription(schema: Schema) =
+"""
+Define ${propertyName.allCapitalized}
+${schema.propertyDescription(parent, propertyName) ?: ""}
+""".trim()
 
 private fun Property.toParameter(builder: ParameterAggregator, schema: Schema) {
     builder.parameter(propertyName, clazz) {
         description = description(schema)
+        additionalQualifiers += schema.simpleTypeQualifiers(parent, propertyName)
     }
 }
 
@@ -230,6 +241,16 @@ private fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema:
         }
     }
 
+    if (!topComplex.isEmpty()) {
+        step("Advanced Parameters") {
+            for (prop in topComplex) {
+                parameter(prop.propertyName.condition, boolean) {
+                    description = prop.conditionDescription(schema)
+                }
+            }
+        }
+    }
+
     for (prop in topComplex) {
         val propProperties = prop.clazz.properties
         val primitives = propProperties.simpleProperties.onlyPrimitives
@@ -238,6 +259,7 @@ private fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema:
         when {
             primitives.isEmpty() -> groups(prop.title) {
                 description = schema.propertyDescription(clazz, prop.propertyName)
+                visibility = FromBooleanParameter(prop.propertyName.condition)
                 for (propProp in complex) {
                     group(propProp.title) {
                         description = schema.propertyDescription(propProp.parent, propProp.propertyName)
@@ -247,6 +269,7 @@ private fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema:
             }
             complex.isEmpty() -> step(prop.title) {
                 description = schema.propertyDescription(clazz, prop.propertyName)
+                visibility = FromBooleanParameter(prop.propertyName.condition)
                 primitives.forEach { it.toParameter(this@step, schema) }
             }
             else -> Unit // TODO("Add support for attributes with mixed structure.")
@@ -257,7 +280,7 @@ private fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema:
 private fun Schema.descriptionInCreateRelationWorkflow(parentClazz: ObjectClass, clazz: ObjectClass) : String {
     val relationDescription = relationDescription(parentClazz, clazz)
     return """
-        ${clazz.descriptionFormat.capitalize()} to be added.
+        ${clazz.allCapitalized} to be added.
         $relationDescription
     """.trimIndent()
 }
@@ -266,12 +289,12 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation, schema: S
 
     val parentName = relation.parentName
     val childName = relation.childName
-    val workflowName = "Add ${childName.workflowNameFormat} to ${parentName.workflowNameFormat}"
+    val workflowName = "Add ${childName.allLowerCase} to ${parentName.allLowerCase}"
     val scriptBody = relation.addReferenceRelationScriptBody()
 
     return info.versionOf(workflowName) withScript scriptBody andParameters {
         parameter(parent, parentName.reference) {
-            description = "${parentName.descriptionFormat.capitalize()} to add to"
+            description = "${parentName.allCapitalized} to add to"
             mandatory = true
         }
         parameter(child, childName.reference) {
@@ -288,16 +311,16 @@ fun removeReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation, action
 
     val parentName = relation.parentName
     val childName = relation.childName
-    val workflowName = "Remove ${childName.workflowNameFormat} from ${parentName.workflowNameFormat}"
+    val workflowName = "Remove ${childName.allLowerCase} from ${parentName.allLowerCase}"
     val scriptBody = relation.removeReferenceRelationScriptBody()
 
     return info.versionOf(workflowName) withScript scriptBody andParameters {
         parameter(parent, parentName.reference) {
-            description = "${parentName.descriptionFormat.capitalize()} to remove from"
+            description = "${parentName.allCapitalized} to remove from"
             mandatory = true
         }
         parameter(child, childName.reference) {
-            description = "${childName.descriptionFormat.capitalize()} to be removed"
+            description = "${childName.allCapitalized} to be removed"
             mandatory = true
             visibility = WhenNonNull(parent)
             listedBy(action)
@@ -350,6 +373,9 @@ private fun ForwardRelation.addReferenceRelationScriptBody() =
 private fun Property.setCode(ref: String) =
     "$ref.set${propertyName.capitalize()}($propertyName);"
 
+private val String.condition get() =
+    "define_$this"
+
 private fun Property.propertyCode(prefix: String): String =
     if (clazz.isApiTypeClass) clazz.attributeCode(propertyName, prefix, true) else ""
 
@@ -361,7 +387,7 @@ if (init)
 """
 ${prepare(prefix)}
 var $ref = null;
-if ($condition) {
+if (${ref.condition}) {
     $ref = new Contrail$simpleName();
     ${assign(ref, prefix+tab)}
 }
@@ -372,9 +398,6 @@ ${prepare(prefix)}
 ${assign(ref, prefix)}
 """
 }.trimStart().prependIndent(prefix)
-
-val List<Property>.condition get() =
-    joinToString(" ||\n$tab") { "${it.propertyName} != null" }
 
 fun List<Property>.assign(ref: String, prefix: String = tab) =
     joinToString(separator = "\n$prefix") { it.setCode(ref) }

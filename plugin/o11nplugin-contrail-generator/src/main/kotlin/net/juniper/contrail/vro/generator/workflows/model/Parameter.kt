@@ -114,3 +114,12 @@ val String.reference get() =
 
 val Class<*>.reference get() =
     Reference(this)
+
+val Class<*>.parameterType get() = when (this) {
+    java.lang.Boolean::class.java, java.lang.Boolean.TYPE -> boolean
+    String::class.java -> string
+    java.lang.Integer::class.java, java.lang.Integer.TYPE,
+    java.lang.Long::class.java, java.lang.Long.TYPE -> number
+    java.util.Date::class.java -> date
+    else -> reference
+}

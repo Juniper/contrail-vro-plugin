@@ -15,6 +15,8 @@ val optional = "optional"
 val xsdString = "xsd:string"
 val xsdBoolean = "xsd:boolean"
 val xsdInteger = "xsd:integer"
+val xsdTime = "xsd:time"
+val xsdDateTime = "xsd:dateTime"
 
 val xsdElement = "xsd:element"
 val xsdSimpleType = "xsd:simpleType"
@@ -26,7 +28,7 @@ val xsdRestriction = "xsd:restriction"
 val xsdEnumeration = "xsd:enumeration"
 
 val xsdTypes = listOf(xsdComplexType, xsdSimpleType, xsdElement)
-val knownSchemaTypes = listOf(xsdString, xsdBoolean, xsdInteger)
+val knownSchemaTypes = listOf(xsdString, xsdBoolean, xsdInteger, xsdTime, xsdDateTime)
 
 val ifmapIdlName = "#IFMAP-SEMANTICS-IDL"
 val commentName = "#comment"
