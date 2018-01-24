@@ -12,7 +12,7 @@ import net.juniper.contrail.vro.generator.workflows.model.wrapConstraints
 import org.w3c.dom.Node
 
 fun Schema.simpleTypeQualifiers(clazz: Class<*>, propertyName: String): List<ParameterQualifier> = when {
-    clazz.isApiObjectClass -> objectFieldQualifiers(propertyName.xsdName)
+    clazz.isApiObjectClass -> objectFieldQualifiers(clazz.xsdName, propertyName.xsdName)
     else -> propertyFieldQualifiers(clazz, propertyName.xsdName)
 }
 
@@ -158,8 +158,9 @@ private fun stringConstraints(restrictionChild: Node): Map<String, Any> {
     return constraints
 }
 
-private fun Schema.objectFieldQualifiers(xsdFieldName: String): List<ParameterQualifier> {
-    val matchingElements = elements.withAttribute(name, xsdFieldName)
+private fun Schema.objectFieldQualifiers(xsdParent: String, xsdFieldName: String): List<ParameterQualifier> {
+    val fullName = "$xsdParent-$xsdFieldName"
+    val matchingElements = elements.withAttribute(name) { it == xsdFieldName || it == fullName }
     if (matchingElements.size > 1)
         throw IllegalStateException("Multiple definitions of property $xsdFieldName")
     val definitionNode = matchingElements.firstOrNull() ?: return emptyList()

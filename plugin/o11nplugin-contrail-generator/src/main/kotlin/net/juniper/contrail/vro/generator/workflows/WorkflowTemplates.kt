@@ -196,8 +196,10 @@ fun deleteWorkflow(info: ProjectInfo, className: String, scriptBody: String): Wo
     }
 }
 
-private val Property.title get() =
-    propertyName.allCapitalized
+private val Property.title get() = when (propertyName) {
+    "mgmt" -> "Management"
+    else -> propertyName.allCapitalized
+}
 
 private fun Property.description(schema: Schema) =
 """
@@ -207,7 +209,7 @@ ${schema.propertyDescription(parent, propertyName) ?: ""}
 
 private fun Property.conditionDescription(schema: Schema) =
 """
-Define ${propertyName.allCapitalized}
+Define $title
 ${schema.propertyDescription(parent, propertyName) ?: ""}
 """.trim()
 
@@ -236,13 +238,13 @@ private fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema:
     val topComplex = properties.simpleProperties.onlyComplex
 
     if (!topPrimitives.isEmpty()) {
-        step("Custom Parameters") {
+        step("Custom parameters") {
             topPrimitives.forEach { it.toParameter(this@step, schema) }
         }
     }
 
     if (!topComplex.isEmpty()) {
-        step("Advanced Parameters") {
+        step("Advanced parameters") {
             for (prop in topComplex) {
                 parameter(prop.propertyName.condition, boolean) {
                     description = prop.conditionDescription(schema)
@@ -272,7 +274,19 @@ private fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema:
                 visibility = FromBooleanParameter(prop.propertyName.condition)
                 primitives.forEach { it.toParameter(this@step, schema) }
             }
-            else -> Unit // TODO("Add support for attributes with mixed structure.")
+            else -> groups(prop.title) {
+                description = schema.propertyDescription(clazz, prop.propertyName)
+                visibility = FromBooleanParameter(prop.propertyName.condition)
+                group("Custom parameters") {
+                    primitives.forEach { it.toParameter(this@group, schema) }
+                }
+                for (propProp in complex) {
+                    group(propProp.title) {
+                        description = schema.propertyDescription(propProp.parent, propProp.propertyName)
+                        propProp.clazz.properties.simpleProperties.onlyPrimitives.forEach { it.toParameter(this@group, schema) }
+                    }
+                }
+            }
         }
     }
 }
@@ -406,6 +420,7 @@ fun List<Property>.prepare(prefix: String) =
     joinToString(separator = "") { it.propertyCode(prefix) }
 
 private fun ForwardRelation.addRelationWithAttributeScriptBody() = """
+var attribute = new Contrail${attribute.simpleName}();
 ${ attribute.attributeCode("attribute") }
 $parent.add$childName($child, attribute);
 $retrieveExecutorAndUpdateParent

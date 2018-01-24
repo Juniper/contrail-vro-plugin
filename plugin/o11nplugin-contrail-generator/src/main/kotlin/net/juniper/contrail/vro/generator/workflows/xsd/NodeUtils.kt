@@ -48,5 +48,11 @@ val Node.idlComment: Node? get() {
 fun Iterable<Node>.withAttribute(attribute: String, name: String) =
     asSequence().withAttribute(attribute, name).toList()
 
+inline fun Iterable<Node>.withAttribute(attribute: String, crossinline condition: (String) -> Boolean) =
+    asSequence().withAttribute(attribute, condition).toList()
+
 fun Sequence<Node>.withAttribute(attribute: String, value: String): Sequence<Node> =
-    filter { it.attributeValue(attribute) == value }
+    withAttribute(attribute) { it.equals(value, ignoreCase = true) }
+
+inline fun Sequence<Node>.withAttribute(attribute: String, crossinline condition: (String) -> Boolean): Sequence<Node> =
+    filter { it.attributeValue(attribute)?.run(condition) ?: false }
