@@ -9,7 +9,6 @@ import net.juniper.contrail.vro.config.bold
 import net.juniper.contrail.vro.config.camelChunks
 import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.ignoredInWorkflow
-import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.generator.model.properties
@@ -18,14 +17,13 @@ import net.juniper.contrail.vro.config.isEditableProperty
 import net.juniper.contrail.vro.config.isPropertyOrStringListWrapper
 import net.juniper.contrail.vro.config.pluralParameterName
 import net.juniper.contrail.vro.config.splitCamel
+import net.juniper.contrail.vro.generator.Contrail
 import net.juniper.contrail.vro.generator.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.generator.workflows.dsl.PresentationParametersBuilder
+import net.juniper.contrail.vro.generator.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.generator.workflows.model.SecureString
-import net.juniper.contrail.vro.generator.workflows.model.Workflow
-import net.juniper.contrail.vro.generator.workflows.dsl.andParameters
-import net.juniper.contrail.vro.generator.workflows.dsl.packagedIn
 import net.juniper.contrail.vro.generator.workflows.dsl.withScript
-import net.juniper.contrail.vro.generator.workflows.dsl.withVersion
+import net.juniper.contrail.vro.generator.workflows.dsl.workflow
 import net.juniper.contrail.vro.generator.workflows.model.Action
 import net.juniper.contrail.vro.generator.workflows.model.Element
 import net.juniper.contrail.vro.generator.workflows.model.FromBooleanParameter
@@ -51,10 +49,10 @@ fun Element.elementInfoPropertiesFor(categoryPath: String) = createElementInfoPr
     id = id
 )
 
-fun dunesPropertiesFor(info: ProjectInfo) = createDunesProperties(
-    pkgDescription = "Contrail package",
-    pkgName = info.workflowsPackageName,
-    usedPlugins = "Contrail#${info.baseVersion}",
+fun dunesPropertiesFor(packageName: String, version: String) = createDunesProperties(
+    pkgDescription = "$Contrail package",
+    pkgName = packageName,
+    usedPlugins = "$Contrail#$version",
     pkgOwner = "Juniper",
     pkgId = "4452345677834623546675023032605023032"
 )
@@ -81,17 +79,8 @@ private val Class<*>.allCapitalized get() =
 
 private val typeSuffix = "Type$".toRegex()
 
-val ProjectInfo.workflowVersion get() =
-    "$baseVersion.$buildNumber"
-
-fun ProjectInfo.versionOf(name: String) =
-    name packagedIn workflowsPackageName withVersion workflowVersion
-
-fun createConnectionWorkflow(info: ProjectInfo): Workflow {
-
-    val workflowName = "Create Contrail connection"
-
-    return info.versionOf(workflowName) withScript createConnectionScriptBody andParameters {
+fun createConnectionWorkflow() =
+    workflow("Create Contrail connection").withScript(createConnectionScriptBody) {
         step("Controller") {
             parameter("name", string) {
                 description = "Connection name"
@@ -127,7 +116,6 @@ fun createConnectionWorkflow(info: ProjectInfo): Workflow {
             }
         }
     }
-}
 
 private fun Schema.createWorkflowDescription(clazz: ObjectClass) : String? {
     val objectDescription = objectDescription(clazz) ?: return null
@@ -145,12 +133,12 @@ private fun Schema.relationInCreateWorkflowDescription(parentClazz: ObjectClass,
     """.trimIndent()
 }
 
-fun createWorkflow(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<ObjectClass>, schema: Schema): Workflow {
+fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
 
     val workflowName = "Create ${clazz.allLowerCase}"
     val parentName = parentClazz?.simpleName ?: Connection
 
-    return info.versionOf(workflowName) withScript createScriptBody(clazz, parentClazz, refs) andParameters {
+    return workflow(workflowName).withScript(createScriptBody(clazz, parentClazz, refs)) {
         description = schema.createWorkflowDescription(clazz)
         parameter("name", string) {
             description = "${clazz.allCapitalized} name"
@@ -177,24 +165,20 @@ fun createWorkflow(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectCla
     }
 }
 
-fun deleteConnectionWorkflow(info: ProjectInfo): Workflow =
-    deleteWorkflow(info, Connection, deleteConnectionScriptBody)
+fun deleteConnectionWorkflow() =
+    deleteWorkflow(Connection, deleteConnectionScriptBody)
 
-fun deleteWorkflow(info: ProjectInfo, clazz: ObjectClass): Workflow =
-    deleteWorkflow(info, clazz.simpleName, deleteScriptBody(clazz.simpleName))
+fun deleteWorkflow(clazz: ObjectClass) =
+    deleteWorkflow(clazz.simpleName, deleteScriptBody(clazz.simpleName))
 
-fun deleteWorkflow(info: ProjectInfo, className: String, scriptBody: String): Workflow {
-
-    val workflowName = "Delete ${className.allLowerCase}"
-
-    return info.versionOf(workflowName) withScript scriptBody andParameters {
+fun deleteWorkflow(className: String, scriptBody: String) =
+    workflow("Delete ${className.allLowerCase}").withScript(scriptBody) {
         parameter(item, className.reference) {
             description = "${className.allCapitalized} to delete"
             mandatory = true
             showInInventory = true
         }
     }
-}
 
 private val Property.title get() = when (propertyName) {
     "mgmt" -> "Management"
@@ -299,14 +283,14 @@ private fun Schema.descriptionInCreateRelationWorkflow(parentClazz: ObjectClass,
     """.trimIndent()
 }
 
-fun addReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation, schema: Schema): Workflow {
+fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDefinition {
 
     val parentName = relation.parentName
     val childName = relation.childName
     val workflowName = "Add ${childName.allLowerCase} to ${parentName.allLowerCase}"
     val scriptBody = relation.addReferenceRelationScriptBody()
 
-    return info.versionOf(workflowName) withScript scriptBody andParameters {
+    return workflow(workflowName).withScript(scriptBody) {
         parameter(parent, parentName.reference) {
             description = "${parentName.allCapitalized} to add to"
             mandatory = true
@@ -321,14 +305,14 @@ fun addReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation, schema: S
     }
 }
 
-fun removeReferenceWorkflow(info: ProjectInfo, relation: ForwardRelation, action: Action): Workflow {
+fun removeReferenceWorkflow(relation: ForwardRelation, action: Action): WorkflowDefinition {
 
     val parentName = relation.parentName
     val childName = relation.childName
     val workflowName = "Remove ${childName.allLowerCase} from ${parentName.allLowerCase}"
     val scriptBody = relation.removeReferenceRelationScriptBody()
 
-    return info.versionOf(workflowName) withScript scriptBody andParameters {
+    return workflow(workflowName).withScript(scriptBody) {
         parameter(parent, parentName.reference) {
             description = "${parentName.allCapitalized} to remove from"
             mandatory = true

@@ -8,20 +8,20 @@ import net.juniper.contrail.api.types.NetworkPolicy
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.generator.ProjectInfo
-import net.juniper.contrail.vro.generator.workflows.dsl.andParameters
+import net.juniper.contrail.vro.generator.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.generator.workflows.dsl.withScript
+import net.juniper.contrail.vro.generator.workflows.dsl.workflow
 import net.juniper.contrail.vro.generator.workflows.model.FromStringParameter
-import net.juniper.contrail.vro.generator.workflows.model.Workflow
 import net.juniper.contrail.vro.generator.workflows.model.boolean
 import net.juniper.contrail.vro.generator.workflows.model.reference
 import net.juniper.contrail.vro.generator.workflows.model.string
 
-fun addRuleToPolicyWorkflow(info: ProjectInfo): Workflow {
+fun addRuleToPolicyWorkflow(info: ProjectInfo): WorkflowDefinition {
 
     val workflowName = "Add rule to policy"
 
-    return info.versionOf(workflowName) withScript loadFile(info.generatorRoot, "addRuleToPolicy") andParameters {
-        parameter("parent", NetworkPolicy::class.java.reference) {
+    return workflow(workflowName).withScript(loadFile(info.generatorRoot, "addRuleToPolicy")) {
+        parameter("parent", reference<NetworkPolicy>()) {
             description = "Policy to add the rule to"
             mandatory = true
         }
@@ -53,15 +53,15 @@ fun addRuleToPolicyWorkflow(info: ProjectInfo): Workflow {
             description = "Source CIDR"
             visibility = FromStringParameter("src_address_type", "CIDR")
         }
-        parameter("src_address_network", VirtualNetwork::class.java.simpleName.reference) {
+        parameter("src_address_network", reference<VirtualNetwork>()) {
             description = "Source Virtual Network"
             visibility = FromStringParameter("src_address_type", "Network")
         }
-        parameter("src_address_policy", NetworkPolicy::class.java.simpleName.reference) {
+        parameter("src_address_policy", reference<NetworkPolicy>()) {
             description = "Source Network Policy"
             visibility = FromStringParameter("src_address_type", "Policy")
         }
-        parameter("src_address_security_group", SecurityGroup::class.java.simpleName.reference) {
+        parameter("src_address_security_group", reference<SecurityGroup>()) {
             description = "Source Security Group"
             visibility = FromStringParameter("src_address_type", "Security Group")
         }
@@ -80,15 +80,15 @@ fun addRuleToPolicyWorkflow(info: ProjectInfo): Workflow {
             description = "Destination CIDR"
             visibility = FromStringParameter("dst_address_type", "CIDR")
         }
-        parameter("dst_address_network", VirtualNetwork::class.java.simpleName.reference) {
+        parameter("dst_address_network", reference<VirtualNetwork>()) {
             description = "Destination Virtual Network"
             visibility = FromStringParameter("dst_address_type", "Network")
         }
-        parameter("dst_address_policy", NetworkPolicy::class.java.simpleName.reference) {
+        parameter("dst_address_policy", reference<NetworkPolicy>()) {
             description = "Destination Network Policy"
             visibility = FromStringParameter("dst_address_type", "Policy")
         }
-        parameter("dst_address_security_group", SecurityGroup::class.java.simpleName.reference) {
+        parameter("dst_address_security_group", reference<SecurityGroup>()) {
             description = "Destination Security Group"
             visibility = FromStringParameter("dst_address_type", "Security Group")
         }

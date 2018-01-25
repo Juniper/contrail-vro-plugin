@@ -4,6 +4,8 @@
 
 package net.juniper.contrail.vro.generator
 
+val Contrail = "Contrail"
+
 val generatedPackageName = "net.juniper.contrail.vro.generated"
 
 val generatedSourcesRoot = "/target/generated-sources"

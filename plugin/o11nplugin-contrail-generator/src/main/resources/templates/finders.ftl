@@ -52,12 +52,8 @@ class ${klass}Finder
 </#list>
 
 fun getIndex(sid: Sid, key: String): Int? {
-    val potentialIndexStr = sid.getString(key)
-    return if(potentialIndexStr == "") {
-        null
-    } else {
-        potentialIndexStr.toInt()
-    }
+    val potentialIndexStr: String? = sid.getString(key)
+    return potentialIndexStr?.toIntOrNull()
 }
 
 <#list nestedRelations as relation>

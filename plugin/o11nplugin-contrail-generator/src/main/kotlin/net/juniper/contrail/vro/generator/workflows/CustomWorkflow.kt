@@ -10,9 +10,9 @@ import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.SubnetType
 import net.juniper.contrail.vro.generator.ProjectInfo
-import net.juniper.contrail.vro.generator.workflows.dsl.andParameters
+import net.juniper.contrail.vro.generator.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.generator.workflows.dsl.withScript
-import net.juniper.contrail.vro.generator.workflows.model.Workflow
+import net.juniper.contrail.vro.generator.workflows.dsl.workflow
 import net.juniper.contrail.vro.generator.workflows.model.number
 import net.juniper.contrail.vro.generator.workflows.model.reference
 import net.juniper.contrail.vro.generator.workflows.model.string
@@ -23,13 +23,13 @@ import net.juniper.contrail.vro.generator.workflows.xsd.Schema
 import net.juniper.contrail.vro.generator.workflows.xsd.propertyDescription
 import net.juniper.contrail.vro.generator.workflows.xsd.relationDescription
 
-fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): Workflow {
+fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): WorkflowDefinition {
 
     val workflowName = "Add subnet to virtual network"
 
     // Due to custom validation in Contrail UI the mandatory field is not extracted from schema
 
-    return info.versionOf(workflowName) withScript loadFile(info.generatorRoot, "createIpamSubnet") andParameters {
+    return workflow(workflowName).withScript(loadFile(info.generatorRoot, "createIpamSubnet")) {
         step("References") {
             parameter("parent", reference<VirtualNetwork>()) {
                 description = schema.relationDescription(Project::class.java, VirtualNetwork::class.java)

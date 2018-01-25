@@ -11,6 +11,7 @@ import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
 import net.juniper.contrail.vro.config.packageToPath
+import net.juniper.contrail.vro.generator.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.generator.workflows.model.Action
 import net.juniper.contrail.vro.generator.workflows.model.Element
 import net.juniper.contrail.vro.generator.workflows.model.Workflow
@@ -23,8 +24,8 @@ import javax.xml.bind.Marshaller
 
 fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: Schema) {
     generateDunesMetaInfo(info)
-    createConnectionWorkflow(info).saveInConfiguration(info)
-    deleteConnectionWorkflow(info).saveInConfiguration(info)
+    createConnectionWorkflow().saveInConfiguration(info)
+    deleteConnectionWorkflow().saveInConfiguration(info)
 
     relations.rootClasses.forEach {
         val refs = relations.referencesOf(it)
@@ -50,8 +51,8 @@ fun RelationDefinition.referencesOf(clazz: ObjectClass) =
         .toList()
 
 private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<ObjectClass>, schema: Schema) {
-    createWorkflow(info, clazz, parentClazz, refs, schema).save(info, clazz.simpleName)
-    deleteWorkflow(info, clazz).save(info, clazz.simpleName)
+    createWorkflow(clazz, parentClazz, refs, schema).save(info, clazz.simpleName)
+    deleteWorkflow(clazz).save(info, clazz.simpleName)
 }
 
 private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema) =
@@ -60,8 +61,8 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, re
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation, schema: Schema) {
     val action = relation.findReferencesAction(info.workflowVersion, info.workflowsPackageName)
     action.save(info)
-    addReferenceWorkflow(info, relation, schema).save(info, relation.parentName)
-    removeReferenceWorkflow(info, relation, action).save(info, relation.parentName)
+    addReferenceWorkflow(relation, schema).save(info, relation.parentName)
+    removeReferenceWorkflow(relation, action).save(info, relation.parentName)
 }
 
 private fun createCustomWorkflows(info: ProjectInfo, schema: Schema) {
@@ -84,6 +85,9 @@ val propertiesMarshaller = propertiesContext.createMarshaller().apply {
         <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">""".trimIndent())
 }
 
+private val ProjectInfo.workflowVersion get() =
+    "$baseVersion.$buildNumber"
+
 private fun Marshaller.applyDefaultSetup(): Marshaller {
     setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)
     setProperty(CharacterEscapeHandler::class.java.name, DefaultCharacterEscapeHandler())
@@ -98,6 +102,15 @@ private fun Workflow.save(info: ProjectInfo, category: String) {
     generateDefinition(info, categoryPackage)
     generateElementInfo(info, categoryPackage)
 }
+
+private fun WorkflowDefinition.saveInConfiguration(info: ProjectInfo) =
+    createWorkflow(info).saveInConfiguration(info)
+
+private fun WorkflowDefinition.save(info: ProjectInfo, category: String) =
+    createWorkflow(info).save(info, category)
+
+private fun WorkflowDefinition.createWorkflow(info: ProjectInfo) =
+    createWorkflow(info.workflowsPackageName, info.workflowVersion)
 
 private fun Action.save(info: ProjectInfo) {
     val categoryPackage = info.workflowsPackageName
@@ -132,7 +145,7 @@ private fun Element.generateElementInfo(info: ProjectInfo, categoryPath: String)
 
 private fun generateDunesMetaInfo(info: ProjectInfo) {
     val outputFile = dunesOutputPath(info).asPreparedFile()
-    val properties = dunesPropertiesFor(info)
+    val properties = dunesPropertiesFor(info.workflowsPackageName, info.baseVersion)
 
     propertiesMarshaller.marshal(properties, outputFile)
 }
