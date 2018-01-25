@@ -83,6 +83,18 @@ object any : ParameterType<Any>() {
         "any"
 }
 
+data class pair<Type1 : Any, Type2 : Any>(
+    val name1: String, val type1: ParameterType<Type1>,
+    val name2: String, val type2: ParameterType<Type2>
+) : ParameterType<Pair<Type1, Type2>>() {
+    override val name: String get() =
+        "CompositeType($name1:${type1.name},$name2:${type2.name})"
+
+    //just to avoid the auto-generated data class version of toString()
+    override fun toString() =
+        name
+}
+
 data class array<out Type : Any>(val type: ParameterType<Type>) : ParameterType<List<Type>>() {
     override val name: String get() =
         "Array/${type.name}"
@@ -114,6 +126,9 @@ val String.reference get() =
 
 val Class<*>.reference get() =
     Reference(this)
+
+inline fun <reified T> reference() =
+    T::class.java.reference
 
 val Class<*>.parameterType get() = when (this) {
     java.lang.Boolean::class.java, java.lang.Boolean.TYPE -> boolean

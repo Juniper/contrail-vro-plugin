@@ -45,4 +45,10 @@ class Executor(private val connection: Connection) {
         connection.getObjects(${relation.childName}::class.java, parent.${relation.getter})
 
     </#list>
+
+    fun getVnSubnet(vnetwork: VirtualNetwork, ipam: NetworkIpam): VnSubnetsType =
+        vnetwork.networkIpam.find { it.uuid == ipam.uuid }?.attr ?: VnSubnetsType()
+
+    fun isNetworRelatedToIpam(vnetwork: VirtualNetwork, ipam: NetworkIpam): Boolean =
+        vnetwork.networkIpam.any { it.uuid == ipam.uuid }
 }

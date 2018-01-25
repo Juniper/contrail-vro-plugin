@@ -18,18 +18,18 @@ import net.juniper.contrail.vro.generator.workflows.model.VisibilityCondition
 import net.juniper.contrail.vro.generator.workflows.model.WhenNonNull
 import net.juniper.contrail.vro.generator.workflows.model.array
 import net.juniper.contrail.vro.generator.workflows.model.boolean
+import net.juniper.contrail.vro.generator.workflows.model.number
+import net.juniper.contrail.vro.generator.workflows.model.string
 import net.juniper.contrail.vro.generator.workflows.model.date
 import net.juniper.contrail.vro.generator.workflows.model.defaultValueQualifier
-import net.juniper.contrail.vro.generator.workflows.model.listFromAction
 import net.juniper.contrail.vro.generator.workflows.model.mandatoryQualifier
-import net.juniper.contrail.vro.generator.workflows.model.maxNumberValueQualifier
-import net.juniper.contrail.vro.generator.workflows.model.minNumberValueQualifier
-import net.juniper.contrail.vro.generator.workflows.model.number
+import net.juniper.contrail.vro.generator.workflows.model.listFromAction
 import net.juniper.contrail.vro.generator.workflows.model.numberFormatQualifier
+import net.juniper.contrail.vro.generator.workflows.model.minNumberValueQualifier
+import net.juniper.contrail.vro.generator.workflows.model.maxNumberValueQualifier
 import net.juniper.contrail.vro.generator.workflows.model.predefinedAnswersQualifier
 import net.juniper.contrail.vro.generator.workflows.model.selectAsTreeQualifier
 import net.juniper.contrail.vro.generator.workflows.model.showInInventoryQualifier
-import net.juniper.contrail.vro.generator.workflows.model.string
 import net.juniper.contrail.vro.generator.workflows.model.visibleWhenBooleanSwitchedQualifier
 import net.juniper.contrail.vro.generator.workflows.model.visibleWhenNonNullQualifier
 import net.juniper.contrail.vro.generator.workflows.model.visibleWhenVariableHasValueQualifier
@@ -99,6 +99,12 @@ open class ParameterAggregator(
         ReferenceParameterBuilder(name, type).updateWith(setup)
     }
 
+    @JvmName("parameterArrayPair")
+    fun parameter(name: String, type: array<Pair<String, String>>, setup: ArrayPairParameterBuilder.() -> Unit) {
+        ArrayPairParameterBuilder(name, type).updateWith(setup)
+    }
+
+    @JvmName("parameterArrayReference")
     fun parameter(name: String, type: array<Reference>, setup: ReferenceArrayParameterBuilder.() -> Unit = {}) {
         ReferenceArrayParameterBuilder(name, type).updateWith(setup)
     }
@@ -187,6 +193,9 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
     protected open val customQualifiers: List<ParameterQualifier> get() =
         emptyList()
 }
+
+class ArrayPairParameterBuilder(name: String, type: array<Pair<String, String>>) :
+        BasicParameterBuilder<List<Pair<String, String>>>(name, type)
 
 class BooleanParameterBuilder(name: String) : BasicParameterBuilder<Boolean>(name, boolean)
 

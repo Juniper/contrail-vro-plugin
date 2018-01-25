@@ -41,6 +41,7 @@ fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: 
     relations.forwardRelations.forEach {
         generateReferenceWorkflows(info, it, schema)
     }
+    createCustomWorkflows(info, schema)
 }
 
 fun RelationDefinition.referencesOf(clazz: ObjectClass) =
@@ -63,6 +64,10 @@ private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelat
     action.save(info)
     addReferenceWorkflow(info, relation, schema).save(info, relation.parentName)
     removeReferenceWorkflow(info, relation, action).save(info, relation.parentName)
+}
+
+private fun createCustomWorkflows(info: ProjectInfo, schema: Schema) {
+    createIpamSubnetWorkflow(info, schema).save(info, "Custom")
 }
 
 val workflowContext = JAXBContext.newInstance(Workflow::class.java)
