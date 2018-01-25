@@ -14,8 +14,8 @@ updateRepo() {
 cd $(cd $(dirname "$0"); pwd)
 
 updateRepo https://github.com/Juniper/contrail-controller.git controller R4.0
-updateRepo https://github.com/danieljasinski/contrail-generateDS.git generateds vro
-updateRepo https://github.com/danieljasinski/contrail-java-api.git contrail-java-api flat-property-hierarchy
+updateRepo https://github.com/Juniper/contrail-generateDS.git generateds
+updateRepo https://github.com/Juniper/contrail-java-api.git contrail-java-api
 
 cd contrail-java-api
 mvn clean 
