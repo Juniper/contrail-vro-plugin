@@ -199,9 +199,9 @@ class ArrayPairParameterBuilder(name: String, type: array<Pair<String, String>>)
 
 class BooleanParameterBuilder(name: String) : BasicParameterBuilder<Boolean>(name, boolean)
 
-class IntParameterBuilder(name: String) : BasicParameterBuilder<Int>(name, number) {
-    var min: Int? = null
-    var max: Int? = null
+class IntParameterBuilder(name: String) : BasicParameterBuilder<Long>(name, number) {
+    var min: Long? = null
+    var max: Long? = null
 
     override val customQualifiers get(): List<ParameterQualifier> {
         val qualifiers = mutableListOf<ParameterQualifier>()

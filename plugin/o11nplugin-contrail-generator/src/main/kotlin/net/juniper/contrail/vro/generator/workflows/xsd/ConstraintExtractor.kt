@@ -126,11 +126,11 @@ private fun integerConstraints(restrictionChild: Node): Map<String, Any> {
     val children = restrictionChild.children
 
     val maxInclusive =
-        children.find { it.nodeName == "xsd:maxInclusive" }?.attributesMap?.get(value)?.toInt()
+        children.find { it.nodeName == "xsd:maxInclusive" }?.attributesMap?.get(value)?.toLong()
     if (maxInclusive != null) constraints.put("maxInclusive", maxInclusive)
 
     val minInclusive =
-        children.find { it.nodeName == "xsd:minInclusive" }?.attributesMap?.get(value)?.toInt()
+        children.find { it.nodeName == "xsd:minInclusive" }?.attributesMap?.get(value)?.toLong()
     if (minInclusive != null) constraints.put("minInclusive", minInclusive)
 
     return constraints

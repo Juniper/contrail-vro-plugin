@@ -11,7 +11,8 @@ val String.isModelClassName get() = when (this) {
     "FloatingIp",
     "FloatingIpPool",
     "NetworkPolicy",
-    "SecurityGroup" -> true
+    "SecurityGroup",
+    "Subnet"-> true
     else -> false
 }
 
@@ -64,7 +65,7 @@ val Class<*>.ignoredInWorkflow get() =
 val ObjectClass.isRootClass: Boolean get() {
     val parentType = newInstance().defaultParentType
 
-    if (parentType == null) return false
+    if (parentType == null) return true
     if (parentType == "config-root") return true
 
     return ! parentType.typeToClassName.isModelClassName

@@ -53,7 +53,7 @@ object boolean : ParameterType<Boolean>() {
         "boolean"
 }
 
-object number : ParameterType<Int>() {
+object number : ParameterType<Long>() {
     override val name get() =
         "number"
 }

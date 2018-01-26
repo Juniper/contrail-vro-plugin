@@ -71,8 +71,8 @@ fun <T : Any> predefinedAnswersQualifier(type: ParameterType<T>, values: List<T>
     return staticQualifier(genericEnumerationQualifierName, array(simpleType), cDATAListFormat(simpleType, values))
 }
 fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifierName, string, value)
-fun minNumberValueQualifier(value: Int) = staticQualifier(minNumberValueQualifierName, number, value)
-fun maxNumberValueQualifier(value: Int) = staticQualifier(maxNumberValueQualifierName, number, value)
+fun minNumberValueQualifier(value: Long) = staticQualifier(minNumberValueQualifierName, number, value)
+fun maxNumberValueQualifier(value: Long) = staticQualifier(maxNumberValueQualifierName, number, value)
 fun visibleWhenNonNullQualifier(otherName: String) =
     ognlQualifier(visibleQualifierName, boolean, "#$otherName != null")
 fun visibleWhenVariableHasValueQualifier(otherName: String, requiredValue: String) =
@@ -112,8 +112,8 @@ fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQuali
                 constraintValue.toString()
             )
         }
-        "minInclusive" -> minNumberValueQualifier(constraintValue.toString().toInt())
-        "maxInclusive" -> maxNumberValueQualifier(constraintValue.toString().toInt())
+        "minInclusive" -> minNumberValueQualifier(constraintValue.toString().toLong())
+        "maxInclusive" -> maxNumberValueQualifier(constraintValue.toString().toLong())
         "pattern" -> {
             ParameterQualifier(
                 static,
