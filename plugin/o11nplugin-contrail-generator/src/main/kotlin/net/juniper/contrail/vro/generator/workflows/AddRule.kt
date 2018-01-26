@@ -19,7 +19,7 @@ import net.juniper.contrail.vro.generator.workflows.model.string
 
 fun addRuleToPolicyWorkflow(info: ProjectInfo): Workflow {
 
-    val workflowName = "Add rule to policy (custom)"
+    val workflowName = "Add rule to policy"
 
     return info.versionOf(workflowName) withScript addRuleToPolicyScriptBody andParameters {
         addRuleParams()
@@ -27,21 +27,21 @@ fun addRuleToPolicyWorkflow(info: ProjectInfo): Workflow {
 }
 
 fun ParameterAggregator.addRuleParams(suffix: String = "") {
-    parameter("parent$suffix", NetworkPolicy::class.java.simpleName.reference) {
+    parameter("parent$suffix", NetworkPolicy::class.java.reference) {
         description = "Policy to add the rule to"
         mandatory = true
     }
     parameter("action$suffix", string) {
         description = "Action"
         mandatory = true
-        defaultValue = "PASS"
-        predefinedAnswers = listOf("PASS", "DENY")
+        defaultValue = "pass"
+        predefinedAnswers = listOf("pass", "deny")
     }
     parameter("protocol$suffix", string) {
         description = "Protocol"
         mandatory = true
-        defaultValue = "ANY"
-        predefinedAnswers = listOf("ANY", "TCP", "UDP", "ICMP", "ICMP6")
+        defaultValue = "any"
+        predefinedAnswers = listOf("any", "tcp", "udp", "icmp", "icmp6")
     }
     parameter("direction$suffix", string) {
         description = "Direction"
@@ -50,7 +50,7 @@ fun ParameterAggregator.addRuleParams(suffix: String = "") {
         predefinedAnswers = listOf("<>", ">")
     }
     parameter("src_address_type$suffix", string) {
-        description = "Traffic source"
+        description = "Traffic Source"
         mandatory = true
         defaultValue = "CIDR"
         predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
@@ -60,24 +60,24 @@ fun ParameterAggregator.addRuleParams(suffix: String = "") {
         visibility = FromStringParameter("src_address_type$suffix", "CIDR")
     }
     parameter("src_address_network$suffix", VirtualNetwork::class.java.simpleName.reference) {
-        description = "Source network"
+        description = "Source Virtual Network"
         visibility = FromStringParameter("src_address_type$suffix", "Network")
     }
     parameter("src_address_policy$suffix", NetworkPolicy::class.java.simpleName.reference) {
-        description = "Source policy"
+        description = "Source Network Policy"
         visibility = FromStringParameter("src_address_type$suffix", "Policy")
     }
     parameter("src_address_security_group$suffix", SecurityGroup::class.java.simpleName.reference) {
-        description = "Source security group"
+        description = "Source Security Group"
         visibility = FromStringParameter("src_address_type$suffix", "Security Group")
     }
     parameter("src_ports$suffix", string) {
         description = "Port"
         mandatory = true
-        defaultValue = "Any"
+        defaultValue = "any"
     }
     parameter("dst_address_type$suffix", string) {
-        description = "Traffic destination"
+        description = "Traffic Destination"
         mandatory = true
         defaultValue = "CIDR"
         predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
@@ -87,21 +87,21 @@ fun ParameterAggregator.addRuleParams(suffix: String = "") {
         visibility = FromStringParameter("dst_address_type$suffix", "CIDR")
     }
     parameter("dst_address_network$suffix", VirtualNetwork::class.java.simpleName.reference) {
-        description = "Destination network"
+        description = "Destination Virtual Network"
         visibility = FromStringParameter("dst_address_type$suffix", "Network")
     }
     parameter("dst_address_policy$suffix", NetworkPolicy::class.java.simpleName.reference) {
-        description = "Destination policy"
+        description = "Destination Network Policy"
         visibility = FromStringParameter("dst_address_type$suffix", "Policy")
     }
     parameter("dst_address_security_group$suffix", SecurityGroup::class.java.simpleName.reference) {
-        description = "Destination security group"
+        description = "Destination Security Group"
         visibility = FromStringParameter("dst_address_type$suffix", "Security Group")
     }
     parameter("dst_ports$suffix", string) {
         description = "Port"
         mandatory = true
-        defaultValue = "Any"
+        defaultValue = "any"
     }
     parameter("log$suffix", boolean) {
         description = "Log"
