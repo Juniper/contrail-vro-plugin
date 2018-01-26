@@ -27,6 +27,8 @@ fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): Workflow {
 
     val workflowName = "Add Subnet to Virtual Network"
 
+    // Due to custom validation in Contrail UI the mandatory field is not extracted from schema
+
     return info.versionOf(workflowName) withScript loadFile(info.generatorRoot, "createIpamSubnet") andParameters {
         step("References") {
             parameter("parent", reference<VirtualNetwork>()) {
@@ -54,6 +56,9 @@ fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): Workflow {
         }
         step("Parameters") {
             parameter("addr_from_start", boolean) {
+
+                // addr_from_start is the only parameter in IpamSubnet that has underscore in name
+
                 description = schema.propertyDescription(IpamSubnetType::class.java, "addr_from_start")
                 mandatory = true
                 defaultValue = true
