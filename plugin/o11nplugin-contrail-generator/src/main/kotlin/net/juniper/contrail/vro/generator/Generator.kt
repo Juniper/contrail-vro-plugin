@@ -6,7 +6,6 @@ package net.juniper.contrail.vro.generator
 
 import net.juniper.contrail.vro.config.inventoryPropertyFilter
 import net.juniper.contrail.vro.config.modelClassFilter
-import net.juniper.contrail.vro.config.rootClassFilter
 import net.juniper.contrail.vro.config.div
 import net.juniper.contrail.vro.generator.model.buildRelationDefinition
 import net.juniper.contrail.vro.generator.model.generateModel
@@ -25,14 +24,13 @@ object Generator {
         val repositoryRoot = pluginRoot.parent
 
         val objectClasses = objectClasses().filter(modelClassFilter)
-        val rootClasses = objectClasses.filter(rootClassFilter)
         val propertyClasses = objectClasses.propertyClasses()
 
         val schemaPath = repositoryRoot / schemaFilePath
         val schema = buildSchema(schemaPath)
-        val relations = buildRelationDefinition(objectClasses, rootClasses, inventoryPropertyFilter)
+        val relations = buildRelationDefinition(objectClasses, inventoryPropertyFilter)
 
-        generateModel(projectInfo, relations, objectClasses, rootClasses, propertyClasses)
+        generateModel(projectInfo, relations, objectClasses, propertyClasses)
         generateWorkflows(projectInfo, relations, schema)
     }
 }

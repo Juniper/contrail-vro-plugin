@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.PropertyClassFilter
+import net.juniper.contrail.vro.config.rootClassFilter
 
 class RelationDefinition(
     val rootClasses: List<ObjectClass>,
@@ -16,10 +17,9 @@ class RelationDefinition(
 
 fun buildRelationDefinition(
     objectClasses: List<ObjectClass>,
-    rootClasses: List<ObjectClass>,
     inventoryPropertyFilter: PropertyClassFilter
 ) = RelationDefinition(
-    rootClasses,
+    objectClasses.filter(rootClassFilter),
     objectClasses.generateRelations(),
     objectClasses.generateReferenceRelations(),
     objectClasses.generateNestedRelations(inventoryPropertyFilter)

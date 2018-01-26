@@ -23,6 +23,13 @@ class Executor(private val connection: Connection) {
     }
     </#list>
 
+    <#list internalClasses as internalClass>
+    @Throws(IOException::class)
+    fun create${internalClass.simpleName}(obj: ${internalClass.simpleName}) {
+        connection.create(obj)
+    }
+    </#list>
+
     <#list findableClasses as klass>
     @Throws(IOException::class)
     fun update${klass.simpleName}(obj: ${klass.simpleName}) {
