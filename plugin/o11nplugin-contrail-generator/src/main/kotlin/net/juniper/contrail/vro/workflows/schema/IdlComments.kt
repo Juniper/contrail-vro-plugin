@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator.workflows.xsd
+package net.juniper.contrail.vro.workflows.schema
 
 private val insideQuotesRegex = "'[^']+'".toRegex()
 

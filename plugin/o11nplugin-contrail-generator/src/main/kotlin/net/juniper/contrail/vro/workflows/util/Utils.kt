@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator.workflows.util
+package net.juniper.contrail.vro.workflows.util
 
 import com.google.common.hash.Hashing
 import net.juniper.contrail.vro.generator.scriptPath

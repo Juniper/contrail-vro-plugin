@@ -10,19 +10,19 @@ import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.SubnetType
 import net.juniper.contrail.vro.generator.ProjectInfo
-import net.juniper.contrail.vro.generator.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.generator.workflows.dsl.withScript
-import net.juniper.contrail.vro.generator.workflows.dsl.workflow
-import net.juniper.contrail.vro.generator.workflows.model.number
-import net.juniper.contrail.vro.generator.workflows.model.reference
-import net.juniper.contrail.vro.generator.workflows.model.string
-import net.juniper.contrail.vro.generator.workflows.model.boolean
-import net.juniper.contrail.vro.generator.workflows.model.array
-import net.juniper.contrail.vro.generator.workflows.model.pair
-import net.juniper.contrail.vro.generator.workflows.util.extractPropertyDescription
-import net.juniper.contrail.vro.generator.workflows.util.extractRelationDescription
-import net.juniper.contrail.vro.generator.workflows.util.loadFile
-import net.juniper.contrail.vro.generator.workflows.xsd.Schema
+import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.withScript
+import net.juniper.contrail.vro.workflows.dsl.workflow
+import net.juniper.contrail.vro.workflows.model.number
+import net.juniper.contrail.vro.workflows.model.reference
+import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.model.boolean
+import net.juniper.contrail.vro.workflows.model.array
+import net.juniper.contrail.vro.workflows.model.pair
+import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
+import net.juniper.contrail.vro.workflows.util.extractRelationDescription
+import net.juniper.contrail.vro.workflows.util.loadFile
+import net.juniper.contrail.vro.workflows.schema.Schema
 
 fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): WorkflowDefinition {
 

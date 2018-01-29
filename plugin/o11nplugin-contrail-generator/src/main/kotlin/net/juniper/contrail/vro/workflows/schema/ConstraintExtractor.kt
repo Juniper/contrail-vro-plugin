@@ -2,13 +2,13 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator.workflows.xsd
+package net.juniper.contrail.vro.workflows.schema
 
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.defaultParentType
 import net.juniper.contrail.vro.config.isApiObjectClass
-import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
-import net.juniper.contrail.vro.generator.workflows.model.wrapConstraints
+import net.juniper.contrail.vro.workflows.model.ParameterQualifier
+import net.juniper.contrail.vro.workflows.model.wrapConstraints
 import org.w3c.dom.Node
 
 fun Schema.simpleTypeQualifiers(clazz: Class<*>, propertyName: String): List<ParameterQualifier> = when {

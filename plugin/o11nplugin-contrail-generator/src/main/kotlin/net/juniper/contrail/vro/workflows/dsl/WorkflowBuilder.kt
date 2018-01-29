@@ -2,14 +2,14 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator.workflows.dsl
+package net.juniper.contrail.vro.workflows.dsl
 
-import net.juniper.contrail.vro.generator.workflows.model.Binding
-import net.juniper.contrail.vro.generator.workflows.model.Position
-import net.juniper.contrail.vro.generator.workflows.model.WorkflowItem
-import net.juniper.contrail.vro.generator.workflows.model.WorkflowItemType
-import net.juniper.contrail.vro.generator.workflows.model.Script
-import net.juniper.contrail.vro.generator.workflows.model.boolean
+import net.juniper.contrail.vro.workflows.model.Binding
+import net.juniper.contrail.vro.workflows.model.Position
+import net.juniper.contrail.vro.workflows.model.WorkflowItem
+import net.juniper.contrail.vro.workflows.model.WorkflowItemType
+import net.juniper.contrail.vro.workflows.model.Script
+import net.juniper.contrail.vro.workflows.model.boolean
 
 @DslMarker
 annotation class WorkflowBuilder

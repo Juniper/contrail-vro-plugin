@@ -2,16 +2,16 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator.workflows.dsl
+package net.juniper.contrail.vro.workflows.dsl
 
-import net.juniper.contrail.vro.generator.workflows.model.Bind
-import net.juniper.contrail.vro.generator.workflows.model.Parameter
-import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
-import net.juniper.contrail.vro.generator.workflows.model.ParameterSet
-import net.juniper.contrail.vro.generator.workflows.model.ParameterType
-import net.juniper.contrail.vro.generator.workflows.model.PresentationParameter
-import net.juniper.contrail.vro.generator.workflows.model.Reference
-import net.juniper.contrail.vro.generator.workflows.model.showInInventoryQualifier
+import net.juniper.contrail.vro.workflows.model.Bind
+import net.juniper.contrail.vro.workflows.model.Parameter
+import net.juniper.contrail.vro.workflows.model.ParameterQualifier
+import net.juniper.contrail.vro.workflows.model.ParameterSet
+import net.juniper.contrail.vro.workflows.model.ParameterType
+import net.juniper.contrail.vro.workflows.model.PresentationParameter
+import net.juniper.contrail.vro.workflows.model.Reference
+import net.juniper.contrail.vro.workflows.model.showInInventoryQualifier
 
 class ParameterInfo(
     val name: String,

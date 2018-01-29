@@ -2,37 +2,37 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator.workflows.dsl
+package net.juniper.contrail.vro.workflows.dsl
 
-import net.juniper.contrail.vro.generator.workflows.model.Action
-import net.juniper.contrail.vro.generator.workflows.model.AlwaysVisible
-import net.juniper.contrail.vro.generator.workflows.model.FromBooleanParameter
-import net.juniper.contrail.vro.generator.workflows.model.ParameterQualifier
-import net.juniper.contrail.vro.generator.workflows.model.ParameterType
-import net.juniper.contrail.vro.generator.workflows.model.PresentationGroup
-import net.juniper.contrail.vro.generator.workflows.model.PresentationStep
-import net.juniper.contrail.vro.generator.workflows.model.Reference
-import net.juniper.contrail.vro.generator.workflows.model.SecureString
-import net.juniper.contrail.vro.generator.workflows.model.FromStringParameter
-import net.juniper.contrail.vro.generator.workflows.model.VisibilityCondition
-import net.juniper.contrail.vro.generator.workflows.model.WhenNonNull
-import net.juniper.contrail.vro.generator.workflows.model.array
-import net.juniper.contrail.vro.generator.workflows.model.boolean
-import net.juniper.contrail.vro.generator.workflows.model.number
-import net.juniper.contrail.vro.generator.workflows.model.string
-import net.juniper.contrail.vro.generator.workflows.model.date
-import net.juniper.contrail.vro.generator.workflows.model.defaultValueQualifier
-import net.juniper.contrail.vro.generator.workflows.model.mandatoryQualifier
-import net.juniper.contrail.vro.generator.workflows.model.listFromAction
-import net.juniper.contrail.vro.generator.workflows.model.numberFormatQualifier
-import net.juniper.contrail.vro.generator.workflows.model.minNumberValueQualifier
-import net.juniper.contrail.vro.generator.workflows.model.maxNumberValueQualifier
-import net.juniper.contrail.vro.generator.workflows.model.predefinedAnswersQualifier
-import net.juniper.contrail.vro.generator.workflows.model.selectAsTreeQualifier
-import net.juniper.contrail.vro.generator.workflows.model.showInInventoryQualifier
-import net.juniper.contrail.vro.generator.workflows.model.visibleWhenBooleanSwitchedQualifier
-import net.juniper.contrail.vro.generator.workflows.model.visibleWhenNonNullQualifier
-import net.juniper.contrail.vro.generator.workflows.model.visibleWhenVariableHasValueQualifier
+import net.juniper.contrail.vro.workflows.model.Action
+import net.juniper.contrail.vro.workflows.model.AlwaysVisible
+import net.juniper.contrail.vro.workflows.model.FromBooleanParameter
+import net.juniper.contrail.vro.workflows.model.ParameterQualifier
+import net.juniper.contrail.vro.workflows.model.ParameterType
+import net.juniper.contrail.vro.workflows.model.PresentationGroup
+import net.juniper.contrail.vro.workflows.model.PresentationStep
+import net.juniper.contrail.vro.workflows.model.Reference
+import net.juniper.contrail.vro.workflows.model.SecureString
+import net.juniper.contrail.vro.workflows.model.FromStringParameter
+import net.juniper.contrail.vro.workflows.model.VisibilityCondition
+import net.juniper.contrail.vro.workflows.model.WhenNonNull
+import net.juniper.contrail.vro.workflows.model.array
+import net.juniper.contrail.vro.workflows.model.boolean
+import net.juniper.contrail.vro.workflows.model.number
+import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.model.date
+import net.juniper.contrail.vro.workflows.model.defaultValueQualifier
+import net.juniper.contrail.vro.workflows.model.mandatoryQualifier
+import net.juniper.contrail.vro.workflows.model.listFromAction
+import net.juniper.contrail.vro.workflows.model.numberFormatQualifier
+import net.juniper.contrail.vro.workflows.model.minNumberValueQualifier
+import net.juniper.contrail.vro.workflows.model.maxNumberValueQualifier
+import net.juniper.contrail.vro.workflows.model.predefinedAnswersQualifier
+import net.juniper.contrail.vro.workflows.model.selectAsTreeQualifier
+import net.juniper.contrail.vro.workflows.model.showInInventoryQualifier
+import net.juniper.contrail.vro.workflows.model.visibleWhenBooleanSwitchedQualifier
+import net.juniper.contrail.vro.workflows.model.visibleWhenNonNullQualifier
+import net.juniper.contrail.vro.workflows.model.visibleWhenVariableHasValueQualifier
 import java.util.Date
 
 @WorkflowBuilder

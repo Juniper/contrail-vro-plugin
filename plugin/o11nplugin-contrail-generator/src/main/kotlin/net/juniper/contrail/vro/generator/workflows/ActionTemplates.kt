@@ -5,12 +5,12 @@
 package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.vro.generator.model.ForwardRelation
-import net.juniper.contrail.vro.generator.workflows.model.Action
-import net.juniper.contrail.vro.generator.workflows.model.ActionParameter
-import net.juniper.contrail.vro.generator.workflows.model.Reference
-import net.juniper.contrail.vro.generator.workflows.model.Script
-import net.juniper.contrail.vro.generator.workflows.model.array
-import net.juniper.contrail.vro.generator.workflows.util.generateID
+import net.juniper.contrail.vro.workflows.model.Action
+import net.juniper.contrail.vro.workflows.model.ActionParameter
+import net.juniper.contrail.vro.workflows.model.Reference
+import net.juniper.contrail.vro.workflows.model.Script
+import net.juniper.contrail.vro.workflows.model.array
+import net.juniper.contrail.vro.workflows.util.generateID
 
 val ForwardRelation.getReferencesActionName get() =
     "get${childNamePluralized}Of$parentName"

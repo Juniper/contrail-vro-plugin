@@ -2,18 +2,18 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator.workflows.dsl
+package net.juniper.contrail.vro.workflows.dsl
 
-import net.juniper.contrail.vro.generator.workflows.util.generateID
-import net.juniper.contrail.vro.generator.workflows.model.Binding
-import net.juniper.contrail.vro.generator.workflows.model.ParameterSet
-import net.juniper.contrail.vro.generator.workflows.model.Position
-import net.juniper.contrail.vro.generator.workflows.model.Presentation
-import net.juniper.contrail.vro.generator.workflows.model.PresentationStep
-import net.juniper.contrail.vro.generator.workflows.model.Reference
-import net.juniper.contrail.vro.generator.workflows.model.Script
-import net.juniper.contrail.vro.generator.workflows.model.Workflow
-import net.juniper.contrail.vro.generator.workflows.model.WorkflowItem
+import net.juniper.contrail.vro.workflows.util.generateID
+import net.juniper.contrail.vro.workflows.model.Binding
+import net.juniper.contrail.vro.workflows.model.ParameterSet
+import net.juniper.contrail.vro.workflows.model.Position
+import net.juniper.contrail.vro.workflows.model.Presentation
+import net.juniper.contrail.vro.workflows.model.PresentationStep
+import net.juniper.contrail.vro.workflows.model.Reference
+import net.juniper.contrail.vro.workflows.model.Script
+import net.juniper.contrail.vro.workflows.model.Workflow
+import net.juniper.contrail.vro.workflows.model.WorkflowItem
 
 data class WorkflowDefinition(
     val displayName: String,

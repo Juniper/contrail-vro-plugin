@@ -12,7 +12,7 @@ import net.juniper.contrail.vro.generator.model.generateModel
 import net.juniper.contrail.vro.config.objectClasses
 import net.juniper.contrail.vro.config.propertyClasses
 import net.juniper.contrail.vro.generator.workflows.generateWorkflows
-import net.juniper.contrail.vro.generator.workflows.xsd.buildSchema
+import net.juniper.contrail.vro.workflows.schema.buildSchema
 import java.nio.file.Paths
 
 object Generator {
