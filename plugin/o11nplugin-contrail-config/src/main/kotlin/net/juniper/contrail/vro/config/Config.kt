@@ -38,6 +38,10 @@ val nonEditableProperties = setOf(
     "networkId"
 )
 
+val directChildren = setOf(
+    "FloatingIp"
+)
+
 val String.isInventoryPropertyClassName get() =
     inventoryProperties.contains(this)
 
@@ -50,6 +54,9 @@ val String.isIgnoredInWorkflow get() =
 val String.isEditableProperty get() =
     ! nonEditableProperties.contains(this)
 
+val String.isDirectChild get() =
+    directChildren.contains(this)
+
 val Class<*>.isRequiredAttributeClass get() =
     simpleName.isRequiredAttribute
 
@@ -61,6 +68,9 @@ val Class<*>.isInventoryProperty get() =
 
 val Class<*>.ignoredInWorkflow get() =
     simpleName.isIgnoredInWorkflow
+
+val Class<*>.isDirectChild get() =
+    simpleName.isDirectChild
 
 val ObjectClass.isRootClass: Boolean get() {
     val parentType = newInstance().defaultParentType

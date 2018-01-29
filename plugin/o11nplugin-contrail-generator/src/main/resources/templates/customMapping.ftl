@@ -86,7 +86,9 @@ class CustomMapping: AbstractMapping() {
             .to(${relation.childName}::class.java)
             .using(${relation.parentName}Has${relation.childName}::class.java)
             .`as`("${relation.name}")
+            <#if !relation.directChild >
             .`in`(FolderDef("${relation.folderName}__in__${relation.parentName}_${relation.childName}s", "folder.png"))
+            </#if>
         </#list>
 
         <#list forwardRelations as relation>

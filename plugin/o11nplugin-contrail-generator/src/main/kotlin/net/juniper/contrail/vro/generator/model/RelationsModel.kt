@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.vro.config.ObjectClass
+import net.juniper.contrail.vro.config.isDirectChild
 
 data class RelationsModel(
     val rootClassNames: List<String>,
@@ -18,6 +19,7 @@ data class RelationModel(
     val childName: String,
     val childNameDecapitalized: String,
     val name: String,
+    val isDirectChild: Boolean,
     val folderName: String
 )
 
@@ -43,6 +45,7 @@ fun Relation.toRelationModel() = RelationModel(
     childName,
     childName.decapitalize(),
     name,
+    childName.isDirectChild,
     folderName
 )
 
