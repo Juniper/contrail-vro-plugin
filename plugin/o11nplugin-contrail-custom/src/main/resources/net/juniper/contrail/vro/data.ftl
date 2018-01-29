@@ -8,8 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 import net.juniper.contrail.vro.ContrailPluginFactory;
-import net.juniper.contrail.vro.format.ReferenceFormatter;
-import net.juniper.contrail.vro.format.PropertyFormatter;
+import net.juniper.contrail.vro.format.*;
 import net.juniper.contrail.api.*;
 import net.juniper.contrail.api.types.*;
 
@@ -82,7 +81,7 @@ public class ${className}
 		// Empty default constructor
 	}</#if>
 
-    <#list methods as m> <#if !m.extensionClass?? && !interceptor?? && !m.inheritedWrapperMethod>
+    <#list methods as m> <#if !m.extensionClass?? && !interceptor?? && !m.inheritedWrapperMethod && (m.name != 'getDisplayName' || !objectClass)>
     <@compress single_line=true>public ${m.returns.returnFriendlyClassName} ${m.name}(<@params m />)<@thrown m /> {</@compress>
         <@locals m />
 
@@ -143,6 +142,12 @@ public class ${className}
 
 	<#if singleton >
 	    <@singletonMethod />
+	</#if>
+
+	<#if objectClass >
+    public String getDisplayName() {
+        return DisplayNameFormatter.INSTANCE.format(__getTarget());
+    }
 	</#if>
 
     <#list refsFields as field>

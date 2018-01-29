@@ -34,6 +34,8 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
             emptyList()
     }
 
+    val isObjectClass get() =
+        delegate.modelClass.isApiObjectClass
 
     private fun Method.toCustomProperty() =
         CustomProperty(returnTypeOrListType!!.simpleName, name)

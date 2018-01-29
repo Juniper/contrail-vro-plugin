@@ -15,7 +15,7 @@ class CustomMapping: AbstractMapping() {
         "getObjectType",
         "getDefaultParentType",
         "getDefaultParent",
-        "getDisplayName"
+        "setDisplayName"
     )
 
     val propertiesToHide = arrayOf(
