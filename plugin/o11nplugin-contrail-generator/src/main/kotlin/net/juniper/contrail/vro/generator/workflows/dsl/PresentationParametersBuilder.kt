@@ -155,7 +155,7 @@ abstract class BasicBuilder {
     }
 }
 
-abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: ParameterType<Type>) : BasicBuilder() {
+abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val type: ParameterType<Type>) : BasicBuilder() {
     var mandatory: Boolean = false
     var defaultValue: Type? = null
     var predefinedAnswers: List<Type>? = null
@@ -163,7 +163,7 @@ abstract class BasicParameterBuilder<Type: Any>(val name: String, val type: Para
     private var listedBy: Action? = null
 
     val parameterInfo get() = ParameterInfo(
-        name = name,
+        name = parameterName,
         type = type,
         description = description,
         qualifiers = allQualifiers

@@ -10,6 +10,7 @@ import net.juniper.contrail.vro.generator.workflows.model.ActionParameter
 import net.juniper.contrail.vro.generator.workflows.model.Reference
 import net.juniper.contrail.vro.generator.workflows.model.Script
 import net.juniper.contrail.vro.generator.workflows.model.array
+import net.juniper.contrail.vro.generator.workflows.util.generateID
 
 val ForwardRelation.getReferencesActionName get() =
     "get${childNamePluralized}Of$parentName"

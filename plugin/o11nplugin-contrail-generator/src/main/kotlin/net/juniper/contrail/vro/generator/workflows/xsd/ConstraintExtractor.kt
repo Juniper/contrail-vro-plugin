@@ -16,14 +16,23 @@ fun Schema.simpleTypeQualifiers(clazz: Class<*>, propertyName: String): List<Par
     else -> propertyFieldQualifiers(clazz, propertyName.xsdName)
 }
 
-fun Schema.propertyDescription(clazz: Class<*>, propertyName: String): String? = when {
-    clazz.isApiObjectClass -> propertyDefinitionComment(clazz.xsdName, propertyName.xsdName).description
-    else -> definitionNode(clazz, propertyName.xsdName).attributeValue(description)
+inline fun <reified T : Any> Schema.propertyDescription(propertyName: String, convertToXsd: Boolean = true): String? =
+    propertyDescription(T::class.java, propertyName, convertToXsd)
+
+fun Schema.propertyDescription(clazz: Class<*>, propertyName: String, convertToXsd: Boolean = true): String? =
+    propertyDescriptionImpl(clazz, propertyName.maybeToXsd(convertToXsd))
+
+private fun Schema.propertyDescriptionImpl(clazz: Class<*>, xsdFieldName: String): String? = when {
+    clazz.isApiObjectClass -> propertyDefinitionComment(clazz.xsdName, xsdFieldName).description
+    else -> definitionNode(clazz, xsdFieldName).attributeValue(description)
 }
 
 fun Schema.objectDescription(clazz: ObjectClass): String? {
     return relationDefinitionComment(clazz.defaultParentType ?: return null, clazz.xsdName).description
 }
+
+inline fun <reified F : Any, reified T : Any> Schema.relationDescription() =
+    relationDescription(F::class.java, T::class.java)
 
 fun Schema.relationDescription(from: Class<*>, to: Class<*>) =
     relationDefinitionComment(from, to).description

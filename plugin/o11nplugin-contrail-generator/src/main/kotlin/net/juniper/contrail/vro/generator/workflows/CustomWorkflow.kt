@@ -19,6 +19,7 @@ import net.juniper.contrail.vro.generator.workflows.model.string
 import net.juniper.contrail.vro.generator.workflows.model.boolean
 import net.juniper.contrail.vro.generator.workflows.model.array
 import net.juniper.contrail.vro.generator.workflows.model.pair
+import net.juniper.contrail.vro.generator.workflows.util.loadFile
 import net.juniper.contrail.vro.generator.workflows.xsd.Schema
 import net.juniper.contrail.vro.generator.workflows.xsd.propertyDescription
 import net.juniper.contrail.vro.generator.workflows.xsd.relationDescription
@@ -32,25 +33,25 @@ fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): WorkflowDefinit
     return workflow(workflowName).withScript(loadFile(info.generatorRoot, "createIpamSubnet")) {
         step("References") {
             parameter("parent", reference<VirtualNetwork>()) {
-                description = schema.relationDescription(Project::class.java, VirtualNetwork::class.java)
+                description = schema.relationDescription<Project, VirtualNetwork>()
                 mandatory = true
             }
             parameter("ipam", reference<NetworkIpam>()) {
-                description = schema.relationDescription(VirtualNetwork::class.java, NetworkIpam::class.java)
+                description = schema.relationDescription<VirtualNetwork, NetworkIpam>()
                 mandatory = true
             }
         }
         step("Subnet") {
             parameter("subnet_name", string) {
-                description = schema.propertyDescription(IpamSubnetType::class.java, "subnet-name")
+                description = schema.propertyDescription<IpamSubnetType>(parameterName)
                 mandatory = true
             }
             parameter("ip_prefix", string) {
-                description = schema.propertyDescription(SubnetType::class.java, "ip-prefix")
+                description = schema.propertyDescription<SubnetType>(parameterName)
                 mandatory = true
             }
             parameter("ip_prefix_len", number) {
-                description = schema.propertyDescription(SubnetType::class.java, "ip-prefix-len")
+                description = schema.propertyDescription<SubnetType>(parameterName)
                 mandatory = true
             }
         }
@@ -59,25 +60,25 @@ fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): WorkflowDefinit
 
                 // addr_from_start is the only parameter in IpamSubnet that has underscore in name
 
-                description = schema.propertyDescription(IpamSubnetType::class.java, "addr_from_start")
+                description = schema.propertyDescription<IpamSubnetType>(parameterName, convertToXsd = false)
                 mandatory = true
                 defaultValue = true
             }
             parameter("allocation_pools", array(pair("start", string, "end", string))) {
-                description = schema.propertyDescription(IpamSubnetType::class.java, "allocation-pools")
+                description = schema.propertyDescription<IpamSubnetType>(parameterName)
                 mandatory = true
             }
             parameter("enable_dhcp", boolean) {
-                description = schema.propertyDescription(IpamSubnetType::class.java, "enable-dhcp")
+                description = schema.propertyDescription<IpamSubnetType>(parameterName)
                 mandatory = true
                 defaultValue = true
             }
             parameter("dns_server_address", string) {
-                description = schema.propertyDescription(IpamSubnetType::class.java, "dns-nameservers")
+                description = schema.propertyDescription<IpamSubnetType>(parameterName)
                 mandatory = false
             }
             parameter("default_gateway", string) {
-                description = schema.propertyDescription(IpamSubnetType::class.java, "default-gateway")
+                description = schema.propertyDescription<IpamSubnetType>(parameterName)
             }
         }
     }

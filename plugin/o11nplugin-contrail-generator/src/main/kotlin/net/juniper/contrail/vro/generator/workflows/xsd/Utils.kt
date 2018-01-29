@@ -15,7 +15,10 @@ private val String.xsdChunk get() =
     toLowerCase().handleShortcuts
 
 val String.xsdName get() =
-    camelChunks.joinToString(separator = "-") { it.xsdChunk }
+    replace("_", "-").camelChunks.joinToString(separator = "-") { it.xsdChunk }
+
+fun String.maybeToXsd(convert: Boolean) =
+    if (convert) xsdName else this
 
 val Class<*>.xsdName get() =
     simpleName.xsdName

@@ -4,7 +4,7 @@
 
 package net.juniper.contrail.vro.generator.workflows.dsl
 
-import net.juniper.contrail.vro.generator.workflows.generateID
+import net.juniper.contrail.vro.generator.workflows.util.generateID
 import net.juniper.contrail.vro.generator.workflows.model.Binding
 import net.juniper.contrail.vro.generator.workflows.model.ParameterSet
 import net.juniper.contrail.vro.generator.workflows.model.Position

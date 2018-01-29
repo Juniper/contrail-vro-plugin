@@ -15,6 +15,7 @@ import net.juniper.contrail.vro.generator.workflows.model.FromStringParameter
 import net.juniper.contrail.vro.generator.workflows.model.boolean
 import net.juniper.contrail.vro.generator.workflows.model.reference
 import net.juniper.contrail.vro.generator.workflows.model.string
+import net.juniper.contrail.vro.generator.workflows.util.loadFile
 
 fun addRuleToPolicyWorkflow(info: ProjectInfo): WorkflowDefinition {
 
