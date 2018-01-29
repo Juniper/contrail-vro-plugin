@@ -11,7 +11,7 @@ import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
 import net.juniper.contrail.vro.config.packageToPath
-import net.juniper.contrail.vro.workflows.custom.loadCustomWorkflows
+import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Element
@@ -97,6 +97,9 @@ private fun Marshaller.applyDefaultSetup(): Marshaller {
 
 private fun Workflow.saveInConfiguration(info: ProjectInfo) =
     save(info, "Configuration")
+
+private fun Workflow.save(info: ProjectInfo, categoryClass: Class<*>) =
+    save(info, categoryClass.pluginName)
 
 private fun Workflow.save(info: ProjectInfo, category: String) {
     val categoryPackage = "$libraryPackage.$category"

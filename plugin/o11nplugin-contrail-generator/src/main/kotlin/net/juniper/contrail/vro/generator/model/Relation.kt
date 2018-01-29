@@ -23,6 +23,7 @@ import net.juniper.contrail.vro.config.nameWithoutGet
 import net.juniper.contrail.vro.config.nameWithoutGetAndBackRefs
 import net.juniper.contrail.vro.config.objectReferenceAttributeClass
 import net.juniper.contrail.vro.config.objectType
+import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.pluralize
 import net.juniper.contrail.vro.config.propertyName
 import net.juniper.contrail.vro.config.referenceName
@@ -39,7 +40,7 @@ open class Relation (
     val parentName: String = parentClass.simpleName
     val childName: String = childClass.simpleName
     val name: String = relationName(parentName, childName)
-    val folderName = childName.folderName()
+    val folderName = childClass.pluginName.folderName()
 }
 
 class ForwardRelation (

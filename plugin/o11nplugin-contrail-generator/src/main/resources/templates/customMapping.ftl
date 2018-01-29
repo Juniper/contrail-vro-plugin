@@ -37,11 +37,12 @@ class CustomMapping: AbstractMapping() {
 
         wrap(Executor::class.java)
 
-        <#list findableClassNames as klass>
-        wrap(${klass}::class.java)
+        <#list findableClasses as klass>
+        wrap(${klass.simpleName}::class.java)
           .hiding(*methodsToHide)
+          .`as`("${klass.pluginName}")
           .andFind()
-          .using(${klass}Finder::class.java)
+          .using(${klass.simpleName}Finder::class.java)
           .hiding(*propertiesToHide)
           .withIcon("item.png")
         </#list>

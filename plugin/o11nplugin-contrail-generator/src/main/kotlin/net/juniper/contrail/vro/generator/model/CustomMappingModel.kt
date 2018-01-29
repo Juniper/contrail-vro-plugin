@@ -7,9 +7,10 @@ package net.juniper.contrail.vro.generator.model
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.PropertyClass
 import net.juniper.contrail.vro.config.folderName
+import net.juniper.contrail.vro.config.pluginName
 
 data class CustomMappingModel (
-    val findableClassNames: List<String>,
+    val findableClasses: List<ClassInfoModel>,
     val rootClasses: List<ClassInfoModel>,
     val propertyClassNames: List<String>,
     val relations: List<RelationModel>,
@@ -19,12 +20,14 @@ data class CustomMappingModel (
 
 data class ClassInfoModel(
     val simpleName: String,
+    val pluginName: String,
     val folderName: String
 )
 
 fun Class<*>.toClassInfoModel() = ClassInfoModel(
     simpleName,
-    simpleName.folderName()
+    pluginName,
+    pluginName.folderName()
 )
 
 fun generateCustomMappingModel(
@@ -35,7 +38,7 @@ fun generateCustomMappingModel(
     forwardRelations: List<ForwardRelation>,
     nestedRelations: List<NestedRelation>
 ) = CustomMappingModel(
-    objectClasses.map { it.simpleName },
+    objectClasses.map { it.toClassInfoModel() },
     rootClasses.map { it.toClassInfoModel() },
     propertyClasses.map { it.simpleName },
     relations.map { it.toRelationModel() },

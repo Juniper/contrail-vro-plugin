@@ -7,12 +7,20 @@ package net.juniper.contrail.vro.config
 val String.isModelClassName get() = when (this) {
     "Project",
     "VirtualNetwork",
+    "Subnet",
     "NetworkIpam",
     "FloatingIp",
     "FloatingIpPool",
     "NetworkPolicy",
     "SecurityGroup",
-    "Subnet"-> true
+    "VirtualMachine",
+    "VirtualMachineInterface",
+    "VirtualRouter",
+    "VirtualRouter",
+    "LogicalRouter",
+    "PhysicalRouter",
+    "RouteTable",
+    "RouteTarget" -> true
     else -> false
 }
 
@@ -91,6 +99,11 @@ val ObjectClass.isRootClass: Boolean get() {
 
 val ObjectClass.isInternal: Boolean get() =
     newInstance().defaultParentType == null
+
+val Class<*>.pluginName get() = when(this.simpleName) {
+    "VirtualMachineInterface" -> "Port"
+    else -> simpleName
+}
 
 val inventoryPropertyFilter: PropertyClassFilter = { it.isInventoryProperty }
 val modelClassFilter: ObjectClassFilter = { it.isModelClass }

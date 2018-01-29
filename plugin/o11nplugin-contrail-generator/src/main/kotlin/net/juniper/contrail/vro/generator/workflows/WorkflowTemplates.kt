@@ -15,6 +15,7 @@ import net.juniper.contrail.vro.generator.model.properties
 import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isEditableProperty
 import net.juniper.contrail.vro.config.isPropertyOrStringListWrapper
+import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.pluralParameterName
 import net.juniper.contrail.vro.config.splitCamel
 import net.juniper.contrail.vro.generator.Contrail
@@ -69,13 +70,13 @@ private val String.allLowerCase get() =
     splitCamel().toLowerCase()
 
 private val Class<*>.allLowerCase get() =
-    simpleName.allLowerCase
+    pluginName.allLowerCase
 
 private val String.allCapitalized get() =
     replace(typeSuffix, "").camelChunks.joinToString(" ") { it.capitalize() }
 
 private val Class<*>.allCapitalized get() =
-    simpleName.allCapitalized
+    pluginName.allCapitalized
 
 private val typeSuffix = "Type$".toRegex()
 
@@ -136,7 +137,7 @@ private fun Schema.relationInCreateWorkflowDescription(parentClazz: ObjectClass,
 fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
 
     val workflowName = "Create ${clazz.allLowerCase}"
-    val parentName = parentClazz?.simpleName ?: Connection
+    val parentName = parentClazz?.pluginName ?: Connection
 
     return workflow(workflowName).withScript(createScriptBody(clazz, parentClazz, refs)) {
         description = schema.createWorkflowDescription(clazz)
@@ -169,7 +170,7 @@ fun deleteConnectionWorkflow() =
     deleteWorkflow(Connection, deleteConnectionScriptBody)
 
 fun deleteWorkflow(clazz: ObjectClass) =
-    deleteWorkflow(clazz.simpleName, deleteScriptBody(clazz.simpleName))
+    deleteWorkflow(clazz.pluginName, deleteScriptBody(clazz.pluginName))
 
 fun deleteWorkflow(className: String, scriptBody: String) =
     workflow("Delete ${className.allLowerCase}").withScript(scriptBody) {
@@ -337,12 +338,12 @@ ContrailConnectionManager.delete($item);
 
 private fun createScriptBody(clazz: Class<*>, parentClazz: ObjectClass?, references: List<ObjectClass>) = """
 ${parent.retrieveExecutor}
-var $item = new Contrail${clazz.simpleName}();
+var $item = new Contrail${clazz.pluginName}();
 $item.setName(name);
 ${ clazz.attributeCode(item) }
-$executor.create${clazz.simpleName}($item${if (parentClazz == null) "" else ", $parent"});
+$executor.create${clazz.pluginName}($item${if (parentClazz == null) "" else ", $parent"});
 ${references.addAllReferences}
-${item.updateAsClass(clazz.simpleName)}
+${item.updateAsClass(clazz.pluginName)}
 """.trimIndent()
 
 private val List<ObjectClass>.addAllReferences get() =
@@ -352,7 +353,7 @@ private val Class<*>.addReferenceEntry get() =
 """
 if($pluralParameterName) {
     for each (ref in $pluralParameterName) {
-        $item.add${this.simpleName}(ref);
+        $item.add${this.pluginName}(ref);
     }
 }
 """
@@ -386,7 +387,7 @@ if (init)
 ${prepare(prefix)}
 var $ref = null;
 if (${ref.condition}) {
-    $ref = new Contrail$simpleName();
+    $ref = new Contrail$pluginName();
     ${assign(ref, prefix+tab)}
 }
 """
@@ -404,7 +405,7 @@ fun List<Property>.prepare(prefix: String) =
     joinToString(separator = "") { it.propertyCode(prefix) }
 
 private fun ForwardRelation.addRelationWithAttributeScriptBody() = """
-var attribute = new Contrail${attribute.simpleName}();
+var attribute = new Contrail${attribute.pluginName}();
 ${ attribute.attributeCode("attribute") }
 $parent.add$childName($child, attribute);
 $retrieveExecutorAndUpdateParent

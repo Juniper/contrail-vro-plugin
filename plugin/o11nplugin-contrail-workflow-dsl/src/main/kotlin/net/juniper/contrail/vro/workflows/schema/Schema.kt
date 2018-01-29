@@ -26,6 +26,7 @@ private fun String.toCommentObject(): IdlComment? =
 
 private fun extractIncludedSchemaPath(it: Node, path: Path): Path {
     val relativePath = it.attributesMap["schemaLocation"] ?: throw IllegalStateException("Error in schema")
+    println("Including extra schema $relativePath")
     val parentDirectory = path.parent.toString()
     return Paths.get(parentDirectory, relativePath)
 }
