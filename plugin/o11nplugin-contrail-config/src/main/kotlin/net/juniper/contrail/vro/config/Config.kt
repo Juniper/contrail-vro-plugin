@@ -43,7 +43,8 @@ val directChildren = setOf(
 )
 
 val hiddenRelations = setOf(
-    Pair("FloatingIp", "Project")
+    Pair("FloatingIp", "Project"),
+    Pair("VirtualNetwork", "NetworkIpam")
 )
 
 val String.isInventoryPropertyClassName get() =
