@@ -5,8 +5,9 @@
 package net.juniper.contrail.vro.workflows.util
 
 import com.google.common.hash.Hashing
-import net.juniper.contrail.vro.generator.scriptPath
 import java.io.File
+
+val scriptPath = "src/main/js/scripts"
 
 fun generateID(packageName: String, displayName: String) =
     Hashing.md5().newHasher()
