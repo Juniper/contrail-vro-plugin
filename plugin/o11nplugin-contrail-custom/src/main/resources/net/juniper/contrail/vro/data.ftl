@@ -144,11 +144,11 @@ public class ${className}
 	    <@singletonMethod />
 	</#if>
 
-	<#if objectClass >
+    <#if objectClass >
     public String getDisplayName() {
         return DisplayNameFormatter.INSTANCE.format(__getTarget());
     }
-	</#if>
+    </#if>
 
     <#list refsFields as field>
     public String get${field.wrapperMethodName}() {

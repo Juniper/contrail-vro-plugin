@@ -9,98 +9,42 @@ import com.vmware.o11n.sdk.modeldriven.AbstractWrapper
 import com.vmware.o11n.sdk.modeldriven.Findable
 import com.vmware.o11n.sdk.modeldriven.ModelWrapper
 import com.vmware.o11n.sdk.modeldriven.Sid
-import com.vmware.o11n.sdk.modeldriven.converters.GenericToDateConverter
-import com.vmware.o11n.sdk.modeldriven.converters.GenericToStringConverter
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
+import net.juniper.contrail.api.types.IpamSubnetType
+import net.juniper.contrail.api.types.VirtualNetwork
+import net.juniper.contrail.api.types.VnSubnetsType
 
 class ReferenceFormatter(val factory: IPluginFactory) {
+    fun <T : ApiPropertyBase> getRefString(wrapper: AbstractWrapper, references: List<ObjectReference<T>>?, type: String): String? {
+        if (references == null) return null
 
-    private val blankSpacesRegex = "^\\s*$".toRegex()
-    private val lineFormat = "%s%s:\t%s\n"
+        val parentSid: Sid = if (wrapper is Findable) wrapper.internalId else return null
 
-    fun <T : ApiPropertyBase> getRefString(wrapper: AbstractWrapper, ref_list: List<ObjectReference<T>>?, type: String?): String? {
-        if (ref_list == null) return null
-
-        val builder = StringBuilder()
-        var prefix = ""
-
-        val wrapperSid: Sid?
-        if (wrapper is Findable) wrapperSid = wrapper.internalId else return ""
-
-        try {
-            for (ref in ref_list) {
-                val sid = wrapperSid.with(type, ref.uuid)
-                val element = factory.find(type, sid.toString()) as ModelWrapper?
-                if (element != null) {
-                    builder.append(prefix)
-                    prefix = "\n"
-                    builder.append((element.__getTarget() as ApiObjectBase).name)
-                }
-            }
-        } catch (e: IllegalArgumentException) {
-            return null
-        }
-
-        return builder.toString()
+        return references.asSequence().map { format(parentSid, type, it) }.filterNotNull().joinToString("\n")
     }
 
-    private fun <T : ApiPropertyBase> convert(attr: T?): String {
-        if (attr == null || attr.javaClass.typeName.endsWith("ApiObjectbase"))
-            return ""
-        else
-            return convertToString(attr, attr.javaClass.simpleName, "    ")
+    private fun <T : ApiPropertyBase> format(parentSid: Sid, type: String, ref: ObjectReference<T>): String? {
+        val sid = parentSid.with(type, ref.uuid)
+        val element = factory.find(type, sid.toString()) as? ModelWrapper ?: return null
+        val obj = element.__getTarget() as ApiObjectBase
+        return format(obj, ref.attr, sid)
     }
 
-    private fun convertToString(attribute: Any?, fieldName: String, indent: String): String {
-        val builder = StringBuilder()
-
-        if (attribute == null)
-            return ""
-
-        if (attribute is List<*>) {
-            var listCounter = 0
-            for ( listAttribute in attribute ) {
-                builder.append(convertToString(listAttribute, reformatName("$fieldName [$listCounter]"), indent + "    "))
-                listCounter++
-            }
-
-            val nestedFileds = builder.toString()
-            return if (nestedFileds != "") nestedFileds else ""
-        }
-
-        // check if attribute has overriden toString method
-        if (attribute::class.java.getMethod("toString").getDeclaringClass() !== Object::class.java) {
-            return String.format(lineFormat, indent, reformatName(fieldName), attribute.toString())
-        }
-
-        if (GenericToStringConverter.supportedClasses().contains(attribute.javaClass)) {
-            return String.format(lineFormat, indent, reformatName(fieldName), GenericToStringConverter().convert(attribute))
-        }
-
-        if (GenericToDateConverter.supportedClasses().contains(attribute.javaClass)) {
-            return String.format(lineFormat, indent, reformatName(fieldName), GenericToDateConverter().convert(attribute))
-        }
-
-        for (field in attribute.javaClass.declaredFields) {
-            field.isAccessible = true
-            try {
-                builder.append(convertToString(field.get(attribute), field.name, indent + "    "))
-            } catch (e: IllegalAccessException) {
-                e.printStackTrace()
-            }
-        }
-
-        val fieldTitle = String.format(lineFormat, indent, reformatName(fieldName), "")
-        val nestedFileds = builder.toString()
-        return if (nestedFileds != "") fieldTitle + nestedFileds else ""
+    private fun <T : ApiPropertyBase> format(obj: ApiObjectBase, attr: T?, sid: Sid): String? = when(attr) {
+        is VnSubnetsType -> format(attr, sid)
+        else -> obj.name
     }
 
-    private fun reformatName(name: String): String {
-        val underscoreSplittedName = name.replace("_", " ")
-        val cammelCaseRegex = "(?<=[a-z])(?=[A-Z])".toRegex()
-        val splittedCammelCases = underscoreSplittedName.split(cammelCaseRegex)
-        return splittedCammelCases.joinToString(" ").toLowerCase().capitalize()
+    private fun format(subnet: VnSubnetsType, sid: Sid): String? {
+        if (subnet.ipamSubnets == null || subnet.ipamSubnets.isEmpty()) return null
+        return subnet.ipamSubnets.asSequence().map { format(it, sid) }.filterNotNull().joinToString("\n")
+    }
+
+    private fun format(subnet: IpamSubnetType, sid: Sid): String? {
+        val vnId = sid.with("VirtualNetwork", subnet.subnetUuid)
+        val network = factory.find("VirtualNetwork", vnId.toString()) as? VirtualNetwork? ?: return null
+        return "${network.name} (${PropertyFormatter.format(subnet.subnet)})"
     }
 }

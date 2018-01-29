@@ -38,10 +38,16 @@ object PropertyFormatter {
             virtualNetwork != null -> "VN: $virtualNetwork"
             securityGroup != null -> "SG: $securityGroup"
             networkPolicy != null -> "NP: $networkPolicy"
-            subnetList != null -> format(subnetList)
+            subnetList != null -> subnetList.inline
             else -> ""
         }
     }
+
+    fun format(prop: IpamSubnets): String =
+        prop.subnets.joinToString("\n") { format(it) }
+
+    fun format(prop: IpamSubnetType): String =
+        format(prop.subnet)
 
     private fun <T : ApiPropertyBase> List<T>?.format(transform: (T) -> CharSequence) =
         this?.joinToString(separator = ", ", transform = transform)
@@ -50,6 +56,9 @@ object PropertyFormatter {
         format { format(it) } ?: ""
 
     private inline val List<PortType>?.inline @JvmName("getInlinePorts") get() =
+        format { format(it) } ?: ""
+
+    private inline val List<SubnetType>?.inline @JvmName("getInlineSubnetTypes") get() =
         format { format(it) } ?: ""
 
     fun format(prop: PolicyRuleType): String = prop.run {
