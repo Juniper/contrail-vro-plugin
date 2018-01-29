@@ -73,6 +73,12 @@ class CustomMapping: AbstractMapping() {
             .using(RootHasConnections::class.java)
             .`as`("RootHasConnections")
 
+        relate(VirtualNetwork::class.java)
+            .to(Subnet::class.java)
+            .using(VirtualNetworkHasSubnet::class.java)
+            .`as`("VirtualNetworkToSubnet")
+            .`in`(FolderDef("Subnets__in__VirtualNetwork_Subnets", "folder.png"))
+
         <#list rootClasses as rootClass>
         relate(Connection::class.java)
             .to(${rootClass.simpleName}::class.java)

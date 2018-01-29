@@ -72,6 +72,12 @@ class Connection(public val info: ConnectionInfo, val connector: ApiConnector) :
     fun <T : ApiObjectBase> findById(clazz: Class<T>, objectId: String): T? =
         safe { connector.findById(clazz, objectId) as T? }
 
+    inline fun <reified T : ApiObjectBase> findById(objectId: String): T? =
+        findById(T::class.java, objectId)
+
+    inline fun <reified T : ApiObjectBase> find(id: Sid): T? =
+        findById(T::class.java, id.getString(T::class.java.simpleName))
+
     fun <T : ApiObjectBase> findByFQN(clazz: Class<T>, fqn: String): T? =
         safe { connector.findByFQN(clazz, fqn) as T? }
 
