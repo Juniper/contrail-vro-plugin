@@ -26,8 +26,6 @@ fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: 
     createConnectionWorkflow(info).saveInConfiguration(info)
     deleteConnectionWorkflow(info).saveInConfiguration(info)
 
-    addRuleToPolicyWorkflow(info).save(info, "NetworkPolicy")
-
     relations.rootClasses.forEach {
         val refs = relations.referencesOf(it)
         generateLifecycleWorkflows(info, it, refs, schema)
@@ -67,7 +65,8 @@ private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelat
 }
 
 private fun createCustomWorkflows(info: ProjectInfo, schema: Schema) {
-    createIpamSubnetWorkflow(info, schema).save(info, "Custom")
+    createIpamSubnetWorkflow(info, schema).save(info, "VirtualNetwork")
+    addRuleToPolicyWorkflow(info).save(info, "NetworkPolicy")
 }
 
 val workflowContext = JAXBContext.newInstance(Workflow::class.java)

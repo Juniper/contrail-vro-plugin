@@ -5,15 +5,24 @@
 package net.juniper.contrail.vro.model
 
 import net.juniper.contrail.api.types.AddressType
+import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.NetworkPolicy
 import net.juniper.contrail.api.types.PolicyRuleType
 import net.juniper.contrail.api.types.PortType
 import net.juniper.contrail.api.types.SubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
+import net.juniper.contrail.api.types.VnSubnetsType
 import net.juniper.contrail.vro.format.PropertyFormatter
 import java.util.UUID
 
 class Utils {
+
+    fun getVnSubnet(network: VirtualNetwork, ipam: NetworkIpam): VnSubnetsType =
+        network.networkIpam?.find { it.uuid == ipam.uuid }?.attr ?: VnSubnetsType()
+
+    fun isNetworRelatedToIpam(network: VirtualNetwork, ipam: NetworkIpam): Boolean =
+        network.networkIpam?.any { it.uuid == ipam.uuid } ?: false
+
     private fun String.clean() =
         replace("\\s+", "")
 

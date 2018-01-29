@@ -21,10 +21,10 @@ allocation_pools.forEach(function(element) {
    ipamSubnet.addAllocationPools(element.start, element.end);
 });
 
-var vnSubnet = executor.getVnSubnet(parent, ipam);
+var vnSubnet = ContrailUtils.getVnSubnet(parent, ipam);
 
 vnSubnet.addIpamSubnets(ipamSubnet);
-if (!executor.isNetworRelatedToIpam(parent, ipam)){
+if (!ContrailUtils.isNetworRelatedToIpam(parent, ipam)){
 	parent.addNetworkIpam(ipam, vnSubnet);
 }
 

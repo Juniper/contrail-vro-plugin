@@ -25,7 +25,7 @@ import net.juniper.contrail.vro.generator.workflows.xsd.relationDescription
 
 fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): Workflow {
 
-    val workflowName = "Add Subnet to Virtual Network"
+    val workflowName = "Add subnet to virtual network"
 
     // Due to custom validation in Contrail UI the mandatory field is not extracted from schema
 
@@ -78,7 +78,6 @@ fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): Workflow {
             }
             parameter("default_gateway", string) {
                 description = schema.propertyDescription(IpamSubnetType::class.java, "default-gateway")
-                mandatory = true
             }
         }
     }
