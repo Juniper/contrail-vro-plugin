@@ -42,6 +42,10 @@ val directChildren = setOf(
     "FloatingIp"
 )
 
+val hiddenRelations = setOf(
+    Pair("FloatingIp", "Project")
+)
+
 val String.isInventoryPropertyClassName get() =
     inventoryProperties.contains(this)
 
@@ -56,6 +60,9 @@ val String.isEditableProperty get() =
 
 val String.isDirectChild get() =
     directChildren.contains(this)
+
+infix fun String.isDisplayableChildOf(parent: String) =
+    ! hiddenRelations.contains(Pair(parent, this))
 
 val Class<*>.isRequiredAttributeClass get() =
     simpleName.isRequiredAttribute

@@ -14,6 +14,7 @@ import net.juniper.contrail.vro.config.parentType
 import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isBackRef
+import net.juniper.contrail.vro.config.isDisplayableChildOf
 import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.isPropertyListWrapper
 import net.juniper.contrail.vro.config.listWrapperGetter
@@ -171,6 +172,7 @@ private val ObjectClass.refRelations: Sequence<ForwardRelation> get() =
         .distinctBy { it.referenceName }
         .filter { ! it.isBackRef }
         .map { ForwardRelation(this, it) }
+        .filter { it.childName isDisplayableChildOf it.parentName }
 
 private val ObjectClass.referenceMethods: Sequence<Method> get() =
     declaredMethods.asSequence()
