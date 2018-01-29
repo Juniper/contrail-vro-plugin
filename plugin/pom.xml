@@ -58,6 +58,11 @@
       </dependency>
       <dependency>
         <groupId>net.juniper.contrail.vro</groupId>
+        <artifactId>o11nplugin-contrail-workflows</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.juniper.contrail.vro</groupId>
         <artifactId>o11nplugin-contrail-generator</artifactId>
         <version>${project.version}</version>
         <type>provided</type>
@@ -503,6 +508,7 @@
   <modules>
     <module>o11nplugin-contrail-config</module>
     <module>o11nplugin-contrail-workflow-dsl</module>
+    <module>o11nplugin-contrail-workflows</module>
     <module>o11nplugin-contrail-generator</module>
     <module>o11nplugin-contrail-core</module>
     <module>o11nplugin-contrail-custom</module>

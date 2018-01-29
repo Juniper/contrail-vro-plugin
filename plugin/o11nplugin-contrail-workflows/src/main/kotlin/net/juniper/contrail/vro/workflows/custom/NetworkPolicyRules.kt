@@ -2,26 +2,22 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator.workflows
+package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.NetworkPolicy
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.api.types.VirtualNetwork
-import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.dsl.withScript
-import net.juniper.contrail.vro.workflows.dsl.workflow
 import net.juniper.contrail.vro.workflows.model.FromStringParameter
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.workflows.util.loadFile
 
-fun addRuleToPolicyWorkflow(info: ProjectInfo): WorkflowDefinition {
+internal fun addRuleToPolicyWorkflow(): WorkflowDefinition {
 
     val workflowName = "Add rule to policy"
 
-    return workflow(workflowName).withScript(loadFile(info.generatorRoot, "addRuleToPolicy")) {
+    return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("addRuleToPolicy") {
         parameter("parent", reference<NetworkPolicy>()) {
             description = "Policy to add the rule to"
             mandatory = true

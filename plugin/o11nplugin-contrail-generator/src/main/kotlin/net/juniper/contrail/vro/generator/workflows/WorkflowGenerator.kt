@@ -11,6 +11,7 @@ import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
 import net.juniper.contrail.vro.config.packageToPath
+import net.juniper.contrail.vro.workflows.custom.loadCustomWorkflows
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Element
@@ -40,6 +41,7 @@ fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: 
     relations.forwardRelations.forEach {
         generateReferenceWorkflows(info, it, schema)
     }
+
     createCustomWorkflows(info, schema)
 }
 
@@ -66,8 +68,7 @@ private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelat
 }
 
 private fun createCustomWorkflows(info: ProjectInfo, schema: Schema) {
-    createIpamSubnetWorkflow(info, schema).save(info, "VirtualNetwork")
-    addRuleToPolicyWorkflow(info).save(info, "NetworkPolicy")
+    loadCustomWorkflows(schema).forEach { it.save(info) }
 }
 
 val workflowContext = JAXBContext.newInstance(Workflow::class.java)
@@ -105,6 +106,9 @@ private fun Workflow.save(info: ProjectInfo, category: String) {
 
 private fun WorkflowDefinition.saveInConfiguration(info: ProjectInfo) =
     createWorkflow(info).saveInConfiguration(info)
+
+private fun WorkflowDefinition.save(info: ProjectInfo) =
+    save(info, category ?: throw IllegalStateException("Category of workflow $displayName was not defined."))
 
 private fun WorkflowDefinition.save(info: ProjectInfo, category: String) =
     createWorkflow(info).save(info, category)

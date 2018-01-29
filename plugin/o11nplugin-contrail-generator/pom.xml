@@ -21,10 +21,13 @@
       <groupId>net.juniper.contrail.vro</groupId>
       <artifactId>o11nplugin-contrail-config</artifactId>
     </dependency>
-
     <dependency>
       <groupId>net.juniper.contrail.vro</groupId>
       <artifactId>o11nplugin-contrail-workflow-dsl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.juniper.contrail.vro</groupId>
+      <artifactId>o11nplugin-contrail-workflows</artifactId>
     </dependency>
 
     <dependency>

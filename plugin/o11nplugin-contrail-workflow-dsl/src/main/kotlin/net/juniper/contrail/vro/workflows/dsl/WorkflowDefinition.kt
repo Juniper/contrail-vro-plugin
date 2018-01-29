@@ -17,6 +17,7 @@ import net.juniper.contrail.vro.workflows.model.WorkflowItem
 
 data class WorkflowDefinition(
     val displayName: String,
+    val category: String? = null,
     val presentation: Presentation = Presentation(),
     val workflowItems: List<WorkflowItem> = emptyList(),
     val references: List<Reference>? = null,
@@ -46,7 +47,12 @@ data class WorkflowDefinition(
 fun workflow(name: String) =
     WorkflowDefinition(name)
 
-fun WorkflowDefinition.withScript(scriptBody: String, setup: PresentationParametersBuilder.() -> Unit): WorkflowDefinition {
+fun WorkflowDefinition.inCategory(category: String) =
+    copy(category = category)
+
+typealias ParameterDefinition = PresentationParametersBuilder.() -> Unit
+
+fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition): WorkflowDefinition {
     if (!workflowItems.isEmpty())
         throw IllegalStateException("Script was already defined for this workflow.")
 

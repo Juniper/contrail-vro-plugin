@@ -2,17 +2,14 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator.workflows
+package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.SubnetType
-import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.dsl.withScript
-import net.juniper.contrail.vro.workflows.dsl.workflow
 import net.juniper.contrail.vro.workflows.model.number
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
@@ -21,16 +18,15 @@ import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.pair
 import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.workflows.util.extractRelationDescription
-import net.juniper.contrail.vro.workflows.util.loadFile
 import net.juniper.contrail.vro.workflows.schema.Schema
 
-fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): WorkflowDefinition {
+internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
 
     val workflowName = "Add subnet to virtual network"
 
     // Due to custom validation in Contrail UI the mandatory field is not extracted from schema
 
-    return workflow(workflowName).withScript(loadFile(info.generatorRoot, "createIpamSubnet")) {
+    return customWorkflow<VirtualNetwork>(workflowName).withScriptFile("createSubnet") {
         step("References") {
             parameter("parent", reference<VirtualNetwork>()) {
                 extractRelationDescription<Project, VirtualNetwork>(schema)
