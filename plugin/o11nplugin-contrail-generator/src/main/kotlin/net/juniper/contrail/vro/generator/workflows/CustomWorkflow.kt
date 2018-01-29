@@ -19,10 +19,10 @@ import net.juniper.contrail.vro.generator.workflows.model.string
 import net.juniper.contrail.vro.generator.workflows.model.boolean
 import net.juniper.contrail.vro.generator.workflows.model.array
 import net.juniper.contrail.vro.generator.workflows.model.pair
+import net.juniper.contrail.vro.generator.workflows.util.extractPropertyDescription
+import net.juniper.contrail.vro.generator.workflows.util.extractRelationDescription
 import net.juniper.contrail.vro.generator.workflows.util.loadFile
 import net.juniper.contrail.vro.generator.workflows.xsd.Schema
-import net.juniper.contrail.vro.generator.workflows.xsd.propertyDescription
-import net.juniper.contrail.vro.generator.workflows.xsd.relationDescription
 
 fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): WorkflowDefinition {
 
@@ -33,25 +33,25 @@ fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): WorkflowDefinit
     return workflow(workflowName).withScript(loadFile(info.generatorRoot, "createIpamSubnet")) {
         step("References") {
             parameter("parent", reference<VirtualNetwork>()) {
-                description = schema.relationDescription<Project, VirtualNetwork>()
+                extractRelationDescription<Project, VirtualNetwork>(schema)
                 mandatory = true
             }
             parameter("ipam", reference<NetworkIpam>()) {
-                description = schema.relationDescription<VirtualNetwork, NetworkIpam>()
+                extractRelationDescription<VirtualNetwork, NetworkIpam>(schema)
                 mandatory = true
             }
         }
         step("Subnet") {
             parameter("subnet_name", string) {
-                description = schema.propertyDescription<IpamSubnetType>(parameterName)
+                extractPropertyDescription<IpamSubnetType>(schema)
                 mandatory = true
             }
             parameter("ip_prefix", string) {
-                description = schema.propertyDescription<SubnetType>(parameterName)
+                extractPropertyDescription<SubnetType>(schema)
                 mandatory = true
             }
             parameter("ip_prefix_len", number) {
-                description = schema.propertyDescription<SubnetType>(parameterName)
+                extractPropertyDescription<SubnetType>(schema)
                 mandatory = true
             }
         }
@@ -59,26 +59,25 @@ fun createIpamSubnetWorkflow(info: ProjectInfo, schema: Schema): WorkflowDefinit
             parameter("addr_from_start", boolean) {
 
                 // addr_from_start is the only parameter in IpamSubnet that has underscore in name
-
-                description = schema.propertyDescription<IpamSubnetType>(parameterName, convertToXsd = false)
+                extractPropertyDescription<IpamSubnetType>(schema, convertParameterNameToXsd = false)
                 mandatory = true
                 defaultValue = true
             }
-            parameter("allocation_pools", array(pair("start", string, "end", string))) {
-                description = schema.propertyDescription<IpamSubnetType>(parameterName)
+            parameter("allocation_pools", pair("start", string, "end", string).array) {
+                extractPropertyDescription<IpamSubnetType>(schema)
                 mandatory = true
             }
             parameter("enable_dhcp", boolean) {
-                description = schema.propertyDescription<IpamSubnetType>(parameterName)
+                extractPropertyDescription<IpamSubnetType>(schema)
                 mandatory = true
                 defaultValue = true
             }
             parameter("dns_server_address", string) {
-                description = schema.propertyDescription<IpamSubnetType>(parameterName)
+                extractPropertyDescription<IpamSubnetType>(schema)
                 mandatory = false
             }
             parameter("default_gateway", string) {
-                description = schema.propertyDescription<IpamSubnetType>(parameterName)
+                extractPropertyDescription<IpamSubnetType>(schema)
             }
         }
     }
