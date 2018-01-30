@@ -12,6 +12,7 @@ import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
 import net.juniper.contrail.vro.config.packageToPath
 import net.juniper.contrail.vro.config.pluginName
+import net.juniper.contrail.vro.workflows.custom.loadCustomWorkflows
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Element

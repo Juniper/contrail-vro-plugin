@@ -74,6 +74,7 @@ val String.cleanOrRename get() = when (this) {
     "Src" -> "Source"
     "Dst" -> "Destination"
     "Vxlan", "vxlan" -> "VxLAN"
+    "Qos", "qos" -> "QoS"
     "Entries", "entries" -> "Rules"
     "Mgmt", "mgmt" -> "Configuration"
     "Perms2", "perms2" -> "Permissions"

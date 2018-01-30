@@ -20,7 +20,14 @@ val String.isModelClassName get() = when (this) {
     "LogicalRouter",
     "PhysicalRouter",
     "RouteTable",
-    "RouteTarget" -> true
+    "RouteTarget",
+    "ServiceInstance",
+    "ServiceTemplate",
+    "InstanceIp",
+    "QosConfig",
+    "QosConfig",
+    "GlobalQosConfig",
+    "ServiceHealthCheck"-> true
     else -> false
 }
 

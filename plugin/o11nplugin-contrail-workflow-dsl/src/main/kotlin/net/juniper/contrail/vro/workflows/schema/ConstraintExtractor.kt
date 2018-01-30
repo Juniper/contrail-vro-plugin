@@ -60,11 +60,9 @@ private fun Schema.definitionNode(clazz: Class<*>, xsdFieldName: String): Node {
 private fun Schema.relationDefinitionComment(from: Class<*>, to: Class<*>): IdlComment =
     relationDefinitionComment(from.xsdName, to .xsdName)
 
-private fun Schema.relationDefinitionComment(from: String, to: String): IdlComment {
-    val elementName = "$from-$to"
-    return comments.find { it.elementName == elementName } ?:
-        throw IllegalArgumentException("Relation $elementName was not found in the schema.")
-}
+private fun Schema.relationDefinitionComment(from: String, to: String): IdlComment =
+    comments.asSequence().mapNotNull { it as? Link }.find { it.parentClassName == from && it.propertyClassName == to } ?:
+        throw IllegalArgumentException("Relation $from-$to was not found in the schema.")
 
 private fun Schema.propertyDefinitionComment(parent: String, propertyName: String): IdlComment =
     comments.firstOrNull { it.parentClassName == parent && (it.elementName == propertyName || it.elementName == "$parent-$propertyName") } ?:

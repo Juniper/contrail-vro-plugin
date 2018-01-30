@@ -102,6 +102,8 @@ private fun <T : Any> cDATAListFormat(type: ParameterType<T>, values: List<T>): 
     return "#{$elements}#"
 }
 
+val regexCleaner = "\\s+".toRegex()
+
 fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQualifier? =
     when (xsdConstraint) {
         "default" -> {
@@ -119,7 +121,7 @@ fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQuali
                 static,
                 "regexp",
                 "Regexp",
-                constraintValue.toString()
+                constraintValue.toString().replace(regexCleaner, "")
             )
         }
         "enumerations" -> predefinedAnswersQualifier(string, constraintValue as List<String>)

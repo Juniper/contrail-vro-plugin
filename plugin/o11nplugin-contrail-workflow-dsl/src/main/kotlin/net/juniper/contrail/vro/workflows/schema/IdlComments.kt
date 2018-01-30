@@ -36,8 +36,8 @@ class Link(comment: String) : IdlComment(comment) {
 
         type = "Link"
         elementName = properties[0]
-        propertyClassName = properties[1]
-        parentClassName = properties[2]
+        parentClassName = properties[1]
+        propertyClassName = properties[2]
         isRequired = checkIsRequired()
         description = properties.last()
     }
