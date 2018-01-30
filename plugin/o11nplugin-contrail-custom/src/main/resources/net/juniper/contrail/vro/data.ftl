@@ -151,10 +151,10 @@ public class ${className}
     </#if>
 
     <#list refsFields as field>
-    public String get${field.wrapperMethodName}() {
+    public String ${field.wrapperMethodName}() {
         List<${field.returnTypeName}> ref_list = __getTarget().get${field.methodName}();
 
-        return referenceFormatter.getRefString(this, ref_list, "${field.refObjectType}");
+        return referenceFormatter.formatReferences(this, ref_list, "${field.refObjectType}");
     }
 
     </#list>

@@ -9,8 +9,14 @@ import com.vmware.o11n.sdk.modeldrivengen.model.FormalParameter
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedConstructor
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedMethod
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
+import net.juniper.contrail.vro.config.backRefTypeName
+import net.juniper.contrail.vro.config.displayedBackRefsPropertyPrefix
+import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.isApiPropertyClass
+import net.juniper.contrail.vro.config.isHiddenProperty
+import net.juniper.contrail.vro.config.isInventoryProperty
+import net.juniper.contrail.vro.config.isModelClassName
 import net.juniper.contrail.vro.config.returnTypeOrListType
 import net.juniper.contrail.vro.config.returnsApiPropertyOrList
 import java.lang.reflect.Method
@@ -20,6 +26,7 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
     val refsFields: List<CustomRefsField> = delegate.modelClass.declaredFields
         .asSequence()
         .filter { it.name.endsWith("back_refs") }
+        .filter { it.backRefTypeName.isModelClassName }
         .map { CustomRefsField.wrapField(it) }
         .toList()
 
@@ -28,7 +35,9 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
             methods.asSequence()
                 .filter { it.name.startsWith("get") }
                 .filter { it.returnsApiPropertyOrList }
+                .filter { ! it.returnType.isInventoryProperty }
                 .map { it.toCustomProperty() }
+                .filter { ! it.propertyName.isHiddenProperty }
                 .toList()
         else
             emptyList()
@@ -43,6 +52,59 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
     init {
         generatePropertyMethods()
         generateRefsMethods()
+    }
+
+    private fun generateRefsMethods() {
+        for (customField in this.refsFields) {
+            val name = customField.wrapperMethodName
+            val originalProperty = customField.propertyName
+            val returnParameter = createReturnsFormalParameter()
+
+            val method = ManagedMethod()
+            method.setName(name, name)
+            method.originalPropertyName = originalProperty
+            method.propertyName = originalProperty
+            method.params = emptyList()
+            method.setIsInheritedWrapperMethod(true)
+            method.isPropertyReadOnly = true
+            method.returns = returnParameter
+
+            methods.add(method)
+        }
+    }
+
+    private fun generatePropertyMethods() {
+        for (property in propertyViews) {
+            val returnParameter = createReturnsFormalParameter()
+
+            val method = ManagedMethod()
+            method.setName(property.viewMethodName, property.viewMethodName)
+            method.propertyName = property.viewPropertyName
+            method.originalPropertyName = property.viewPropertyName
+            method.params = emptyList()
+            method.setIsInheritedWrapperMethod(true)
+            method.isPropertyReadOnly = true
+            method.returns = returnParameter
+
+            methods.add(method)
+        }
+    }
+
+    private fun createReturnsFormalParameter(): FormalParameter {
+        val returnParameter = FormalParameter()
+        returnParameter.name = "_result"
+        returnParameter.modelType = String::class.java
+        returnParameter.fullClassName = String::class.java.name
+        returnParameter.typeName = "String"
+        returnParameter.isWrapped = false
+        return returnParameter
+    }
+
+    companion object {
+
+        fun wrap(type: ManagedType): CustomManagedType {
+            return CustomManagedType(type)
+        }
     }
 
     override fun isGenerate(): Boolean =
@@ -148,58 +210,5 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
 
     override fun setInterceptor(interceptorClass: Class<out Interceptor>) {
         delegate.interceptor = interceptorClass
-    }
-
-    private fun generateRefsMethods() {
-        for (customField in this.refsFields) {
-            val name = "get" + customField.wrapperMethodName
-            val propertyName = customField.wrapperMethodName.decapitalize()
-            val returnParameter = createReturnsFormalParameter()
-
-            val method = ManagedMethod()
-            method.setName(name, name)
-            method.originalPropertyName = propertyName
-            method.propertyName = propertyName
-            method.params = emptyList()
-            method.setIsInheritedWrapperMethod(true)
-            method.isPropertyReadOnly = true
-            method.returns = returnParameter
-
-            methods.add(method)
-        }
-    }
-
-    private fun generatePropertyMethods() {
-        for (property in propertyViews) {
-            val returnParameter = createReturnsFormalParameter()
-
-            val method = ManagedMethod()
-            method.setName(property.viewMethodName, property.viewMethodName)
-            method.propertyName = property.viewPropertyName
-            method.originalPropertyName = property.viewPropertyName
-            method.params = emptyList()
-            method.setIsInheritedWrapperMethod(true)
-            method.isPropertyReadOnly = true
-            method.returns = returnParameter
-
-            methods.add(method)
-        }
-    }
-
-    private fun createReturnsFormalParameter(): FormalParameter {
-        val returnParameter = FormalParameter()
-        returnParameter.name = "_result"
-        returnParameter.modelType = String::class.java
-        returnParameter.fullClassName = String::class.java.name
-        returnParameter.typeName = "String"
-        returnParameter.isWrapped = false
-        return returnParameter
-    }
-
-    companion object {
-
-        fun wrap(type: ManagedType): CustomManagedType {
-            return CustomManagedType(type)
-        }
     }
 }

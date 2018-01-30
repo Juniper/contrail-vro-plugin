@@ -12,7 +12,16 @@ val ES_SUFFIXES = ".*(s|x|z|ch|sh)$".toRegex()
 val NON_IES_SUFFIXES_REGEX = "(ay|ey|iy|oy|uy)$".toRegex()
 
 val String.typeToClassName: String get() =
-    split("-").joinToString("") { it.toLowerCase().capitalize() }
+    split("-").toClassName()
+
+val String.fieldToClassName: String get() =
+    split("_").toClassName()
+
+private fun List<String>.toClassName() =
+    joinToString("") { it.toLowerCase().capitalize() }
+
+val String.isCapitalized get() =
+    if (isNullOrBlank()) false else get(0).isUpperCase()
 
 fun String.underscoredPropertyToCamelCase(): String {
     val elements = split("_")
@@ -47,27 +56,33 @@ val Class<*>.pluralParameterName get() =
 
 fun pluralizeCamelCases(name: String) : String {
     val nameParts = name.split(CAMEL_CASE_REGEX)
-    val uppercasedWords = nameParts.map { uppercaseAcronyms(it) }.run {
+    val uppercasedWords = nameParts.map { it.cleanOrRename }.run {
         if (last() == "List") dropLast(1) else this
     }
     val pluralWord = uppercasedWords.last().pluralize()
     return (uppercasedWords.dropLast(1).plus(pluralWord)).joinToString(" ")
 }
 
-fun uppercaseAcronyms(name: String): String = when (name) {
+val String.cleanOrRename get() = when (this) {
+    "Uuid", "uuid" -> "UUID"
     "Ip", "ip" -> "IP"
     "Bgp", "bgp" -> "BGP"
     "Vpn", "vpn" -> "VPN"
+    "Pbb", "pbb" -> "PBB"
+    "Evpn", "evpn" -> "EVPN"
+    "Rpf", "rpf" -> "RPF"
     "Src" -> "Source"
     "Dst" -> "Destination"
-    "Entries" -> "Rules"
-    "mgmt" -> "Management"
-    else -> name
+    "Vxlan", "vxlan" -> "VxLAN"
+    "Entries", "entries" -> "Rules"
+    "Mgmt", "mgmt" -> "Configuration"
+    "Perms2", "perms2" -> "Permissions"
+    else -> this
 }
 
 private val String.alreadyPlural get() = when (this) {
     "Pairs", "Details", "Fields", "Type2", "Subnets", "Pools", "Routes", "Rules",
-    "Ports", "Annotations", "Addresses", "Entries" -> true
+    "Ports", "Annotations", "Addresses", "Entries", "Permissions" -> true
     else -> false
 }
 

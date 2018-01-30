@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.config
 
 import com.google.common.reflect.ClassPath
+import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.lang.reflect.ParameterizedType
@@ -31,8 +32,12 @@ val <T> Class<T>.kotlinClassName: String get() = when (this) {
 private val String.ref get() =
     "${this}Ref"
 
+private val BackRefs = "BackRefs"
+private val back_refs = "_back_refs"
+
 private val getterPattern = "^get".toRegex()
-private val backRefsPattern = "BackRefs$".toRegex()
+private val backRefsPattern = "$BackRefs$".toRegex()
+private val fieldBackRefsPattern = "$back_refs$".toRegex()
 
 val Method.nameWithoutGet get() =
     name.replace(getterPattern, "")
@@ -47,7 +52,13 @@ val Method.isGetter get() =
     name.startsWith("get")
 
 val Method.isBackRef get() =
-    isGetter and name.endsWith("BackRefs")
+    isGetter and name.endsWith(BackRefs)
+
+val Field.isBackRef get() =
+    name.endsWith(back_refs)
+
+val Field.backRefTypeName get() =
+    name.replace(fieldBackRefsPattern, "").fieldToClassName
 
 val Method.referenceName get() =
     nameWithoutGetAndBackRefs.ref

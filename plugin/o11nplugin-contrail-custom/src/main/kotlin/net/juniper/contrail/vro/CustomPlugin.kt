@@ -4,10 +4,19 @@
 
 package net.juniper.contrail.vro
 
+import com.vmware.o11n.sdk.modeldrivengen.model.Attribute
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedFinder
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
 import com.vmware.o11n.sdk.modeldrivengen.model.Plugin
+import net.juniper.contrail.vro.config.backRefWrapperPropertyDisplayName
+import net.juniper.contrail.vro.config.cleanedBackRefProperty
+import net.juniper.contrail.vro.config.cleanedDisplayedProperty
+import net.juniper.contrail.vro.config.displayedName
 import net.juniper.contrail.vro.config.isApiObjectClass
+import net.juniper.contrail.vro.config.isBackRefWrapperProperty
+import net.juniper.contrail.vro.config.isCapitalized
+import net.juniper.contrail.vro.config.isDisplayOnlyProperty
+import net.juniper.contrail.vro.config.position
 
 class CustomPlugin : Plugin() {
 
@@ -39,9 +48,23 @@ class CustomPlugin : Plugin() {
     private fun cleanFinders(finders: MutableList<ManagedFinder>) {
         finders.asSequence()
             .filter { it.managedType?.modelClass?.isApiObjectClass ?: false }
-            .map { it.attributes.asSequence() }
-            .flatten()
-            .filter { it.displayName?.endsWith(displayedPropertySuffix) ?: false }
-            .forEach { it.displayName = it.displayName.replace(displayedPropertyPattern, "") }
+            .forEach { it.clean() }
+    }
+
+    private fun ManagedFinder.clean() {
+        attributes.forEach { it.clean() }
+        attributes.sortBy { it.accessor.position }
+    }
+
+    private fun Attribute.clean() {
+        val displayedName = displayName
+        if (displayedName != null && !displayedName.isCapitalized) {
+            displayName = if (displayedName.isDisplayOnlyProperty)
+                displayedName.cleanedDisplayedProperty.displayedName
+            else if (displayedName.isBackRefWrapperProperty)
+                displayName.backRefWrapperPropertyDisplayName
+            else
+                displayedName.displayedName
+        }
     }
 }

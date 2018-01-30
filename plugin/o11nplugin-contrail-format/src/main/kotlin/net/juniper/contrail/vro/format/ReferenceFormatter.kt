@@ -12,12 +12,13 @@ import com.vmware.o11n.sdk.modeldriven.Sid
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
+import net.juniper.contrail.api.types.FloatingIp
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.VnSubnetsType
 
 class ReferenceFormatter(val factory: IPluginFactory) {
-    fun <T : ApiPropertyBase> getRefString(wrapper: AbstractWrapper, references: List<ObjectReference<T>>?, type: String): String? {
+    fun <T : ApiPropertyBase> formatReferences(wrapper: AbstractWrapper, references: List<ObjectReference<T>>?, type: String): String? {
         if (references == null) return null
 
         val parentSid: Sid = if (wrapper is Findable) wrapper.internalId else return null
@@ -33,18 +34,20 @@ class ReferenceFormatter(val factory: IPluginFactory) {
     }
 
     private fun <T : ApiPropertyBase> format(obj: ApiObjectBase, attr: T?, sid: Sid): String? = when(attr) {
-        is VnSubnetsType -> format(attr, sid)
+        is VnSubnetsType -> format(obj as VirtualNetwork, attr, sid)
+        else -> format(obj)
+    }
+
+    private fun format(obj: ApiObjectBase) = when (obj) {
+        is FloatingIp -> obj.address
         else -> obj.name
     }
 
-    private fun format(subnet: VnSubnetsType, sid: Sid): String? {
+    private fun format(virtualNetwork: VirtualNetwork, subnet: VnSubnetsType, sid: Sid): String? {
         if (subnet.ipamSubnets == null || subnet.ipamSubnets.isEmpty()) return null
-        return subnet.ipamSubnets.asSequence().map { format(it, sid) }.filterNotNull().joinToString("\n")
+        return subnet.ipamSubnets.joinToString("\n") { format(virtualNetwork.name, it) }
     }
 
-    private fun format(subnet: IpamSubnetType, sid: Sid): String? {
-        val vnId = sid.with("VirtualNetwork", subnet.subnetUuid)
-        val network = factory.find("VirtualNetwork", vnId.toString()) as? VirtualNetwork? ?: return null
-        return "${network.name} (${PropertyFormatter.format(subnet.subnet)})"
-    }
+    private fun format(networkName: String, subnet: IpamSubnetType): String =
+        "$networkName (${PropertyFormatter.format(subnet.subnet)})"
 }

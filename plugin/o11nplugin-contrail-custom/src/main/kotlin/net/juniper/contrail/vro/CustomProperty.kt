@@ -4,6 +4,8 @@
 
 package net.juniper.contrail.vro
 
+import net.juniper.contrail.vro.config.displayedPropertySuffix
+
 class CustomProperty(
     val propertyType: String,
     val methodName: String
@@ -15,6 +17,3 @@ class CustomProperty(
     private fun String.methodToView() =
         replaceFirst("get", "").decapitalize()
 }
-
-val displayedPropertySuffix = "View"
-val displayedPropertyPattern = "$displayedPropertySuffix$".toRegex()
