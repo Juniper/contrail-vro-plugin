@@ -24,7 +24,7 @@ constructor(private val connectionRepository: ConnectionRepository) : ObjectRela
 {
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, id: Sid): List<Subnet>? {
         val connection = connectionRepository.getConnection(id) ?: return null
-        val ipams = connection?.find<VirtualNetwork>(id)?.networkIpam ?: return null
+        val ipams = connection.find<VirtualNetwork>(id)?.networkIpam ?: return null
         return ipams.asSequence().map {
             it.attr.ipamSubnets.asSequence().map { connection.findById<Subnet>(it.subnetUuid) }.filterNotNull()
         }.flatten().toList()

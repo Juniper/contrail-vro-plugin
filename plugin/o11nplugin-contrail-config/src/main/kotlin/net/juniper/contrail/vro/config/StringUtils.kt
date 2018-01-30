@@ -17,6 +17,9 @@ val String.typeToClassName: String get() =
 val String.fieldToClassName: String get() =
     split("_").toClassName()
 
+val String.classToTypeName: String get() =
+    camelChunks.joinToString("-") { it.toLowerCase() }
+
 private fun List<String>.toClassName() =
     joinToString("") { it.toLowerCase().capitalize() }
 

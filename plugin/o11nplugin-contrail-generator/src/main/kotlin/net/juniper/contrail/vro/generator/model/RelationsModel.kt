@@ -29,6 +29,7 @@ data class RelationModel(
 data class NestedRelationModel(
     val childWrapperName: String,
     val parentWrapperName: String,
+    val childName: String,
     val name: String,
     val getter: String,
     val folderName: String,
@@ -57,6 +58,7 @@ fun Relation.toRelationModel() = RelationModel(
 fun NestedRelation.toNestedRelationModel() = NestedRelationModel(
     childWrapperName,
     parentWrapperName,
+    child.simpleName,
     name,
     getter,
     folderName,

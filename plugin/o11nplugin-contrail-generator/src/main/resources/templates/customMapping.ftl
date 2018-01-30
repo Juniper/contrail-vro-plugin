@@ -2,6 +2,7 @@ ${editWarning}
 package ${packageName}
 
 /* ktlint-disable no-wildcard-imports */
+import java.io.File
 import com.vmware.o11n.sdk.modeldrivengen.mapping.*
 import net.juniper.contrail.api.*
 import net.juniper.contrail.api.types.*
@@ -9,6 +10,23 @@ import net.juniper.contrail.vro.base.*
 import net.juniper.contrail.vro.config.*
 import net.juniper.contrail.vro.model.*
 /* ktlint-enable no-wildcard-imports */
+
+private val iconDir = "${iconRootDir}/src/main/dar/resources/images"
+
+private fun findIcon(customName: String, defaultName: String): String {
+    if (File(iconDir, customName).isFile)
+        return customName
+
+    println("WARNING: Custom icon $customName was not found. Using default icon $defaultName.")
+
+    return defaultName
+}
+
+inline private fun <reified T> findItemIcon() =
+    findIcon(itemIconName<T>(), defaultItemIconName)
+
+inline private fun <reified T> findFolderIcon() =
+    findIcon(folderIconName<T>(), defaultFolderIconName)
 
 class CustomMapping: AbstractMapping() {
 
@@ -33,7 +51,7 @@ class CustomMapping: AbstractMapping() {
         wrap(Connection::class.java)
            .andFind()
            .using(ConnectionFinder::class.java)
-           .withIcon("default-16x16.png")
+           .withIcon("controller.png")
 
         wrap(Executor::class.java)
 
@@ -44,7 +62,7 @@ class CustomMapping: AbstractMapping() {
           .andFind()
           .using(${klass.simpleName}Finder::class.java)
           .hiding(*propertiesToHide)
-          .withIcon("item.png")
+          .withIcon(findItemIcon<${klass.simpleName}>())
         </#list>
 
         <#list propertyClassNames as klass>
@@ -56,7 +74,7 @@ class CustomMapping: AbstractMapping() {
           .andFind()
           .using(${relation.childWrapperName}Finder::class.java)
           .hiding("listIdx")
-          .withIcon("item-prop.png")
+          .withIcon(<#if relation.toMany>findItemIcon<#else>findFolderIcon</#if><${relation.childName}>())
         </#list>
     }
 
@@ -71,14 +89,14 @@ class CustomMapping: AbstractMapping() {
             .to(Subnet::class.java)
             .using(VirtualNetworkHasSubnet::class.java)
             .`as`("VirtualNetworkToSubnet")
-            .`in`(FolderDef("Subnets__in__VirtualNetwork_Subnets", "folder.png"))
+            .`in`(FolderDef("Subnets__in__VirtualNetwork_Subnets", findFolderIcon<Subnet>()))
 
         <#list rootClasses as rootClass>
         relate(Connection::class.java)
             .to(${rootClass.simpleName}::class.java)
             .using(ConnectionHas${rootClass.simpleName}::class.java)
             .`as`("ConnectionHas${rootClass.simpleName}")
-            .`in`(FolderDef("${rootClass.folderName}__in__ROOT", "folder.png"))
+            .`in`(FolderDef("${rootClass.folderName}__in__ROOT", findFolderIcon<${rootClass.simpleName}>()))
         </#list>
 
         <#list relations as relation>
@@ -87,7 +105,7 @@ class CustomMapping: AbstractMapping() {
             .using(${relation.parentName}Has${relation.childName}::class.java)
             .`as`("${relation.name}")
             <#if !relation.directChild >
-            .`in`(FolderDef("${relation.folderName}__in__${relation.parentName}_${relation.childName}s", "folder.png"))
+            .`in`(FolderDef("${relation.folderName}__in__${relation.parentName}_${relation.childName}s", findFolderIcon<${relation.childName}>()))
             </#if>
         </#list>
 
@@ -96,7 +114,7 @@ class CustomMapping: AbstractMapping() {
             .to(${relation.childName}::class.java)
             .using(${relation.parentName}Has${relation.childName}::class.java)
             .`as`("${relation.parentName}To${relation.childName}")
-            .`in`(FolderDef("${relation.folderName}__in__${relation.parentName}_${relation.getter}", "folder-ref.png"))
+            .`in`(FolderDef("${relation.folderName}__in__${relation.parentName}_${relation.getter}", findFolderIcon<${relation.childName}>()))
         </#list>
 
         <#list nestedRelations as relation>
@@ -104,7 +122,7 @@ class CustomMapping: AbstractMapping() {
             .to(${relation.childWrapperName}::class.java)
             .using(${relation.parentWrapperName}Has${relation.childWrapperName}::class.java)
             .`as`("${relation.name}")
-            <#if relation.toMany>.`in`(FolderDef("${relation.folderName}__in__${relation.parentWrapperName}_${relation.getter}", "folder.png"))</#if>
+            <#if relation.toMany>.`in`(FolderDef("${relation.folderName}__in__${relation.parentWrapperName}_${relation.getter}", findFolderIcon<${relation.childName}>()))</#if>
         </#list>
     }
 }

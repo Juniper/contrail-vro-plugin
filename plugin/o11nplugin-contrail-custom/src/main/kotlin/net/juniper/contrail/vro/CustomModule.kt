@@ -32,7 +32,7 @@ class CustomModule : AbstractModule() {
         plugin.description = "Contrail plug-in for vRealize Orchestrator"
         plugin.displayName = "Contrail"
         plugin.name = "Contrail"
-        plugin.icon = "opencontrail-16x16.png"
+        plugin.icon = "opencontrail.png"
         plugin.packages = listOf("o11nplugin-contrail-package-\${project.version}.package")
         plugin.setAdaptorClassName(ContrailPluginAdaptor::class.java)
     }

@@ -27,7 +27,7 @@ fun generateModel(
     val internalClasses = objectClasses.filter(internalClassFilter)
 
     val relationsModel = generateRelationsModel(relations, forwardRelations, nestedRelations, rootClasses)
-    val customMappingModel = generateCustomMappingModel(objectClasses, rootClasses, propertyClasses, relations, forwardRelations, nestedRelations)
+    val customMappingModel = generateCustomMappingModel(info, objectClasses, rootClasses, propertyClasses, relations, forwardRelations, nestedRelations)
     val wrappersModel = generateWrappersModel(nestedRelations)
     val findersModel = generateFindersModel(objectClasses, nestedRelations)
     val executorModel = generateExecutorModel(objectClasses, rootClasses, internalClasses, relations, forwardRelations)
