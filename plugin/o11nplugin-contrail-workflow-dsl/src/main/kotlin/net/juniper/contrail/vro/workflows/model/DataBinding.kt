@@ -18,9 +18,9 @@ class FromParameterValue(val parameter: String) : DataBinding<Any>() {
         bindDataTo(parameter, any)
 }
 
-class NullStateOfProperty(val item: String, val property: String) : DataBinding<Boolean>() {
+class NullStateOfProperty(val item: String, val propertyPath: String) : DataBinding<Boolean>() {
     override val qualifier: ParameterQualifier? get() =
-        bindValueToNullableState(item, property)
+        bindValueToNullableState(item, propertyPath)
 }
 
 class FromSimplePropertyValue<Type : Any>(

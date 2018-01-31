@@ -4,8 +4,9 @@
 
 package net.juniper.contrail.vro.config.constants
 
-val apiPackageName = "net.juniper.contrail.api"
-val apiTypesPackageName = "net.juniper.contrail.api.types"
+val basePackageName = "net.juniper.contrail"
+val apiPackageName = "$basePackageName.api"
+val apiTypesPackageName = "$basePackageName.api.types"
 
 val Configuration = "Configuration"
 val Connection = "Connection"

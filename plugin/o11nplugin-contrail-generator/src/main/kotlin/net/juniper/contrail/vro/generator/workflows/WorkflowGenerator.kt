@@ -55,6 +55,7 @@ fun RelationDefinition.referencesOf(clazz: ObjectClass) =
 
 private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<ObjectClass>, schema: Schema) {
     createWorkflow(clazz, parentClazz, refs, schema).save(info, clazz)
+    editWorkflow(clazz, schema).save(info, clazz)
     deleteWorkflow(clazz).save(info, clazz)
 }
 

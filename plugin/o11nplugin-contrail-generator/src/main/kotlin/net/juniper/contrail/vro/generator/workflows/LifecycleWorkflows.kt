@@ -10,8 +10,10 @@ import net.juniper.contrail.vro.config.bold
 import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
+import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.pluralParameterName
+import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
@@ -55,6 +57,22 @@ fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<Obj
     }
 }
 
+fun editWorkflow(clazz: ObjectClass, schema: Schema): WorkflowDefinition {
+
+    val workflowName = "Edit ${clazz.allLowerCase}"
+
+    return workflow(workflowName).withScript(editScriptBody(clazz)) {
+        description = schema.createWorkflowDescription(clazz)
+        parameter(item, clazz.reference) {
+            description = "${clazz.allCapitalized} to edit"
+            mandatory = true
+            showInInventory = true
+        }
+
+        addProperties(clazz, schema, editMode = true)
+    }
+}
+
 fun deleteWorkflow(clazz: ObjectClass) =
     deleteWorkflow(clazz.pluginName, deleteScriptBody(clazz.pluginName))
 
@@ -83,7 +101,36 @@ ${references.addAllReferences}
 ${item.updateAsClass(clazz.pluginName)}
 """.trimIndent()
 
+private fun editScriptBody(clazz: Class<*>) = """
+${clazz.editPropertiesCode(item)}
+${item.retrieveExecutor}
+${item.updateAsClass(clazz.pluginName)}
+""".trimIndent()
+
 private fun deleteScriptBody(className: String) = """
 ${item.retrieveExecutor}
 ${item.deleteAsClass(className)}
 """.trimIndent()
+
+fun Class<*>.editPropertiesCode(item: String, level: Int = 0) =
+    workflowEditableProperties.joinToString("\n") { it.editCode(item, level) }
+
+fun Property.editCode(item: String, level: Int) = when {
+    clazz.isApiTypeClass && level <= maxComplexLevel -> editComplexCode(item, level)
+    !clazz.isApiTypeClass && level <= maxPrimitiveLevel -> simpleEditCode(item)
+    else -> ""
+}
+
+fun Property.simpleEditCode(item: String) =
+    "$item.set${propertyName.capitalize()}($propertyName);"
+
+fun Property.editComplexCode(item: String, level: Int): String = """
+var $propertyName = $item.get${propertyName.capitalize()}();
+if (${propertyName.condition}) {
+    if (!$propertyName) $propertyName = new Contrail${clazz.pluginName}();
+${clazz.editPropertiesCode(propertyName, level + 1).prependIndent(tab)}
+} else {
+    $propertyName = null;
+}
+$item.set${propertyName.capitalize()}($propertyName);
+""".trim()

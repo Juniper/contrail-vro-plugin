@@ -11,10 +11,10 @@ import com.vmware.o11n.sdk.modeldrivengen.model.Plugin
 import net.juniper.contrail.vro.config.backRefWrapperPropertyDisplayName
 import net.juniper.contrail.vro.config.cleanedDisplayedProperty
 import net.juniper.contrail.vro.config.displayedName
-import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.isBackRefWrapperProperty
 import net.juniper.contrail.vro.config.isCapitalized
 import net.juniper.contrail.vro.config.isDisplayOnlyProperty
+import net.juniper.contrail.vro.config.isModelClass
 import net.juniper.contrail.vro.config.position
 
 class CustomPlugin : Plugin() {
@@ -46,7 +46,7 @@ class CustomPlugin : Plugin() {
 
     private fun cleanFinders(finders: MutableList<ManagedFinder>) {
         finders.asSequence()
-            .filter { it.managedType?.modelClass?.isApiObjectClass ?: false }
+            .filter { it.managedType?.modelClass?.isModelClass ?: false }
             .forEach { it.clean() }
     }
 

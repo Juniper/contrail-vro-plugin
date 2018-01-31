@@ -23,12 +23,14 @@ import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.workflows.dsl.PresentationParametersBuilder
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
+import net.juniper.contrail.vro.workflows.model.AlwaysVisible
 import net.juniper.contrail.vro.workflows.model.DataBinding
 import net.juniper.contrail.vro.workflows.model.Element
 import net.juniper.contrail.vro.workflows.model.FromBooleanParameter
 import net.juniper.contrail.vro.workflows.model.FromComplexPropertyValue
 import net.juniper.contrail.vro.workflows.model.FromSimplePropertyValue
 import net.juniper.contrail.vro.workflows.model.NullStateOfProperty
+import net.juniper.contrail.vro.workflows.model.WhenNonNull
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.createDunesProperties
 import net.juniper.contrail.vro.workflows.model.createElementInfoProperties
@@ -53,9 +55,14 @@ fun dunesPropertiesFor(packageName: String, version: String) = createDunesProper
     pkgId = "4452345677834623546675023032605023032"
 )
 
+val maxComplexLevel = 1
+val maxPrimitiveLevel = 2
+
 val attribute = "attribute"
 val executor = "executor"
 val tab = "    "
+val AdvancedParameters = "Advanced parameters"
+val CustomParameters = "Custom parameters"
 
 val String.allLowerCase get() =
     splitCamel().toLowerCase()
@@ -82,6 +89,7 @@ fun deleteWorkflow(className: String, scriptBody: String) =
 
 private val Property.title get() = when (propertyName) {
     "mgmt" -> "Configuration"
+    "ecmpHashingIncludeFields" -> "ECMP Hashing"
     else -> propertyName.allCapitalized
 }
 
@@ -117,6 +125,16 @@ private fun Property.toParameter(builder: ParameterAggregator, schema: Schema, e
     }
 }
 
+private fun List<Property>.advancedSwitch(builder: ParameterAggregator, schema: Schema, propertyPrefix: String, editMode: Boolean) {
+    forEach {
+        builder.parameter(it.propertyName.condition, boolean) {
+            description = it.conditionDescription(schema)
+            if (editMode)
+                dataBinding = NullStateOfProperty(item, "$propertyPrefix${it.propertyName}")
+        }
+    }
+}
+
 private val workflowPropertiesFilter: (Property) -> Boolean =
     { it.declaringClass == it.parent &&
         ! it.clazz.isPropertyOrStringListWrapper &&
@@ -134,21 +152,19 @@ fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema: Schema,
     val topPrimitives = properties.simpleProperties.onlyPrimitives
     val topComplex = properties.simpleProperties.onlyComplex
 
+    val stepVisibility = if (editMode) WhenNonNull(item) else AlwaysVisible
+
     if (!topPrimitives.isEmpty()) {
-        step("Custom parameters") {
+        step(CustomParameters) {
+            visibility = stepVisibility
             topPrimitives.forEach { it.toParameter(this@step, schema, editMode) }
         }
     }
 
     if (!topComplex.isEmpty()) {
-        step("Advanced parameters") {
-            for (prop in topComplex) {
-                parameter(prop.propertyName.condition, boolean) {
-                    description = prop.conditionDescription(schema)
-                    if (editMode)
-                        dataBinding = NullStateOfProperty(item, prop.propertyName)
-                }
-            }
+        step(AdvancedParameters) {
+            visibility = stepVisibility
+            topComplex.advancedSwitch(this@step, schema, "", editMode)
         }
     }
 
@@ -158,19 +174,23 @@ fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema: Schema,
         val complex = propProperties.simpleProperties.onlyComplex
 
         when {
-            primitives.isEmpty() -> groups(prop.title) {
+            primitives.isEmpty() && !complex.isEmpty() -> groups(prop.title) {
                 description = schema.propertyDescription(clazz, prop.propertyName)
                 visibility = FromBooleanParameter(prop.propertyName.condition)
+                group(AdvancedParameters) {
+                    complex.advancedSwitch(this@group, schema, "${prop.propertyName}.", editMode)
+                }
                 for (propProp in complex) {
                     group(propProp.title) {
                         description = schema.propertyDescription(propProp.parent, propProp.propertyName)
+                        visibility = FromBooleanParameter(propProp.propertyName.condition)
                         propProp.clazz.properties.simpleProperties.forEach {
                             it.toParameter(this@group, schema, editMode, prop.grandChildBinding(propProp))
                         }
                     }
                 }
             }
-            complex.isEmpty() -> step(prop.title) {
+            complex.isEmpty() && ! primitives.isEmpty() -> step(prop.title) {
                 description = schema.propertyDescription(clazz, prop.propertyName)
                 visibility = FromBooleanParameter(prop.propertyName.condition)
                 primitives.forEach { it.toParameter(this@step, schema, editMode, prop.childBinding) }
@@ -178,11 +198,15 @@ fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema: Schema,
             else -> groups(prop.title) {
                 description = schema.propertyDescription(clazz, prop.propertyName)
                 visibility = FromBooleanParameter(prop.propertyName.condition)
-                group("Custom parameters") {
+                group(CustomParameters) {
                     primitives.forEach { it.toParameter(this@group, schema, editMode, prop.childBinding) }
+                }
+                group(AdvancedParameters) {
+                    complex.advancedSwitch(this@group, schema, "${prop.propertyName}.", editMode)
                 }
                 for (propProp in complex) {
                     group(propProp.title) {
+                        visibility = FromBooleanParameter(propProp.propertyName.condition)
                         description = schema.propertyDescription(propProp.parent, propProp.propertyName)
                         propProp.clazz.properties.simpleProperties.onlyPrimitives.forEach {
                             it.toParameter(this@group, schema, editMode, prop.grandChildBinding(propProp))
@@ -209,16 +233,14 @@ if($pluralParameterName) {
 private fun Property.setCode(ref: String) =
     "$ref.set${propertyName.capitalize()}($propertyName);"
 
-private val String.condition get() =
+val String.condition get() =
     "define_$this"
 
 fun Property.propertyCode(prefix: String): String =
     if (clazz.isApiTypeClass) clazz.attributeCode(propertyName, prefix, true) else ""
 
 fun Class<*>.attributeCode(ref: String, prefix: String = "", init: Boolean = false) =
-    properties.simpleProperties
-        .filter(workflowPropertiesFilter)
-        .run {
+    workflowEditableProperties.run {
 if (init)
 """
 ${prepare(prefix)}
@@ -234,6 +256,10 @@ ${prepare(prefix)}
 ${assign(ref, prefix)}
 """
 }.trimStart().prependIndent(prefix)
+
+val Class<*>.workflowEditableProperties get() =
+    properties.simpleProperties
+        .filter(workflowPropertiesFilter)
 
 fun List<Property>.assign(ref: String, prefix: String = tab) =
     joinToString(separator = "\n$prefix") { it.setCode(ref) }

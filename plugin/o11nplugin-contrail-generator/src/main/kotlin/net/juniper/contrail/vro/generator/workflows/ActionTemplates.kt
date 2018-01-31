@@ -4,6 +4,8 @@
 
 package net.juniper.contrail.vro.generator.workflows
 
+import net.juniper.contrail.vro.config.pluginName
+import net.juniper.contrail.vro.config.pluralize
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.ActionParameter
@@ -12,8 +14,11 @@ import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.util.generateID
 
+fun Class<*>.relationActionName(child: Class<*>) =
+    "get${child.pluginName.pluralize()}Of$pluginName"
+
 val ForwardRelation.getReferencesActionName get() =
-    "get${childNamePluralized}Of$parentName"
+    parentClass.relationActionName(childClass)
 
 val ForwardRelation.getReferencesActionScript
     get() =

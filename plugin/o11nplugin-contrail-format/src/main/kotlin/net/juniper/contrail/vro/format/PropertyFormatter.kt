@@ -20,6 +20,7 @@ import java.lang.reflect.Type
  */
 object PropertyFormatter {
     private val padding = 30
+    private val empty = "-"
 
     fun format(prop: KeyValuePair) =
         "${prop.key}: ${prop.value}"
@@ -47,6 +48,9 @@ object PropertyFormatter {
     fun format(prop: ShareType) =
         "${prop.tenant}: ${prop.tenantAccess.formatAccess()}"
 
+    fun format(prop: AllowedAddressPair) =
+        "Subnet: ${prop.ip ?: empty} MAC: ${prop.mac ?: empty} Mode: ${prop.addressMode ?: empty}"
+
     fun format(prop: PermType2) =
         "Owner".withValueWrap(prop.owner) +
         "Owner Permissions".withValueWrap(prop.ownerAccess.formatAccess()) +
@@ -56,6 +60,16 @@ object PropertyFormatter {
     fun format(prop: IpamType) =
         "IPAM Method".withValueWrap(prop.ipamMethod) +
         "DNS Method".withValue(prop.ipamDnsMethod)
+
+    fun format(prop: IpamSubnets): String =
+        prop.subnets.joinToString("\n") { format(it) }
+
+    fun format(prop: IpamSubnetType): String =
+        format(prop.subnet)
+
+    fun format(prop: PolicyRuleType): String = prop.run {
+        "${actionList.simpleAction} $protocol  ${srcAddresses.inline} ${srcPorts.inline} $direction ${dstAddresses.inline} ${dstPorts.inline}"
+    }
 
     private fun String.withValue(value: String?): String =
         "$this: " + (value ?: "-")
@@ -68,12 +82,6 @@ object PropertyFormatter {
 
     private fun Int?.formatAccess():String =
         AccessType.format(this)
-
-    fun format(prop: IpamSubnets): String =
-        prop.subnets.joinToString("\n") { format(it) }
-
-    fun format(prop: IpamSubnetType): String =
-        format(prop.subnet)
 
     private fun <T : ApiPropertyBase> List<T>?.format(empty:String = "", transform: (T) -> CharSequence) =
         this?.joinToString(separator = ", ", transform = transform).run {
@@ -91,10 +99,6 @@ object PropertyFormatter {
 
     private inline val List<ShareType>?.inline @JvmName("getShareTypes") get() =
         format("-") { format(it) }
-
-    fun format(prop: PolicyRuleType): String = prop.run {
-        "$protocol  ${srcAddresses.inline} ${srcPorts.inline} $direction ${dstAddresses.inline} ${dstPorts.inline}"
-    }
 
     fun format(prop: ApiPropertyBase):String =
         DefaultFormat.format(prop)
