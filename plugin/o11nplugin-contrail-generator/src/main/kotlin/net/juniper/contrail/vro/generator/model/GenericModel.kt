@@ -4,7 +4,7 @@
 
 package net.juniper.contrail.vro.generator.model
 
-import net.juniper.contrail.vro.config.apiTypesPackageName
+import net.juniper.contrail.vro.config.constants.apiTypesPackageName
 import net.juniper.contrail.vro.generator.editWarningMessage
 import net.juniper.contrail.vro.generator.generatedPackageName
 

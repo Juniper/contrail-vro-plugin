@@ -27,8 +27,6 @@ import javax.xml.bind.Marshaller
 
 fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: Schema) {
     generateDunesMetaInfo(info)
-    createConnectionWorkflow().saveInConfiguration(info)
-    deleteConnectionWorkflow().saveInConfiguration(info)
 
     relations.rootClasses.forEach {
         val refs = relations.referencesOf(it)
@@ -102,9 +100,6 @@ private fun Marshaller.applyDefaultSetup(): Marshaller {
     return this
 }
 
-private fun Workflow.saveInConfiguration(info: ProjectInfo) =
-    save(info, "Configuration")
-
 private fun WorkflowDefinition.save(info: ProjectInfo, categoryClass: Class<*>) =
     save(info, categoryClass.pluginName)
 
@@ -113,9 +108,6 @@ private fun Workflow.save(info: ProjectInfo, category: String) {
     generateDefinition(info, categoryPackage)
     generateElementInfo(info, categoryPackage)
 }
-
-private fun WorkflowDefinition.saveInConfiguration(info: ProjectInfo) =
-    createWorkflow(info).saveInConfiguration(info)
 
 private fun WorkflowDefinition.save(info: ProjectInfo) =
     save(info, category ?: throw IllegalStateException("Category of workflow $displayName was not defined."))

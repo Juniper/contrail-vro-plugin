@@ -8,6 +8,8 @@ import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
 import net.juniper.contrail.api.types.VirtualMachineInterface
+import net.juniper.contrail.vro.config.constants.apiPackageName
+import net.juniper.contrail.vro.config.constants.apiTypesPackageName
 import java.lang.reflect.Method
 
 fun objectClasses() =
