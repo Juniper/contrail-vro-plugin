@@ -30,6 +30,7 @@ import net.juniper.contrail.vro.config.referenceName
 import net.juniper.contrail.vro.config.returnListGenericClass
 import net.juniper.contrail.vro.config.returnsApiPropertyOrList
 import net.juniper.contrail.vro.config.returnsObjectReferences
+import net.juniper.contrail.vro.config.toPluginName
 import net.juniper.contrail.vro.config.typeToObjectClass
 import java.lang.reflect.Method
 
@@ -49,8 +50,10 @@ class ForwardRelation (
 ) {
     val parentName: String = parentClass.simpleName
     val childName: String = method.nameWithoutGetAndBackRefs
+    val parentPluginName: String = parentName.toPluginName
+    val childPluginName: String = childName.toPluginName
     val childClass: ObjectClass = childName.asObjectClass!!
-    val childNamePluralized = childName.pluralize()
+    val childNamePluralized = childPluginName.pluralize()
     val getter: String = method.propertyName
     val folderName = method.nameWithoutGetAndBackRefs.folderName()
     val attribute = method.objectReferenceAttributeClassOrDefault
@@ -72,8 +75,8 @@ class NestedRelation(
     val getter: String = getterChain.last().name
     val getterDecapitalized = getter.decapitalize()
     val name: String = relationName(parentCollapsedName, getter)
-    val childWrapperName = rootClass.simpleName + getterChain.joinToString("") { "_" + it.name }
-    val parentWrapperName = rootClass.simpleName + parentGetterChain.joinToString("") { "_" + it.name }
+    val childWrapperName = wrapperName(rootClass, getterChain)
+    val parentWrapperName = wrapperName(rootClass, parentGetterChain)
     val folderName = folderNameBase.folderName()
     val toMany: Boolean = getterChain.last().toMany
 }

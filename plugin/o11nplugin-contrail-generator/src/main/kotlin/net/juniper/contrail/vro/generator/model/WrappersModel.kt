@@ -8,6 +8,7 @@ import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isPropertyListWrapper
 import net.juniper.contrail.vro.config.kotlinClassName
 import net.juniper.contrail.vro.config.nestedName
+import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.underscoredNestedName
 
 data class WrappersModel(
@@ -38,8 +39,8 @@ fun Property.toPropertyModel() = PropertyModel(
     classLabel
 )
 
-private fun wrapperName(rootClass: Class<*>, getterChain: List<Getter>) =
-    rootClass.simpleName + getterChain.joinToString("") { "_" + it.name }
+fun wrapperName(rootClass: Class<*>, getterChain: List<Getter>) =
+    rootClass.pluginName + getterChain.joinToString("") { "_" + it.name }
 
 private fun Property.toWrapperProperties(wrapperName: String) : Property {
     val fieldName = fieldName.capitalize()

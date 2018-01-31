@@ -29,13 +29,13 @@ import net.juniper.contrail.vro.base.ConnectionRepository
   </@compress>
 </#macro>
 
-<#list rootClassNames as rootClass>
-class ConnectionHas${rootClass}
-@Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${rootClass}> {
+<#list rootClasses as rootClass>
+class ConnectionHas${rootClass.simpleName}
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${rootClass.simpleName}> {
 
-    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${rootClass}>? {
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${rootClass.simpleName}>? {
         val connection = connections.getConnection(parentId)
-        return connection?.list(${rootClass}::class.java)
+        return connection?.list(${rootClass.simpleName}::class.java)
     }
 }
 

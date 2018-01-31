@@ -16,7 +16,6 @@ val String.isModelClassName get() = when (this) {
     "VirtualMachine",
     "VirtualMachineInterface",
     "VirtualRouter",
-    "VirtualRouter",
     "LogicalRouter",
     "PhysicalRouter",
     "RouteTable",
@@ -24,7 +23,6 @@ val String.isModelClassName get() = when (this) {
     "ServiceInstance",
     "ServiceTemplate",
     "InstanceIp",
-    "QosConfig",
     "QosConfig",
     "GlobalQosConfig",
     "ServiceHealthCheck"-> true
@@ -107,10 +105,14 @@ val ObjectClass.isRootClass: Boolean get() {
 val ObjectClass.isInternal: Boolean get() =
     newInstance().defaultParentType == null
 
-val Class<*>.pluginName get() = when(this.simpleName) {
+val String.toPluginName get() = when (this) {
+    // Virtual Machine Interface is visible in Contrail UI as Port
     "VirtualMachineInterface" -> "Port"
-    else -> simpleName
+    else -> this
 }
+
+val Class<*>.pluginName get() =
+    simpleName.toPluginName
 
 val inventoryPropertyFilter: PropertyClassFilter = { it.isInventoryProperty }
 val modelClassFilter: ObjectClassFilter = { it.isModelClass }

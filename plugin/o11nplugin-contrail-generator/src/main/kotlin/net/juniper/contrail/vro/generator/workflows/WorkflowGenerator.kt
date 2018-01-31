@@ -54,8 +54,8 @@ fun RelationDefinition.referencesOf(clazz: ObjectClass) =
         .toList()
 
 private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<ObjectClass>, schema: Schema) {
-    createWorkflow(clazz, parentClazz, refs, schema).save(info, clazz.simpleName)
-    deleteWorkflow(clazz).save(info, clazz.simpleName)
+    createWorkflow(clazz, parentClazz, refs, schema).save(info, clazz)
+    deleteWorkflow(clazz).save(info, clazz)
 }
 
 private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema) =
@@ -64,8 +64,8 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, re
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation, schema: Schema) {
     val action = relation.findReferencesAction(info.workflowVersion, info.workflowsPackageName)
     action.save(info)
-    addReferenceWorkflow(relation, schema).save(info, relation.parentName)
-    removeReferenceWorkflow(relation, action).save(info, relation.parentName)
+    addReferenceWorkflow(relation, schema).save(info, relation.parentClass)
+    removeReferenceWorkflow(relation, action).save(info, relation.parentClass)
 }
 
 private fun createCustomWorkflows(info: ProjectInfo, schema: Schema) {
@@ -99,7 +99,7 @@ private fun Marshaller.applyDefaultSetup(): Marshaller {
 private fun Workflow.saveInConfiguration(info: ProjectInfo) =
     save(info, "Configuration")
 
-private fun Workflow.save(info: ProjectInfo, categoryClass: Class<*>) =
+private fun WorkflowDefinition.save(info: ProjectInfo, categoryClass: Class<*>) =
     save(info, categoryClass.pluginName)
 
 private fun Workflow.save(info: ProjectInfo, category: String) {

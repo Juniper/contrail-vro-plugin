@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
+import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.workflows.dsl.ParameterDefinition
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.inCategory
@@ -25,4 +26,4 @@ fun WorkflowDefinition.withScriptFile(name: String, setup: ParameterDefinition) 
     withScript(ScriptLoader.load(name), setup)
 
 inline fun <reified T : Any> customWorkflow(name: String) =
-    workflow(name).inCategory(T::class.java.simpleName)
+    workflow(name).inCategory(T::class.java.pluginName)

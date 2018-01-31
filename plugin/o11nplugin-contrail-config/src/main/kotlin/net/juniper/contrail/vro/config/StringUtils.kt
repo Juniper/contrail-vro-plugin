@@ -44,7 +44,7 @@ fun String.folderName() : String = when (this) {
 }
 
 val Class<*>.folderName get() =
-    simpleName.folderName()
+    pluginName.folderName()
 
 val String.pluralParameterName get(): String =
     folderName().replace(" ", "").run {
@@ -52,7 +52,7 @@ val String.pluralParameterName get(): String =
     }
 
 val Class<*>.pluralParameterName get() =
-    simpleName.pluralParameterName
+    pluginName.pluralParameterName
 
 fun pluralizeCamelCases(name: String) : String {
     val nameParts = name.split(CAMEL_CASE_REGEX)
@@ -75,6 +75,7 @@ val String.cleanOrRename get() = when (this) {
     "Dst" -> "Destination"
     "Vxlan", "vxlan" -> "VxLAN"
     "Qos", "qos" -> "QoS"
+    "Ecmp", "ecmp" -> "ECMP"
     "Entries", "entries" -> "Rules"
     "Mgmt", "mgmt" -> "Configuration"
     "Perms2", "perms2" -> "Permissions"

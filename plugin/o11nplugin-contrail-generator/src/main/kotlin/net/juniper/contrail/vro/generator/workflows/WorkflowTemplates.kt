@@ -286,8 +286,8 @@ private fun Schema.descriptionInCreateRelationWorkflow(parentClazz: ObjectClass,
 
 fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDefinition {
 
-    val parentName = relation.parentName
-    val childName = relation.childName
+    val parentName = relation.parentPluginName
+    val childName = relation.childPluginName
     val workflowName = "Add ${childName.allLowerCase} to ${parentName.allLowerCase}"
     val scriptBody = relation.addReferenceRelationScriptBody()
 
@@ -308,8 +308,8 @@ fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDef
 
 fun removeReferenceWorkflow(relation: ForwardRelation, action: Action): WorkflowDefinition {
 
-    val parentName = relation.parentName
-    val childName = relation.childName
+    val parentName = relation.parentPluginName
+    val childName = relation.childPluginName
     val workflowName = "Remove ${childName.allLowerCase} from ${parentName.allLowerCase}"
     val scriptBody = relation.removeReferenceRelationScriptBody()
 

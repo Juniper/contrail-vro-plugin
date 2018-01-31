@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.workflows.model
 
 import net.juniper.contrail.vro.config.CDATA
+import net.juniper.contrail.vro.config.pluginName
 import java.util.Date
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
@@ -105,7 +106,7 @@ data class array<out Type : Any>(val type: ParameterType<Type>) : ParameterType<
 }
 
 data class Reference(val simpleName: String) : ParameterType<Reference>() {
-    constructor(clazz: Class<*>): this(clazz.simpleName)
+    constructor(clazz: Class<*>): this(clazz.pluginName)
 
     override val name: String get() =
         "Contrail:$simpleName"

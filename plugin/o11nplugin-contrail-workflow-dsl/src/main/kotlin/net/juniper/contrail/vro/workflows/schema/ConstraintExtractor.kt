@@ -5,8 +5,8 @@
 package net.juniper.contrail.vro.workflows.schema
 
 import net.juniper.contrail.vro.config.ObjectClass
-import net.juniper.contrail.vro.config.defaultParentType
 import net.juniper.contrail.vro.config.isApiObjectClass
+import net.juniper.contrail.vro.config.parentType
 import net.juniper.contrail.vro.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.workflows.model.wrapConstraints
 import org.w3c.dom.Node
@@ -28,7 +28,7 @@ private fun Schema.propertyDescriptionImpl(clazz: Class<*>, xsdFieldName: String
 }
 
 fun Schema.objectDescription(clazz: ObjectClass): String? {
-    return relationDefinitionComment(clazz.defaultParentType ?: return null, clazz.xsdName).description
+    return relationDefinitionComment(clazz.parentType ?: return null, clazz.xsdName).description
 }
 
 inline fun <reified F : Any, reified T : Any> Schema.relationDescription() =

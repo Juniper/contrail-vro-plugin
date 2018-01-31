@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.config
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
+import net.juniper.contrail.api.types.VirtualMachineInterface
 import java.lang.reflect.Method
 
 fun objectClasses() =
@@ -36,8 +37,12 @@ val String.isApiTypeClass get() =
 val ObjectClass.defaultParentType: String? get() =
     newInstance().defaultParentType
 
-val ObjectClass.parentType: String? get() =
-    if (isRootClass) null else defaultParentType
+val ObjectClass.parentType: String? get() = when {
+    isRootClass -> null
+    // Default parent of Virtual Machine Interface is deprecated in the schema
+    this == VirtualMachineInterface::class.java -> "project"
+    else -> defaultParentType
+}
 
 val ObjectClass.objectType: String get() =
     newInstance().objectType

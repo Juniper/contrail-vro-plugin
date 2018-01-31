@@ -10,7 +10,7 @@ class Executor(private val connection: Connection) {
 
     <#list relations as relation>
     @Throws(IOException::class)
-    fun create${relation.childName}(obj: ${relation.childName}, parent: ${relation.parentName}) {
+    fun create${relation.childPluginName}(obj: ${relation.childName}, parent: ${relation.parentName}) {
         obj.setParent(parent)
         connection.create(obj)
     }
@@ -18,37 +18,37 @@ class Executor(private val connection: Connection) {
 
     <#list rootClasses as rootClass>
     @Throws(IOException::class)
-    fun create${rootClass.simpleName}(obj: ${rootClass.simpleName}) {
+    fun create${rootClass.pluginName}(obj: ${rootClass.simpleName}) {
         connection.create(obj)
     }
     </#list>
 
     <#list internalClasses as internalClass>
     @Throws(IOException::class)
-    fun create${internalClass.simpleName}(obj: ${internalClass.simpleName}) {
+    fun create${internalClass.pluginName}(obj: ${internalClass.simpleName}) {
         connection.create(obj)
     }
     </#list>
 
     <#list findableClasses as klass>
     @Throws(IOException::class)
-    fun update${klass.simpleName}(obj: ${klass.simpleName}) {
+    fun update${klass.pluginName}(obj: ${klass.simpleName}) {
         connection.update(obj)
     }
 
     @Throws(IOException::class)
-    fun read${klass.simpleName}(obj: ${klass.simpleName}) {
+    fun read${klass.pluginName}(obj: ${klass.simpleName}) {
         connection.read(obj)
     }
 
     @Throws(IOException::class)
-    fun delete${klass.simpleName}(obj: ${klass.simpleName}) {
+    fun delete${klass.pluginName}(obj: ${klass.simpleName}) {
         connection.delete(obj)
     }
     </#list>
 
     <#list forwardRelations as relation>
-    fun get${relation.childNamePluralized}Of${relation.parentName}(parent: ${relation.parentName}) =
+    fun get${relation.childNamePluralized}Of${relation.parentPluginName}(parent: ${relation.parentName}) =
         connection.getObjects(${relation.childName}::class.java, parent.${relation.getter})
 
     </#list>
