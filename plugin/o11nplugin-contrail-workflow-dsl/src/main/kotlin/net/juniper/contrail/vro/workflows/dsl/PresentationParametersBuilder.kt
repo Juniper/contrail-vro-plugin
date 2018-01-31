@@ -4,35 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.dsl
 
-import net.juniper.contrail.vro.workflows.model.Action
-import net.juniper.contrail.vro.workflows.model.AlwaysVisible
-import net.juniper.contrail.vro.workflows.model.FromBooleanParameter
-import net.juniper.contrail.vro.workflows.model.ParameterQualifier
-import net.juniper.contrail.vro.workflows.model.ParameterType
-import net.juniper.contrail.vro.workflows.model.PresentationGroup
-import net.juniper.contrail.vro.workflows.model.PresentationStep
-import net.juniper.contrail.vro.workflows.model.Reference
-import net.juniper.contrail.vro.workflows.model.SecureString
-import net.juniper.contrail.vro.workflows.model.FromStringParameter
-import net.juniper.contrail.vro.workflows.model.VisibilityCondition
-import net.juniper.contrail.vro.workflows.model.WhenNonNull
-import net.juniper.contrail.vro.workflows.model.array
-import net.juniper.contrail.vro.workflows.model.boolean
-import net.juniper.contrail.vro.workflows.model.number
-import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.workflows.model.date
-import net.juniper.contrail.vro.workflows.model.defaultValueQualifier
-import net.juniper.contrail.vro.workflows.model.mandatoryQualifier
-import net.juniper.contrail.vro.workflows.model.listFromAction
-import net.juniper.contrail.vro.workflows.model.numberFormatQualifier
-import net.juniper.contrail.vro.workflows.model.minNumberValueQualifier
-import net.juniper.contrail.vro.workflows.model.maxNumberValueQualifier
-import net.juniper.contrail.vro.workflows.model.predefinedAnswersQualifier
-import net.juniper.contrail.vro.workflows.model.selectAsTreeQualifier
-import net.juniper.contrail.vro.workflows.model.showInInventoryQualifier
-import net.juniper.contrail.vro.workflows.model.visibleWhenBooleanSwitchedQualifier
-import net.juniper.contrail.vro.workflows.model.visibleWhenNonNullQualifier
-import net.juniper.contrail.vro.workflows.model.visibleWhenVariableHasValueQualifier
+import net.juniper.contrail.vro.workflows.model.*
 import java.util.Date
 
 @WorkflowBuilder
@@ -216,7 +188,23 @@ class IntParameterBuilder(name: String) : BasicParameterBuilder<Long>(name, numb
     }
 }
 
-class StringParameterBuilder(name: String) : BasicParameterBuilder<String>(name, string)
+class StringParameterBuilder(name: String) : BasicParameterBuilder<String>(name, string) {
+    var customValidation: StringValidation? = null
+    var multiline: Boolean = false
+
+    override val customQualifiers get(): List<ParameterQualifier> {
+        val qualifiers = mutableListOf<ParameterQualifier>()
+        customValidation?.let {
+            when (it){
+                is CIDR -> qualifiers.add(cidrValidatorQualifier(parameterName, it.actionPackageName, it.actionName))
+            }
+        }
+        if (multiline){
+            qualifiers.add(multilineQualifier())
+        }
+        return qualifiers
+    }
+}
 
 class SecureStringParameterBuilder(name: String) : BasicParameterBuilder<String>(name, SecureString)
 

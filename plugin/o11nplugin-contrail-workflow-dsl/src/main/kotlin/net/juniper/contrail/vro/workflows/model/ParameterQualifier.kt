@@ -58,6 +58,8 @@ val sdkRootObjectQualifierName = "sdkRootObject"
 val selectAsQualifierName = "show-select-as"
 val beforeDateQualifierName = "beforeDate"
 val afterDateQualifierName = "afterDate"
+val customValidatorQualifierName = "ognlValidator"
+val multilineQualifierName = "textInput"
 
 val voidValue = "__NULL__"
 
@@ -71,6 +73,7 @@ fun <T : Any> predefinedAnswersQualifier(type: ParameterType<T>, values: List<T>
     return staticQualifier(genericEnumerationQualifierName, array(simpleType), cDATAListFormat(simpleType, values))
 }
 fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifierName, string, value)
+fun multilineQualifier() = staticQualifier(multilineQualifierName, void, voidValue)
 fun minNumberValueQualifier(value: Long) = staticQualifier(minNumberValueQualifierName, number, value)
 fun maxNumberValueQualifier(value: Long) = staticQualifier(maxNumberValueQualifierName, number, value)
 fun visibleWhenNonNullQualifier(otherName: String) =
@@ -85,14 +88,26 @@ fun childOf(parent: String) =
     ognlQualifier(sdkRootObjectQualifierName, any, "#$parent")
 fun bindDataTo(parameter: String) =
     ognlQualifier(dataBindingQualifierName, string, "#$parameter")
+fun cidrValidatorQualifier(parameter: String, packageName: String, actionName: String) =
+    validatorActionQualifier(packageName, actionName, listOf(parameter))
+fun allocValidatorQualifier(parameter: String, cidr: String, packageName: String, actionName: String) =
+    validatorActionQualifier(packageName, actionName, listOf(cidr, parameter))
 
 private val Action.ognl get() =
     """GetAction("$packageName","$name").call($call)"""
 private val Action.call get() =
     parameters.joinToString(",") { "#${it.name}" }
 
+private fun validatorActionCall(packageName: String, actionName: String, parameters: List<String>?): String {
+    val args = parameters?.let { it.joinToString(", ") { "#${it}" } } ?: ""
+    return """GetAction("$packageName","$actionName").call($args)"""
+}
+
 private fun <T : Any> staticQualifier(name: String, type: ParameterType<T>, value: T) =
     ParameterQualifier(static, name, type.name, value.toString())
+
+private fun validatorActionQualifier(packageName: String, actionName: String, parameters: List<String>?) =
+    ognlQualifier(customValidatorQualifierName, string, validatorActionCall(packageName, actionName, parameters))
 
 private fun ognlQualifier(name: String, type: ParameterType<Any>, value: String) =
     ParameterQualifier(ognl, name, type.name, value)

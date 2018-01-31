@@ -17,6 +17,12 @@ import java.util.UUID
 
 class Utils {
 
+    fun isValidCidr(input: String): Boolean = InetAddress.isValidSubnet(input)
+
+    fun isValidIpv6Cidr(input: String): Boolean = InetAddress.IPv6.isValidSubnet(input)
+
+    fun isValidIpv4Cidr(input: String): Boolean = InetAddress.IPv4.isValidSubnet(input)
+
     fun getVnSubnet(network: VirtualNetwork, ipam: NetworkIpam): VnSubnetsType =
         network.networkIpam?.find { it.uuid == ipam.uuid }?.attr ?: VnSubnetsType()
 

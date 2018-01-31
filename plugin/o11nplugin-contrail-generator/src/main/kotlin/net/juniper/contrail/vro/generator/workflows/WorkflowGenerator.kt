@@ -11,6 +11,7 @@ import net.juniper.contrail.vro.generator.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
 import net.juniper.contrail.vro.config.packageToPath
+import net.juniper.contrail.vro.workflows.custom.loadCustomActions
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.workflows.custom.loadCustomWorkflows
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
@@ -44,6 +45,7 @@ fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: 
     }
 
     createCustomWorkflows(info, schema)
+    createCustomActions(info, schema)
 }
 
 fun RelationDefinition.referencesOf(clazz: ObjectClass) =
@@ -70,6 +72,10 @@ private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelat
 
 private fun createCustomWorkflows(info: ProjectInfo, schema: Schema) {
     loadCustomWorkflows(schema).forEach { it.save(info) }
+}
+
+private fun createCustomActions(info: ProjectInfo, schema: Schema) {
+    loadCustomActions(info.workflowVersion, info.workflowsPackageName).forEach { it.save(info) }
 }
 
 val workflowContext = JAXBContext.newInstance(Workflow::class.java)
