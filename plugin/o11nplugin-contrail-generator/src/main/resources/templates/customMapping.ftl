@@ -89,14 +89,14 @@ class CustomMapping: AbstractMapping() {
             .to(Subnet::class.java)
             .using(VirtualNetworkHasSubnet::class.java)
             .`as`("VirtualNetworkToSubnet")
-            .`in`(FolderDef("Subnets__in__VirtualNetwork_Subnets", findFolderIcon<Subnet>()))
+            .`in`(FolderDef(folderName("Subnets", "VirtualNetwork", "Subnet"), findFolderIcon<Subnet>()))
 
         <#list rootClasses as rootClass>
         relate(Connection::class.java)
             .to(${rootClass.simpleName}::class.java)
             .using(ConnectionHas${rootClass.simpleName}::class.java)
             .`as`("ConnectionHas${rootClass.simpleName}")
-            .`in`(FolderDef("${rootClass.folderName}__in__ROOT", findFolderIcon<${rootClass.simpleName}>()))
+            .`in`(FolderDef(folderName("${rootClass.folderName}", "ROOT"), findFolderIcon<${rootClass.simpleName}>()))
         </#list>
 
         <#list relations as relation>
@@ -105,7 +105,7 @@ class CustomMapping: AbstractMapping() {
             .using(${relation.parentName}Has${relation.childName}::class.java)
             .`as`("${relation.name}")
             <#if !relation.directChild >
-            .`in`(FolderDef("${relation.folderName}__in__${relation.parentName}_${relation.childName}s", findFolderIcon<${relation.childName}>()))
+            .`in`(FolderDef(folderName("${relation.folderName}", "${relation.parentName}", "${relation.childName}"), findFolderIcon<${relation.childName}>()))
             </#if>
         </#list>
 
@@ -114,7 +114,7 @@ class CustomMapping: AbstractMapping() {
             .to(${relation.childName}::class.java)
             .using(${relation.parentName}Has${relation.childName}::class.java)
             .`as`("${relation.parentName}To${relation.childName}")
-            .`in`(FolderDef("${relation.folderName}__in__${relation.parentName}_${relation.getter}", findFolderIcon<${relation.childName}>()))
+            .`in`(FolderDef(folderName("${relation.folderName}", "${relation.parentName}", "${relation.getter}"), findFolderIcon<${relation.childName}>()))
         </#list>
 
         <#list nestedRelations as relation>
@@ -122,7 +122,7 @@ class CustomMapping: AbstractMapping() {
             .to(${relation.childWrapperName}::class.java)
             .using(${relation.parentWrapperName}Has${relation.childWrapperName}::class.java)
             .`as`("${relation.name}")
-            <#if relation.toMany>.`in`(FolderDef("${relation.folderName}__in__${relation.parentWrapperName}_${relation.getter}", findFolderIcon<${relation.childName}>()))</#if>
+            <#if relation.toMany>.`in`(FolderDef(folderName("${relation.folderName}", "${relation.parentWrapperName}", "${relation.getter}"), findFolderIcon<${relation.childName}>()))</#if>
         </#list>
     }
 }
