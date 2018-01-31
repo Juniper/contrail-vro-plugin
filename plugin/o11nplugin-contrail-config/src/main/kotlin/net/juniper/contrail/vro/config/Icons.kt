@@ -8,7 +8,7 @@ val defaultFolderIconName = "folder.png"
 val defaultItemIconName = "item.png"
 
 inline fun <reified T> folderIconName() =
-    T::class.java.simpleName.classToTypeName+".png"
+    T::class.java.simpleName.classToTypeName + ".png"
 
 inline fun <reified T> itemIconName() =
     defaultItemIconName

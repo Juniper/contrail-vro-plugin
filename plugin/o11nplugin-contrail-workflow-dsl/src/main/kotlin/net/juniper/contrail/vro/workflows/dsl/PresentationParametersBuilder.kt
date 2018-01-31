@@ -5,6 +5,8 @@
 package net.juniper.contrail.vro.workflows.dsl
 
 import net.juniper.contrail.vro.workflows.model.* // ktlint-disable no-wildcard-imports
+import net.juniper.contrail.vro.workflows.model.DataBinding
+import net.juniper.contrail.vro.workflows.model.NoDataBinding
 import java.util.Date
 
 @WorkflowBuilder
@@ -130,6 +132,7 @@ abstract class BasicBuilder {
 abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val type: ParameterType<Type>) : BasicBuilder() {
     var mandatory: Boolean = false
     var defaultValue: Type? = null
+    var dataBinding: DataBinding<Type> = NoDataBinding
     var predefinedAnswers: List<Type>? = null
     val additionalQualifiers = mutableListOf<ParameterQualifier>()
     private var listedBy: Action? = null
@@ -153,6 +156,9 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
 
         defaultValue?.let {
             add(defaultValueQualifier(type, it))
+        }
+        dataBinding.qualifier?.let {
+            add(it)
         }
         predefinedAnswers?.let {
             add(predefinedAnswersQualifier(type, it))

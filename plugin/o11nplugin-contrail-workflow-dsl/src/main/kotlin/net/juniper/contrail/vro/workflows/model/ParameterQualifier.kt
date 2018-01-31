@@ -86,12 +86,22 @@ fun listFromAction(action: Action) =
     ognlQualifier(linkedEnumerationQualifierName, action.resultType, action.ognl)
 fun childOf(parent: String) =
     ognlQualifier(sdkRootObjectQualifierName, any, "#$parent")
-fun bindDataTo(parameter: String) =
-    ognlQualifier(dataBindingQualifierName, string, "#$parameter")
+fun bindDataTo(parameter: String, type: ParameterType<Any>) =
+    ognlQualifier(dataBindingQualifierName, type, "#$parameter")
+fun bindValueToNullableState(item: String, property: String) =
+    ognlQualifier(dataBindingQualifierName, boolean, "#$item.$property != null")
+fun <T : Any> bindValueToSimpleProperty(item: String, property: String, type: ParameterType<T>) =
+    ognlQualifier(dataBindingQualifierName, type, "#$item.$property")
+fun <T : Any> bindValueToComplexProperty(item: String, propertyPath: String, type: ParameterType<T>) =
+    ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, extractPropertyAction, "#$item", "\"$propertyPath\""))
+
 fun cidrValidatorQualifier(parameter: String, packageName: String, actionName: String) =
     validatorActionQualifier(packageName, actionName, parameter)
 fun allocValidatorQualifier(parameter: String, cidr: String, packageName: String, actionName: String) =
     validatorActionQualifier(packageName, actionName, cidr, parameter)
+
+private val actionPackage = "net.juniper.contrail"
+private val extractPropertyAction = "getPropertyValue"
 
 private fun actionOgnl(packageName: String, name: String, vararg parameter: String) =
     """GetAction("$packageName","$name").call(${parameter.joinToString(",")})"""
