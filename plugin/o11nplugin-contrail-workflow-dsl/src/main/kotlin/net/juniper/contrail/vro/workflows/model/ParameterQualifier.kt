@@ -5,6 +5,9 @@
 package net.juniper.contrail.vro.workflows.model
 
 import net.juniper.contrail.vro.config.CDATA
+import net.juniper.contrail.vro.config.actionPackage
+import net.juniper.contrail.vro.config.propertyNotNull
+import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.workflows.model.QualifierKind.ognl
 import net.juniper.contrail.vro.workflows.model.QualifierKind.static
 import javax.xml.bind.annotation.XmlAccessType
@@ -88,23 +91,22 @@ fun childOf(parent: String) =
     ognlQualifier(sdkRootObjectQualifierName, any, "#$parent")
 fun bindDataTo(parameter: String, type: ParameterType<Any>) =
     ognlQualifier(dataBindingQualifierName, type, "#$parameter")
-fun bindValueToNullableState(item: String, property: String) =
-    ognlQualifier(dataBindingQualifierName, boolean, "#$item.$property != null")
+fun bindValueToNullableState(item: String, propertyPath: String) =
+    ognlQualifier(dataBindingQualifierName, boolean, actionOgnl(actionPackage, propertyNotNull, "#$item", "\"$propertyPath\""))
 fun <T : Any> bindValueToSimpleProperty(item: String, property: String, type: ParameterType<T>) =
     ognlQualifier(dataBindingQualifierName, type, "#$item.$property")
 fun <T : Any> bindValueToComplexProperty(item: String, propertyPath: String, type: ParameterType<T>) =
-    ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, extractPropertyAction, "#$item", "\"$propertyPath\""))
+    ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, propertyValue, "#$item", "\"$propertyPath\""))
+fun <T : Any> bindValueToAction(actionName: String, type: ParameterType<T>, vararg parameters: String) =
+    ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, actionName, *parameters))
 
 fun cidrValidatorQualifier(parameter: String, packageName: String, actionName: String) =
     validatorActionQualifier(packageName, actionName, parameter)
 fun allocValidatorQualifier(parameter: String, cidr: String, packageName: String, actionName: String) =
     validatorActionQualifier(packageName, actionName, cidr, parameter)
 
-private val actionPackage = "net.juniper.contrail"
-private val extractPropertyAction = "getPropertyValue"
-
-private fun actionOgnl(packageName: String, name: String, vararg parameter: String) =
-    """GetAction("$packageName","$name").call(${parameter.joinToString(",")})"""
+private fun actionOgnl(packageName: String, name: String, vararg parameters: String) =
+    """GetAction("$packageName","$name").call(${parameters.joinToString(",")})"""
 
 private val Action.ognl get() =
     """GetAction("$packageName","$name").call($call)"""

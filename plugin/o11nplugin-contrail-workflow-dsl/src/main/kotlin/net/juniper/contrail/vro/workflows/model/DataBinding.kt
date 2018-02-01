@@ -40,3 +40,8 @@ class FromComplexPropertyValue<Type : Any>(
     override val qualifier: ParameterQualifier? get() =
         bindValueToComplexProperty(item, propertyPath, type)
 }
+
+class FromAction<Type : Any>(val actionName: String, val type: ParameterType<Type>, vararg val parameters: String) : DataBinding<Type>() {
+    override val qualifier: ParameterQualifier? get() =
+        bindValueToAction(actionName, type, *parameters)
+}
