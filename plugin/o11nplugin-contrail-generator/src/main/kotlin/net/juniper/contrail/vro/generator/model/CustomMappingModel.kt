@@ -8,7 +8,7 @@ import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.PropertyClass
 import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.pluginName
-import net.juniper.contrail.vro.generator.ProjectInfo
+import net.juniper.contrail.vro.config.ProjectInfo
 
 data class CustomMappingModel (
     val findableClasses: List<ClassInfoModel>,

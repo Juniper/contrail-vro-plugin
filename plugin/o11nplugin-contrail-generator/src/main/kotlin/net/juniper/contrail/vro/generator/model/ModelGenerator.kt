@@ -9,7 +9,7 @@ import net.juniper.contrail.vro.config.PropertyClass
 import net.juniper.contrail.vro.config.rootClassFilter
 import net.juniper.contrail.vro.config.internalClassFilter
 import net.juniper.contrail.vro.config.div
-import net.juniper.contrail.vro.generator.ProjectInfo
+import net.juniper.contrail.vro.config.ProjectInfo
 import net.juniper.contrail.vro.generator.generatedPackageName
 import net.juniper.contrail.vro.generator.generatedSourcesRoot
 import net.juniper.contrail.vro.generator.templatePath

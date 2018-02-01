@@ -7,7 +7,7 @@ package net.juniper.contrail.vro.generator.workflows
 import com.sun.xml.internal.bind.marshaller.CharacterEscapeHandler
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.isRequiredAttributeClass
-import net.juniper.contrail.vro.generator.ProjectInfo
+import net.juniper.contrail.vro.config.ProjectInfo
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
 import net.juniper.contrail.vro.config.packageToPath
@@ -64,7 +64,7 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, re
     generateLifecycleWorkflows(info, clazz, null, refs, schema)
 
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation, schema: Schema) {
-    val action = relation.findReferencesAction(info.workflowVersion, info.workflowsPackageName)
+    val action = relation.findReferencesAction(info.workflowVersion, info.workflowPackage)
     action.save(info)
     addReferenceWorkflow(relation, schema).save(info, relation.parentClass)
     removeReferenceWorkflow(relation, action).save(info, relation.parentClass)
@@ -75,7 +75,7 @@ private fun createCustomWorkflows(info: ProjectInfo, schema: Schema) {
 }
 
 private fun createCustomActions(info: ProjectInfo, schema: Schema) {
-    loadCustomActions(info.workflowVersion, info.workflowsPackageName).forEach { it.save(info) }
+    loadCustomActions(info.workflowVersion, info.workflowPackage).forEach { it.save(info) }
 }
 
 val workflowContext = JAXBContext.newInstance(Workflow::class.java)
@@ -124,10 +124,10 @@ private fun WorkflowDefinition.save(info: ProjectInfo, category: String) =
     createWorkflow(info).save(info, category)
 
 private fun WorkflowDefinition.createWorkflow(info: ProjectInfo) =
-    createWorkflow(info.workflowsPackageName, info.workflowVersion)
+    createWorkflow(info.workflowPackage, info.workflowVersion)
 
 private fun Action.save(info: ProjectInfo) {
-    val categoryPackage = info.workflowsPackageName
+    val categoryPackage = info.workflowPackage
     generateDefinition(info, categoryPackage)
     generateElementInfo(info, categoryPackage)
 }
@@ -159,7 +159,7 @@ private fun Element.generateElementInfo(info: ProjectInfo, categoryPath: String)
 
 private fun generateDunesMetaInfo(info: ProjectInfo) {
     val outputFile = dunesOutputPath(info).asPreparedFile()
-    val properties = dunesPropertiesFor(info.workflowsPackageName, info.baseVersion)
+    val properties = dunesPropertiesFor(info.workflowPackage, info.baseVersion)
 
     propertiesMarshaller.marshal(properties, outputFile)
 }

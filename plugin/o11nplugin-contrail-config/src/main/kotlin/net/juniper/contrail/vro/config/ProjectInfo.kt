@@ -2,46 +2,48 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.generator
+package net.juniper.contrail.vro.config
 
 import java.util.Properties
+
+val globalProjectInfo = readProjectInfo()
 
 fun readProjectInfo(): ProjectInfo {
     val props = Properties()
     props.load(ProjectInfo::class.java.getResourceAsStream("/maven.properties"))
-    val generatorRoot = props["project.dir"] as String
-    val generatorPattern = "-generator$".toRegex()
-    val staticRoot = "$generatorRoot/src/main/static"
-    val finalProjectRoot = generatorRoot.replace(generatorPattern, "")
-    val coreRoot = generatorRoot.replace(generatorPattern, "-core")
-    val customRoot = generatorRoot.replace(generatorPattern, "-custom")
-    val packageRoot = generatorRoot.replace(generatorPattern, "-package")
+    val configRoot = props["project.dir"] as String
+    val configPattern = "-config$".toRegex()
+    val finalProjectRoot = configRoot.replace(configPattern, "")
+    val generatorRoot = configRoot.replace(configPattern, "-core")
+    val coreRoot = configRoot.replace(configPattern, "-core")
+    val customRoot = configRoot.replace(configPattern, "-custom")
+    val packageRoot = configRoot.replace(configPattern, "-package")
     val version = props["project.version"] as String
     val buildNumber = props["build.number"] as String
-    val workflowsPackageName = props["workflows.packageName"] as String
+    val workflowPackage = props["workflow.package"] as String
     val baseVersion = version.replace("-SNAPSHOT", "")
 
     return ProjectInfo(
-        generatorRoot = generatorRoot,
         finalProjectRoot = finalProjectRoot,
+        configRoot = configRoot,
+        generatorRoot = generatorRoot,
         coreRoot = coreRoot,
         customRoot = customRoot,
         packageRoot = packageRoot,
-        staticRoot = staticRoot,
         version = version,
         baseVersion = baseVersion,
         buildNumber = buildNumber,
-        workflowsPackageName = workflowsPackageName)
+        workflowPackage = workflowPackage)
 }
 
 data class ProjectInfo(
-    val generatorRoot: String,
     val finalProjectRoot: String,
+    val configRoot: String,
+    val generatorRoot: String,
     val coreRoot: String,
     val customRoot: String,
     val packageRoot: String,
-    val staticRoot: String,
     val version: String,
     val baseVersion: String,
     val buildNumber: String,
-    val workflowsPackageName: String)
+    val workflowPackage: String)

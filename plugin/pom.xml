@@ -14,7 +14,7 @@
     <spring.version>4.3.7.RELEASE</spring.version>
     <installation.mode>version</installation.mode>
     <kotlin.version>1.2.21</kotlin.version>
-    <workflows.packageName>net.juniper.contrail</workflows.packageName>
+    <workflow.package>net.juniper.contrail</workflow.package>
   </properties>
 
   <repositories>

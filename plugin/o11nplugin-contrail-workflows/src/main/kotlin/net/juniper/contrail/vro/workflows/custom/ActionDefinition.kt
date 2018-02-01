@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
+import net.juniper.contrail.vro.config.cidrCheckingAction
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.ActionParameter
 import net.juniper.contrail.vro.workflows.model.Script
@@ -11,7 +12,7 @@ import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.util.generateID
 
 internal fun addCidrValidationAction(version: String, packageName: String): Action {
-    val name = "isValidCidr"
+    val name = cidrCheckingAction
     val resultType = string
     val parameters = listOf(ActionParameter("input", string))
     return Action(

@@ -78,40 +78,8 @@
 
   <build>
     <finalName>generator</finalName>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
 
     <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>buildnumber-maven-plugin</artifactId>
-        <version>1.4</version>
-        <executions>
-          <execution>
-            <id>buildnumber</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>create</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <buildNumberPropertyName>build.number</buildNumberPropertyName>
-          <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
-          <format>{0,number}</format>
-          <items>
-            <item>buildNumber</item>
-          </items>
-          <doCheck>false</doCheck>
-          <doUpdate>false</doUpdate>
-          <revisionOnScmFailure>unknownbuild</revisionOnScmFailure>
-        </configuration>
-      </plugin>
-
       <plugin>
         <artifactId>kotlin-maven-plugin</artifactId>
         <groupId>org.jetbrains.kotlin</groupId>
