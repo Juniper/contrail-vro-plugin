@@ -1,19 +1,29 @@
-#!/bin/sh
+#!/bin/bash
+
+set -e
 
 updateRepo() {
     URL=$1
     DIR=$2
     BRANCH=${3:-$(git rev-parse --abbrev-ref HEAD)}
-    git clone $URL $DIR || echo Repository $DIR already exists.
-    cd $DIR 
+    git clone ${URL} ${DIR} || echo Repository ${DIR} already exists.
+    cd ${DIR}
+
+    if [[ ${BRANCH} == master || ${BRANCH} == R* ]]
+    then
+        git checkout -B "${BRANCH}" "origin/${BRANCH}"
+    else
+        git checkout -B master origin/master
+    fi
+
     git pull
-    git checkout $BRANCH
+
     cd ..
 } 
 
 cd $(cd $(dirname "$0"); pwd)
 
-updateRepo https://github.com/Juniper/contrail-controller.git controller R4.0
+updateRepo https://github.com/Juniper/contrail-controller.git controller
 updateRepo https://github.com/Juniper/contrail-generateDS.git generateds
 updateRepo https://github.com/Juniper/contrail-java-api.git contrail-java-api
 
@@ -31,4 +41,4 @@ fi
 
 cd plugin
 mvn clean 
-mvn install $REPO_HOST
+mvn install ${REPO_HOST}
