@@ -13,7 +13,10 @@ var application = [];
 var srcAddr = [ContrailUtils.createAddress(src_address_type, src_address_cidr, src_address_network, src_address_policy)];
 var dstAddr = [ContrailUtils.createAddress(dst_address_type, dst_address_cidr, dst_address_network, dst_address_policy)];
 
-var actions = new ContrailActionListType(ContrailUtils.lowercase(action));
+var simpleAction = ContrailUtils.lowercase(simple_action)
+var qosName = qos.getQualifiedName().join(":")
+
+var actions = new ContrailActionListType(simpleAction, null, null, null, null, null, log, null, qosName);
 
 var rule = new ContrailPolicyRuleType(rule_sequence, ruleUuid, direction, ContrailUtils.lowercase(protocol), srcAddr, srcPorts, application, dstAddr, dstPorts, actions);
 

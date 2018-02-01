@@ -134,6 +134,7 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
     var defaultValue: Type? = null
     var dataBinding: DataBinding<Type> = NoDataBinding
     var predefinedAnswers: List<Type>? = null
+    var predefinedAnswersAction: Action? = null
     val additionalQualifiers = mutableListOf<ParameterQualifier>()
     private var listedBy: Action? = null
 
@@ -162,6 +163,9 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
         }
         predefinedAnswers?.let {
             add(predefinedAnswersQualifier(type, it))
+        }
+        predefinedAnswersAction?.let {
+            add(predefinedAnswersActionQualifier(type, it))
         }
         listedBy?.let {
             add(listFromAction(it))

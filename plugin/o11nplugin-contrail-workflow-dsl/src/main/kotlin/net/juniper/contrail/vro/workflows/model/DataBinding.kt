@@ -41,6 +41,23 @@ class FromComplexPropertyValue<Type : Any>(
         bindValueToComplexProperty(item, propertyPath, type)
 }
 
+class FromListPropertyValue<Type: Any>(
+    val parentItem: String,
+    val childItem: String,
+    val listAccessor: String,
+    val propertyPath: String,
+    val type: ParameterType<Type>
+) : DataBinding<Type>() {
+    override val qualifier: ParameterQualifier? get() =
+        bindValueToListProperty(
+            parentItem,
+            childItem,
+            listAccessor,
+            propertyPath,
+            type
+        )
+}
+
 class FromAction<Type : Any>(val actionName: String, val type: ParameterType<Type>, vararg val parameters: String) : DataBinding<Type>() {
     override val qualifier: ParameterQualifier? get() =
         bindValueToAction(actionName, type, *parameters)

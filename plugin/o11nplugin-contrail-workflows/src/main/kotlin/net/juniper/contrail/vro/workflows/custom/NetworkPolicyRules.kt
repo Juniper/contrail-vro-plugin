@@ -4,118 +4,342 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
+import net.juniper.contrail.api.types.ActionListType
+import net.juniper.contrail.api.types.AddressType
 import net.juniper.contrail.api.types.NetworkPolicy
+import net.juniper.contrail.api.types.PolicyRuleType
+import net.juniper.contrail.api.types.Project
+import net.juniper.contrail.api.types.QosConfig
 import net.juniper.contrail.api.types.SecurityGroup
+import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.model.Action
+import net.juniper.contrail.vro.workflows.model.ActionParameter
+import net.juniper.contrail.vro.workflows.model.FromBooleanParameter
+import net.juniper.contrail.vro.workflows.model.FromListPropertyValue
 import net.juniper.contrail.vro.workflows.model.FromStringParameter
+import net.juniper.contrail.vro.workflows.model.Script
+import net.juniper.contrail.vro.workflows.model.WhenNonNull
+import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.schema.Schema
+import net.juniper.contrail.vro.workflows.schema.propertyDescription
+import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
+import net.juniper.contrail.vro.workflows.util.extractRelationDescription
 
-internal fun addRuleToPolicyWorkflow(): WorkflowDefinition {
+internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
 
     val workflowName = "Add rule to policy"
 
+    val sourceAddressTypeParameterName = "src_address_type"
+    val destinationAddressTypeParameterName = "dst_address_type"
+
     return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("addRuleToPolicy") {
-        parameter("parent", reference<NetworkPolicy>()) {
-            description = "Policy to add the rule to"
-            mandatory = true
+        step("Parent policy") {
+            parameter("parent", reference<NetworkPolicy>()) {
+                extractRelationDescription<Project, NetworkPolicy>(schema)
+                mandatory = true
+            }
         }
-        parameter("action", string) {
-            description = "Action"
-            mandatory = true
-            defaultValue = "pass"
-            predefinedAnswers = listOf("pass", "deny")
+        step("Basic attributes") {
+            visibility = WhenNonNull("parent")
+            parameter("simple_action", string) {
+                extractPropertyDescription<ActionListType>(schema)
+                mandatory = true
+                defaultValue = "pass"
+                predefinedAnswers = listOf("pass", "deny")
+            }
+            parameter("protocol", string) {
+                extractPropertyDescription<PolicyRuleType>(schema)
+                mandatory = true
+                defaultValue = "any"
+                predefinedAnswers = listOf("any", "tcp", "udp", "icmp", "icmp6")
+            }
+            parameter("direction", string) {
+                // direction has no description in the schema
+                description = "Direction"
+                mandatory = true
+                defaultValue = "<>"
+                predefinedAnswers = listOf("<>", ">")
+            }
         }
-        parameter("protocol", string) {
-            description = "Protocol"
-            mandatory = true
-            defaultValue = "any"
-            predefinedAnswers = listOf("any", "tcp", "udp", "icmp", "icmp6")
+        step("Addresses") {
+            visibility = WhenNonNull("parent")
+            parameter(sourceAddressTypeParameterName, string) {
+                description = "Traffic Source"
+                mandatory = true
+                defaultValue = "CIDR"
+                predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
+            }
+            parameter("src_address_cidr", string) {
+                description = schema.propertyDescription<AddressType>("subnet")
+                mandatory = true
+                visibility = FromStringParameter(sourceAddressTypeParameterName, "CIDR")
+            }
+            parameter("src_address_network", reference<VirtualNetwork>()) {
+                description = schema.propertyDescription<AddressType>("virtual_network")
+                mandatory = true
+                visibility = FromStringParameter(sourceAddressTypeParameterName, "Network")
+            }
+            parameter("src_address_policy", reference<NetworkPolicy>()) {
+                description = schema.propertyDescription<AddressType>("network-policy")
+                mandatory = true
+                visibility = FromStringParameter(sourceAddressTypeParameterName, "Policy")
+            }
+            parameter("src_address_security_group", reference<SecurityGroup>()) {
+                description = schema.propertyDescription<AddressType>("security-group")
+                mandatory = true
+                visibility = FromStringParameter(sourceAddressTypeParameterName, "Security Group")
+            }
+            parameter("src_ports", string) {
+                extractPropertyDescription<PolicyRuleType>(schema)
+                mandatory = true
+                defaultValue = "any"
+            }
+            parameter(destinationAddressTypeParameterName, string) {
+                description = "Traffic Destination"
+                mandatory = true
+                defaultValue = "CIDR"
+                predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
+            }
+            parameter("dst_address_cidr", string) {
+                description = schema.propertyDescription<AddressType>("subnet")
+                mandatory = true
+                visibility = FromStringParameter(destinationAddressTypeParameterName, "CIDR")
+            }
+            parameter("dst_address_network", reference<VirtualNetwork>()) {
+                description = schema.propertyDescription<AddressType>("virtual_network")
+                mandatory = true
+                visibility = FromStringParameter(destinationAddressTypeParameterName, "Network")
+            }
+            parameter("dst_address_policy", reference<NetworkPolicy>()) {
+                description = schema.propertyDescription<AddressType>("network-policy")
+                mandatory = true
+                visibility = FromStringParameter(destinationAddressTypeParameterName, "Policy")
+            }
+            parameter("dst_address_security_group", reference<SecurityGroup>()) {
+                description = schema.propertyDescription<AddressType>("security-group")
+                mandatory = true
+                visibility = FromStringParameter(destinationAddressTypeParameterName, "Security Group")
+            }
+            parameter("dst_ports", string) {
+                extractPropertyDescription<PolicyRuleType>(schema)
+                mandatory = true
+                defaultValue = "any"
+            }
         }
-        parameter("direction", string) {
-            description = "Direction"
-            mandatory = true
-            defaultValue = "<>"
-            predefinedAnswers = listOf("<>", ">")
-        }
-        parameter("src_address_type", string) {
-            description = "Traffic Source"
-            mandatory = true
-            defaultValue = "CIDR"
-            predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
-        }
-        parameter("src_address_cidr", string) {
-            description = "Source CIDR"
-            visibility = FromStringParameter("src_address_type", "CIDR")
-        }
-        parameter("src_address_network", reference<VirtualNetwork>()) {
-            description = "Source Virtual Network"
-            visibility = FromStringParameter("src_address_type", "Network")
-        }
-        parameter("src_address_policy", reference<NetworkPolicy>()) {
-            description = "Source Network Policy"
-            visibility = FromStringParameter("src_address_type", "Policy")
-        }
-        parameter("src_address_security_group", reference<SecurityGroup>()) {
-            description = "Source Security Group"
-            visibility = FromStringParameter("src_address_type", "Security Group")
-        }
-        parameter("src_ports", string) {
-            description = "Port"
-            mandatory = true
-            defaultValue = "any"
-        }
-        parameter("dst_address_type", string) {
-            description = "Traffic Destination"
-            mandatory = true
-            defaultValue = "CIDR"
-            predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
-        }
-        parameter("dst_address_cidr", string) {
-            description = "Destination CIDR"
-            visibility = FromStringParameter("dst_address_type", "CIDR")
-        }
-        parameter("dst_address_network", reference<VirtualNetwork>()) {
-            description = "Destination Virtual Network"
-            visibility = FromStringParameter("dst_address_type", "Network")
-        }
-        parameter("dst_address_policy", reference<NetworkPolicy>()) {
-            description = "Destination Network Policy"
-            visibility = FromStringParameter("dst_address_type", "Policy")
-        }
-        parameter("dst_address_security_group", reference<SecurityGroup>()) {
-            description = "Destination Security Group"
-            visibility = FromStringParameter("dst_address_type", "Security Group")
-        }
-        parameter("dst_ports", string) {
-            description = "Port"
-            mandatory = true
-            defaultValue = "any"
-        }
-        parameter("log", boolean) {
-            description = "Log"
-            mandatory = true
-            defaultValue = false
-        }
-        parameter("services", boolean) {
-            // TODO choose service
-            description = "Services"
-            mandatory = true
-            defaultValue = false
-        }
-        parameter("mirror", boolean) {
-            // TODO mirror settings
-            description = "Mirror"
-            mandatory = true
-            defaultValue = false
-        }
-        parameter("QoS", boolean) {
-            // TODO choose QoS
-            description = "QoS"
-            mandatory = true
-            defaultValue = false
+        step("Advanced Options") {
+            visibility = WhenNonNull("parent")
+            parameter("log", boolean) {
+                extractPropertyDescription<ActionListType>(schema)
+                mandatory = true
+                defaultValue = false
+            }
+            parameter("services", boolean) {
+                description = "Services"
+                mandatory = true
+                defaultValue = false
+            }
+            parameter("service_instances", array(reference<ServiceInstance>())) {
+                description = "Service instances"
+                mandatory = true
+                visibility = FromBooleanParameter("services")
+            }
+            parameter("mirror", boolean) {
+                // TODO mirror settings
+                description = "Mirror"
+                mandatory = true
+                defaultValue = false
+            }
+            parameter("QoS_show", boolean) {
+                description = "QoS"
+                mandatory = true
+                defaultValue = false
+            }
+            parameter("qos", reference<QosConfig>()) {
+                description = "QoS"
+                mandatory = true
+                visibility = FromBooleanParameter("QoS_show")
+            }
         }
     }
 }
+
+// TODO: add data bindings for complex-type attributes
+internal fun modifyPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
+    val workflowName = "Modify Policy Rule"
+
+    val sourceAddressTypeParameterName = "src_address_type"
+    val destinationAddressTypeParameterName = "dst_address_type"
+    val policyRuleListGetter = "getEntries().getPolicyRule()"
+
+    return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("modifyPolicyRule") {
+        step("Rule") {
+            parameter("parent", reference<NetworkPolicy>()) {
+                extractRelationDescription<Project, NetworkPolicy>(schema)
+                mandatory = true
+            }
+            parameter("rule", string) {
+                visibility = WhenNonNull("parent")
+                description = "Rule to be modified"
+                predefinedAnswersAction = actionCall(
+                        "getNetworkPolicyRules",
+                        "test.actions",
+                        listOf("parent")
+                )
+            }
+        }
+        step("Basic Attributes") {
+            visibility = WhenNonNull("rule")
+            parameter("simple_action", string) {
+                extractPropertyDescription<ActionListType>(schema)
+                mandatory = true
+                defaultValue = "pass"
+                predefinedAnswers = listOf("pass", "deny")
+                dataBinding = FromListPropertyValue(
+                    "parent",
+                    "rule",
+                    policyRuleListGetter,
+                    "getActionList().getSimpleAction()",
+                    string)
+            }
+            parameter("protocol", string) {
+                extractPropertyDescription<PolicyRuleType>(schema)
+                mandatory = true
+                defaultValue = "any"
+                predefinedAnswers = listOf("any", "tcp", "udp", "icmp", "icmp6")
+                dataBinding = FromListPropertyValue(
+                    "parent",
+                    "rule",
+                    policyRuleListGetter,
+                    "protocol",
+                    string)
+            }
+            parameter("direction", string) {
+                // direction has no description in the schema
+                description = "Direction"
+                mandatory = true
+                defaultValue = "<>"
+                predefinedAnswers = listOf("<>", ">")
+                dataBinding = FromListPropertyValue(
+                    "parent",
+                    "rule",
+                    policyRuleListGetter,
+                    "direction",
+                    string)
+            }
+        }
+        step("Addresses") {
+            visibility = WhenNonNull("rule")
+            parameter(sourceAddressTypeParameterName, string) {
+                description = "Traffic Source"
+                mandatory = true
+                defaultValue = "CIDR"
+                predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
+            }
+            parameter("src_address_cidr", string) {
+                description = schema.propertyDescription<AddressType>("subnet")
+                mandatory = true
+                visibility = FromStringParameter(sourceAddressTypeParameterName, "CIDR")
+            }
+            parameter("src_address_network", reference<VirtualNetwork>()) {
+                description = schema.propertyDescription<AddressType>("virtual_network")
+                mandatory = true
+                visibility = FromStringParameter(sourceAddressTypeParameterName, "Network")
+            }
+            parameter("src_address_policy", reference<NetworkPolicy>()) {
+                description = schema.propertyDescription<AddressType>("network-policy")
+                mandatory = true
+                visibility = FromStringParameter(sourceAddressTypeParameterName, "Policy")
+            }
+            parameter("src_address_security_group", reference<SecurityGroup>()) {
+                description = schema.propertyDescription<AddressType>("security-group")
+                mandatory = true
+                visibility = FromStringParameter(sourceAddressTypeParameterName, "Security Group")
+            }
+            parameter("src_ports", string) {
+                extractPropertyDescription<PolicyRuleType>(schema)
+                mandatory = true
+                defaultValue = "any"
+            }
+            parameter(destinationAddressTypeParameterName, string) {
+                description = "Traffic Destination"
+                mandatory = true
+                defaultValue = "CIDR"
+                predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
+            }
+            parameter("dst_address_cidr", string) {
+                description = schema.propertyDescription<AddressType>("subnet")
+                mandatory = true
+                visibility = FromStringParameter(destinationAddressTypeParameterName, "CIDR")
+            }
+            parameter("dst_address_network", reference<VirtualNetwork>()) {
+                description = schema.propertyDescription<AddressType>("virtual_network")
+                mandatory = true
+                visibility = FromStringParameter(destinationAddressTypeParameterName, "Network")
+            }
+            parameter("dst_address_policy", reference<NetworkPolicy>()) {
+                description = schema.propertyDescription<AddressType>("network-policy")
+                mandatory = true
+                visibility = FromStringParameter(destinationAddressTypeParameterName, "Policy")
+            }
+            parameter("dst_address_security_group", reference<SecurityGroup>()) {
+                description = schema.propertyDescription<AddressType>("security-group")
+                mandatory = true
+                visibility = FromStringParameter(destinationAddressTypeParameterName, "Security Group")
+            }
+            parameter("dst_ports", string) {
+                extractPropertyDescription<PolicyRuleType>(schema)
+                mandatory = true
+                defaultValue = "any"
+            }
+        }
+        step("Advanced Options") {
+            visibility = WhenNonNull("rule")
+            parameter("log", boolean) {
+                extractPropertyDescription<ActionListType>(schema)
+                mandatory = true
+                defaultValue = false
+            }
+            parameter("services", boolean) {
+                description = "Services"
+                mandatory = true
+                defaultValue = false
+            }
+            parameter("service_instances", array(reference<ServiceInstance>())) {
+                description = "Service instances"
+                mandatory = true
+                visibility = FromBooleanParameter("services")
+            }
+            parameter("mirror", boolean) {
+                // TODO mirror settings
+                description = "Mirror"
+                mandatory = true
+                defaultValue = false
+            }
+            parameter("QoS_show", boolean) {
+                description = "QoS"
+                mandatory = true
+                defaultValue = false
+            }
+            parameter("qos", reference<QosConfig>()) {
+                description = "QoS"
+                mandatory = true
+                visibility = FromBooleanParameter("QoS_show")
+            }
+        }
+    }
+}
+
+private fun actionCall(name: String, packageName: String, arguments: List<String>): Action = Action(
+    name,
+    packageName,
+    "",
+    "",
+    array(string),
+    arguments.map { ActionParameter(it, string) },
+    Script("")
+)

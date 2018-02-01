@@ -75,6 +75,17 @@ fun <T : Any> predefinedAnswersQualifier(type: ParameterType<T>, values: List<T>
     val simpleType = type.unArrayed
     return staticQualifier(genericEnumerationQualifierName, array(simpleType), cDATAListFormat(simpleType, values))
 }
+fun <T : Any> predefinedAnswersActionQualifier(
+    type: ParameterType<T>,
+    action: Action
+): ParameterQualifier {
+    val simpleType = type.unArrayed
+    return ognlQualifier(
+        genericEnumerationQualifierName,
+        array(simpleType),
+        action.ognl)
+}
+
 fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifierName, string, value)
 fun multilineQualifier() = staticQualifier(multilineQualifierName, void, voidValue)
 fun minNumberValueQualifier(value: Long) = staticQualifier(minNumberValueQualifierName, number, value)
@@ -97,6 +108,14 @@ fun <T : Any> bindValueToSimpleProperty(item: String, property: String, type: Pa
     ognlQualifier(dataBindingQualifierName, type, "#$item.$property")
 fun <T : Any> bindValueToComplexProperty(item: String, propertyPath: String, type: ParameterType<T>) =
     ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, propertyValue, "#$item", "\"$propertyPath\""))
+fun <T : Any> bindValueToListProperty(parentItem: String, childItem: String, listAccessor: String, propertyPath: String, type: ParameterType<T>) =
+    ognlQualifier(dataBindingQualifierName, type, actionOgnl(
+            actionPackage,
+            extractListPropertyAction,
+            "#$parentItem",
+            "#$childItem",
+            "\"$listAccessor\"",
+            "\"$propertyPath\""))
 fun <T : Any> bindValueToAction(actionName: String, type: ParameterType<T>, vararg parameters: String) =
     ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, actionName, *parameters))
 
@@ -105,8 +124,23 @@ fun cidrValidatorQualifier(parameter: String, packageName: String, actionName: S
 fun allocValidatorQualifier(parameter: String, cidr: String, packageName: String, actionName: String) =
     validatorActionQualifier(packageName, actionName, cidr, parameter)
 
-private fun actionOgnl(packageName: String, name: String, vararg parameters: String) =
-    """GetAction("$packageName","$name").call(${parameters.joinToString(",")})"""
+private val actionPackage = "net.juniper.contrail"
+private val extractPropertyAction = "getPropertyValue"
+private val extractListPropertyAction = "getListPropertyValue"
+/* extractListPropertyAction
+arguments:
+    parentItem : Any
+    childItem : String (a human-readable representation of the object with it's index at the beginning)
+    listAccessor: String
+    propertyPath: String
+script:
+    var objectIndex = ContrailUtils.ruleStringToIndex(childItem);
+    var child = eval("parentItem." + listAccessor + "[" + objectIndex + "]");
+    return eval("child." + propertyPath);
+ */
+
+private fun actionOgnl(packageName: String, name: String, vararg parameter: String) =
+    """GetAction("$packageName","$name").call(${parameter.joinToString(",")})"""
 
 private val Action.ognl get() =
     """GetAction("$packageName","$name").call($call)"""

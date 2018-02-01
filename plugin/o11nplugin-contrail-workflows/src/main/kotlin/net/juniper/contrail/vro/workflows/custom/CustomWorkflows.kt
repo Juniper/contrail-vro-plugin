@@ -10,6 +10,7 @@ import net.juniper.contrail.vro.workflows.schema.Schema
 fun loadCustomWorkflows(schema: Schema): List<WorkflowDefinition> = mutableListOf<WorkflowDefinition>().apply {
     this += createConnectionWorkflow()
     this += deleteConnectionWorkflow()
-    this += addRuleToPolicyWorkflow()
+    this += addRuleToPolicyWorkflow(schema)
+    this += modifyPolicyRuleWorkflow(schema)
     this += createSubnetWorkflow(schema)
 }
