@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro
 
+import net.juniper.contrail.vro.config.BackRefs
 import net.juniper.contrail.vro.config.backRefTypeName
 import net.juniper.contrail.vro.config.backRefsPropertyPrefix
 import net.juniper.contrail.vro.config.toPluginName
@@ -15,7 +16,7 @@ class CustomRefsField(
     val returnTypeName: String,
     val refObjectType: String
 ) {
-    val methodName: String = refObjectType+"BackRefs"
+    val methodName: String = "$refObjectType$BackRefs"
     val propertyName = "$backRefsPropertyPrefix${refObjectType.toPluginName}s"
     val wrapperMethodName = "get${propertyName.capitalize()}"
 

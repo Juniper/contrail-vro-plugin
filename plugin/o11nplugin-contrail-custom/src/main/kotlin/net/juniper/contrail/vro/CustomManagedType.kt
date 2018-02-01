@@ -10,10 +10,7 @@ import com.vmware.o11n.sdk.modeldrivengen.model.ManagedConstructor
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedMethod
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
 import net.juniper.contrail.vro.config.backRefTypeName
-import net.juniper.contrail.vro.config.displayedBackRefsPropertyPrefix
-import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.isApiObjectClass
-import net.juniper.contrail.vro.config.isApiPropertyClass
 import net.juniper.contrail.vro.config.isHiddenProperty
 import net.juniper.contrail.vro.config.isInventoryProperty
 import net.juniper.contrail.vro.config.isModelClassName
@@ -124,14 +121,12 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
     override fun isRootIdPropagated(): Boolean =
         delegate.isRootIdPropagated
 
-
     override fun setRootIdPropagated(rootIdPropagated: Boolean) {
         delegate.isRootIdPropagated = rootIdPropagated
     }
 
     override fun getFullSuperClassName(): String? =
         delegate.fullSuperClassName
-
 
     override fun setFullSuperClassName(fullSuperClassName: String) {
         delegate.fullSuperClassName = fullSuperClassName
@@ -191,7 +186,6 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
     override fun toString(): String =
         delegate.toString()
 
-
     override fun setName(name: String) {
         delegate.name = name
     }
@@ -199,14 +193,12 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
     override fun getModelClass(): Class<*>? =
         delegate.modelClass
 
-
     override fun setModelClass(wrappedClass: Class<*>) {
         delegate.modelClass = wrappedClass
     }
 
     override fun getInterceptor(): Class<out Interceptor>? =
         delegate.interceptor
-
 
     override fun setInterceptor(interceptorClass: Class<out Interceptor>) {
         delegate.interceptor = interceptorClass

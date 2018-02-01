@@ -29,11 +29,8 @@ val <T> Class<T>.kotlinClassName: String get() = when (this) {
     else -> simpleName
 }
 
-private val String.ref get() =
-    "${this}Ref"
-
-private val BackRefs = "BackRefs"
-private val back_refs = "_back_refs"
+val BackRefs = "BackRefs"
+val back_refs = "_back_refs"
 
 private val getterPattern = "^get".toRegex()
 private val backRefsPattern = "$BackRefs$".toRegex()
@@ -59,9 +56,6 @@ val Field.isBackRef get() =
 
 val Field.backRefTypeName get() =
     name.replace(fieldBackRefsPattern, "").fieldToClassName
-
-val Method.referenceName get() =
-    nameWithoutGetAndBackRefs.ref
 
 val Type.parameterClass: Class<*>? get() =
     parameterType?.unwrapped
@@ -90,8 +84,17 @@ val <T> Class<T>.isAbstract: Boolean get() =
 val <T> Class<T>.isNotAbstract: Boolean get() =
     !isAbstract
 
+inline fun <reified T> Class<*>?.isA() =
+    this == T::class.java
+
+inline fun <reified T> Class<*>?.isAn() =
+    isA<T>()
+
 fun Class<*>.isSubclassOf(other: Class<*>) =
     other.isAssignableFrom(this)
+
+inline fun <reified T> Class<*>?.isSubclassOf() =
+    this?.isSubclassOf(T::class.java) ?: false
 
 private val loader get(): ClassLoader =
     Thread.currentThread().contextClassLoader
@@ -107,6 +110,9 @@ fun <T> Class<T>.nonAbstractSubclassesIn(packageName: String): List<Class<out T>
 
 fun <T> Class<T>.nonAbstractSubclasses(): List<Class<out T>> =
     nonAbstractSubclassesIn(`package`.name)
+
+inline fun <reified T> nonAbstractSubclassesOf(): List<Class<out T>> =
+    T::class.java.nonAbstractSubclasses()
 
 private fun <T> Class<T>.subclassesIn(packageName: String): List<Class<*>> =
     classesIn(packageName)

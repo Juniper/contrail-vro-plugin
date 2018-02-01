@@ -25,7 +25,7 @@ val String.isModelClassName get() = when (this) {
     "InstanceIp",
     "QosConfig",
     "GlobalQosConfig",
-    "ServiceHealthCheck"-> true
+    "ServiceHealthCheck" -> true
     else -> false
 }
 

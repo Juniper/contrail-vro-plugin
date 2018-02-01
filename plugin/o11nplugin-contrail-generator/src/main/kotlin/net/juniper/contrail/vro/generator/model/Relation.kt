@@ -26,7 +26,6 @@ import net.juniper.contrail.vro.config.objectType
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.pluralize
 import net.juniper.contrail.vro.config.propertyName
-import net.juniper.contrail.vro.config.referenceName
 import net.juniper.contrail.vro.config.returnListGenericClass
 import net.juniper.contrail.vro.config.returnsApiPropertyOrList
 import net.juniper.contrail.vro.config.returnsObjectReferences
@@ -173,7 +172,6 @@ private fun Method.recursiveRelations(
 
 private val ObjectClass.refRelations: Sequence<ForwardRelation> get() =
     referenceMethods
-        .distinctBy { it.referenceName }
         .filter { ! it.isBackRef }
         .map { ForwardRelation(this, it) }
         .filter { it.childName isDisplayableChildOf it.parentName }

@@ -89,25 +89,23 @@ fun childOf(parent: String) =
 fun bindDataTo(parameter: String) =
     ognlQualifier(dataBindingQualifierName, string, "#$parameter")
 fun cidrValidatorQualifier(parameter: String, packageName: String, actionName: String) =
-    validatorActionQualifier(packageName, actionName, listOf(parameter))
+    validatorActionQualifier(packageName, actionName, parameter)
 fun allocValidatorQualifier(parameter: String, cidr: String, packageName: String, actionName: String) =
-    validatorActionQualifier(packageName, actionName, listOf(cidr, parameter))
+    validatorActionQualifier(packageName, actionName, cidr, parameter)
+
+private fun actionOgnl(packageName: String, name: String, vararg parameter: String) =
+    """GetAction("$packageName","$name").call(${parameter.joinToString(",")})"""
 
 private val Action.ognl get() =
     """GetAction("$packageName","$name").call($call)"""
 private val Action.call get() =
     parameters.joinToString(",") { "#${it.name}" }
 
-private fun validatorActionCall(packageName: String, actionName: String, parameters: List<String>?): String {
-    val args = parameters?.let { it.joinToString(", ") { "#${it}" } } ?: ""
-    return """GetAction("$packageName","$actionName").call($args)"""
-}
-
 private fun <T : Any> staticQualifier(name: String, type: ParameterType<T>, value: T) =
     ParameterQualifier(static, name, type.name, value.toString())
 
-private fun validatorActionQualifier(packageName: String, actionName: String, parameters: List<String>?) =
-    ognlQualifier(customValidatorQualifierName, string, validatorActionCall(packageName, actionName, parameters))
+private fun validatorActionQualifier(packageName: String, actionName: String, vararg parameters: String) =
+    ognlQualifier(customValidatorQualifierName, string, actionOgnl(packageName, actionName, *parameters))
 
 private fun ognlQualifier(name: String, type: ParameterType<Any>, value: String) =
     ParameterQualifier(ognl, name, type.name, value)

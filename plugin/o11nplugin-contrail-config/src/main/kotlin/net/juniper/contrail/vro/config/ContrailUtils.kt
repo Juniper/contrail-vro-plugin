@@ -11,13 +11,13 @@ import net.juniper.contrail.api.types.VirtualMachineInterface
 import java.lang.reflect.Method
 
 fun objectClasses() =
-    ApiObjectBase::class.java.nonAbstractSubclasses()
+    nonAbstractSubclassesOf<ApiObjectBase>()
 
 val Class<*>.isApiObjectClass get() =
-    isSubclassOf(ApiObjectBase::class.java)
+    isSubclassOf<ApiObjectBase>()
 
 val Class<*>.isApiPropertyClass get() =
-    isSubclassOf(ApiPropertyBase::class.java)
+    isSubclassOf<ApiPropertyBase>()
 
 val Class<*>.isApiTypeClass get() =
     isApiObjectClass || isApiPropertyClass
@@ -25,8 +25,11 @@ val Class<*>.isApiTypeClass get() =
 val String.asApiClass get() =
     classForName("$apiTypesPackageName.$this") ?: classForName("$apiPackageName.$this")
 
-val String.asObjectClass get() =
-    asApiClass as? ObjectClass?
+val String.asObjectClass: ObjectClass? get() =
+    asApiClass?.let {
+        @Suppress("UNCHECKED_CAST")
+        if (it.isSubclassOf<ApiObjectBase>()) it as ObjectClass else null
+    }
 
 val String.typeToObjectClass get() =
     typeToClassName.asObjectClass
@@ -40,7 +43,7 @@ val ObjectClass.defaultParentType: String? get() =
 val ObjectClass.parentType: String? get() = when {
     isRootClass -> null
     // Default parent of Virtual Machine Interface is deprecated in the schema
-    this == VirtualMachineInterface::class.java -> "project"
+    isA<VirtualMachineInterface>() -> "project"
     else -> defaultParentType
 }
 
@@ -48,13 +51,13 @@ val ObjectClass.objectType: String get() =
     newInstance().objectType
 
 val Method.returnsObjectReferences: Boolean get() =
-    returnListGenericClass == ObjectReference::class.java
+    returnListGenericClass.isA<ObjectReference<*>>()
 
 val Class<*>.isPropertyListWrapper get() =
-    superclass == ApiPropertyBase::class.java && hasOnlyListOfProperties
+    isSubclassOf<ApiPropertyBase>() && hasOnlyListOfProperties
 
 val Class<*>.isPropertyOrStringListWrapper get() =
-    superclass == ApiPropertyBase::class.java && hasOnlyListOfPropertiesOrStrings
+    isSubclassOf<ApiPropertyBase>() && hasOnlyListOfPropertiesOrStrings
 
 val Class<*>.listWrapperGetter get() =
     declaredGetters.firstOrNull { it.returnsListOfProperties }
@@ -78,29 +81,30 @@ val Class<*>.hasOnlyListOfPropertiesOrStrings: Boolean get() =
     }
 
 val Method.returnsListOfProperties: Boolean get() =
-    returnListGenericClass?.superclass == ApiPropertyBase::class.java
+    returnListGenericClass?.isSubclassOf<ApiPropertyBase>() ?: false
 
 val Method.returnsListOpPropertiesOrStrings: Boolean get() =
     returnListGenericClass?.run {
-        this == String::class.java || superclass == ApiPropertyBase::class.java
+        this.isA<String>() || this.isSubclassOf<ApiPropertyBase>()
     } ?: false
 
 val Method.returnsApiPropertyOrList: Boolean get() =
     returnTypeOrListType?.isApiPropertyClass ?: false
 
 private val Method.deepestReturnType: Class<*>? get() =
-    if (returnType == List::class.java)
+    if (returnType.isA<List<*>>())
         objectReferenceAttributeClass ?: returnListGenericClass
     else
         returnType
 
 private val Method.apiPropertyReturn get() =
     deepestReturnType?.let {
-        if (it.superclass == ApiPropertyBase::class.java) it as PropertyClass else null
+        @Suppress("UNCHECKED_CAST")
+        if (it.isSubclassOf<ApiPropertyBase>()) it as PropertyClass else null
     }
 
 private val Array<Method>.asProperties get() =
-    asSequence().filter { it.isGetter }.map { it.apiPropertyReturn }.filterNotNull()
+    asSequence().filter { it.isGetter }.map { it.apiPropertyReturn }.filterNotNull().filter { it.isNotAbstract }
 
 private val Sequence<PropertyClass>.recursed get() =
     map { it.apiProperties }.flatten()

@@ -22,7 +22,7 @@ val hiddenMethods = setOf(
 val String.isHiddenProperty get() =
     hiddenProperties.contains(this)
 
-val String.displayedName get() = when(this) {
+val String.displayedName get() = when (this) {
     "ipamSubnetMethod" -> "Subnet Method"
     else -> camelChunks.joinToString(" ") { it.cleanOrRename.capitalize() }
 }

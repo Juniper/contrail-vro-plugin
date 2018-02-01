@@ -9,7 +9,6 @@ import com.vmware.o11n.sdk.modeldrivengen.model.ManagedFinder
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
 import com.vmware.o11n.sdk.modeldrivengen.model.Plugin
 import net.juniper.contrail.vro.config.backRefWrapperPropertyDisplayName
-import net.juniper.contrail.vro.config.cleanedBackRefProperty
 import net.juniper.contrail.vro.config.cleanedDisplayedProperty
 import net.juniper.contrail.vro.config.displayedName
 import net.juniper.contrail.vro.config.isApiObjectClass
