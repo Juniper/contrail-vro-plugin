@@ -1,24 +1,23 @@
 
 // TODO: update "actions" with Services, Mirror, QoS
 
-var rule_sequence = new ContrailSequenceType(-1, -1);
+var ruleSequence = new ContrailSequenceType(-1, -1);
 
 var ruleUuid = ContrailUtils.randomUUID();
 
-var srcPorts = ContrailUtils.parsePorts(src_ports);
-var dstPorts = ContrailUtils.parsePorts(dst_ports);
+var parsedSrcPorts = ContrailUtils.parsePorts(srcPorts);
+var parsedDstPorts = ContrailUtils.parsePorts(dstPorts);
 
 var application = [];
 
-var srcAddr = [ContrailUtils.createAddress(src_address_type, src_address_cidr, src_address_network, src_address_policy)];
-var dstAddr = [ContrailUtils.createAddress(dst_address_type, dst_address_cidr, dst_address_network, dst_address_policy)];
+var srcAddr = [ContrailUtils.createAddress(srcAddressType, srcAddressCidr, srcAddressNetwork, srcAddressPolicy)];
+var dstAddr = [ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAddressNetwork, dstAddressPolicy)];
 
-var simpleAction = ContrailUtils.lowercase(simple_action)
 var qosName = qos.getQualifiedName().join(":")
 
 var actions = new ContrailActionListType(simpleAction, null, null, null, null, null, log, null, qosName);
 
-var rule = new ContrailPolicyRuleType(rule_sequence, ruleUuid, direction, ContrailUtils.lowercase(protocol), srcAddr, srcPorts, application, dstAddr, dstPorts, actions);
+var rule = new ContrailPolicyRuleType(ruleSequence, ruleUuid, direction, ContrailUtils.lowercase(protocol), srcAddr, parsedSrcPorts, application, dstAddr, parsedDstPorts, actions);
 
 var id = parent.getInternalId().toString();
 var executor = ContrailConnectionManager.getExecutor(id);

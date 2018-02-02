@@ -50,11 +50,11 @@ class FromListPropertyValue<Type: Any>(
 ) : DataBinding<Type>() {
     override val qualifier: ParameterQualifier? get() =
         bindValueToListProperty(
-            parentItem,
-            childItem,
-            listAccessor,
-            propertyPath,
-            type
+            parentItem = parentItem,
+            childItem = childItem,
+            listAccessor = listAccessor,
+            propertyPath = propertyPath,
+            type = type
         )
 }
 

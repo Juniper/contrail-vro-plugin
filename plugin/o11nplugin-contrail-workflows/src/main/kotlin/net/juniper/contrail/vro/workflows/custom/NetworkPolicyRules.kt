@@ -32,10 +32,10 @@ import net.juniper.contrail.vro.workflows.util.extractRelationDescription
 
 internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
 
-    val workflowName = "Add rule to policy"
+    val workflowName = "Add rule to network policy"
 
-    val sourceAddressTypeParameterName = "src_address_type"
-    val destinationAddressTypeParameterName = "dst_address_type"
+    val sourceAddressTypeParameterName = "srcAddressType"
+    val destinationAddressTypeParameterName = "dstAddressType"
 
     return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("addRuleToPolicy") {
         step("Parent policy") {
@@ -46,7 +46,7 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
         }
         step("Basic attributes") {
             visibility = WhenNonNull("parent")
-            parameter("simple_action", string) {
+            parameter("simpleAction", string) {
                 extractPropertyDescription<ActionListType>(schema)
                 mandatory = true
                 defaultValue = "pass"
@@ -74,27 +74,27 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 defaultValue = "CIDR"
                 predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
             }
-            parameter("src_address_cidr", string) {
+            parameter("srcAddressCidr", string) {
                 description = schema.propertyDescription<AddressType>("subnet")
                 mandatory = true
                 visibility = FromStringParameter(sourceAddressTypeParameterName, "CIDR")
             }
-            parameter("src_address_network", reference<VirtualNetwork>()) {
+            parameter("srcAddressNetwork", reference<VirtualNetwork>()) {
                 description = schema.propertyDescription<AddressType>("virtual_network")
                 mandatory = true
                 visibility = FromStringParameter(sourceAddressTypeParameterName, "Network")
             }
-            parameter("src_address_policy", reference<NetworkPolicy>()) {
+            parameter("srcAddressPolicy", reference<NetworkPolicy>()) {
                 description = schema.propertyDescription<AddressType>("network-policy")
                 mandatory = true
                 visibility = FromStringParameter(sourceAddressTypeParameterName, "Policy")
             }
-            parameter("src_address_security_group", reference<SecurityGroup>()) {
+            parameter("srcAddressSecurityGroup", reference<SecurityGroup>()) {
                 description = schema.propertyDescription<AddressType>("security-group")
                 mandatory = true
                 visibility = FromStringParameter(sourceAddressTypeParameterName, "Security Group")
             }
-            parameter("src_ports", string) {
+            parameter("srcPorts", string) {
                 extractPropertyDescription<PolicyRuleType>(schema)
                 mandatory = true
                 defaultValue = "any"
@@ -105,27 +105,27 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 defaultValue = "CIDR"
                 predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
             }
-            parameter("dst_address_cidr", string) {
+            parameter("dstAddressCidr", string) {
                 description = schema.propertyDescription<AddressType>("subnet")
                 mandatory = true
                 visibility = FromStringParameter(destinationAddressTypeParameterName, "CIDR")
             }
-            parameter("dst_address_network", reference<VirtualNetwork>()) {
+            parameter("dstAddressNetwork", reference<VirtualNetwork>()) {
                 description = schema.propertyDescription<AddressType>("virtual_network")
                 mandatory = true
                 visibility = FromStringParameter(destinationAddressTypeParameterName, "Network")
             }
-            parameter("dst_address_policy", reference<NetworkPolicy>()) {
+            parameter("dstAddressPolicy", reference<NetworkPolicy>()) {
                 description = schema.propertyDescription<AddressType>("network-policy")
                 mandatory = true
                 visibility = FromStringParameter(destinationAddressTypeParameterName, "Policy")
             }
-            parameter("dst_address_security_group", reference<SecurityGroup>()) {
+            parameter("dstAddressSecurityGroup", reference<SecurityGroup>()) {
                 description = schema.propertyDescription<AddressType>("security-group")
                 mandatory = true
                 visibility = FromStringParameter(destinationAddressTypeParameterName, "Security Group")
             }
-            parameter("dst_ports", string) {
+            parameter("dstPorts", string) {
                 extractPropertyDescription<PolicyRuleType>(schema)
                 mandatory = true
                 defaultValue = "any"
@@ -143,7 +143,7 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 defaultValue = false
             }
-            parameter("service_instances", array(reference<ServiceInstance>())) {
+            parameter("serviceInstances", array(reference<ServiceInstance>())) {
                 description = "Service instances"
                 mandatory = true
                 visibility = FromBooleanParameter("services")
@@ -154,7 +154,7 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 defaultValue = false
             }
-            parameter("QoS_show", boolean) {
+            parameter("QoSShow", boolean) {
                 description = "QoS"
                 mandatory = true
                 defaultValue = false
@@ -162,21 +162,21 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
             parameter("qos", reference<QosConfig>()) {
                 description = "QoS"
                 mandatory = true
-                visibility = FromBooleanParameter("QoS_show")
+                visibility = FromBooleanParameter("QoSShow")
             }
         }
     }
 }
 
 // TODO: add data bindings for complex-type attributes
-internal fun modifyPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Modify Policy Rule"
+internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
+    val workflowName = "Edit network policy rule"
 
-    val sourceAddressTypeParameterName = "src_address_type"
-    val destinationAddressTypeParameterName = "dst_address_type"
+    val sourceAddressTypeParameterName = "srcAddressType"
+    val destinationAddressTypeParameterName = "dstAddressType"
     val policyRuleListGetter = "getEntries().getPolicyRule()"
 
-    return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("modifyPolicyRule") {
+    return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("editPolicyRule") {
         step("Rule") {
             parameter("parent", reference<NetworkPolicy>()) {
                 extractRelationDescription<Project, NetworkPolicy>(schema)
@@ -184,17 +184,17 @@ internal fun modifyPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
             }
             parameter("rule", string) {
                 visibility = WhenNonNull("parent")
-                description = "Rule to be modified"
+                description = "Rule to edit"
                 predefinedAnswersAction = actionCall(
-                        "getNetworkPolicyRules",
-                        "test.actions",
-                        listOf("parent")
+                    "getNetworkPolicyRules",
+                    "test.actions",
+                    listOf("parent")
                 )
             }
         }
         step("Basic Attributes") {
             visibility = WhenNonNull("rule")
-            parameter("simple_action", string) {
+            parameter("simpleAction", string) {
                 extractPropertyDescription<ActionListType>(schema)
                 mandatory = true
                 defaultValue = "pass"
@@ -240,27 +240,27 @@ internal fun modifyPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
                 defaultValue = "CIDR"
                 predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
             }
-            parameter("src_address_cidr", string) {
+            parameter("srcAddressCidr", string) {
                 description = schema.propertyDescription<AddressType>("subnet")
                 mandatory = true
                 visibility = FromStringParameter(sourceAddressTypeParameterName, "CIDR")
             }
-            parameter("src_address_network", reference<VirtualNetwork>()) {
-                description = schema.propertyDescription<AddressType>("virtual_network")
+            parameter("srcAddressNetwork", reference<VirtualNetwork>()) {
+                description = schema.propertyDescription<AddressType>("virtual-network")
                 mandatory = true
                 visibility = FromStringParameter(sourceAddressTypeParameterName, "Network")
             }
-            parameter("src_address_policy", reference<NetworkPolicy>()) {
+            parameter("srcAddressPolicy", reference<NetworkPolicy>()) {
                 description = schema.propertyDescription<AddressType>("network-policy")
                 mandatory = true
                 visibility = FromStringParameter(sourceAddressTypeParameterName, "Policy")
             }
-            parameter("src_address_security_group", reference<SecurityGroup>()) {
+            parameter("srcAddressSecurityGroup", reference<SecurityGroup>()) {
                 description = schema.propertyDescription<AddressType>("security-group")
                 mandatory = true
                 visibility = FromStringParameter(sourceAddressTypeParameterName, "Security Group")
             }
-            parameter("src_ports", string) {
+            parameter("srcPorts", string) {
                 extractPropertyDescription<PolicyRuleType>(schema)
                 mandatory = true
                 defaultValue = "any"
@@ -271,27 +271,27 @@ internal fun modifyPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
                 defaultValue = "CIDR"
                 predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
             }
-            parameter("dst_address_cidr", string) {
+            parameter("dstAddressCidr", string) {
                 description = schema.propertyDescription<AddressType>("subnet")
                 mandatory = true
                 visibility = FromStringParameter(destinationAddressTypeParameterName, "CIDR")
             }
-            parameter("dst_address_network", reference<VirtualNetwork>()) {
-                description = schema.propertyDescription<AddressType>("virtual_network")
+            parameter("dstAddressNetwork", reference<VirtualNetwork>()) {
+                description = schema.propertyDescription<AddressType>("virtual-network")
                 mandatory = true
                 visibility = FromStringParameter(destinationAddressTypeParameterName, "Network")
             }
-            parameter("dst_address_policy", reference<NetworkPolicy>()) {
+            parameter("dstAddressPolicy", reference<NetworkPolicy>()) {
                 description = schema.propertyDescription<AddressType>("network-policy")
                 mandatory = true
                 visibility = FromStringParameter(destinationAddressTypeParameterName, "Policy")
             }
-            parameter("dst_address_security_group", reference<SecurityGroup>()) {
+            parameter("dstAddressSecurityGroup", reference<SecurityGroup>()) {
                 description = schema.propertyDescription<AddressType>("security-group")
                 mandatory = true
                 visibility = FromStringParameter(destinationAddressTypeParameterName, "Security Group")
             }
-            parameter("dst_ports", string) {
+            parameter("dstPorts", string) {
                 extractPropertyDescription<PolicyRuleType>(schema)
                 mandatory = true
                 defaultValue = "any"
@@ -309,7 +309,7 @@ internal fun modifyPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 defaultValue = false
             }
-            parameter("service_instances", array(reference<ServiceInstance>())) {
+            parameter("serviceInstances", array(reference<ServiceInstance>())) {
                 description = "Service instances"
                 mandatory = true
                 visibility = FromBooleanParameter("services")
@@ -320,7 +320,7 @@ internal fun modifyPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 defaultValue = false
             }
-            parameter("QoS_show", boolean) {
+            parameter("QoSShow", boolean) {
                 description = "QoS"
                 mandatory = true
                 defaultValue = false
@@ -328,7 +328,7 @@ internal fun modifyPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
             parameter("qos", reference<QosConfig>()) {
                 description = "QoS"
                 mandatory = true
-                visibility = FromBooleanParameter("QoS_show")
+                visibility = FromBooleanParameter("QoSShow")
             }
         }
     }
