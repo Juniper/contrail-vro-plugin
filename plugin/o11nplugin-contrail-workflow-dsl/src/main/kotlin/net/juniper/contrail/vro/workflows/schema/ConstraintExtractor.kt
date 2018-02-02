@@ -11,6 +11,9 @@ import net.juniper.contrail.vro.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.workflows.model.wrapConstraints
 import org.w3c.dom.Node
 
+inline fun <reified T : Any> Schema.simpleTypeQualifiers(propertyName: String): List<ParameterQualifier> =
+    simpleTypeQualifiers(T::class.java, propertyName)
+
 fun Schema.simpleTypeQualifiers(clazz: Class<*>, propertyName: String): List<ParameterQualifier> = when {
     clazz.isApiObjectClass -> objectFieldQualifiers(clazz.xsdName, propertyName.xsdName)
     else -> propertyFieldQualifiers(clazz, propertyName.xsdName)

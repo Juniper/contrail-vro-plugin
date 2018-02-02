@@ -27,15 +27,24 @@ import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
+import net.juniper.contrail.vro.workflows.schema.simpleTypeQualifiers
 import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.workflows.util.extractRelationDescription
+
+val sourceAddressTypeParameterName = "srcAddressType"
+val destinationAddressTypeParameterName = "dstAddressType"
+// There is no information about protocols in the schema
+val defaultPort = "any"
+val defaultProtocol = "any"
+val allowedProtocols = listOf("any", "tcp", "udp", "icmp", "icmp6")
+val defaultAddressType = "CIDR"
+val allowedAddressTypes = listOf("CIDR", "Network", "Policy", "Security Group")
+val defaultDirection = "<>"
+val allowedDirections = listOf("<>", ">")
 
 internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
 
     val workflowName = "Add rule to network policy"
-
-    val sourceAddressTypeParameterName = "srcAddressType"
-    val destinationAddressTypeParameterName = "dstAddressType"
 
     return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("addRuleToPolicy") {
         step("Parent policy") {
@@ -48,22 +57,20 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
             visibility = WhenNonNull("parent")
             parameter("simpleAction", string) {
                 extractPropertyDescription<ActionListType>(schema)
-                mandatory = true
-                defaultValue = "pass"
-                predefinedAnswers = listOf("pass", "deny")
+                additionalQualifiers += schema.simpleTypeQualifiers<ActionListType>("simpleAction")
             }
             parameter("protocol", string) {
                 extractPropertyDescription<PolicyRuleType>(schema)
                 mandatory = true
-                defaultValue = "any"
-                predefinedAnswers = listOf("any", "tcp", "udp", "icmp", "icmp6")
+                defaultValue = defaultProtocol
+                predefinedAnswers = allowedProtocols
             }
             parameter("direction", string) {
                 // direction has no description in the schema
                 description = "Direction"
                 mandatory = true
-                defaultValue = "<>"
-                predefinedAnswers = listOf("<>", ">")
+                defaultValue = defaultDirection
+                predefinedAnswers = allowedDirections
             }
         }
         step("Addresses") {
@@ -71,8 +78,8 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
             parameter(sourceAddressTypeParameterName, string) {
                 description = "Traffic Source"
                 mandatory = true
-                defaultValue = "CIDR"
-                predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
+                defaultValue = defaultAddressType
+                predefinedAnswers = allowedAddressTypes
             }
             parameter("srcAddressCidr", string) {
                 description = schema.propertyDescription<AddressType>("subnet")
@@ -97,13 +104,13 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
             parameter("srcPorts", string) {
                 extractPropertyDescription<PolicyRuleType>(schema)
                 mandatory = true
-                defaultValue = "any"
+                defaultValue = defaultPort
             }
             parameter(destinationAddressTypeParameterName, string) {
                 description = "Traffic Destination"
                 mandatory = true
-                defaultValue = "CIDR"
-                predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
+                defaultValue = defaultAddressType
+                predefinedAnswers = allowedAddressTypes
             }
             parameter("dstAddressCidr", string) {
                 description = schema.propertyDescription<AddressType>("subnet")
@@ -128,7 +135,7 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
             parameter("dstPorts", string) {
                 extractPropertyDescription<PolicyRuleType>(schema)
                 mandatory = true
-                defaultValue = "any"
+                defaultValue = defaultPort
             }
         }
         step("Advanced Options") {
@@ -172,8 +179,6 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
 internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
     val workflowName = "Edit network policy rule"
 
-    val sourceAddressTypeParameterName = "srcAddressType"
-    val destinationAddressTypeParameterName = "dstAddressType"
     val policyRuleListGetter = "getEntries().getPolicyRule()"
 
     return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("editPolicyRule") {
@@ -196,9 +201,7 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
             visibility = WhenNonNull("rule")
             parameter("simpleAction", string) {
                 extractPropertyDescription<ActionListType>(schema)
-                mandatory = true
-                defaultValue = "pass"
-                predefinedAnswers = listOf("pass", "deny")
+                additionalQualifiers += schema.simpleTypeQualifiers<ActionListType>("simpleAction")
                 dataBinding = FromListPropertyValue(
                     "parent",
                     "rule",
@@ -209,8 +212,8 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
             parameter("protocol", string) {
                 extractPropertyDescription<PolicyRuleType>(schema)
                 mandatory = true
-                defaultValue = "any"
-                predefinedAnswers = listOf("any", "tcp", "udp", "icmp", "icmp6")
+                defaultValue = defaultProtocol
+                predefinedAnswers = allowedProtocols
                 dataBinding = FromListPropertyValue(
                     "parent",
                     "rule",
@@ -223,7 +226,7 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
                 description = "Direction"
                 mandatory = true
                 defaultValue = "<>"
-                predefinedAnswers = listOf("<>", ">")
+                predefinedAnswers = allowedDirections
                 dataBinding = FromListPropertyValue(
                     "parent",
                     "rule",
@@ -237,8 +240,8 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
             parameter(sourceAddressTypeParameterName, string) {
                 description = "Traffic Source"
                 mandatory = true
-                defaultValue = "CIDR"
-                predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
+                defaultValue = defaultAddressType
+                predefinedAnswers = allowedAddressTypes
             }
             parameter("srcAddressCidr", string) {
                 description = schema.propertyDescription<AddressType>("subnet")
@@ -263,13 +266,13 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
             parameter("srcPorts", string) {
                 extractPropertyDescription<PolicyRuleType>(schema)
                 mandatory = true
-                defaultValue = "any"
+                defaultValue = defaultPort
             }
             parameter(destinationAddressTypeParameterName, string) {
                 description = "Traffic Destination"
                 mandatory = true
-                defaultValue = "CIDR"
-                predefinedAnswers = listOf("CIDR", "Network", "Policy", "Security Group")
+                defaultValue = defaultAddressType
+                predefinedAnswers = allowedAddressTypes
             }
             parameter("dstAddressCidr", string) {
                 description = schema.propertyDescription<AddressType>("subnet")
@@ -294,7 +297,7 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
             parameter("dstPorts", string) {
                 extractPropertyDescription<PolicyRuleType>(schema)
                 mandatory = true
-                defaultValue = "any"
+                defaultValue = defaultPort
             }
         }
         step("Advanced Options") {

@@ -10,6 +10,7 @@ val utilActionPackage = "$actionPackage.util"
 val cidrCheckingAction = "isValidCidr"
 val propertyNotNull = "propertyNotNull"
 val propertyValue = "propertyValue"
+
 /* extractListPropertyAction
 arguments:
     parentItem : Any
