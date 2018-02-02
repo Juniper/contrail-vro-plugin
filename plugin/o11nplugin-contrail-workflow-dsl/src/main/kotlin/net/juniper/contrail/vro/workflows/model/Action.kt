@@ -82,3 +82,6 @@ class ActionParameter(
     @XmlAttribute(name = "t")
     val type: String = type.name
 }
+
+infix fun <T : Any> String.ofType(type: ParameterType<T>) =
+    ActionParameter(this, type)
