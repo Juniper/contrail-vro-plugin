@@ -407,20 +407,20 @@ fun List<Property>.prepare(prefix: String) =
 private fun ForwardRelation.addRelationWithAttributeScriptBody() = """
 var attribute = new Contrail${attribute.pluginName}();
 ${ attribute.attributeCode("attribute") }
-$parent.add$childName($child, attribute);
+$parent.add${childClass.pluginName}($child, attribute);
 $retrieveExecutorAndUpdateParent
 """
 
 private fun ForwardRelation.addSimpleReferenceRelationScriptBody() = """
-$parent.add$childName($child);
+$parent.add${childClass.pluginName}($child);
 $retrieveExecutorAndUpdateParent
 """
 
 private fun ForwardRelation.removeReferenceRelationScriptBody() = """
 ${if (simpleReference)
-    "$parent.remove$childName($child);"
+    "$parent.remove${childClass.pluginName}($child);"
 else
-    "$parent.remove$childName($child, null);"
+    "$parent.remove${childClass.pluginName}($child, null);"
 }
 $retrieveExecutorAndUpdateParent
 """.trimIndent()
@@ -435,7 +435,7 @@ private fun String.deleteAsClass(className: String) =
     "$executor.delete$className($this);"
 
 private val ForwardRelation.updateParent get() =
-    parent.updateAsClass(parentName)
+    parent.updateAsClass(parentClass.pluginName)
 
 private val ForwardRelation.retrieveExecutorAndUpdateParent get() =
 """

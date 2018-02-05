@@ -105,11 +105,17 @@ val ObjectClass.isRootClass: Boolean get() {
 val ObjectClass.isInternal: Boolean get() =
     newInstance().defaultParentType == null
 
+private val VirtualMachineInterfaceName = "VirtualMachineInterface"
+private val PortName = "Port"
+
 val String.toPluginName get() = when (this) {
     // Virtual Machine Interface is visible in Contrail UI as Port
-    "VirtualMachineInterface" -> "Port"
+    VirtualMachineInterfaceName -> PortName
     else -> this
 }
+
+val String.toPluginMethodName get() =
+    replace(VirtualMachineInterfaceName, PortName)
 
 val Class<*>.pluginName get() =
     simpleName.toPluginName

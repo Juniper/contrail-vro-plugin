@@ -3,6 +3,7 @@ package ${packageName}
 
 /* ktlint-disable no-wildcard-imports */
 import java.io.File
+import java.lang.reflect.Method
 import com.vmware.o11n.sdk.modeldrivengen.mapping.*
 import net.juniper.contrail.api.*
 import net.juniper.contrail.api.types.*
@@ -27,6 +28,11 @@ inline private fun <reified T> findItemIcon() =
 
 inline private fun <reified T> findFolderIcon() =
     findIcon(folderIconName<T>(), defaultFolderIconName)
+
+private val renamePolicy = object : MethodRenamePolicy {
+    override fun rename(m: Method): String =
+        m.name.toPluginMethodName
+}
 
 class CustomMapping: AbstractMapping() {
 
@@ -57,9 +63,11 @@ class CustomMapping: AbstractMapping() {
 
         <#list findableClasses as klass>
         wrap(${klass.simpleName}::class.java)
-          .hiding(*methodsToHide)
           .`as`("${klass.pluginName}")
+          .rename(renamePolicy)
+          .hiding(*methodsToHide)
           .andFind()
+          .`as`("${klass.pluginName}")
           .using(${klass.simpleName}Finder::class.java)
           .hiding(*propertiesToHide)
           .withIcon(findItemIcon<${klass.simpleName}>())
