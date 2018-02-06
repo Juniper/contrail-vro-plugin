@@ -61,13 +61,10 @@ fun removeReferenceWorkflow(relation: ForwardRelation, action: Action): Workflow
     }
 }
 
-private fun Schema.descriptionInCreateRelationWorkflow(parentClazz: ObjectClass, clazz: ObjectClass) : String {
-    val relationDescription = relationDescription(parentClazz, clazz)
-    return """
-        ${clazz.allCapitalized} to be added.
-        $relationDescription
-    """.trimIndent()
-}
+private fun Schema.descriptionInCreateRelationWorkflow(parentClazz: ObjectClass, clazz: ObjectClass) = """
+${clazz.allCapitalized} to be added
+${relationDescription(parentClazz, clazz)}
+""".trim()
 
 private fun ForwardRelation.addReferenceRelationScriptBody() =
     if (simpleReference)

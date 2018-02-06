@@ -49,6 +49,12 @@ fun String.folderName() : String = when (this) {
 val Class<*>.folderName get() =
     pluginName.folderName()
 
+val String.parameterName get() =
+    decapitalize()
+
+val Class<*>.parameterName get() =
+    pluginName.parameterName
+
 val String.pluralParameterName get(): String =
     folderName().replace(" ", "").run {
         if (startsWith("BGP")) this else decapitalize()

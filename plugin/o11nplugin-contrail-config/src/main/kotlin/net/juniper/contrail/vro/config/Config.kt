@@ -55,6 +55,10 @@ val directChildren = setOf(
     "FloatingIp"
 )
 
+val mandatoryReference = setOf(
+    Pair("VirtualMachineInterface", "VirtualNetwork")
+)
+
 val hiddenRelations = setOf(
     Pair("FloatingIp", "Project"),
     Pair("VirtualNetwork", "NetworkIpam")
@@ -74,6 +78,9 @@ val String.isEditableProperty get() =
 
 val String.isDirectChild get() =
     directChildren.contains(this)
+
+fun Class<*>.isRelationMandatory(child: Class<*>) =
+    mandatoryReference.contains(Pair(simpleName, child.simpleName))
 
 infix fun String.isDisplayableChildOf(parent: String) =
     ! hiddenRelations.contains(Pair(parent, this))

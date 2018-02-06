@@ -7,18 +7,15 @@ package net.juniper.contrail.vro.generator.workflows
 import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.bold
-import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.isApiTypeClass
+import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.pluginName
-import net.juniper.contrail.vro.config.pluralParameterName
 import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
-import net.juniper.contrail.vro.workflows.model.Reference
-import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
@@ -43,17 +40,12 @@ fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<Obj
 
         }
 
-        if (!refs.isEmpty()) {
-            step("References") {
-                for (ref in refs) {
-                    parameter(ref.pluralParameterName, Reference(ref).array) {
-                        description = schema.relationInCreateWorkflowDescription(clazz, ref)
-                    }
-                }
+        for (ref in refs) {
+            parameter(ref.parameterName, ref.reference) {
+                description = schema.relationInCreateWorkflowDescription(clazz, ref)
+                mandatory = true
             }
         }
-
-        addProperties(clazz, schema)
     }
 }
 
@@ -83,22 +75,18 @@ private fun Schema.createWorkflowDescription(clazz: ObjectClass) : String? {
         $objectDescription
     """.trimIndent()
 }
-private fun Schema.relationInCreateWorkflowDescription(parentClazz: ObjectClass, clazz: ObjectClass) : String {
-    val relationDescription = relationDescription(parentClazz, clazz)
-    return """
-        ${clazz.folderName.bold}
-        $relationDescription
-    """.trimIndent()
-}
+
+private fun Schema.relationInCreateWorkflowDescription(parentClazz: ObjectClass, clazz: ObjectClass) = """
+${clazz.allCapitalized}
+${relationDescription(parentClazz, clazz)}
+""".trim()
 
 private fun createScriptBody(clazz: Class<*>, parentClazz: ObjectClass?, references: List<ObjectClass>) = """
 ${parent.retrieveExecutor}
 var $item = new Contrail${clazz.pluginName}();
 $item.setName(name);
-${ clazz.attributeCode(item) }
-$executor.create${clazz.pluginName}($item${if (parentClazz == null) "" else ", $parent"});
 ${references.addAllReferences}
-${item.updateAsClass(clazz.pluginName)}
+$executor.create${clazz.pluginName}($item${if (parentClazz == null) "" else ", $parent"});
 """.trimIndent()
 
 private fun editScriptBody(clazz: Class<*>) = """
@@ -116,15 +104,15 @@ fun Class<*>.editPropertiesCode(item: String, level: Int = 0) =
     workflowEditableProperties.joinToString("\n") { it.editCode(item, level) }
 
 fun Property.editCode(item: String, level: Int) = when {
-    clazz.isApiTypeClass && level <= maxComplexLevel -> editComplexCode(item, level)
-    !clazz.isApiTypeClass && level <= maxPrimitiveLevel -> simpleEditCode(item)
+    clazz.isApiTypeClass && level <= maxComplexLevel -> complexEditCode(item, level)
+    !clazz.isApiTypeClass && level <= maxPrimitiveLevel -> primitiveEditCode(item)
     else -> ""
 }
 
-fun Property.simpleEditCode(item: String) =
+fun Property.primitiveEditCode(item: String) =
     "$item.set${propertyName.capitalize()}($propertyName);"
 
-fun Property.editComplexCode(item: String, level: Int): String = """
+fun Property.complexEditCode(item: String, level: Int): String = """
 var $propertyName = $item.get${propertyName.capitalize()}();
 if (${propertyName.condition}) {
     if (!$propertyName) $propertyName = new Contrail${clazz.pluginName}();

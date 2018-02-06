@@ -19,6 +19,7 @@ class CustomRefsField(
     val methodName: String = "$refObjectType$BackRefs"
     val propertyName = "$backRefsPropertyPrefix${refObjectType.toPluginName}s"
     val wrapperMethodName = "get${propertyName.capitalize()}"
+    val refObjectPluginType = refObjectType.toPluginName
 
     companion object {
         fun wrapField(field: Field): CustomRefsField {

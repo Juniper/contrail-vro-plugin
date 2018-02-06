@@ -6,8 +6,8 @@ package net.juniper.contrail.vro.generator.workflows
 
 import com.sun.xml.internal.bind.marshaller.CharacterEscapeHandler
 import net.juniper.contrail.vro.config.ObjectClass
-import net.juniper.contrail.vro.config.isRequiredAttributeClass
 import net.juniper.contrail.vro.config.ProjectInfo
+import net.juniper.contrail.vro.config.isRelationMandatory
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
 import net.juniper.contrail.vro.config.packageToPath
@@ -29,12 +29,12 @@ fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: 
     generateDunesMetaInfo(info)
 
     relations.rootClasses.forEach {
-        val refs = relations.referencesOf(it)
+        val refs = relations.mandatoryReferencesOf(it)
         generateLifecycleWorkflows(info, it, refs, schema)
     }
 
     relations.relations.forEach {
-        val refs = relations.referencesOf(it.childClass)
+        val refs = relations.mandatoryReferencesOf(it.childClass)
         generateLifecycleWorkflows(info, it.childClass, it.parentClass, refs, schema)
     }
 
@@ -46,10 +46,10 @@ fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: 
     createCustomActions(info, schema)
 }
 
-fun RelationDefinition.referencesOf(clazz: ObjectClass) =
+fun RelationDefinition.mandatoryReferencesOf(clazz: ObjectClass) =
     forwardRelations.asSequence()
         .filter { it.parentClass == clazz }
-        .filter { it.simpleReference || ! it.attribute.isRequiredAttributeClass }
+        .filter { clazz.isRelationMandatory(it.childClass) }
         .map { it.childClass }
         .toList()
 

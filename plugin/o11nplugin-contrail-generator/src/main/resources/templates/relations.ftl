@@ -47,7 +47,7 @@ class ${relation.parentName}Has${relation.childName}
 
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childName}>? {
         val connection = connections.getConnection(parentId)
-        val parent = connection?.findById(${relation.parentName}::class.java, parentId.getString("${relation.parentName}"))
+        val parent = connection?.findById(${relation.parentName}::class.java, parentId.getString("${relation.parentPluginName}"))
         return connection?.getObjects(${relation.childName}::class.java, parent?.${relation.childNameDecapitalized}s)
     }
 }
@@ -60,7 +60,7 @@ class ${relation.parentName}Has${relation.childName}
 
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childName}>? {
         val connection = connections.getConnection(parentId)
-        val parent = connection?.findById(${relation.parentName}::class.java, parentId.getString("${relation.parentName}"))
+        val parent = connection?.findById(${relation.parentName}::class.java, parentId.getString("${relation.parentPluginName}"))
         return connection?.getObjects(${relation.childName}::class.java, parent?.${relation.getter})
     }
 }
@@ -79,7 +79,7 @@ class ${relation.parentWrapperName}Has${relation.childWrapperName}
 
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childWrapperName}>? {
         val connection = connections.getConnection(parentId)
-        val parent = connection?.findById(${relation.rootClassSimpleName}::class.java, parentId.getString("${relation.rootClassSimpleName}"))
+        val parent = connection?.findById(${relation.rootClassSimpleName}::class.java, parentId.getString("${relation.rootClassPluginName}"))
         return <@getterChain relation/>
     }
 }

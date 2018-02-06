@@ -154,7 +154,7 @@ public class ${className}
     public String ${field.wrapperMethodName}() {
         List<${field.returnTypeName}> ref_list = __getTarget().get${field.methodName}();
 
-        return referenceFormatter.formatReferences(this, ref_list, "${field.refObjectType}");
+        return referenceFormatter.formatReferences(this, ref_list, "${field.refObjectPluginType}");
     }
 
     </#list>

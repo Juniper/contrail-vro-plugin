@@ -19,7 +19,6 @@ import java.lang.reflect.Type
  * and take single argument of selected property type.
  */
 object PropertyFormatter {
-    private val padding = 30
     private val empty = "-"
 
     fun format(prop: KeyValuePair) =
@@ -68,17 +67,17 @@ object PropertyFormatter {
         format(prop.subnet)
 
     fun format(prop: PolicyRuleType): String = prop.run {
-        "${actionList.simpleAction} $protocol  ${srcAddresses.inline} ${srcPorts.inline} $direction ${dstAddresses.inline} ${dstPorts.inline}"
+        "${actionList.safeSimpleAction}$protocol  ${srcAddresses.inline} ${srcPorts.inline} $direction ${dstAddresses.inline} ${dstPorts.inline}"
     }
+
+    private val ActionListType?.safeSimpleAction get() =
+        if (this == null) "" else "$simpleAction "
 
     private fun String.withValue(value: String?): String =
         "$this: " + (value ?: "-")
 
     private fun String.withValueWrap(value: String?) =
         (this.withValue(value)) + "\n"
-
-    private val String.pad get() =
-        padEnd(padding)
 
     private fun Int?.formatAccess():String =
         AccessType.format(this)

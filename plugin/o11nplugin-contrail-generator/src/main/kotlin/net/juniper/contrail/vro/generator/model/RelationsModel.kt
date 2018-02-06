@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.isDirectChild
+import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.toPluginName
 
 data class RelationsModel(
@@ -35,6 +36,7 @@ data class NestedRelationModel(
     val folderName: String,
     val toMany: Boolean,
     val rootClassSimpleName: String,
+    val rootClassPluginName: String,
     val getterChain: List<GetterModel>
 )
 
@@ -64,6 +66,7 @@ fun NestedRelation.toNestedRelationModel() = NestedRelationModel(
     folderName,
     toMany,
     rootClass.simpleName,
+    rootClass.pluginName,
     getterChain.map { it.toGetterModel() }
 )
 

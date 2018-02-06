@@ -33,20 +33,20 @@ private fun <T : ApiObjectBase> Connection.query(clazz: Class<T>, query: String,
         ?.map { FoundObject(it, internalId.with(key, it.uuid)) }
         ?.toList()
 
-<#list classNames as klass>
-class ${klass}Finder
-@Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${klass}> {
+<#list classes as klass>
+class ${klass.simpleName}Finder
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${klass.simpleName}> {
 
-    override fun assignId(obj: ${klass}, sid: Sid): Sid =
-        sid.with("${klass}", obj.uuid)
+    override fun assignId(obj: ${klass.simpleName}, sid: Sid): Sid =
+        sid.with("${klass.pluginName}", obj.uuid)
 
-    override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${klass}? {
+    override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${klass.simpleName}? {
         val connection = connections.getConnection(sid)
-        return connection?.findById(${klass}::class.java, sid.getString("${klass}"))
+        return connection?.findById(${klass.simpleName}::class.java, sid.getString("${klass.pluginName}"))
     }
 
-    override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${klass}>>? =
-        connections.query(${klass}::class.java, query, "${klass}")
+    override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${klass.simpleName}>>? =
+        connections.query(${klass.simpleName}::class.java, query, "${klass.pluginName}")
 }
 
 </#list>

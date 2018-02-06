@@ -15,8 +15,8 @@ import net.juniper.contrail.vro.config.isEditableProperty
 import net.juniper.contrail.vro.config.isPropertyOrStringListWrapper
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
+import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.pluginName
-import net.juniper.contrail.vro.config.pluralParameterName
 import net.juniper.contrail.vro.config.splitCamel
 import net.juniper.contrail.vro.generator.Contrail
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
@@ -223,10 +223,8 @@ val List<ObjectClass>.addAllReferences get() =
 
 private val Class<*>.addReferenceEntry get() =
 """
-if($pluralParameterName) {
-    for each (ref in $pluralParameterName) {
-        $item.add${this.pluginName}(ref);
-    }
+if($parameterName) {
+    $item.add$pluginName($parameterName);
 }
 """
 
