@@ -13,6 +13,8 @@ import net.juniper.contrail.api.types.QosConfig
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualNetwork
+import net.juniper.contrail.vro.config.actionPackage
+import net.juniper.contrail.vro.config.getNetworkPolicyRules
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.ActionParameter
@@ -191,8 +193,8 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
                 visibility = WhenNonNull("parent")
                 description = "Rule to edit"
                 predefinedAnswersAction = actionCall(
-                    "getNetworkPolicyRules",
-                    "test.actions",
+                    getNetworkPolicyRules,
+                    actionPackage,
                     listOf("parent")
                 )
             }

@@ -11,7 +11,7 @@ val cidrCheckingAction = "isValidCidr"
 val propertyNotNull = "propertyNotNull"
 val propertyValue = "propertyValue"
 
-/* extractListPropertyAction
+/* extractListProperty
 arguments:
     parentItem : Any
     childItem : String (a human-readable representation of the object with it's index at the beginning)
@@ -22,4 +22,18 @@ script:
     var child = eval("parentItem." + listAccessor + "[" + objectIndex + "]");
     return eval("child." + propertyPath);
  */
-val extractListPropertyAction = "getListPropertyValue"
+val extractListProperty = "getListPropertyValue"
+
+/* getNetworkPolicyRules
+arguments:
+    netpolicy : Any (a network policy)
+script:
+    var actionResult = new Array();
+    var rules = netpolicy.getEntries().getPolicyRule()
+
+    rules.forEach(function (value, index) {
+        actionResult.push(ContrailUtils.ruleToString(value, index));
+    });
+    return actionResult;
+ */
+val getNetworkPolicyRules = "getNetworkPolicyRules"

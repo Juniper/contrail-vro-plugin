@@ -6,8 +6,7 @@ package net.juniper.contrail.vro.workflows.model
 
 import net.juniper.contrail.vro.config.CDATA
 import net.juniper.contrail.vro.config.actionPackage
-import net.juniper.contrail.vro.config.extractListPropertyAction
-import net.juniper.contrail.vro.config.actionPackage
+import net.juniper.contrail.vro.config.extractListProperty
 import net.juniper.contrail.vro.config.propertyNotNull
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.workflows.model.QualifierKind.ognl
@@ -113,7 +112,7 @@ fun <T : Any> bindValueToComplexProperty(item: String, propertyPath: String, typ
 fun <T : Any> bindValueToListProperty(parentItem: String, childItem: String, listAccessor: String, propertyPath: String, type: ParameterType<T>) =
     ognlQualifier(dataBindingQualifierName, type, actionOgnl(
         packageName = actionPackage,
-        name = extractListPropertyAction,
+        name = extractListProperty,
         parameter = *arrayOf("#$parentItem", "#$childItem", "\"$listAccessor\"", "\"$propertyPath\"")
     ))
 fun <T : Any> bindValueToAction(actionName: String, type: ParameterType<T>, vararg parameters: String) =
