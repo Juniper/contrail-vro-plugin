@@ -12,6 +12,7 @@ class PresentationParametersBuilder(
     private val steps: MutableList<PresentationStep>,
     parameters: MutableList<ParameterInfo>,
     allParameters: MutableList<ParameterInfo>,
+    private val outputParameters: MutableList<ParameterInfo>,
     private val attributes: MutableList<Attribute>
 ) : ParameterAggregator(parameters, allParameters) {
 
@@ -29,10 +30,13 @@ class PresentationParametersBuilder(
         steps += PresentationStep.fromGroups(title, stepGroups, groupBuilder.description, groupBuilder.qualifiers)
     }
 
+    fun output(name: String, type: Reference, setup: OutputParameterBuilder.() -> Unit) {
+        outputParameters += OutputParameterBuilder(name, type).apply(setup).buildOutputParameter()
+    }
+
     fun attribute(name: String, type: Reference, setup: AttributeBuilder.() -> Unit) {
         attributes += AttributeBuilder(name, type).apply(setup).buildAttribute()
     }
-
 }
 
 @WorkflowBuilder
@@ -240,6 +244,13 @@ class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterB
 }
 
 class ReferenceArrayParameterBuilder(name: String, type: array<Reference>) : BasicParameterBuilder<List<Reference>>(name, type)
+
+class OutputParameterBuilder(val name: String, val type: ParameterType<Any>) {
+    var description: String? = null
+
+    fun buildOutputParameter() =
+        ParameterInfo(name, type, description = description)
+}
 
 class AttributeBuilder(val name: String, val type: ParameterType<Any>) {
     var description: String? = null

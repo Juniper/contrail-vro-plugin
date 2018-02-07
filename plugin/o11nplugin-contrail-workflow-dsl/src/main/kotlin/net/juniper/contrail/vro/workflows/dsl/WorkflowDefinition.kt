@@ -62,26 +62,26 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
     val steps = mutableListOf<PresentationStep>()
     val parameters = mutableListOf<ParameterInfo>()
     val allParameters = mutableListOf<ParameterInfo>()
+    val outputParameters = mutableListOf<ParameterInfo>()
     val attributes = mutableListOf<Attribute>()
 
-    val builder = PresentationParametersBuilder(steps, parameters, allParameters, attributes).apply(setup)
+    val builder = PresentationParametersBuilder(steps, parameters, allParameters, outputParameters, attributes).apply(setup)
 
     val presentation = Presentation(parameters.asPresentationParameters, steps, builder.description)
 
-    val outBinding = Binding(listOf(success.asBind))
+    val outBinding = Binding(outputParameters.asBinds)
     val inBinding = Binding(allParameters.asBinds)
 
     val script = Script(scriptBody)
     val scriptItem = scriptWorkflowItem(script, inBinding, outBinding)
     val workflowItems = listOf(END, scriptItem)
-    val output = listOf(success.asParameter)
 
     return copy(
         presentation = presentation,
         workflowItems = workflowItems,
         references = allParameters.asReferences,
         input = allParameters.asParameterSet,
-        output = ParameterSet(output),
+        output = outputParameters.asParameterSet,
         attributes = attributes
     )
 }
