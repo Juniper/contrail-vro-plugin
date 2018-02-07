@@ -5,8 +5,9 @@
 package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.vro.config.ObjectClass
-import net.juniper.contrail.vro.config.constants.child
+import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
+import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
@@ -26,14 +27,16 @@ fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDef
     val scriptBody = relation.addReferenceRelationScriptBody()
 
     return workflow(workflowName).withScript(scriptBody) {
-        parameter(parent, parentName.reference) {
+        parameter(item, parentName.reference) {
             description = "${parentName.allCapitalized} to add to"
             mandatory = true
         }
-        parameter(child, childName.reference) {
+
+        parameter(relation.child, childName.reference) {
             description = schema.descriptionInCreateRelationWorkflow(relation.parentClass, relation.childClass)
             mandatory = true
         }
+
         if ( ! relation.simpleReference) {
             addProperties(relation.attribute, schema)
         }
@@ -48,11 +51,11 @@ fun removeReferenceWorkflow(relation: ForwardRelation, action: Action): Workflow
     val scriptBody = relation.removeReferenceRelationScriptBody()
 
     return workflow(workflowName).withScript(scriptBody) {
-        parameter(parent, parentName.reference) {
+        parameter(item, parentName.reference) {
             description = "${parentName.allCapitalized} to remove from"
             mandatory = true
         }
-        parameter(child, childName.reference) {
+        parameter(relation.child, childName.reference) {
             description = "${childName.allCapitalized} to be removed"
             mandatory = true
             visibility = WhenNonNull(parent)
@@ -75,20 +78,23 @@ private fun ForwardRelation.addReferenceRelationScriptBody() =
 private fun ForwardRelation.addRelationWithAttributeScriptBody() = """
 var attribute = new Contrail${attribute.pluginName}();
 ${ attribute.attributeCode("attribute") }
-$parent.add$childPluginName($child, attribute);
-$retrieveExecutorAndUpdateParent
+$item.add$childPluginName($child, attribute);
+$retrieveExecutorAndUpdateItem
 """
 
+private val ForwardRelation.child get() =
+    childClass.parameterName
+
 private fun ForwardRelation.addSimpleReferenceRelationScriptBody() = """
-$parent.add$childPluginName($child);
-$retrieveExecutorAndUpdateParent
+$item.add$childPluginName($child);
+$retrieveExecutorAndUpdateItem
 """
 
 private fun ForwardRelation.removeReferenceRelationScriptBody() = """
 ${if (simpleReference)
-    "$parent.remove$childPluginName($child);"
+    "$item.remove$childPluginName($child);"
 else
-    "$parent.remove$childName($child, null);"
+    "$item.remove$childName($child, null);"
 }
-$retrieveExecutorAndUpdateParent
+$retrieveExecutorAndUpdateItem
 """.trimIndent()

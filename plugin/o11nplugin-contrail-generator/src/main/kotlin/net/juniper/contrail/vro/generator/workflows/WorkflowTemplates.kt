@@ -268,6 +268,9 @@ fun List<Property>.prepare(prefix: String) =
 val String.retrieveExecutor get() =
     "var $executor = ContrailConnectionManager.getExecutor($this.getInternalId().toString());"
 
+val retrieveExecutorFromItem get() =
+    "var $executor = ContrailConnectionManager.getExecutor($item.internalId.toString());"
+
 fun String.updateAsClass(className: String) =
     "$executor.update$className($this);"
 
@@ -277,8 +280,17 @@ fun String.deleteAsClass(className: String) =
 val ForwardRelation.updateParent get() =
     parent.updateAsClass(parentClass.pluginName)
 
+val ForwardRelation.updateItem get() =
+    item.updateAsClass(parentClass.pluginName)
+
 val ForwardRelation.retrieveExecutorAndUpdateParent get() =
 """
 ${parent.retrieveExecutor}
 $updateParent
+""".trimIndent()
+
+val ForwardRelation.retrieveExecutorAndUpdateItem get() =
+"""
+$retrieveExecutorFromItem
+$updateItem
 """.trimIndent()

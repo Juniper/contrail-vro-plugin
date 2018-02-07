@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.generator.workflows
 import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.bold
+import net.juniper.contrail.vro.config.constants.id
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.isApiTypeClass
@@ -27,7 +28,7 @@ fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<Obj
     val workflowName = "Create ${clazz.allLowerCase}"
     val parentName = parentClazz?.pluginName ?: Connection
 
-    return workflow(workflowName).withScript(createScriptBody(clazz, parentClazz, refs)) {
+    return workflow(workflowName).withScript(clazz.createScriptBody(parentClazz, refs)) {
         description = schema.createWorkflowDescription(clazz)
         parameter("name", string) {
             description = "${clazz.allCapitalized} name"
@@ -38,6 +39,10 @@ fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<Obj
             description = "Parent ${parentName.allCapitalized}"
             mandatory = true
 
+        }
+
+        output(item, clazz.reference) {
+            description = "${clazz.allCapitalized} created in this workflow"
         }
 
         for (ref in refs) {
@@ -81,12 +86,14 @@ ${clazz.allCapitalized}
 ${relationDescription(parentClazz, clazz)}
 """.trim()
 
-private fun createScriptBody(clazz: Class<*>, parentClazz: ObjectClass?, references: List<ObjectClass>) = """
-${parent.retrieveExecutor}
-var $item = new Contrail${clazz.pluginName}();
+private fun Class<*>.createScriptBody(parentClazz: ObjectClass?, references: List<ObjectClass>) = """
+$item = new Contrail$pluginName();
 $item.setName(name);
 ${references.addAllReferences}
-$executor.create${clazz.pluginName}($item${if (parentClazz == null) "" else ", $parent"});
+var $id = $parent.internalId;
+var $executor = ContrailConnectionManager.getExecutor($id.toString());
+$executor.create$pluginName($item${if (parentClazz == null) "" else ", $parent"});
+$item.internalId = id.with("$pluginName", item.uuid);
 """.trimIndent()
 
 private fun editScriptBody(clazz: Class<*>) = """
@@ -96,7 +103,7 @@ ${item.updateAsClass(clazz.pluginName)}
 """.trimIndent()
 
 private fun deleteScriptBody(className: String) = """
-${item.retrieveExecutor}
+$retrieveExecutorFromItem
 ${item.deleteAsClass(className)}
 """.trimIndent()
 

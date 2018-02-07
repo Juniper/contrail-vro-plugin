@@ -40,7 +40,8 @@ val nonEssentialAttributes = setOf(
 val ignoredInWorkflows = setOf(
     "KeyValuePairs",
     "PermType2",
-    "IdPermsType"
+    "IdPermsType",
+    "SequenceType"
 )
 
 val nonEditableProperties = setOf(
