@@ -4,12 +4,30 @@
 
 package net.juniper.contrail.vro.workflows.model
 
-sealed class VisibilityCondition
+sealed class VisibilityCondition {
+    abstract val stringCondition: String
+}
 
-object AlwaysVisible : VisibilityCondition()
+object AlwaysVisible : VisibilityCondition() {
+    override val stringCondition: String = "true"
+}
 
-class WhenNonNull(val name: String) : VisibilityCondition()
+class WhenNonNull(name: String) : VisibilityCondition() {
+    override val stringCondition: String = "#$name != null"
+}
 
-class FromBooleanParameter(val name: String) : VisibilityCondition()
+class FromBooleanParameter(name: String) : VisibilityCondition() {
+    override val stringCondition: String = "#$name"
+}
 
-class FromStringParameter(val name: String, val value: String) : VisibilityCondition()
+class FromStringParameter(name: String, value: String) : VisibilityCondition() {
+    override val stringCondition: String = "#$name == \"$value\""
+}
+
+class ConditionConjunction(vararg conditions: VisibilityCondition) : VisibilityCondition() {
+    override val stringCondition: String = conditions.joinToString(" && ") { "(${it.stringCondition})" }
+}
+
+class ConditionAlternative(vararg conditions: VisibilityCondition) : VisibilityCondition() {
+    override val stringCondition: String = conditions.joinToString(" || ") { "(${it.stringCondition})" }
+}

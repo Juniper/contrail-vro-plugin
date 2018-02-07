@@ -121,9 +121,7 @@ abstract class BasicBuilder {
         visibility.let {
             when (it) {
                 is AlwaysVisible -> Unit
-                is WhenNonNull -> add(visibleWhenNonNullQualifier(it.name))
-                is FromBooleanParameter -> add(visibleWhenBooleanSwitchedQualifier(it.name))
-                is FromStringParameter -> add(visibleWhenVariableHasValueQualifier(it.name, it.value))
+                else -> add(visibilityConditionQualifier(it))
             }
         }
     }

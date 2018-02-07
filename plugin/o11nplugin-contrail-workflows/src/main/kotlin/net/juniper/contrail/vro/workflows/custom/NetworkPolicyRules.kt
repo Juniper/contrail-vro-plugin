@@ -16,12 +16,15 @@ import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.getNetworkPolicyRules
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.model.ActionCall
+import net.juniper.contrail.vro.workflows.model.ConditionAlternative
+import net.juniper.contrail.vro.workflows.model.ConditionConjunction
 import net.juniper.contrail.vro.workflows.model.FromBooleanParameter
 import net.juniper.contrail.vro.workflows.model.FromListPropertyValue
 import net.juniper.contrail.vro.workflows.model.FromStringParameter
 import net.juniper.contrail.vro.workflows.model.WhenNonNull
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.boolean
+import net.juniper.contrail.vro.workflows.model.number
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
@@ -32,6 +35,8 @@ import net.juniper.contrail.vro.workflows.util.extractRelationDescription
 
 val sourceAddressTypeParameterName = "srcAddressType"
 val destinationAddressTypeParameterName = "dstAddressType"
+val mirrorShowParameterName = "mirror"
+val mirrorTypeParameterName = "mirrorType"
 // There is no information about protocols in the schema
 val defaultPort = "any"
 val defaultProtocol = "any"
@@ -40,6 +45,12 @@ val defaultAddressType = "CIDR"
 val allowedAddressTypes = listOf("CIDR", "Network", "Policy", "Security Group")
 val defaultDirection = "<>"
 val allowedDirections = listOf("<>", ">")
+val defaultMirrorType = "Analyzer Instance"
+val allowedMirrorTypes = listOf("Analyzer Instance", "NIC Assisted", "Analyzer IP")
+val defaultJuniperHeaderOption = "enabled"
+val allowedJuniperHeaderOptions = listOf("enabled", "disabled")
+val defaultNexthopMode = "dynamic"
+val allowedNexthopModes = listOf("dynamic", "static")
 
 internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
 
@@ -154,12 +165,92 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 visibility = FromBooleanParameter("services")
             }
-            parameter("mirror", boolean) {
-                // TODO mirror settings
+
+            parameter(mirrorShowParameterName, boolean) {
                 description = "Mirror"
                 mandatory = true
                 defaultValue = false
             }
+            parameter(mirrorTypeParameterName, string) {
+                description = "Mirror Type"
+                mandatory = true
+                visibility = FromBooleanParameter(mirrorShowParameterName)
+                defaultValue = defaultMirrorType
+                predefinedAnswers = allowedMirrorTypes
+            }
+            parameter("analyzerInstance", reference<ServiceInstance>()) {
+                description = "Analyzer Instance"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer Instance"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("analyzerName", string) {
+                description = "Analyzer Name"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    ConditionAlternative(
+                        FromStringParameter(mirrorTypeParameterName, "NIC Assisted"),
+                        FromStringParameter(mirrorTypeParameterName, "Analyzer IP")),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("nicAssistedVlan", number) {
+                description = "NIC Assisted VLAN"
+                mandatory = true
+                min = 1
+                max = 4094
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "NIC Assisted"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("analyzerIP", string) {
+                description = "Analyzer IP"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("analyzerMac", string) {
+                description = "Analyzer MAC"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("udpPort", number) {
+                description = "UDP Port"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("juniperHeader", string) {
+                description = "Juniper Header"
+                mandatory = true
+                defaultValue = defaultJuniperHeaderOption
+                predefinedAnswers = allowedJuniperHeaderOptions
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("nexthopMode", string) {
+                description = "Nexthop Mode"
+                mandatory = true
+                defaultValue = defaultNexthopMode
+                predefinedAnswers = allowedNexthopModes
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+
             parameter("QoSShow", boolean) {
                 description = "QoS"
                 mandatory = true
@@ -315,12 +406,92 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 visibility = FromBooleanParameter("services")
             }
-            parameter("mirror", boolean) {
-                // TODO mirror settings
+
+            parameter(mirrorShowParameterName, boolean) {
                 description = "Mirror"
                 mandatory = true
                 defaultValue = false
             }
+            parameter(mirrorTypeParameterName, string) {
+                description = "Mirror Type"
+                mandatory = true
+                visibility = FromBooleanParameter(mirrorShowParameterName)
+                defaultValue = defaultMirrorType
+                predefinedAnswers = allowedMirrorTypes
+            }
+            parameter("analyzerInstance", reference<ServiceInstance>()) {
+                description = "Analyzer Instance"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer Instance"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("analyzerName", string) {
+                description = "Analyzer Name"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    ConditionAlternative(
+                        FromStringParameter(mirrorTypeParameterName, "NIC Assisted"),
+                        FromStringParameter(mirrorTypeParameterName, "Analyzer IP")),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("nicAssistedVlan", number) {
+                description = "NIC Assisted VLAN"
+                mandatory = true
+                min = 1
+                max = 4094
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "NIC Assisted"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("analyzerIP", string) {
+                description = "Analyzer IP"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("analyzerMac", string) {
+                description = "Analyzer MAC"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("udpPort", number) {
+                description = "UDP Port"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("juniperHeader", string) {
+                description = "Juniper Header"
+                mandatory = true
+                defaultValue = defaultJuniperHeaderOption
+                predefinedAnswers = allowedJuniperHeaderOptions
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("nexthopMode", string) {
+                description = "Nexthop Mode"
+                mandatory = true
+                defaultValue = defaultNexthopMode
+                predefinedAnswers = allowedNexthopModes
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+
             parameter("QoSShow", boolean) {
                 description = "QoS"
                 mandatory = true

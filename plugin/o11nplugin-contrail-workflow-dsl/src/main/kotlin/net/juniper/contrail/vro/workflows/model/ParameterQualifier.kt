@@ -91,12 +91,8 @@ fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifier
 fun multilineQualifier() = staticQualifier(multilineQualifierName, void, voidValue)
 fun minNumberValueQualifier(value: Long) = staticQualifier(minNumberValueQualifierName, number, value)
 fun maxNumberValueQualifier(value: Long) = staticQualifier(maxNumberValueQualifierName, number, value)
-fun visibleWhenNonNullQualifier(otherName: String) =
-    ognlQualifier(visibleQualifierName, boolean, "#$otherName != null")
-fun visibleWhenVariableHasValueQualifier(otherName: String, requiredValue: String) =
-    ognlQualifier(visibleQualifierName, boolean, "#$otherName == \"$requiredValue\"")
-fun visibleWhenBooleanSwitchedQualifier(otherName: String) =
-    ognlQualifier(visibleQualifierName, boolean, "#$otherName")
+fun visibilityConditionQualifier(condition: VisibilityCondition) =
+    ognlQualifier(visibleQualifierName, boolean, condition.stringCondition)
 fun listFromAction(action: Action) =
     ognlQualifier(linkedEnumerationQualifierName, action.resultType, action.ognl)
 fun childOf(parent: String) =
