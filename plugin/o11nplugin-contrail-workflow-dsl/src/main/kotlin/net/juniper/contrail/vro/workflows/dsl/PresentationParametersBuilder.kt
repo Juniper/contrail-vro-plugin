@@ -5,8 +5,6 @@
 package net.juniper.contrail.vro.workflows.dsl
 
 import net.juniper.contrail.vro.workflows.model.* // ktlint-disable no-wildcard-imports
-import net.juniper.contrail.vro.workflows.model.DataBinding
-import net.juniper.contrail.vro.workflows.model.NoDataBinding
 import java.util.Date
 
 @WorkflowBuilder
@@ -205,7 +203,11 @@ class StringParameterBuilder(name: String) : BasicParameterBuilder<String>(name,
         val qualifiers = mutableListOf<ParameterQualifier>()
         customValidation?.let {
             when (it) {
-                is CIDR -> qualifiers.add(cidrValidatorQualifier(parameterName, it.actionPackageName, it.actionName))
+                is CIDR -> qualifiers.add(cidrValidatorQualifier(parameterName, it.actionName))
+                is AllocationPool -> qualifiers.add(allocValidatorQualifier(parameterName, it.cidr, it.actionName))
+                is InCIDR -> qualifiers.add(inCidrValidatorQualifier(parameterName, it.cidr, it.actionName))
+                is FreeInCIDR -> qualifiers.add(freeInCidrValidatorQualifier(parameterName, it.cidr, it.pools,
+                        it.dns, it.actionName))
             }
         }
         if (multiline) {

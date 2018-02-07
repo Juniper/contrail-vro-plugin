@@ -69,6 +69,11 @@ object SecureString : ParameterType<String>() {
         "SecureString"
 }
 
+object Regexp : ParameterType<String>() {
+    override val name get() =
+        "Regexp"
+}
+
 object date : ParameterType<Date>() {
     override val name get() =
         "Date"

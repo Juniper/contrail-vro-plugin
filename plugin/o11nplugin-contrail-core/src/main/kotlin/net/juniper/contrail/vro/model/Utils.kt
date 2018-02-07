@@ -17,11 +17,45 @@ import java.util.UUID
 
 class Utils {
 
-    fun isValidCidr(input: String): Boolean = InetAddress.isValidSubnet(input)
+    fun isValidAddress(input: String): Boolean =
+        NetAddressValidator.isValidAddress(input)
 
-    fun isValidIpv6Cidr(input: String): Boolean = InetAddress.IPv6.isValidSubnet(input)
+    fun isValidIpv4Address(input: String): Boolean =
+        NetAddressValidator.IPv4.isValidAddress(input)
 
-    fun isValidIpv4Cidr(input: String): Boolean = InetAddress.IPv4.isValidSubnet(input)
+    fun isValidIpv6Address(input: String): Boolean =
+        NetAddressValidator.IPv6.isValidAddress(input)
+
+    fun isValidCidr(input: String): Boolean =
+        NetAddressValidator.isValidSubnet(input)
+
+    fun isValidIpv6Cidr(input: String): Boolean =
+        NetAddressValidator.IPv6.isValidSubnet(input)
+
+    fun isValidIpv4Cidr(input: String): Boolean =
+        NetAddressValidator.IPv4.isValidSubnet(input)
+
+    fun isValidPool(input: String): Boolean =
+        NetAddressValidator.IPv4.areValidPools(input)
+
+    fun isValidAllocationPool(cidr: String, pools: String): Boolean {
+        if (isValidIpv4Cidr(cidr) && NetAddressValidator.IPv4.areValidPools(pools)) {
+            return parseIpv4Pools(cidr, pools)
+        } else if (isValidIpv6Cidr(cidr) && NetAddressValidator.IPv6.areValidPools(pools)) {
+            //TODO Include IPv6 support
+            return false
+        }
+        return false
+    }
+
+    //TODO Include IPv6 support
+    fun isInCidr(cidr: String, address: String): Boolean =
+        address.ipToInt().ip() in getSubnetRange(cidr)
+
+    fun isFree(cidr: String, address: String, pools: String?, dnsAddr: String?): Boolean {
+        val ip = address.ipToInt().ip()
+        return (ip in getSubnetRange(cidr)) && pools.ipNotInPools(ip) && !dnsAddr.equalsIp(ip)
+    }
 
     fun getVnSubnet(network: VirtualNetwork, ipam: NetworkIpam): VnSubnetsType =
         network.networkIpam?.find { it.uuid == ipam.uuid }?.attr ?: VnSubnetsType()
@@ -87,7 +121,7 @@ class Utils {
         return SubnetType(fullNetworkName, subnetPrefix)
     }
 
-    private fun parseSubnetIP(virtualNetworkAddress: String): String {
+    fun parseSubnetIP(virtualNetworkAddress: String): String {
         val minIpPart = 0
         val maxIpPart = 255
 
@@ -107,7 +141,7 @@ class Utils {
         return subnetIP
     }
 
-    private fun parseSubnetPrefix(virtualNetworkAddress: String): Int {
+    fun parseSubnetPrefix(virtualNetworkAddress: String): Int {
         val minSubnetPrefix = 0
         val maxSubnetPrefix = 32
 
@@ -148,4 +182,10 @@ class Utils {
 
     fun lowercase(s: String) =
         s.toLowerCase()
+
+    fun trimMultiline(s: String): String =
+        splitMultiline(s).joinToString( "\n" )
+
+    fun splitMultiline(s: String): List<String> =
+        s.split('\n').map { it.trim() }.filter { it.isNotBlank() }
 }

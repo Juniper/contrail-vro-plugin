@@ -1,25 +1,34 @@
 var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
+var ip_prefix = ContrailUtils.parseSubnetIP(subnet.trim());
+var ip_prefix_len = ContrailUtils.parseSubnetPrefix(subnet.trim());
+var subnet_name = ContrailUtils.randomUUID();
 
 var ipamSubnet = new ContrailIpamSubnetType();
 var subnetType = new ContrailSubnetType(ip_prefix, ip_prefix_len);
-var subnet = new ContrailSubnet();
+var csubnet = new ContrailSubnet();
 
-subnet.setIpPrefix(subnetType);
-subnet.setName(subnet_name);
-executor.createSubnet(subnet);
-var uuid = subnet.getUuid();
+csubnet.setIpPrefix(subnetType);
+csubnet.setName(subnet_name);
+executor.createSubnet(csubnet);
+var uuid = csubnet.getUuid();
 
-ipamSubnet.setEnableDhcp(enable_dhcp);
-ipamSubnet.setDefaultGateway(default_gateway);
-ipamSubnet.setDnsServerAddress(dns_server_address);
+ipamSubnet.setEnableDhcp(enableDhcp);
+ipamSubnet.setDefaultGateway(defaultGateway.trim());
+if (dnsServerAddress){
+    ipamSubnet.setDnsServerAddress(dnsServerAddress.trim());
+}
 ipamSubnet.setSubnet(subnetType);
 ipamSubnet.setSubnetName(subnet_name);
 ipamSubnet.setSubnetUuid(uuid);
-ipamSubnet.setAddrFromStart(addr_from_start);
+ipamSubnet.setAddrFromStart(addrFromStart);
 
-allocation_pools.forEach(function(element) {
-   ipamSubnet.addAllocationPools(element.start, element.end);
-});
+var pools = ContrailUtils.splitMultiline(allocationPools);
+if (pools.length != 0) {
+    pools.forEach(function(element) {
+       var parts = element.split("-");
+       ipamSubnet.addAllocationPools(parts[0], parts[1]);
+    });
+}
 
 var vnSubnet = ContrailUtils.getVnSubnet(parent, ipam);
 

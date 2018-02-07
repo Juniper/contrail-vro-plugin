@@ -114,15 +114,19 @@ fun <T : Any> bindValueToListProperty(parentItem: String, childItem: String, lis
 fun <T : Any> bindValueToAction(actionName: String, type: ParameterType<T>, vararg parameters: String) =
     ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, actionName, *parameters))
 
-fun cidrValidatorQualifier(parameter: String, packageName: String, actionName: String) =
-    validatorActionQualifier(packageName, actionName, parameter)
-fun allocValidatorQualifier(parameter: String, cidr: String, packageName: String, actionName: String) =
-    validatorActionQualifier(packageName, actionName, cidr, parameter)
+fun cidrValidatorQualifier(parameter: String, actionName: String) =
+    validatorActionQualifier(actionPackage, actionName, "#$parameter")
+fun allocValidatorQualifier(parameter: String, cidr: String, actionName: String) =
+    validatorActionQualifier(actionPackage, actionName, "#$cidr", "#$parameter")
+fun inCidrValidatorQualifier(parameter: String, cidr: String, actionName: String) =
+    validatorActionQualifier(actionPackage, actionName, "#$cidr", "#$parameter")
+fun freeInCidrValidatorQualifier(parameter: String, cidr: String, pools: String, dns: String, actionName: String) =
+    validatorActionQualifier(actionPackage, actionName, "#$cidr", "#$parameter", "#$pools", "#$dns")
 
 private val extractPropertyAction = "getPropertyValue"
 
 private fun actionOgnl(packageName: String, name: String, vararg parameter: String) =
-    """GetAction("$packageName","$name").call(${parameter.joinToString(",")})"""
+    """GetAction("$packageName","$name").call(${parameter.joinToString(", ")})"""
 
 val ActionCall.ognl get() =
     actionOgnl(actionPackage, name, *arguments)

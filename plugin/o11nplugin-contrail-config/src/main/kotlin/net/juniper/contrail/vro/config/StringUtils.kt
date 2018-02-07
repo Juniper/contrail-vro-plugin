@@ -33,6 +33,9 @@ fun String.underscoredPropertyToCamelCase(): String {
     return first + rest.joinToString("") { it.toLowerCase().capitalize() }
 }
 
+fun String.toTitle(): String =
+    splitCamel().capitalize()
+
 fun String.splitCamel(): String =
     camelChunks.joinToString(" ")
 

@@ -7,9 +7,12 @@ package net.juniper.contrail.vro.config
 val actionPackage = globalProjectInfo.workflowPackage
 val utilActionPackage = "$actionPackage.util"
 
-val cidrCheckingAction = "isValidCidr"
+val isCidrAction = "isValidCidr"
 val propertyNotNull = "propertyNotNull"
 val propertyValue = "propertyValue"
+val isInCidrAction = "isInCidr"
+val isFreeInCidrAction = "isFreeInCidr"
+val isAllocPoolAction = "isValidAllocationPool"
 
 /* extractListProperty
 arguments:
