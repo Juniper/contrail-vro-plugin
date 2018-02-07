@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.dsl
 
+import net.juniper.contrail.vro.workflows.model.Attribute
 import net.juniper.contrail.vro.workflows.util.generateID
 import net.juniper.contrail.vro.workflows.model.Binding
 import net.juniper.contrail.vro.workflows.model.ParameterSet
@@ -23,6 +24,7 @@ data class WorkflowDefinition(
     val references: List<Reference>? = null,
     val input: ParameterSet = ParameterSet(),
     val output: ParameterSet = ParameterSet(),
+    val attributes: List<Attribute> = emptyList(),
     val position: Position = defaultWorkflowPosition
 ) {
     fun createWorkflow(packageName: String, version: String): Workflow {
@@ -40,6 +42,7 @@ data class WorkflowDefinition(
         references = references,
         input = input,
         output = output,
+        attributes = attributes,
         position = position
     )
 }
@@ -59,8 +62,9 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
     val steps = mutableListOf<PresentationStep>()
     val parameters = mutableListOf<ParameterInfo>()
     val allParameters = mutableListOf<ParameterInfo>()
+    val attributes = mutableListOf<Attribute>()
 
-    val builder = PresentationParametersBuilder(steps, parameters, allParameters).apply(setup)
+    val builder = PresentationParametersBuilder(steps, parameters, allParameters, attributes).apply(setup)
 
     val presentation = Presentation(parameters.asPresentationParameters, steps, builder.description)
 
@@ -77,7 +81,8 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
         workflowItems = workflowItems,
         references = allParameters.asReferences,
         input = allParameters.asParameterSet,
-        output = ParameterSet(output)
+        output = ParameterSet(output),
+        attributes = attributes
     )
 }
 

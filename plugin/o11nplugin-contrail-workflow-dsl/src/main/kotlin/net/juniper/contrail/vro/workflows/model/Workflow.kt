@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "workflow",
-    propOrder = ["displayName", "refTypes", "position", "input", "output", "workflowItems", "presentation"]
+    propOrder = ["displayName", "refTypes", "position", "input", "output", "attributes", "workflowItems", "presentation"]
 )
 @XmlRootElement(name = "workflow")
 class Workflow(
@@ -27,6 +27,7 @@ class Workflow(
     references: List<Reference>? = null,
     input: ParameterSet = ParameterSet(),
     output: ParameterSet = ParameterSet(),
+    attributes: List<Attribute> = emptyList(),
     position: Position = Position(50.0f, 10.0f)
 ) : Element {
     // this constructor is only necessary to satisfy marshaller
@@ -54,6 +55,9 @@ class Workflow(
 
     @XmlElement(required = true)
     val output: ParameterSet = output
+
+    @XmlElement(name = "attrib")
+    val attributes: List<Attribute> = attributes.toList()
 
     @XmlElement(name = "workflow-item")
     val workflowItems: List<WorkflowItem> = workflowItems.toList()

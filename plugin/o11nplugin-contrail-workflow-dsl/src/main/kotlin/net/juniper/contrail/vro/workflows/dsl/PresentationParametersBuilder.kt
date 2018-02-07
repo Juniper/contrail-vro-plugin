@@ -11,7 +11,8 @@ import java.util.Date
 class PresentationParametersBuilder(
     private val steps: MutableList<PresentationStep>,
     parameters: MutableList<ParameterInfo>,
-    allParameters: MutableList<ParameterInfo>
+    allParameters: MutableList<ParameterInfo>,
+    private val attributes: MutableList<Attribute>
 ) : ParameterAggregator(parameters, allParameters) {
 
     fun step(title: String, setup: ParameterAggregator.() -> Unit) {
@@ -27,6 +28,11 @@ class PresentationParametersBuilder(
         groupBuilder.setup()
         steps += PresentationStep.fromGroups(title, stepGroups, groupBuilder.description, groupBuilder.qualifiers)
     }
+
+    fun attribute(name: String, type: Reference, setup: AttributeBuilder.() -> Unit) {
+        attributes += AttributeBuilder(name, type).apply(setup).buildAttribute()
+    }
+
 }
 
 @WorkflowBuilder
@@ -234,3 +240,11 @@ class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterB
 }
 
 class ReferenceArrayParameterBuilder(name: String, type: array<Reference>) : BasicParameterBuilder<List<Reference>>(name, type)
+
+class AttributeBuilder(val name: String, val type: ParameterType<Any>) {
+    var description: String? = null
+    var readOnly: Boolean = false
+
+    fun buildAttribute() =
+        Attribute(name, type, description, readOnly)
+}
