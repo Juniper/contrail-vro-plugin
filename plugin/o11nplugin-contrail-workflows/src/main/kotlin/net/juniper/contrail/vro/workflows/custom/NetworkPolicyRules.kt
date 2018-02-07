@@ -13,15 +13,12 @@ import net.juniper.contrail.api.types.QosConfig
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualNetwork
-import net.juniper.contrail.vro.config.actionPackage
 import net.juniper.contrail.vro.config.getNetworkPolicyRules
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.model.Action
-import net.juniper.contrail.vro.workflows.model.ActionParameter
+import net.juniper.contrail.vro.workflows.model.ActionCall
 import net.juniper.contrail.vro.workflows.model.FromBooleanParameter
 import net.juniper.contrail.vro.workflows.model.FromListPropertyValue
 import net.juniper.contrail.vro.workflows.model.FromStringParameter
-import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.WhenNonNull
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.boolean
@@ -192,10 +189,9 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
             parameter("rule", string) {
                 visibility = WhenNonNull("parent")
                 description = "Rule to edit"
-                predefinedAnswersAction = actionCall(
+                predefinedAnswersAction = ActionCall(
                     getNetworkPolicyRules,
-                    actionPackage,
-                    listOf("parent")
+                    "parent"
                 )
             }
         }
@@ -338,13 +334,3 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
         }
     }
 }
-
-private fun actionCall(name: String, packageName: String, arguments: List<String>): Action = Action(
-    name,
-    packageName,
-    "",
-    "",
-    array(string),
-    arguments.map { ActionParameter(it, string) },
-    Script("")
-)

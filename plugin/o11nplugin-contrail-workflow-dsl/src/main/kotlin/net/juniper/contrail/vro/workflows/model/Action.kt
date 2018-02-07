@@ -85,3 +85,5 @@ class ActionParameter(
 
 infix fun <T : Any> String.ofType(type: ParameterType<T>) =
     ActionParameter(this, type)
+
+class ActionCall(val name: String, vararg val arguments: String)

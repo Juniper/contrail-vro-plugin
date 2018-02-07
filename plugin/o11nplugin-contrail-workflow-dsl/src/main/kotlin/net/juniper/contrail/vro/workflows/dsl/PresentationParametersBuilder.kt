@@ -133,8 +133,9 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
     var mandatory: Boolean = false
     var defaultValue: Type? = null
     var dataBinding: DataBinding<Type> = NoDataBinding
+    // TODO: Unify predefinedAnswers and predefinedAnswersAction
     var predefinedAnswers: List<Type>? = null
-    var predefinedAnswersAction: Action? = null
+    var predefinedAnswersAction: ActionCall? = null
     val additionalQualifiers = mutableListOf<ParameterQualifier>()
     private var listedBy: Action? = null
 

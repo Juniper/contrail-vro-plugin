@@ -78,7 +78,7 @@ fun <T : Any> predefinedAnswersQualifier(type: ParameterType<T>, values: List<T>
 }
 fun <T : Any> predefinedAnswersActionQualifier(
     type: ParameterType<T>,
-    action: Action
+    action: ActionCall
 ): ParameterQualifier {
     val simpleType = type.unArrayed
     return ognlQualifier(
@@ -127,6 +127,9 @@ private val extractPropertyAction = "getPropertyValue"
 
 private fun actionOgnl(packageName: String, name: String, vararg parameter: String) =
     """GetAction("$packageName","$name").call(${parameter.joinToString(",")})"""
+
+val ActionCall.ognl get() =
+    actionOgnl(actionPackage, name, *arguments)
 
 private val Action.ognl get() =
     """GetAction("$packageName","$name").call($call)"""
