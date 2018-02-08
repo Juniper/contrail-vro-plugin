@@ -9,6 +9,7 @@ import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.NetworkPolicy
 import net.juniper.contrail.api.types.PolicyRuleType
 import net.juniper.contrail.api.types.PortType
+import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.api.types.SubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
@@ -191,11 +192,20 @@ class Utils {
         return subnetPrefix
     }
 
-    fun createAddress(type: String, cidr: String?, network: VirtualNetwork?, policy: NetworkPolicy?): AddressType {
+    fun createAddress(
+        type: String,
+        cidr: String?,
+        network: VirtualNetwork?,
+        policy: NetworkPolicy?,
+        securityGroup: SecurityGroup? = null
+    ): AddressType {
         val subnet = if (type == "CIDR" && cidr != null) parseSubnet(cidr) else null
         val networkName = if (type == "Network" && network != null) network.name else null
         val policyName = if (type == "Policy" && policy != null) policy.name else null
-        return AddressType(subnet, networkName, null, policyName)
+        val securityGroupName = if (type == "Security Group") {
+            securityGroup?.qualifiedName?.joinToString(":") ?: "local"
+        } else null
+        return AddressType(subnet, networkName, securityGroupName, policyName)
     }
 
     fun randomUUID(): String =

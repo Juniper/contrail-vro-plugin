@@ -34,24 +34,24 @@ import net.juniper.contrail.vro.workflows.schema.simpleTypeQualifiers
 import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.workflows.util.extractRelationDescription
 
-val sourceAddressTypeParameterName = "srcAddressType"
-val destinationAddressTypeParameterName = "dstAddressType"
-val mirrorShowParameterName = "mirror"
-val mirrorTypeParameterName = "mirrorType"
+private val sourceAddressTypeParameterName = "srcAddressType"
+private val destinationAddressTypeParameterName = "dstAddressType"
+private val mirrorShowParameterName = "mirror"
+private val mirrorTypeParameterName = "mirrorType"
 // There is no information about protocols in the schema
-val defaultPort = "any"
-val defaultProtocol = "any"
-val allowedProtocols = listOf("any", "tcp", "udp", "icmp", "icmp6")
-val defaultAddressType = "CIDR"
-val allowedAddressTypes = listOf("CIDR", "Network", "Policy", "Security Group")
-val defaultDirection = "<>"
-val allowedDirections = listOf("<>", ">")
-val defaultMirrorType = "Analyzer Instance"
-val allowedMirrorTypes = listOf("Analyzer Instance", "NIC Assisted", "Analyzer IP")
-val defaultJuniperHeaderOption = "enabled"
-val allowedJuniperHeaderOptions = listOf("enabled", "disabled")
-val defaultNexthopMode = "dynamic"
-val allowedNexthopModes = listOf("dynamic", "static")
+private val defaultPort = "any"
+private val defaultProtocol = "any"
+private val allowedProtocols = listOf("any", "tcp", "udp", "icmp", "icmp6")
+private val defaultAddressType = "CIDR"
+private val allowedAddressTypes = listOf("CIDR", "Network", "Policy", "Security Group")
+private val defaultDirection = "<>"
+private val allowedDirections = listOf("<>", ">")
+private val defaultMirrorType = "Analyzer Instance"
+private val allowedMirrorTypes = listOf("Analyzer Instance", "NIC Assisted", "Analyzer IP")
+private val defaultJuniperHeaderOption = "enabled"
+private val allowedJuniperHeaderOptions = listOf("enabled", "disabled")
+private val defaultNexthopMode = "dynamic"
+private val allowedNexthopModes = listOf("dynamic", "static")
 
 internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
 
@@ -80,8 +80,7 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 // direction has no description in the schema
                 description = "Direction"
                 mandatory = true
-                defaultValue = defaultDirection
-                predefinedAnswers = allowedDirections
+                additionalQualifiers += schema.simpleTypeQualifiers<PolicyRuleType>("direction")
             }
         }
         step("Addresses") {

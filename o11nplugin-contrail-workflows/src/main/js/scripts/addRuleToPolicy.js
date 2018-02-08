@@ -8,10 +8,10 @@ var ruleUuid = ContrailUtils.randomUUID();
 var parsedSrcPorts = ContrailUtils.parsePorts(srcPorts);
 var parsedDstPorts = ContrailUtils.parsePorts(dstPorts);
 
-var application = [];
-
 var srcAddr = [ContrailUtils.createAddress(srcAddressType, srcAddressCidr, srcAddressNetwork, srcAddressPolicy)];
 var dstAddr = [ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAddressNetwork, dstAddressPolicy)];
+
+var application = [];
 
 var qosName = qos.getQualifiedName().join(":")
 
