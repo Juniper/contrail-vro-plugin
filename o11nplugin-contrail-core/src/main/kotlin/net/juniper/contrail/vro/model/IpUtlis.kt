@@ -22,6 +22,8 @@ class IpRange(val start: Ip, val end: Ip) {
 }
 
 class Ip(val ip: Int) : Comparable<Ip> {
+    constructor(address: String): this(address.ipToInt())
+
     override fun compareTo(other: Ip) = Integer.compareUnsigned(ip, other.ip)
 }
 
@@ -34,7 +36,7 @@ fun ipToByte(address: String) : ByteArray =
     InetAddress.getByName(address).address
 
 fun String.ipToInt() : Int {
-    val bytes = ipToByte(this)
+    val bytes = ipToByte(trim())
     var result = 0
     for (byte in bytes) {
         result = result shl 8
@@ -44,11 +46,12 @@ fun String.ipToInt() : Int {
 }
 
 fun String?.equalsIp(ip : Ip) =
-    this?.ipToInt()?.ip() != ip
+    this?.ipToInt()?.ip() == ip
 
 fun String?.ipNotInPools(ip : Ip) : Boolean {
-    if (this != null && this.isNotBlank()) {
-        return poolsToRanges(this).none { ip in it }
+    if (this != null) {
+        val cleanedPools = trimMultiline()
+        return cleanedPools.isNotBlank() && poolsToRanges(cleanedPools).none { ip in it }
     } else {
         return true
     }
@@ -61,18 +64,18 @@ fun getNetworkBroadcastAddress(ip: Int, prefixLen: Int) : Int =
     ip or (HIGHEST_BINARY ushr prefixLen)
 
 fun getSubnetRange(cidr: String) : IpRange {
-    val parts = cidr.split('/')
+    val parts = cidr.trim().split('/')
     val prefixLen = parts[1].toInt()
     val ip = parts[0].ipToInt()
     val netAddr = getNetworkAddress(ip, prefixLen)
     val broadcast = getNetworkBroadcastAddress(ip, prefixLen)
-    return IpRange(netAddr.ip(), broadcast.ip())
+    return IpRange(Ip(netAddr), Ip(broadcast))
 }
 
 fun poolToRange(pool: String) : IpRange? {
     val parts = pool.split('-')
-    val start = parts[0].ipToInt().ip()
-    val end = parts[1].ipToInt().ip()
+    val start = Ip(parts[0])
+    val end = Ip(parts[1])
     if (start > end) return null
     return IpRange(start, end)
 }
@@ -83,8 +86,14 @@ fun poolsToRanges(pools: String) : List<IpRange> {
 }
 
 fun parseIpv4Pools(cidr: String, pools: String) : Boolean {
-    val subnet = getSubnetRange(cidr)
-    val ranges = poolsToRanges(pools)
+    val subnet = getSubnetRange(cidr.trim())
+    val ranges = poolsToRanges(pools.trimMultiline())
     if (ranges.isEmpty()) return false
     return ranges.all { it.isValidInSubnet(subnet, ranges) }
 }
+
+fun String.trimMultiline(): String =
+    splitMultiline().joinToString( "\n" )
+
+fun String.splitMultiline(): List<String> =
+    split('\n').map { it.trim() }.filter { it.isNotBlank() }

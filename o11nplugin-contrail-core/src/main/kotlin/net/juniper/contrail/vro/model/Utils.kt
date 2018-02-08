@@ -36,12 +36,18 @@ class Utils {
         NetAddressValidator.IPv4.isValidSubnet(input)
 
     fun isValidPool(input: String): Boolean =
+        NetAddressValidator.areValidPools(input)
+
+    fun isValidIpv4Pool(input: String): Boolean =
         NetAddressValidator.IPv4.areValidPools(input)
 
+    fun isValidIpv6Pool(input: String): Boolean =
+        NetAddressValidator.IPv6.areValidPools(input)
+
     fun isValidAllocationPool(cidr: String, pools: String): Boolean {
-        if (isValidIpv4Cidr(cidr) && NetAddressValidator.IPv4.areValidPools(pools)) {
+        if (isValidIpv4Cidr(cidr) && isValidIpv4Pool(pools)) {
             return parseIpv4Pools(cidr, pools)
-        } else if (isValidIpv6Cidr(cidr) && NetAddressValidator.IPv6.areValidPools(pools)) {
+        } else if (isValidIpv6Cidr(cidr) && isValidIpv6Pool(pools)) {
             //TODO Include IPv6 support
             return false
         }
@@ -49,12 +55,21 @@ class Utils {
     }
 
     //TODO Include IPv6 support
-    fun isInCidr(cidr: String, address: String): Boolean =
-        address.ipToInt().ip() in getSubnetRange(cidr)
+    fun isInCidr(cidr: String, address: String): Boolean {
+        if (isValidIpv4Address(address) && isValidIpv4Cidr(cidr)) {
+            return Ip(address) in getSubnetRange(cidr)
+        }
+        return false
+    }
 
     fun isFree(cidr: String, address: String, pools: String?, dnsAddr: String?): Boolean {
-        val ip = address.ipToInt().ip()
-        return (ip in getSubnetRange(cidr)) && pools.ipNotInPools(ip) && !dnsAddr.equalsIp(ip)
+        if (isValidIpv4Cidr(cidr) && isValidIpv4Address(address)) {
+            if (pools != null && !isValidIpv4Pool(pools)) return false
+            if (dnsAddr != null && !isValidIpv4Address(dnsAddr)) return false
+            val ip = Ip(address)
+            return (ip in getSubnetRange(cidr)) && pools.ipNotInPools(ip) && !dnsAddr.equalsIp(ip)
+        }
+        return false
     }
 
     fun getVnSubnet(network: VirtualNetwork, ipam: NetworkIpam): VnSubnetsType =
@@ -183,9 +198,6 @@ class Utils {
     fun lowercase(s: String) =
         s.toLowerCase()
 
-    fun trimMultiline(s: String): String =
-        splitMultiline(s).joinToString( "\n" )
-
     fun splitMultiline(s: String): List<String> =
-        s.split('\n').map { it.trim() }.filter { it.isNotBlank() }
+        s.splitMultiline()
 }

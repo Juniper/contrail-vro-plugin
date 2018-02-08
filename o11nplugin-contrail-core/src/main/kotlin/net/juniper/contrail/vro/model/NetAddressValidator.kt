@@ -9,12 +9,12 @@ import org.apache.commons.validator.routines.InetAddressValidator
 enum class NetAddressValidator(val maxPrefixLength: Int) {
     IPv4(30) {
         override fun isValidAddress(address: String) =
-            validator.isValidInet4Address(address)
+            validator.isValidInet4Address(address.trim())
 
     },
     IPv6(126) {
         override fun isValidAddress(address: String) =
-            validator.isValidInet6Address(address)
+            validator.isValidInet6Address(address.trim())
     };
 
     protected val validator get() =
@@ -23,7 +23,7 @@ enum class NetAddressValidator(val maxPrefixLength: Int) {
     abstract fun isValidAddress(address: String): Boolean
 
     fun isValidSubnet(subnet: String): Boolean {
-        val parts = subnet.split('/')
+        val parts = subnet.trim().split('/')
         if (parts.size != 2) return false
         val prefixLen = parts[1].toIntOrNull() ?: return false
         if (prefixLen < 0 || prefixLen > maxPrefixLength) return false
@@ -31,7 +31,7 @@ enum class NetAddressValidator(val maxPrefixLength: Int) {
     }
 
     fun areValidPools(pools: String): Boolean {
-        val lines = pools.split('\n')
+        val lines = pools.splitMultiline()
         if (lines.isEmpty()) return false
         return lines.all { isValidPool(it) }
     }
@@ -40,7 +40,7 @@ enum class NetAddressValidator(val maxPrefixLength: Int) {
         private val values = values()
 
         fun isValidPool(pool: String): Boolean {
-            val parts = pool.split('-')
+            val parts = pool.trim().split('-')
             if (parts.size != 2) return false
             return values.asSequence().filter { it.isValidAddress(parts[0]) && it.isValidAddress(parts[1]) }.any()
         }
@@ -52,8 +52,6 @@ enum class NetAddressValidator(val maxPrefixLength: Int) {
             values.asSequence().filter { it.isValidSubnet(subnet) }.any()
 
         fun areValidPools(pools: String) : Boolean {
-            val lines = pools.split('\n')
-            if (lines.isEmpty()) return false
             return values.asSequence().filter { it.areValidPools(pools) }.any()
         }
     }
