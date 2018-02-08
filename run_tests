@@ -39,6 +39,5 @@ else
     REPO_HOST="-Drepo.host=$1"
 fi
 
-cd plugin
 mvn clean 
 mvn install ${REPO_HOST}

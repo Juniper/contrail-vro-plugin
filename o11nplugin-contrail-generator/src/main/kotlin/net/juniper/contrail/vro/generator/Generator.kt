@@ -25,8 +25,7 @@ object Generator {
 
 fun generatePlugin(projectInfo: ProjectInfo) {
     val generatorRoot = Paths.get(projectInfo.generatorRoot)
-    val pluginRoot = generatorRoot.parent
-    val repositoryRoot = pluginRoot.parent
+    val repositoryRoot = generatorRoot.parent
 
     val objectClasses = objectClasses().filter(modelClassFilter)
     val propertyClasses = objectClasses.propertyClasses()
