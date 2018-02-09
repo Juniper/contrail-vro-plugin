@@ -91,7 +91,7 @@ $item = new Contrail$pluginName();
 $item.setName(name);
 ${references.addAllReferences}
 var $id = $parent.internalId;
-var $executor = ContrailConnectionManager.getExecutor($id.toString());
+var $executor = ContrailConnectionManager.executor($id.toString());
 $executor.create$pluginName($item${if (parentClazz == null) "" else ", $parent"});
 $item.internalId = id.with("$pluginName", item.uuid);
 """.trimIndent()

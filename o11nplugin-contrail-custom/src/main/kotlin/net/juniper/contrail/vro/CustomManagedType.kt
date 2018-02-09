@@ -20,28 +20,30 @@ import java.lang.reflect.Method
 
 class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
 
-    val refsFields: List<CustomRefsField> = delegate.modelClass.declaredFields
-        .asSequence()
-        .filter { it.name.endsWith("back_refs") }
-        .filter { it.backRefTypeName.isModelClassName }
-        .map { CustomRefsField.wrapField(it) }
-        .toList()
+    val refsFields: List<CustomRefsField> = delegate.modelClass?.run {
+        declaredFields
+            .asSequence()
+            .filter { it.name.endsWith("back_refs") }
+            .filter { it.backRefTypeName.isModelClassName }
+            .map { CustomRefsField.wrapField(it) }
+            .toList()
+    } ?: emptyList()
 
-    val propertyViews: List<CustomProperty> = delegate.modelClass.run {
+    val propertyViews: List<CustomProperty> = delegate.modelClass?.run {
         if (isApiObjectClass)
-            methods.asSequence()
-                .filter { it.name.startsWith("get") }
-                .filter { it.returnsApiPropertyOrList }
-                .filter { ! it.returnType.isInventoryProperty }
-                .map { it.toCustomProperty() }
-                .filter { ! it.propertyName.isHiddenProperty }
-                .toList()
+        methods.asSequence()
+            .filter { it.name.startsWith("get") }
+            .filter { it.returnsApiPropertyOrList }
+            .filter { ! it.returnType.isInventoryProperty }
+            .map { it.toCustomProperty() }
+            .filter { ! it.propertyName.isHiddenProperty }
+            .toList()
         else
-            emptyList()
-    }
+            null
+    } ?: emptyList()
 
     val isObjectClass get() =
-        delegate.modelClass.isApiObjectClass
+        delegate.modelClass?.isApiObjectClass ?: false
 
     private fun Method.toCustomProperty() =
         CustomProperty(returnTypeOrListType!!.simpleName, name)

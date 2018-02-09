@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.vro.config.constants.Configuration
 import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.item
+import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.workflows.dsl.inCategory
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
@@ -16,7 +17,7 @@ import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 
 internal fun createConnectionWorkflow() =
-    workflow("Create Contrail connection").withScript(createConnectionScriptBody) {
+    workflow("Create Contrail controller connection").withScript(createConnectionScriptBody) {
         step("Controller") {
             parameter("name", string) {
                 description = "Connection name"
@@ -24,11 +25,11 @@ internal fun createConnectionWorkflow() =
                 defaultValue = "Controller"
             }
             parameter("host", string) {
-                description = "Contrail host"
+                description = "Controller host"
                 mandatory = true
             }
             parameter("port", number) {
-                description = "Contrail port"
+                description = "Controller port"
                 mandatory = true
                 defaultValue = 8082
                 min = 0
@@ -51,10 +52,16 @@ internal fun createConnectionWorkflow() =
                 description = "Tenant"
             }
         }
+
+        // Created connection is named 'parent' to simplify chaining
+        // with other workflows where it is used as a parent object.
+        output(parent, Connection.reference) {
+            description = "Connection to Contrail controller"
+        }
     }.inCategory(Configuration)
 
 internal fun deleteConnectionWorkflow() =
-    workflow("Delete ${Connection.toLowerCase()}").withScript(deleteConnectionScriptBody) {
+    workflow("Delete Contrail controller connection").withScript(deleteConnectionScriptBody) {
         parameter(item, Connection.reference) {
             description = "$Connection to delete"
             mandatory = true
@@ -63,8 +70,7 @@ internal fun deleteConnectionWorkflow() =
     }.inCategory(Configuration)
 
 private val createConnectionScriptBody = """
-var connectionId = ContrailConnectionManager.create(name, host, port, username, password, authServer, tenant);
-System.log("Created connection with ID: " + connectionId);
+$parent = ContrailConnectionManager.create(name, host, port, username, password, authServer, tenant);
 """.trimIndent()
 
 private val deleteConnectionScriptBody = """

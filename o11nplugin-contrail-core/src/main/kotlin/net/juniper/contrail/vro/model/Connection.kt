@@ -4,7 +4,6 @@
 
 package net.juniper.contrail.vro.model
 
-import com.vmware.o11n.sdk.modeldriven.Findable
 import com.vmware.o11n.sdk.modeldriven.Sid
 import net.juniper.contrail.api.ApiConnector
 import net.juniper.contrail.api.ApiObjectBase
@@ -15,14 +14,8 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 
 @Suppress("UNCHECKED_CAST")
-class Connection(public val info: ConnectionInfo, val connector: ApiConnector) : Findable {
+class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
     private val log: Logger = LoggerFactory.getLogger(Connection::class.java)
-
-    override fun getInternalId(): Sid =
-        info.sid
-
-    // ignored since id is fixed and provided by info
-    override fun setInternalId(id: Sid?) = Unit
 
     val name: String get() =
         info.name

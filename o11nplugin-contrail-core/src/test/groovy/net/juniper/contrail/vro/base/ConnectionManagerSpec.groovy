@@ -39,10 +39,32 @@ class ConnectionManagerSpec extends Specification {
         def dirtyName = " $nameWithDuplicatedSpaces "
 
         when:
-        def name = manager.create(dirtyName, info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
+        def newConnection = manager.create(dirtyName, info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
 
         then:
-        name == info.name
+        newConnection.name == info.name
+    }
+
+    def "Calling connection with existing id retrieves it from repository" () {
+        given:
+        repository.getConnection(info.sid) >> connection
+
+        when:
+        def retrieved = manager.connection(info.sid.toString())
+
+        then:
+        retrieved == connection
+    }
+
+    def "Calling connection with invalid id returns null" () {
+        given:
+        repository.getConnection(info.sid) >> connection
+
+        when:
+        def retrieved = manager.connection("invalid id")
+
+        then:
+        retrieved == null
     }
 
     def "Calling deleted removes connection from repository and notifies plugin" () {

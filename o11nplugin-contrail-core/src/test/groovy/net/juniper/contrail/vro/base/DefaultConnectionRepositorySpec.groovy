@@ -27,7 +27,7 @@ class DefaultConnectionRepositorySpec extends Specification {
     def "Repository returns null for unknown connection Id" () {
 
         when:
-        def returnedConnection = repository.getConnection(connection.getInternalId())
+        def returnedConnection = repository.getConnection(info.sid)
 
         then:
         returnedConnection == null
@@ -38,7 +38,7 @@ class DefaultConnectionRepositorySpec extends Specification {
         repository.addConnection(connection)
 
         when:
-        def returnedConnection = repository.getConnection(connection.getInternalId())
+        def returnedConnection = repository.getConnection(info.sid)
 
         then:
         returnedConnection == connection
@@ -88,7 +88,7 @@ class DefaultConnectionRepositorySpec extends Specification {
         repository.removeConnection(connection)
 
         and:
-        def returnedConnection = repository.getConnection(connection.getInternalId())
+        def returnedConnection = repository.getConnection(info.sid)
 
         then:
         returnedConnection == null

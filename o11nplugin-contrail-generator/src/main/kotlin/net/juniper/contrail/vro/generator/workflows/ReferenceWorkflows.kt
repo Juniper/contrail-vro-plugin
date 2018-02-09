@@ -6,15 +6,16 @@ package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.constants.item
-import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.parameterName
+import net.juniper.contrail.vro.config.parentConnection
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
-import net.juniper.contrail.vro.workflows.model.Action
+import net.juniper.contrail.vro.workflows.model.ActionCall
 import net.juniper.contrail.vro.workflows.model.WhenNonNull
+import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.relationDescription
@@ -23,18 +24,21 @@ fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDef
 
     val parentName = relation.parentPluginName
     val childName = relation.childPluginName
+    val childReferenceName = relation.child
     val workflowName = "Add ${childName.allLowerCase} to ${parentName.allLowerCase}"
     val scriptBody = relation.addReferenceRelationScriptBody()
 
     return workflow(workflowName).withScript(scriptBody) {
         parameter(item, parentName.reference) {
-            description = "${parentName.allCapitalized} to add to"
+            description = "${parentName.allCapitalized} to add ${childName.allCapitalized} to"
             mandatory = true
+            browserRoot = ActionCall(parentConnection, childReferenceName).asBrowserRoot()
         }
 
-        parameter(relation.child, childName.reference) {
+        parameter(childReferenceName, childName.reference) {
             description = schema.descriptionInCreateRelationWorkflow(relation.parentClass, relation.childClass)
             mandatory = true
+            browserRoot = ActionCall(parentConnection, item).asBrowserRoot()
         }
 
         if ( ! relation.simpleReference) {
@@ -43,7 +47,7 @@ fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDef
     }
 }
 
-fun removeReferenceWorkflow(relation: ForwardRelation, action: Action): WorkflowDefinition {
+fun removeReferenceWorkflow(relation: ForwardRelation): WorkflowDefinition {
 
     val parentName = relation.parentPluginName
     val childName = relation.childPluginName
@@ -52,14 +56,15 @@ fun removeReferenceWorkflow(relation: ForwardRelation, action: Action): Workflow
 
     return workflow(workflowName).withScript(scriptBody) {
         parameter(item, parentName.reference) {
-            description = "${parentName.allCapitalized} to remove from"
+            description = "${parentName.allCapitalized} to remove ${childName.allCapitalized} from"
             mandatory = true
         }
         parameter(relation.child, childName.reference) {
             description = "${childName.allCapitalized} to be removed"
             mandatory = true
-            visibility = WhenNonNull(parent)
-            listedBy(action)
+            visibility = WhenNonNull(item)
+            browserRoot = item.asBrowserRoot()
+            listedBy = ActionCall(relation.getReferencesActionName, item)
         }
     }
 }
@@ -83,7 +88,7 @@ $retrieveExecutorAndUpdateItem
 """
 
 private val ForwardRelation.child get() =
-    childClass.parameterName
+    childClass.pluginName.parameterName
 
 private fun ForwardRelation.addSimpleReferenceRelationScriptBody() = """
 $item.add$childPluginName($child);

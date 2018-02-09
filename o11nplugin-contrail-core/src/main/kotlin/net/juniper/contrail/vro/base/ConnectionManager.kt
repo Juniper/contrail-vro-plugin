@@ -26,19 +26,19 @@ class ConnectionManager
     }
 
     init {
-        log.info("ConnectionInfoManager created.")
+        log.info("ConnectionManager created.")
     }
 
     private fun String.clean() =
         trim().replace(blankPattern, " ")
 
-    fun create(name: String, host: String, port: Int, user: String?, password: String?, authServer: String?, tenant: String?): String {
-        val info = ConnectionInfo(name.clean(), host, port, user, password, authServer, tenant)
+    fun create(name: String, host: String, port: Int, user: String?, password: String?, authServer: String?, tenant: String?): Connection {
+        val info = ConnectionInfo(name.clean(), host, port, user?.trim(), password, authServer?.trim(), tenant?.trim())
         val connector = connectorFactory.create(info)
         val connection = Connection(info, connector)
         repository.addConnection(connection)
         notifier.notifyElementsInvalidate()
-        return connection.name
+        return connection
     }
 
     fun delete(connection: Connection) {
@@ -46,9 +46,12 @@ class ConnectionManager
         notifier.notifyElementsInvalidate()
     }
 
-    fun getExecutor(id: String?): Executor? {
-        val sid = Sid.valueOf(id ?: return null)
-        val connection = repository.getConnection(sid) ?: return null
-        return Executor(connection)
+    fun connection(id: String?): Connection? {
+        if (id == null) return null
+        return repository.getConnection(Sid.valueOf(id))
+    }
+
+    fun executor(id: String?): Executor? {
+        return Executor(connection(id) ?: return null)
     }
 }

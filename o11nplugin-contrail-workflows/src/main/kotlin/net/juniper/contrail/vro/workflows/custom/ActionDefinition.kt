@@ -23,16 +23,25 @@ internal fun cidrValidationAction(version: String, packageName: String): Action 
     val resultType = string
     val parameters = listOf("input" ofType string)
     return Action(
-            name = name,
-            packageName = packageName,
-            id = generateID(packageName, name),
-            version = version,
-            resultType = resultType,
-            parameters = parameters,
-            script = Script(ScriptLoader.load(name))
+        name = name,
+        packageName = packageName,
+        id = generateID(packageName, name),
+        version = version,
+        resultType = resultType,
+        parameters = parameters,
+        script = Script(ScriptLoader.load(name))
     )
 }
 
+/** extractListProperty
+ *
+ * Action retrieves nested property that is located inside a list
+ *
+ * @param parentItem : Any - any inventory object
+ * @param childItem : String - a human-readable representation of the object with it's index at the beginning
+ * @param listAccessor: String - path to the list property
+ * @param propertyPath: String - path to the final property
+ */
 internal fun extractListPropertyAction(version: String, packageName: String): Action {
     val name = extractListProperty
     val resultType = any
@@ -52,18 +61,25 @@ internal fun extractListPropertyAction(version: String, packageName: String): Ac
     )
 }
 
+/**
+ * getNetworkPolicyRules
+ *
+ * Action retrieves string representation o network policy rules
+ *
+ * @param netpolicy : Any - reference to network policy or security group
+ */
 internal fun getNetworkPolicyRulesAction(version: String, packageName: String): Action {
     val name = getNetworkPolicyRules
     val resultType = array(string)
     val parameters = listOf("netpolicy" ofType any)
     return Action(
-            name = name,
-            packageName = packageName,
-            id = generateID(packageName, name),
-            version = version,
-            resultType = resultType,
-            parameters = parameters,
-            script = Script(ScriptLoader.load(name))
+        name = name,
+        packageName = packageName,
+        id = generateID(packageName, name),
+        version = version,
+        resultType = resultType,
+        parameters = parameters,
+        script = Script(ScriptLoader.load(name))
     )
 }
 
@@ -72,13 +88,13 @@ internal fun allocValidationAction(version: String, packageName: String): Action
     val resultType = string
     val parameters = listOf("cidr" ofType string, "pools" ofType string)
     return Action(
-            name = name,
-            packageName = packageName,
-            id = generateID(packageName, name),
-            version = version,
-            resultType = resultType,
-            parameters = parameters,
-            script = Script(ScriptLoader.load(name))
+        name = name,
+        packageName = packageName,
+        id = generateID(packageName, name),
+        version = version,
+        resultType = resultType,
+        parameters = parameters,
+        script = Script(ScriptLoader.load(name))
     )
 }
 
@@ -87,13 +103,13 @@ internal fun inCidrValidationAction(version: String, packageName: String): Actio
     val resultType = string
     val parameters = listOf("cidr" ofType string, "ip" ofType string)
     return Action(
-            name = name,
-            packageName = packageName,
-            id = generateID(packageName, name),
-            version = version,
-            resultType = resultType,
-            parameters = parameters,
-            script = Script(ScriptLoader.load(name))
+        name = name,
+        packageName = packageName,
+        id = generateID(packageName, name),
+        version = version,
+        resultType = resultType,
+        parameters = parameters,
+        script = Script(ScriptLoader.load(name))
     )
 }
 
@@ -102,12 +118,12 @@ internal fun isFreeValidationAction(version: String, packageName: String): Actio
     val resultType = string
     val parameters = listOf("cidr" ofType string, "ip" ofType string, "pools" ofType string, "dns" ofType string)
     return Action(
-            name = name,
-            packageName = packageName,
-            id = generateID(packageName, name),
-            version = version,
-            resultType = resultType,
-            parameters = parameters,
-            script = Script(ScriptLoader.load(name))
+        name = name,
+        packageName = packageName,
+        id = generateID(packageName, name),
+        version = version,
+        resultType = resultType,
+        parameters = parameters,
+        script = Script(ScriptLoader.load(name))
     )
 }

@@ -14,5 +14,5 @@ ruule.srcPorts = ContrailUtils.parsePorts(srcPorts);
 ruule.dstPorts = ContrailUtils.parsePorts(dstPorts);
 ruule.actions = new ContrailActionListType(simpleAction, null, null, null, null, null, log, null, qosName);
 
-var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
+var executor = ContrailConnectionManager.executor(parent.internalId.toString());
 executor.updateNetworkPolicy(parent);

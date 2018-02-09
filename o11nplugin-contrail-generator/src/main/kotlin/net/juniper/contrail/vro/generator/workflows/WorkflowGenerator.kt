@@ -63,10 +63,9 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, re
     generateLifecycleWorkflows(info, clazz, null, refs, schema)
 
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation, schema: Schema) {
-    val action = relation.findReferencesAction(info.workflowVersion, info.workflowPackage)
-    action.save(info)
+    relation.findReferencesAction(info.workflowVersion, info.workflowPackage).save(info)
     addReferenceWorkflow(relation, schema).save(info, relation.parentClass)
-    removeReferenceWorkflow(relation, action).save(info, relation.parentClass)
+    removeReferenceWorkflow(relation).save(info, relation.parentClass)
 }
 
 private fun createCustomWorkflows(info: ProjectInfo, schema: Schema) {

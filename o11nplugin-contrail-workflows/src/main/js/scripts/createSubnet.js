@@ -1,4 +1,4 @@
-var executor = ContrailConnectionManager.getExecutor(parent.getInternalId().toString());
+var executor = ContrailConnectionManager.executor(parent.internalId.toString());
 var ip_prefix = ContrailUtils.parseSubnetIP(subnet.trim());
 var ip_prefix_len = ContrailUtils.parseSubnetPrefix(subnet.trim());
 var subnet_name = ContrailUtils.randomUUID();

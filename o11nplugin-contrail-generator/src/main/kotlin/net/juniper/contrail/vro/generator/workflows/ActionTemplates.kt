@@ -23,11 +23,11 @@ val ForwardRelation.getReferencesActionName get() =
 val ForwardRelation.getReferencesActionScript
     get() =
 """
-var parentId = parent.getInternalId();
-var executor = ContrailConnectionManager.getExecutor(parentId.toString());
+var parentId = parent.internalId;
+var executor = ContrailConnectionManager.executor(parentId.toString());
 var elements = executor.$getReferencesActionName(parent);
 for each (e in elements) {
-    e.setInternalId(parentId.with("$childName", e.getUuid()));
+    e.internalId = parentId.with("$childName", e.uuid);
 }
 return elements;
 """.trimIndent()

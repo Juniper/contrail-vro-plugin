@@ -19,8 +19,8 @@ var actions = new ContrailActionListType(simpleAction, null, null, null, null, n
 
 var rule = new ContrailPolicyRuleType(ruleSequence, ruleUuid, direction, ContrailUtils.lowercase(protocol), srcAddr, parsedSrcPorts, application, dstAddr, parsedDstPorts, actions);
 
-var id = parent.getInternalId().toString();
-var executor = ContrailConnectionManager.getExecutor(id);
+var id = parent.internalId;
+var executor = ContrailConnectionManager.executor(id.toString());
 
 parent.getEntries().addPolicyRule(rule);
 

@@ -39,11 +39,11 @@ class SpringConfig {
     @Bean
     fun defaultModelClassResolver() = DefaultModelClassResolver()
 
-    @Bean(name = arrayOf("pluginFactory"))
+    @Bean(name = ["pluginFactory"])
     @Scope("prototype")
     fun contrailPluginFactory() = ContrailPluginFactory()
 
-    @Bean(name = arrayOf("pluginAdaptor"))
+    @Bean(name = ["pluginAdaptor"])
     fun contrailPluginAdaptor() = ContrailPluginAdaptor()
 
     @Bean

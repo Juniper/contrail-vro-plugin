@@ -30,7 +30,7 @@ private fun <T : ApiObjectBase> ConnectionRepository.query(clazz: Class<T>, quer
 private fun <T : ApiObjectBase> Connection.query(clazz: Class<T>, query: String, key: String): List<FoundObject<T>>? =
     list(clazz)?.asSequence()
         ?.filter { query.isBlank() || it.name.startsWith(query) }
-        ?.map { FoundObject(it, internalId.with(key, it.uuid)) }
+        ?.map { FoundObject(it, info.sid.with(key, it.uuid)) }
         ?.toList()
 
 <#list classes as klass>

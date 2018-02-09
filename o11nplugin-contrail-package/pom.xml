@@ -49,7 +49,7 @@
         <version>${vco.version}</version>
         <extensions>true</extensions>
         <configuration>
-          <packageName>${workflows.packageName}</packageName>
+          <packageName>${workflow.package}</packageName>
           <!-- Set the local path to the *.vmokeystore file used to sign the content -->
           <keystoreLocation>${keystoreLocation}</keystoreLocation>
           <keystorePassword>${keystorePassword}</keystorePassword>
@@ -64,7 +64,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
         <configuration>
           <filesets>
             <fileset>

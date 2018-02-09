@@ -143,7 +143,6 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
     var predefinedAnswers: List<Type>? = null
     var predefinedAnswersAction: ActionCall? = null
     val additionalQualifiers = mutableListOf<ParameterQualifier>()
-    private var listedBy: Action? = null
 
     val parameterInfo get() = ParameterInfo(
         name = parameterName,
@@ -151,10 +150,6 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
         description = description,
         qualifiers = allQualifiers
     )
-
-    fun listedBy(action: Action) {
-        listedBy = action
-    }
 
     private val allQualifiers get(): List<ParameterQualifier> =
         basicQualifiers + commonQualifiers + customQualifiers + additionalQualifiers
@@ -173,9 +168,6 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
         }
         predefinedAnswersAction?.let {
             add(predefinedAnswersActionQualifier(type, it))
-        }
-        listedBy?.let {
-            add(listFromAction(it))
         }
     }
 
@@ -234,11 +226,16 @@ class DateParameterBuilder(name: String) : BasicParameterBuilder<Date>(name, dat
 class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterBuilder<Reference>(name, type) {
 
     var showInInventory: Boolean = false
+    var listedBy: ActionCall? = null
+    var browserRoot: InventoryBrowserRoot = DefaultBrowserRoot
 
     override val customQualifiers get(): List<ParameterQualifier> {
         val qualifiers = mutableListOf<ParameterQualifier>()
-        qualifiers.add(selectAsTreeQualifier)
         if (showInInventory) qualifiers.add(showInInventoryQualifier)
+        listedBy?.let {
+            qualifiers.add(listFromAction(it, type))
+        }
+        browserRoot.ognl?.let { qualifiers.add(displayParentFrom(it)) }
         return qualifiers
     }
 }

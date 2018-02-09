@@ -15,11 +15,11 @@ class ConnectionFinder
 @Autowired constructor(private val connectionRepository: ConnectionRepository) : ObjectFinder<Connection>
 {
     override fun assignId(connection: Connection, relatedObject: Sid?): Sid =
-        connection.internalId
+        connection.info.sid
 
     override fun find(ctx: PluginContext, type: String, id: Sid): Connection? =
         connectionRepository.getConnection(id)
 
     override fun query(ctx: PluginContext, type: String, query: String): List<FoundObject<Connection>> =
-        connectionRepository.findConnections(query).map { FoundObject<Connection>(it) }
+        connectionRepository.findConnections(query).map { FoundObject<Connection>(it, it.info.sid) }
 }

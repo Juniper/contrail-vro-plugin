@@ -266,10 +266,10 @@ fun List<Property>.prepare(prefix: String) =
     joinToString(separator = "") { it.propertyCode(prefix) }
 
 val String.retrieveExecutor get() =
-    "var $executor = ContrailConnectionManager.getExecutor($this.getInternalId().toString());"
+    "var $executor = ContrailConnectionManager.executor($this.internalId.toString());"
 
 val retrieveExecutorFromItem get() =
-    "var $executor = ContrailConnectionManager.getExecutor($item.internalId.toString());"
+    item.retrieveExecutor
 
 fun String.updateAsClass(className: String) =
     "$executor.update$className($this);"

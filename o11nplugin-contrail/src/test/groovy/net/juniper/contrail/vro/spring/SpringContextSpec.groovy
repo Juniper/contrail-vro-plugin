@@ -74,7 +74,7 @@ class SpringContextSpec extends Specification {
     def "Calling create inserts connection into repository"() {
         when:
         def old_size = repository.connections.size()
-        def name = manager.create(info.name, info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
+        def newConnection = manager.create(info.name, info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
 
         then:
         old_size + 1 == repository.connections.size()

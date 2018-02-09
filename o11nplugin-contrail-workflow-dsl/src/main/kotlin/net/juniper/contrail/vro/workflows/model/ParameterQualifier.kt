@@ -93,10 +93,12 @@ fun minNumberValueQualifier(value: Long) = staticQualifier(minNumberValueQualifi
 fun maxNumberValueQualifier(value: Long) = staticQualifier(maxNumberValueQualifierName, number, value)
 fun visibilityConditionQualifier(condition: VisibilityCondition) =
     ognlQualifier(visibleQualifierName, boolean, condition.stringCondition)
-fun listFromAction(action: Action) =
-    ognlQualifier(linkedEnumerationQualifierName, action.resultType, action.ognl)
-fun childOf(parent: String) =
+fun <T : Any> listFromAction(action: ActionCall, type: ParameterType<T>) =
+    ognlQualifier(linkedEnumerationQualifierName, type, action.ognl)
+fun displayAsChildOf(parent: String) =
     ognlQualifier(sdkRootObjectQualifierName, any, "#$parent")
+fun displayParentFrom(ognl: String) =
+    ognlQualifier(sdkRootObjectQualifierName, any, ognl)
 fun bindDataTo(parameter: String, type: ParameterType<Any>) =
     ognlQualifier(dataBindingQualifierName, type, "#$parameter")
 fun bindValueToNullableState(item: String, propertyPath: String) =
@@ -109,7 +111,7 @@ fun <T : Any> bindValueToListProperty(parentItem: String, childItem: String, lis
     ognlQualifier(dataBindingQualifierName, type, actionOgnl(
         packageName = actionPackage,
         name = extractListProperty,
-        parameter = *arrayOf("#$parentItem", "#$childItem", "\"$listAccessor\"", "\"$propertyPath\"")
+        parameters = *arrayOf("#$parentItem", "#$childItem", "\"$listAccessor\"", "\"$propertyPath\"")
     ))
 fun <T : Any> bindValueToAction(actionName: String, type: ParameterType<T>, vararg parameters: String) =
     ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, actionName, *parameters))
@@ -123,18 +125,11 @@ fun inCidrValidatorQualifier(parameter: String, cidr: String, actionName: String
 fun freeInCidrValidatorQualifier(parameter: String, cidr: String, pools: String, dns: String, actionName: String) =
     validatorActionQualifier(actionPackage, actionName, "#$cidr", "#$parameter", "#$pools", "#$dns")
 
-private val extractPropertyAction = "getPropertyValue"
-
-private fun actionOgnl(packageName: String, name: String, vararg parameter: String) =
-    """GetAction("$packageName","$name").call(${parameter.joinToString(", ")})"""
+private fun actionOgnl(packageName: String, name: String, vararg parameters: String) =
+    """GetAction("$packageName","$name").call(${parameters.joinToString(", "){"#$it"}})"""
 
 val ActionCall.ognl get() =
     actionOgnl(actionPackage, name, *arguments)
-
-private val Action.ognl get() =
-    """GetAction("$packageName","$name").call($call)"""
-private val Action.call get() =
-    parameters.joinToString(",") { "#${it.name}" }
 
 private fun <T : Any> staticQualifier(name: String, type: ParameterType<T>, value: T) =
     ParameterQualifier(static, name, type.name, value.toString())
