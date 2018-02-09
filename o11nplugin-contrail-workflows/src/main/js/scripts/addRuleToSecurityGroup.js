@@ -24,11 +24,14 @@ if (direction == "ingress") {
     srcPorts = localPorts;
 }
 
-var rule = new ContrailPolicyRuleType(ruleSequence, ruleUuid, direction, ContrailUtils.lowercase(protocol), srcAddr, srcPorts, null, dstAddr, dstPorts, null, ethertype);
+var rule = new ContrailPolicyRuleType(null, ruleUuid, trafficDirection, ContrailUtils.lowercase(protocol), srcAddr, srcPorts, null, dstAddr, dstPorts, null, ethertype);
+var rules = parent.getEntries();
+if (!rules) {
+    rules = new ContrailPolicyEntriesType();
+    parent.setEntries(rules);
+}
+rules.addPolicyRule(rule);
 
-var id = parent.getInternalId().toString();
-var executor = ContrailConnectionManager.getExecutor(id);
-
-parent.getEntries().addPolicyRule(rule);
-
+var id = parent.internalId;
+var executor = ContrailConnectionManager.executor(id.toString());
 executor.updateSecurityGroup(parent);

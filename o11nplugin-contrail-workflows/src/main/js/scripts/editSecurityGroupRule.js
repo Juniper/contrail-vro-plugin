@@ -29,6 +29,6 @@ if (direction == "ingress") {
 ruule.protocol = protocol;
 ruule.ethertype = ethertype;
 
-var id = parent.getInternalId().toString();
-var executor = ContrailConnectionManager.getExecutor(id);
+var id = parent.internalId;
+var executor = ContrailConnectionManager.getExecutor(id.toString());
 executor.updateSecurityGroup(parent);

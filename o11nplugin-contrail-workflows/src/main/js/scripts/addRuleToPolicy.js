@@ -13,15 +13,21 @@ var dstAddr = [ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAd
 
 var application = [];
 
-var qosName = qos.getQualifiedName().join(":")
+var qosName = null;
+if (qos) {
+    qosName = qos.getQualifiedName().join(":");
+}
 
 var actions = new ContrailActionListType(simpleAction, null, null, null, null, null, log, null, qosName);
 
 var rule = new ContrailPolicyRuleType(ruleSequence, ruleUuid, direction, ContrailUtils.lowercase(protocol), srcAddr, parsedSrcPorts, application, dstAddr, parsedDstPorts, actions);
+var rules = parent.getEntries();
+if (!rules) {
+    rules = new ContrailPolicyEntriesType();
+    parent.setEntries(rules);
+}
+rules.addPolicyRule(rule);
 
 var id = parent.internalId;
 var executor = ContrailConnectionManager.executor(id.toString());
-
-parent.getEntries().addPolicyRule(rule);
-
 executor.updateNetworkPolicy(parent);
