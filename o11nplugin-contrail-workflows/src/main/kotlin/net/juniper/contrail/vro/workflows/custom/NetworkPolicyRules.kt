@@ -21,6 +21,7 @@ import net.juniper.contrail.vro.workflows.model.ConditionConjunction
 import net.juniper.contrail.vro.workflows.model.FromBooleanParameter
 import net.juniper.contrail.vro.workflows.model.FromListPropertyValue
 import net.juniper.contrail.vro.workflows.model.FromStringParameter
+import net.juniper.contrail.vro.workflows.model.MultiAddressNetworkPolicyRule
 import net.juniper.contrail.vro.workflows.model.WhenNonNull
 import net.juniper.contrail.vro.workflows.model.actionCallTo
 import net.juniper.contrail.vro.workflows.model.array
@@ -278,9 +279,10 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
             }
             parameter("rule", string) {
-                visibility = WhenNonNull("parent")
+                visibility = WhenNonNull(parent)
                 description = "Rule to edit"
                 predefinedAnswersAction = actionCallTo(getNetworkPolicyRules).parameter(parent).create()
+                customValidation = MultiAddressNetworkPolicyRule(parent)
             }
         }
         step("Basic Attributes") {

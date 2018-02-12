@@ -227,6 +227,8 @@ class StringParameterBuilder(name: String) : BasicParameterBuilder<String>(name,
                 is InCIDR -> qualifiers.add(inCidrValidatorQualifier(parameterName, it.cidr, it.actionName))
                 is FreeInCIDR -> qualifiers.add(freeInCidrValidatorQualifier(parameterName, it.cidr, it.pools,
                         it.dns, it.actionName))
+                is MultiAddressNetworkPolicyRule -> qualifiers.add(multiAddressValidationQualifier(parameterName, it.policyFieldName, it.actionName))
+                is MultiAddressSecurityGroupRule -> qualifiers.add(multiAddressValidationQualifier(parameterName, it.securityGroupFieldName, it.actionName))
             }
         }
         if (multiline) {

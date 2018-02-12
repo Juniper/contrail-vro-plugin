@@ -17,4 +17,6 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += allocValidationAction(version, packageName)
     this += inCidrValidationAction(version, packageName)
     this += isFreeValidationAction(version, packageName)
+    this += isMultiAddressNetworkPolicyRuleAction(version, packageName)
+    this += isMultiAddressSecurityGroupRuleAction(version, packageName)
 }

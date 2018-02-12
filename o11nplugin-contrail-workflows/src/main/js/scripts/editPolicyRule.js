@@ -11,7 +11,9 @@ if (qos) {
 
 theRule.protocol = protocol;
 theRule.direction = direction;
+theRule.clearSrcAddresses();
 theRule.addSrcAddresses(ContrailUtils.createAddress(srcAddressType, srcAddressCidr, srcAddressNetwork, srcAddressPolicy));
+theRule.clearDstAddresses();
 theRule.addDstAddresses(ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAddressNetwork, dstAddressPolicy));
 theRule.clearSrcPorts();
 ContrailUtils.parsePorts(srcPorts).forEach(function(port) {

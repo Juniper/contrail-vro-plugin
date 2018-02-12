@@ -5,6 +5,8 @@
 package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.vro.config.getNetworkPolicyRules
+import net.juniper.contrail.vro.config.isMultiAddressNetworkPolicyRuleAction
+import net.juniper.contrail.vro.config.isMultiAddressSecurityGroupRuleAction
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.any
@@ -24,6 +26,36 @@ internal fun getNetworkPolicyRulesAction(version: String, packageName: String): 
     val name = getNetworkPolicyRules
     val resultType = array(string)
     val parameters = listOf("netpolicy" ofType any)
+    return Action(
+        name = name,
+        packageName = packageName,
+        id = generateID(packageName, name),
+        version = version,
+        resultType = resultType,
+        parameters = parameters,
+        script = Script(ScriptLoader.load(name))
+    )
+}
+
+internal fun isMultiAddressNetworkPolicyRuleAction(version: String, packageName: String): Action {
+    val name = isMultiAddressNetworkPolicyRuleAction
+    val resultType = string
+    val parameters = listOf("input" ofType string, "npolicy" ofType any)
+    return Action(
+        name = name,
+        packageName = packageName,
+        id = generateID(packageName, name),
+        version = version,
+        resultType = resultType,
+        parameters = parameters,
+        script = Script(ScriptLoader.load(name))
+    )
+}
+
+internal fun isMultiAddressSecurityGroupRuleAction(version: String, packageName: String): Action {
+    val name = isMultiAddressSecurityGroupRuleAction
+    val resultType = string
+    val parameters = listOf("input" ofType string, "sg" ofType any)
     return Action(
         name = name,
         packageName = packageName,

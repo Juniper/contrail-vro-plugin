@@ -116,6 +116,8 @@ fun <T : Any> bindValueToListProperty(parentItem: String, childItem: String, lis
 fun <T : Any> bindValueToAction(actionName: String, type: ParameterType<T>, vararg parameters: String) =
     ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, actionName, *parameters))
 
+fun multiAddressValidationQualifier(parameter: String, policyFieldName: String, actionName: String) =
+    validatorActionQualifier(actionPackage, actionName, "#$parameter", "#$policyFieldName")
 fun cidrValidatorQualifier(parameter: String, actionName: String) =
     validatorActionQualifier(actionPackage, actionName, "#$parameter")
 fun allocValidatorQualifier(parameter: String, cidr: String, actionName: String) =

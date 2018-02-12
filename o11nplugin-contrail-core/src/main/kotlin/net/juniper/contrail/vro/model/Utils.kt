@@ -216,9 +216,14 @@ class Utils {
                 "${rule.direction} ${PropertyFormatter.format(rule.dstAddresses[0])} ports ${rule.dstPorts.joinToString(", "){PropertyFormatter.format(it)}}"
     }
 
-    fun stringToRule(ruleString: String, policy: NetworkPolicy): PolicyRuleType {
+    fun stringToRuleFromNetworkPolicy(ruleString: String, policy: NetworkPolicy): PolicyRuleType {
         val index = ruleString.split(":")[0].toInt()
         return policy.entries.policyRule[index]
+    }
+
+    fun stringToRuleFromSecurityGroup(ruleString: String, group: SecurityGroup): PolicyRuleType {
+        val index = ruleString.split(":")[0].toInt()
+        return group.entries.policyRule[index]
     }
 
     fun ruleStringToIndex(ruleString: String): Int {
