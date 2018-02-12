@@ -12,9 +12,11 @@ import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.generator.model.properties
 import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isEditableProperty
-import net.juniper.contrail.vro.config.isPropertyOrStringListWrapper
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
+import net.juniper.contrail.vro.config.hasOnlyListOfStrings
+import net.juniper.contrail.vro.config.isPropertyListWrapper
+import net.juniper.contrail.vro.config.isStringListWrapper
 import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.splitCamel
@@ -31,11 +33,13 @@ import net.juniper.contrail.vro.workflows.model.FromComplexPropertyValue
 import net.juniper.contrail.vro.workflows.model.FromSimplePropertyValue
 import net.juniper.contrail.vro.workflows.model.NullStateOfProperty
 import net.juniper.contrail.vro.workflows.model.WhenNonNull
+import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.createDunesProperties
 import net.juniper.contrail.vro.workflows.model.createElementInfoProperties
 import net.juniper.contrail.vro.workflows.model.parameterType
 import net.juniper.contrail.vro.workflows.model.reference
+import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
 import net.juniper.contrail.vro.workflows.schema.simpleTypeQualifiers
@@ -105,23 +109,65 @@ Define $title
 ${schema.propertyDescription(parent, propertyName) ?: ""}
 """.trim()
 
+val Class<*>.maxDepth: Int get() =
+    properties.simpleProperties.onlyComplex
+        .map { it.clazz.maxDepth + 1 }
+        .max() ?: 0
+
+val Property.actualListProperty get() =
+    clazz.properties.properties[0]
+
 typealias PropertyBinding = (Property) -> DataBinding<Any>
 
-private val simpleBinding: PropertyBinding = { FromSimplePropertyValue(item, it.propertyName, it.clazz.parameterType) }
+private val Property.simpleBinding: PropertyBinding get() =
+    if (clazz.isStringListWrapper) {
+        { FromComplexPropertyValue(item, "${it.propertyName}.${it.actualListProperty.propertyName}", string.array) }
+    } else {
+        { FromSimplePropertyValue(item, it.propertyName, it.clazz.parameterType) }
+    }
+
 private val Property.childBinding: PropertyBinding get() =
-    { FromComplexPropertyValue(item, "$propertyName.${it.propertyName}", it.clazz.parameterType) }
+    if (clazz.isStringListWrapper) {
+        { FromComplexPropertyValue(item, "$propertyName.${it.propertyName}.${it.actualListProperty.propertyName}", string.array) }
+    } else {
+        { FromComplexPropertyValue(item, "$propertyName.${it.propertyName}", it.clazz.parameterType) }
+    }
+
 private fun Property.grandChildBinding(child: Property): PropertyBinding =
-    { FromComplexPropertyValue(item, "$propertyName.${child.propertyName}.${it.propertyName}", it.clazz.parameterType) }
+    if (clazz.isStringListWrapper) {
+        { FromComplexPropertyValue(item, "$propertyName.${child.propertyName}.${it.propertyName}.${it.actualListProperty.propertyName}", string.array) }
+    } else {
+        { FromComplexPropertyValue(item, "$propertyName.${child.propertyName}.${it.propertyName}", it.clazz.parameterType) }
+    }
 
 private fun Property.toParameter(builder: ParameterAggregator, schema: Schema, editMode: Boolean) =
     toParameter(builder, schema, editMode, simpleBinding)
 
-private fun Property.toParameter(builder: ParameterAggregator, schema: Schema, editMode: Boolean, binding: PropertyBinding) {
+private fun Property.toParameter(builder: ParameterAggregator, schema: Schema, editMode: Boolean, binding: PropertyBinding) =
+    if (clazz.isStringListWrapper)
+        toStringListWrapperParameter(builder, schema, editMode, binding)
+    else
+        toPrimitiveParameter(builder, schema, editMode, binding)
+
+private fun Property.toPrimitiveParameter(builder: ParameterAggregator, schema: Schema, editMode: Boolean, binding: PropertyBinding) {
     builder.parameter(propertyName, clazz) {
         description = description(schema)
         if (editMode)
-            dataBinding = binding(this@toParameter)
+            dataBinding = binding(this@toPrimitiveParameter)
         additionalQualifiers += schema.simpleTypeQualifiers(parent, propertyName)
+    }
+}
+
+private fun Property.toStringListWrapperParameter(builder: ParameterAggregator, schema: Schema, editMode: Boolean, binding: PropertyBinding) {
+    // This function should only be called for properties
+    // that are just wrappers for lists of Strings
+    val actualProperty = actualListProperty
+    assert(actualProperty.clazz == String::class.java)
+    builder.parameter(propertyName, string.array) {
+        description = description(schema)
+        if (editMode)
+            dataBinding = binding(this@toStringListWrapperParameter)
+        additionalQualifiers += schema.simpleTypeQualifiers(clazz, actualProperty.propertyName)
     }
 }
 
@@ -137,20 +183,28 @@ private fun List<Property>.advancedSwitch(builder: ParameterAggregator, schema: 
 
 private val workflowPropertiesFilter: (Property) -> Boolean =
     { it.declaringClass == it.parent &&
-        ! it.clazz.isPropertyOrStringListWrapper &&
+        ! it.clazz.isPropertyListWrapper &&
         ! it.clazz.ignoredInWorkflow &&
         it.propertyName.isEditableProperty }
 
+private val Sequence<Property>.onlyPrimitives get() =
+    filter(workflowPropertiesFilter)
+    .filter { it.clazz.hasOnlyListOfStrings || ! it.clazz.isApiTypeClass }
+
 private val List<Property>.onlyPrimitives get() =
-    filter { workflowPropertiesFilter(it) && ! it.clazz.isApiTypeClass }
+    asSequence().onlyPrimitives.toList()
+
+private val Sequence<Property>.onlyComplex get() =
+    filter(workflowPropertiesFilter)
+    .filter { it.clazz.isApiTypeClass && ! it.clazz.hasOnlyListOfStrings }
 
 private val List<Property>.onlyComplex get() =
-    filter { workflowPropertiesFilter(it) && it.clazz.isApiTypeClass }
+    asSequence().onlyComplex.toList()
 
 fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema: Schema, editMode: Boolean = false) {
     val properties = clazz.properties
     val topPrimitives = properties.simpleProperties.onlyPrimitives
-    val topComplex = properties.simpleProperties.onlyComplex
+    val topComplex = properties.simpleProperties.onlyComplex.filter { it.clazz.maxDepth < 2 }
 
     val stepVisibility = if (editMode) WhenNonNull(item) else AlwaysVisible
 
@@ -171,7 +225,7 @@ fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema: Schema,
     for (prop in topComplex) {
         val propProperties = prop.clazz.properties
         val primitives = propProperties.simpleProperties.onlyPrimitives
-        val complex = propProperties.simpleProperties.onlyComplex
+        val complex = propProperties.simpleProperties.onlyComplex.filter { it.clazz.maxDepth < 1 }
 
         when {
             primitives.isEmpty() && !complex.isEmpty() -> groups(prop.title) {
@@ -282,12 +336,6 @@ val ForwardRelation.updateParent get() =
 
 val ForwardRelation.updateItem get() =
     item.updateAsClass(parentClass.pluginName)
-
-val ForwardRelation.retrieveExecutorAndUpdateParent get() =
-"""
-${parent.retrieveExecutor}
-$updateParent
-""".trimIndent()
 
 val ForwardRelation.retrieveExecutorAndUpdateItem get() =
 """

@@ -13,15 +13,16 @@ import net.juniper.contrail.api.types.QosConfig
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualNetwork
+import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.getNetworkPolicyRules
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.model.ActionCall
 import net.juniper.contrail.vro.workflows.model.ConditionAlternative
 import net.juniper.contrail.vro.workflows.model.ConditionConjunction
 import net.juniper.contrail.vro.workflows.model.FromBooleanParameter
 import net.juniper.contrail.vro.workflows.model.FromListPropertyValue
 import net.juniper.contrail.vro.workflows.model.FromStringParameter
 import net.juniper.contrail.vro.workflows.model.WhenNonNull
+import net.juniper.contrail.vro.workflows.model.actionCallTo
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.number
@@ -273,17 +274,14 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
 
     return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("editPolicyRule") {
         step("Rule") {
-            parameter("parent", reference<NetworkPolicy>()) {
+            parameter(parent, reference<NetworkPolicy>()) {
                 extractRelationDescription<Project, NetworkPolicy>(schema)
                 mandatory = true
             }
             parameter("rule", string) {
                 visibility = WhenNonNull("parent")
                 description = "Rule to edit"
-                predefinedAnswersAction = ActionCall(
-                    getNetworkPolicyRules,
-                    "parent"
-                )
+                predefinedAnswersAction = actionCallTo(getNetworkPolicyRules).parameter(parent).create()
             }
         }
         step("Basic Attributes") {

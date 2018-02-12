@@ -13,9 +13,9 @@ import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
-import net.juniper.contrail.vro.workflows.model.ActionCall
 import net.juniper.contrail.vro.workflows.model.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
+import net.juniper.contrail.vro.workflows.model.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.relationDescription
@@ -32,13 +32,13 @@ fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDef
         parameter(item, parentName.reference) {
             description = "${parentName.allCapitalized} to add ${childName.allCapitalized} to"
             mandatory = true
-            browserRoot = ActionCall(parentConnection, childReferenceName).asBrowserRoot()
+            browserRoot = actionCallTo(parentConnection).parameter(childReferenceName).asBrowserRoot()
         }
 
         parameter(childReferenceName, childName.reference) {
             description = schema.descriptionInCreateRelationWorkflow(relation.parentClass, relation.childClass)
             mandatory = true
-            browserRoot = ActionCall(parentConnection, item).asBrowserRoot()
+            browserRoot = actionCallTo(parentConnection).parameter(item).asBrowserRoot()
         }
 
         if ( ! relation.simpleReference) {
@@ -64,7 +64,7 @@ fun removeReferenceWorkflow(relation: ForwardRelation): WorkflowDefinition {
             mandatory = true
             visibility = WhenNonNull(item)
             browserRoot = item.asBrowserRoot()
-            listedBy = ActionCall(relation.getReferencesActionName, item)
+            listedBy = actionCallTo(relation.getReferencesActionName).parameter(item).create()
         }
     }
 }

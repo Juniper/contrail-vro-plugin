@@ -11,6 +11,7 @@ import net.juniper.contrail.vro.config.constants.id
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.isApiTypeClass
+import net.juniper.contrail.vro.config.isStringListWrapper
 import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.generator.model.Property
@@ -119,13 +120,17 @@ fun Class<*>.editPropertiesCode(item: String, level: Int = 0) =
     workflowEditableProperties.joinToString("\n") { it.editCode(item, level) }
 
 fun Property.editCode(item: String, level: Int) = when {
+    ! clazz.isApiTypeClass && level <= maxPrimitiveLevel -> primitiveEditCode(item)
+    clazz.isStringListWrapper && level <= maxPrimitiveLevel -> listEditCode(item)
     clazz.isApiTypeClass && level <= maxComplexLevel -> complexEditCode(item, level)
-    !clazz.isApiTypeClass && level <= maxPrimitiveLevel -> primitiveEditCode(item)
     else -> ""
 }
 
 fun Property.primitiveEditCode(item: String) =
     "$item.set${propertyName.capitalize()}($propertyName);"
+
+fun Property.listEditCode(item: String) =
+    "$item.set${propertyName.capitalize()}(new Contrail${clazz.pluginName}($propertyName));"
 
 fun Property.complexEditCode(item: String, level: Int): String = """
 var $propertyName = $item.get${propertyName.capitalize()}();

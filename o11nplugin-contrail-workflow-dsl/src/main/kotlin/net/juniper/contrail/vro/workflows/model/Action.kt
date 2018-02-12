@@ -86,4 +86,24 @@ class ActionParameter(
 infix fun <T : Any> String.ofType(type: ParameterType<T>) =
     ActionParameter(this, type)
 
-class ActionCall(val name: String, vararg val arguments: String)
+class ActionCall private constructor(val name: String, vararg val arguments: String) {
+    class ActionCallBuilder(val name: String) {
+        private val arguments = mutableListOf<String>()
+
+        fun parameter(name: String) = apply {
+            arguments.add("#$name")
+        }
+
+        fun string(string: String) = apply {
+            arguments.add("\"$string\"")
+        }
+
+        fun create() =
+            ActionCall(name, *arguments.toTypedArray())
+    }
+}
+
+typealias ActionCallBuilder = ActionCall.ActionCallBuilder
+
+fun actionCallTo(name: String) =
+    ActionCallBuilder(name)

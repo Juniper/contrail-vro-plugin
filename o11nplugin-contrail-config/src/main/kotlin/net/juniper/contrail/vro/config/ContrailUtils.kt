@@ -59,6 +59,9 @@ val ObjectClass.objectType: String get() =
 val Method.returnsObjectReferences: Boolean get() =
     returnListGenericClass.isA<ObjectReference<*>>()
 
+val Class<*>.isStringListWrapper get() =
+    isSubclassOf<ApiPropertyBase>() && hasOnlyListOfStrings
+
 val Class<*>.isPropertyListWrapper get() =
     isSubclassOf<ApiPropertyBase>() && hasOnlyListOfProperties
 
@@ -81,18 +84,22 @@ val Class<*>.hasOnlyListOfProperties: Boolean get() =
         count() == 1 && this[0].returnsListOfProperties
     }
 
-val Class<*>.hasOnlyListOfPropertiesOrStrings: Boolean get() =
+val Class<*>.hasOnlyListOfStrings: Boolean get() =
     declaredGetters.run {
-        count() == 1 && this[0].returnsListOpPropertiesOrStrings
+        count() == 1 && this[0].returnsListOfStrings
     }
+
+val Class<*>.hasOnlyListOfPropertiesOrStrings: Boolean get() =
+    hasOnlyListOfProperties || hasOnlyListOfStrings
 
 val Method.returnsListOfProperties: Boolean get() =
     returnListGenericClass?.isSubclassOf<ApiPropertyBase>() ?: false
 
-val Method.returnsListOpPropertiesOrStrings: Boolean get() =
-    returnListGenericClass?.run {
-        this.isA<String>() || this.isSubclassOf<ApiPropertyBase>()
-    } ?: false
+val Method.returnsListOfStrings: Boolean get() =
+    returnListGenericClass == String::class.java
+
+val Method.returnsListOfPropertiesOrStrings: Boolean get() =
+    returnsListOfProperties || returnsListOfStrings
 
 val Method.returnsApiPropertyOrList: Boolean get() =
     returnTypeOrListType?.isApiPropertyClass ?: false

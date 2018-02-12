@@ -126,7 +126,7 @@ fun freeInCidrValidatorQualifier(parameter: String, cidr: String, pools: String,
     validatorActionQualifier(actionPackage, actionName, "#$cidr", "#$parameter", "#$pools", "#$dns")
 
 private fun actionOgnl(packageName: String, name: String, vararg parameters: String) =
-    """GetAction("$packageName","$name").call(${parameters.joinToString(", "){"#$it"}})"""
+    """GetAction("$packageName","$name").call(${parameters.joinToString(", "){"$it"}})"""
 
 val ActionCall.ognl get() =
     actionOgnl(actionPackage, name, *arguments)

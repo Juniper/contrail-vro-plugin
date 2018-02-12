@@ -81,14 +81,19 @@ open class ParameterAggregator(
         ReferenceParameterBuilder(name, type).updateWith(setup)
     }
 
-    @JvmName("parameterArrayPair")
+    @JvmName("parameterPairArray")
     fun parameter(name: String, type: array<Pair<String, String>>, setup: ArrayPairParameterBuilder.() -> Unit) {
         ArrayPairParameterBuilder(name, type).updateWith(setup)
     }
 
-    @JvmName("parameterArrayReference")
+    @JvmName("parameterReferenceArray")
     fun parameter(name: String, type: array<Reference>, setup: ReferenceArrayParameterBuilder.() -> Unit = {}) {
         ReferenceArrayParameterBuilder(name, type).updateWith(setup)
+    }
+
+    @JvmName("parameterStringArray")
+    fun parameter(name: String, type: array<String>, setup: StringArrayParameterBuilder.() -> Unit) {
+        StringArrayParameterBuilder(name, type).updateWith(setup)
     }
 
     fun parameter(name: String, type: Class<*>, setup: BasicParameterBuilder<*>.() -> Unit) = when (type) {
@@ -241,6 +246,8 @@ class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterB
 }
 
 class ReferenceArrayParameterBuilder(name: String, type: array<Reference>) : BasicParameterBuilder<List<Reference>>(name, type)
+
+class StringArrayParameterBuilder(name: String, type: array<String>) : BasicParameterBuilder<List<String>>(name, type)
 
 class OutputParameterBuilder(val name: String, val type: ParameterType<Any>) {
     var description: String? = null

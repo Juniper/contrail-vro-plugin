@@ -76,7 +76,7 @@ private fun Schema.qualifiersOf(element: Node): List<ParameterQualifier> {
     val xsdConstraints = mutableMapOf<String, Any>()
     xsdConstraints.putAll(elementAttributes.minus(name).minus(type))
 
-    val elementType = elementAttributes[type] ?: throw IllegalStateException("Schema error")
+    val elementType = elementAttributes[type] ?: xsdString
 
     val defaultValue = elementAttributes[default]
     if (defaultValue != null) {
