@@ -50,7 +50,7 @@ private fun Property.toWrapperProperties(wrapperName: String) : Property {
     else
         clazz.kotlinClassName
 
-    return Property(propertyName, clazz, parent, declaringClass, wrapName)
+    return Property(propertyName, clazz, parent, declaringClass, isList, wrapName)
 }
 
 private fun List<Property>.toWrapperProperties(wrapperName: String) : List<Property> =

@@ -5,14 +5,23 @@
 package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.vro.config.isApiTypeClass
+import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.kotlinClassName
 import net.juniper.contrail.vro.config.propertyName
+import net.juniper.contrail.vro.config.returnListGenericClass
 import net.juniper.contrail.vro.config.underscoredNestedName
 import net.juniper.contrail.vro.config.underscoredPropertyToCamelCase
 import net.juniper.contrail.vro.config.wrapperName
-import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Method
 
-class Property(val fieldName: String, val clazz: Class<*>, val parent: Class<*>, val declaringClass: Class<*>, val wrapname: String? = null) {
+class Property(
+    val fieldName: String,
+    val clazz: Class<*>,
+    val parent: Class<*>,
+    val declaringClass: Class<*>,
+    val isList: Boolean,
+    val wrapname: String? = null)
+{
     val propertyName = fieldName.underscoredPropertyToCamelCase()
     val componentName get() = propertyName.replace("List$".toRegex(), "").capitalize()
     val classLabel get() = if (clazz.isApiTypeClass) clazz.underscoredNestedName else clazz.kotlinClassName
@@ -20,25 +29,29 @@ class Property(val fieldName: String, val clazz: Class<*>, val parent: Class<*>,
 }
 
 open class ClassProperties(
-    val simpleProperties: List<Property>,
-    val listProperties: List<Property>
-)
+    val properties: List<Property>
+) {
+    val simpleProperties: List<Property> = properties.filter { ! it.isList }
+    val listProperties: List<Property> = properties.filter { it.isList }
+}
 
-val <T> Class<T>.properties: ClassProperties get() {
-    val simpleProperties = mutableListOf<Property>()
-    val listProperties = mutableListOf<Property>()
+val <T> Class<T>.properties: ClassProperties get() =
+    declaredMethods.asSequence()
+        .filter { it.isGetter }
+        .map { it.toPropertyOf(this) }
+        .filterNotNull()
+        .toClassProperties()
 
-    for (method in declaredMethods.filter { it.name.startsWith("get") }) {
-        val type = method.returnType
-        val propertyName = method.propertyName
-        if (type == java.util.List::class.java) {
-            val genericType = method.genericReturnType as ParameterizedType
-            val genericArg = genericType.actualTypeArguments[0] as? Class<*> ?: continue
-            listProperties.add(Property(propertyName, genericArg, this, method.declaringClass))
-        } else {
-            simpleProperties.add(Property(propertyName, type, this, method.declaringClass))
-        }
+private fun Sequence<Property>.toClassProperties() =
+    ClassProperties(toList())
+
+private fun Method.toPropertyOf(parent: Class<*>): Property? {
+    val type = returnType
+    val propertyName = propertyName
+    return if (type == List::class.java) {
+        val genericArg = returnListGenericClass ?: return null
+        Property(propertyName, genericArg, parent, declaringClass, true)
+    } else {
+        Property(propertyName, type, parent, declaringClass, false)
     }
-
-    return ClassProperties(simpleProperties, listProperties)
 }
