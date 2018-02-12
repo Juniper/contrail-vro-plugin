@@ -7,7 +7,6 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.vro.config.constants.Configuration
 import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.item
-import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.workflows.dsl.inCategory
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
@@ -52,12 +51,6 @@ internal fun createConnectionWorkflow() =
                 description = "Tenant"
             }
         }
-
-        // Created connection is named 'parent' to simplify chaining
-        // with other workflows where it is used as a parent object.
-        output(parent, Connection.reference) {
-            description = "Connection to Contrail controller"
-        }
     }.inCategory(Configuration)
 
 internal fun deleteConnectionWorkflow() =
@@ -70,7 +63,7 @@ internal fun deleteConnectionWorkflow() =
     }.inCategory(Configuration)
 
 private val createConnectionScriptBody = """
-$parent = ContrailConnectionManager.create(name, host, port, username, password, authServer, tenant);
+ContrailConnectionManager.create(name, host, port, username, password, authServer, tenant);
 """.trimIndent()
 
 private val deleteConnectionScriptBody = """
