@@ -55,9 +55,13 @@ internal fun propertyNotNullAction(version: String, packageName: String): Action
     )
 }
 
-val retrievalActionScript =
-    "return eval('$item.' + $parameterPath);"
+val retrievalActionScript = """
+if(!item) return null;
+return eval('$item.' + $parameterPath);
+""".trim()
 
-val notNullActionScript =
-    "return eval('$item.' + $parameterPath) != null;"
+val notNullActionScript = """
+if(!item) return false;
+return eval('$item.' + $parameterPath) != null;
+""".trim()
 
