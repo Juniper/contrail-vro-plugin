@@ -33,9 +33,13 @@ fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: 
         generateLifecycleWorkflows(info, it, refs, schema)
     }
 
+    val multipleParents = relations.relations.groupBy({ it.childClass }, { it })
+        .filterValues { it.size > 1 }.keys
+
     relations.relations.forEach {
         val refs = relations.mandatoryReferencesOf(it.childClass)
-        generateLifecycleWorkflows(info, it.childClass, it.parentClass, refs, schema)
+        val multiParents = multipleParents.contains(it.childClass)
+        generateLifecycleWorkflows(info, it.childClass, it.parentClass, multiParents, refs, schema)
     }
 
     relations.forwardRelations.forEach {
@@ -53,14 +57,14 @@ fun RelationDefinition.mandatoryReferencesOf(clazz: ObjectClass) =
         .map { it.childClass }
         .toList()
 
-private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<ObjectClass>, schema: Schema) {
-    createWorkflow(clazz, parentClazz, refs, schema).save(info, clazz)
+private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, multipleParents: Boolean, refs: List<ObjectClass>, schema: Schema) {
+    createWorkflow(clazz, parentClazz, multipleParents, refs, schema).save(info, clazz)
     editWorkflow(clazz, schema).save(info, clazz)
     deleteWorkflow(clazz).save(info, clazz)
 }
 
 private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema) =
-    generateLifecycleWorkflows(info, clazz, null, refs, schema)
+    generateLifecycleWorkflows(info, clazz, null, false, refs, schema)
 
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation, schema: Schema) {
     relation.findReferencesAction(info.workflowVersion, info.workflowPackage).save(info)

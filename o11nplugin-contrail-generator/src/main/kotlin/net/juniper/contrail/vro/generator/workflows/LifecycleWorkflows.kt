@@ -23,9 +23,11 @@ import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.objectDescription
 import net.juniper.contrail.vro.workflows.schema.relationDescription
 
-fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
+fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, multipleParents: Boolean, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
 
-    val workflowName = "Create ${clazz.allLowerCase}"
+    val workflowBaseName = "Create ${clazz.allLowerCase}"
+    val workflowNameSuffix = if (parentClazz != null && multipleParents) " in ${parentClazz.allLowerCase}" else ""
+    val workflowName = workflowBaseName + workflowNameSuffix
     val parentName = parentClazz?.pluginName ?: Connection
 
     return workflow(workflowName).withScript(clazz.createScriptBody(parentClazz, refs)) {
@@ -86,13 +88,19 @@ ${clazz.allCapitalized}
 ${relationDescription(parentClazz, clazz)}
 """.trim()
 
+private fun Class<*>.createCall(parentClazz: ObjectClass?) =
+    if (parentClazz == null)
+        "$executor.create$pluginName($item);"
+    else
+        "$executor.create${pluginName}In${parentClazz.pluginName}($item, $parent);"
+
 private fun Class<*>.createScriptBody(parentClazz: ObjectClass?, references: List<ObjectClass>) = """
 $item = new Contrail$pluginName();
 $item.setName(name);
 ${references.addAllReferences}
 var $id = $parent.internalId;
 var $executor = ContrailConnectionManager.executor($id.toString());
-$executor.create$pluginName($item${if (parentClazz == null) "" else ", $parent"});
+${createCall(parentClazz)}
 $item.internalId = id.with("$pluginName", item.uuid);
 """.trimIndent()
 

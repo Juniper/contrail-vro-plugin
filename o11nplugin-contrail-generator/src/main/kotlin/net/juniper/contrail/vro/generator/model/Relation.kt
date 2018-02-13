@@ -9,20 +9,21 @@ import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.PropertyClass
 import net.juniper.contrail.vro.config.PropertyClassFilter
 import net.juniper.contrail.vro.config.asObjectClass
+import net.juniper.contrail.vro.config.childClassName
 import net.juniper.contrail.vro.config.collapsedNestedName
-import net.juniper.contrail.vro.config.parentType
 import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isBackRef
+import net.juniper.contrail.vro.config.isChildReferenceGetter
 import net.juniper.contrail.vro.config.isDisplayableChildOf
 import net.juniper.contrail.vro.config.isGetter
+import net.juniper.contrail.vro.config.isModelClassName
 import net.juniper.contrail.vro.config.isPropertyListWrapper
 import net.juniper.contrail.vro.config.listWrapperGetter
 import net.juniper.contrail.vro.config.listWrapperGetterType
 import net.juniper.contrail.vro.config.nameWithoutGet
 import net.juniper.contrail.vro.config.nameWithoutGetAndBackRefs
 import net.juniper.contrail.vro.config.objectReferenceAttributeClass
-import net.juniper.contrail.vro.config.objectType
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.pluralize
 import net.juniper.contrail.vro.config.propertyName
@@ -30,7 +31,6 @@ import net.juniper.contrail.vro.config.returnListGenericClass
 import net.juniper.contrail.vro.config.returnsApiPropertyOrList
 import net.juniper.contrail.vro.config.returnsObjectReferences
 import net.juniper.contrail.vro.config.toPluginName
-import net.juniper.contrail.vro.config.typeToObjectClass
 import java.lang.reflect.Method
 
 open class Relation (
@@ -84,29 +84,19 @@ class Getter(val name: String, val toMany: Boolean)
 
 typealias RelationGraphNode = Pair<ObjectClass, List<ObjectClass>>
 
-fun List<ObjectClass>.generateRelations(): List<Relation> {
-    val parentToChildren = groupBy { it.parentType }
-    return asSequence()
-        .map { createRelationGraphNode(it, parentToChildren) }
-        .map { it.toRelationSequence() }
-        .flatten().toList()
-}
+fun List<ObjectClass>.generateRelations() = asSequence()
+    .map { it.relations() }
+    .flatten().toList()
 
-private fun createRelationGraphNode(
-    parentClass: ObjectClass,
-    parentToChildren: Map<String?, List<ObjectClass>>
-): RelationGraphNode {
-    val parentType = parentClass.objectType
-    val children = parentToChildren.getOrElse(parentType) { listOf() }
-    val childrenTypes = children.map { it.objectType.typeToObjectClass!! }
-    return RelationGraphNode(parentType.typeToObjectClass!!, childrenTypes)
-}
+private fun ObjectClass.relations() = methods.asSequence()
+    .filter { it.isChildReferenceGetter }
+    .map { it.childClassName }.filterNotNull()
+    .filter { it.isModelClassName }
+    .map { it.asObjectClass }.filterNotNull()
+    .map { Relation(this, it) }
 
 private fun relationName(parentType: String, childType: String) =
     "${parentType}To$childType"
-
-private fun RelationGraphNode.toRelationSequence(): Sequence<Relation> =
-    second.asSequence().map { Relation(first, it) }
 
 fun List<ObjectClass>.generateReferenceRelations(): List<ForwardRelation> =
     asSequence()

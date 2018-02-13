@@ -10,7 +10,7 @@ class Executor(private val connection: Connection) {
 
     <#list relations as relation>
     @Throws(IOException::class)
-    fun create${relation.childPluginName}(obj: ${relation.childName}, parent: ${relation.parentName}) {
+    fun create${relation.childPluginName}In${relation.parentName}(obj: ${relation.childName}, parent: ${relation.parentName}) {
         obj.setParent(parent)
         connection.create(obj)
     }

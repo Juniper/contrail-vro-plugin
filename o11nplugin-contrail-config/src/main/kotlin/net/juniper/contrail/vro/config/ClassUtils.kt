@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.config
 
 import com.google.common.reflect.ClassPath
+import net.juniper.contrail.api.ObjectReference
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -33,8 +34,15 @@ val BackRefs = "BackRefs"
 val back_refs = "_back_refs"
 
 private val getterPattern = "^get".toRegex()
+private val referencePattern = "get([A-Za-z0-9]+)s".toRegex()
 private val backRefsPattern = "$BackRefs$".toRegex()
 private val fieldBackRefsPattern = "$back_refs$".toRegex()
+
+val Method.isChildReferenceGetter get() =
+    referencePattern.matchEntire(name) != null && returnListGenericClass == ObjectReference::class.java
+
+val Method.childClassName get() =
+    referencePattern.matchEntire(name)?.groupValues?.get(1)
 
 val Method.nameWithoutGet get() =
     name.replace(getterPattern, "")
