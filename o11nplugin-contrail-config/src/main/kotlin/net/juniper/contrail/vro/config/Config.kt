@@ -4,7 +4,7 @@
 
 package net.juniper.contrail.vro.config
 
-val String.isModelClassName get() = when (this) {
+val modelClasses = setOf(
     "Project",
     "VirtualNetwork",
     "Subnet",
@@ -13,21 +13,15 @@ val String.isModelClassName get() = when (this) {
     "FloatingIpPool",
     "NetworkPolicy",
     "SecurityGroup",
-    "VirtualMachine",
     "VirtualMachineInterface",
-    "VirtualRouter",
-    "LogicalRouter",
-    "PhysicalRouter",
     "RouteTable",
-    "RouteTarget",
     "ServiceInstance",
-    "ServiceTemplate",
-    "InstanceIp",
     "QosConfig",
-    "GlobalQosConfig",
-    "ServiceHealthCheck" -> true
-    else -> false
-}
+    "GlobalQosConfig"
+)
+
+val String.isModelClassName get() =
+    modelClasses.contains(this)
 
 val inventoryProperties = setOf(
     "QuotaType"
