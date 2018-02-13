@@ -47,28 +47,35 @@ class Utils {
 
     fun isValidAllocationPool(cidr: String, pools: String): Boolean {
         if (isValidIpv4Cidr(cidr) && isValidIpv4Pool(pools)) {
-            return parseIpv4Pools(cidr, pools)
+            return parsePools(cidr, pools, ::IPv4)
         } else if (isValidIpv6Cidr(cidr) && isValidIpv6Pool(pools)) {
-            //TODO Include IPv6 support
-            return false
+            return parsePools(cidr, pools, ::IPv6)
         }
         return false
     }
 
-    //TODO Include IPv6 support
     fun isInCidr(cidr: String, address: String): Boolean {
         if (isValidIpv4Address(address) && isValidIpv4Cidr(cidr)) {
-            return Ip(address) in getSubnetRange(cidr)
+            return IPv4(address) in getSubnetRange(cidr, ::IPv4)
+        } else if (isValidIpv6Address(address) && isValidIpv6Cidr(cidr)) {
+            return IPv6(address) in getSubnetRange(cidr, ::IPv6)
         }
         return false
     }
 
     fun isFree(cidr: String, address: String, pools: String?, dnsAddr: String?): Boolean {
         if (isValidIpv4Cidr(cidr) && isValidIpv4Address(address)) {
-            if (pools != null && !isValidIpv4Pool(pools)) return false
-            if (dnsAddr != null && !isValidIpv4Address(dnsAddr)) return false
-            val ip = Ip(address)
-            return (ip in getSubnetRange(cidr)) && pools.ipNotInPools(ip) && !dnsAddr.equalsIp(ip)
+            if (pools != null && pools.isNotBlankMultiline() && !isValidIpv4Pool(pools)) return false
+            if (dnsAddr != null && dnsAddr.isNotBlank() && !isValidIpv4Address(dnsAddr)) return false
+            val ip = IPv4(address)
+            return (ip in getSubnetRange(cidr, ::IPv4)) && ip.notInPools(pools, ::IPv4)
+                    && !dnsAddr.equalsIp(ip, ::IPv4)
+        } else if (isValidIpv6Cidr(cidr) && isValidIpv6Address(address)) {
+            if (pools != null && pools.isNotBlankMultiline() && !isValidIpv6Pool(pools)) return false
+            if (dnsAddr != null && dnsAddr.isNotBlank() && !isValidIpv6Address(dnsAddr)) return false
+            val ip = IPv6(address)
+            return (ip in getSubnetRange(cidr, ::IPv6)) && ip.notInPools(pools, ::IPv6)
+                    && !dnsAddr.equalsIp(ip, ::IPv6)
         }
         return false
     }

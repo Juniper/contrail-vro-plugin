@@ -10,7 +10,6 @@ enum class NetAddressValidator(val maxPrefixLength: Int) {
     IPv4(30) {
         override fun isValidAddress(address: String) =
             validator.isValidInet4Address(address.trim())
-
     },
     IPv6(126) {
         override fun isValidAddress(address: String) =
@@ -21,6 +20,12 @@ enum class NetAddressValidator(val maxPrefixLength: Int) {
         InetAddressValidator.getInstance()
 
     abstract fun isValidAddress(address: String): Boolean
+
+    fun isValidPool(pool: String): Boolean {
+        val parts = pool.trim().split('-')
+        if (parts.size != 2) return false
+        return isValidAddress(parts[0]) && isValidAddress(parts[1])
+    }
 
     fun isValidSubnet(subnet: String): Boolean {
         val parts = subnet.trim().split('/')

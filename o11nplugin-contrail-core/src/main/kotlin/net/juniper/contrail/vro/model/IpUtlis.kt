@@ -2,40 +2,141 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
+@file:Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+
 package net.juniper.contrail.vro.model
 
+import java.math.BigInteger
 import java.net.InetAddress
 
-const val MAX_IPv4_PREFIX = 32
-const val HIGHEST_BINARY = -1
+const val LONG_LENGTH = 64
+val highestIpv4 = IPv4(-1)
+val highestIpv6 = IPv6(-1, -1)
 
-class IpRange(val start: Ip, val end: Ip) {
+typealias JavaLong = java.lang.Long
 
-    operator fun contains(ip: Ip): Boolean =
+interface IP<Ip : IP<Ip>> : Comparable<Ip> {
+    val highestBinary: Ip
+    val maxPrefix: Int
+    infix fun and(other: Ip) : Ip
+    infix fun or(other: Ip) : Ip
+    infix fun shl(bits: Int) : Ip
+    infix fun ushr(bits: Int) : Ip
+}
+
+class IPv4(val ip: Int) : IP<IPv4> {
+    override val highestBinary get() = highestIpv4
+    override val maxPrefix get() = 32
+
+    constructor (address: String) : this(address.ipv4ToInt())
+
+    override operator fun compareTo(other: IPv4) =
+        Integer.compareUnsigned(ip, other.ip)
+
+    override fun equals(other: Any?): Boolean =
+        if (other is IPv4) ip == other.ip else false
+
+    override fun hashCode(): Int = ip.hashCode()
+
+    override infix fun shl(bits: Int) : IPv4 =
+        IPv4(ip shl bits)
+
+    override infix fun ushr(bits: Int) : IPv4 =
+        IPv4(ip ushr bits)
+
+    override infix fun and(other: IPv4) : IPv4 =
+        IPv4(ip and other.ip)
+
+    override infix fun or(other: IPv4) : IPv4 =
+        IPv4(ip or other.ip)
+}
+
+class IPv6(val highBits: Long, val lowBits: Long) : IP<IPv6> {
+    override val highestBinary get() = highestIpv6
+    override val maxPrefix get() = 128
+
+    constructor (address: String) : this(address.ipv6toLong(0..7), address.ipv6toLong(8..15))
+
+    override fun equals(other: Any?): Boolean =
+        if (other is IPv6) highBits.equals(other.highBits) && lowBits.equals(other.lowBits) else false
+
+    override fun hashCode(): Int =
+        BigInteger(JavaLong.toBinaryString(highBits) + JavaLong.toBinaryString(lowBits), 2).hashCode()
+
+    override operator fun compareTo(other: IPv6) : Int {
+        val high = JavaLong.compareUnsigned(highBits, other.highBits)
+        if (high != 0) return high
+        return JavaLong.compareUnsigned(lowBits, other.lowBits)
+    }
+
+    override infix fun and(other: IPv6) : IPv6 =
+        IPv6(highBits and other.highBits, lowBits and other.lowBits)
+
+    override infix fun or(other: IPv6) : IPv6 =
+        IPv6(highBits or other.highBits, lowBits or other.lowBits)
+
+    override infix fun shl(bits: Int) : IPv6 {
+        val lowToCopy : Long
+        val highShifted : Long
+        val newLowBits : Long
+        if (bits < LONG_LENGTH) {
+            highShifted = highBits shl bits
+            lowToCopy = lowBits ushr (LONG_LENGTH - bits)
+            newLowBits = lowBits shl bits
+        } else {
+            highShifted = 0
+            newLowBits = 0
+            if (bits < maxPrefix) {
+                lowToCopy = lowBits shl (bits - LONG_LENGTH)
+            } else {
+                lowToCopy = 0
+            }
+        }
+        return IPv6(highShifted or lowToCopy, newLowBits)
+    }
+
+    override infix fun ushr(bits: Int): IPv6 {
+        val lowShifted : Long
+        val newHighBits : Long
+        val highToCopy : Long
+        if (bits < LONG_LENGTH) {
+            lowShifted = lowBits ushr bits
+            highToCopy = highBits shl (LONG_LENGTH - bits)
+            newHighBits = highBits ushr bits
+        } else {
+            lowShifted = 0
+            newHighBits = 0
+            if (bits < maxPrefix) {
+                highToCopy = highBits ushr (bits - LONG_LENGTH)
+            } else {
+                highToCopy = 0
+            }
+        }
+        return IPv6(newHighBits, lowShifted or highToCopy)
+    }
+
+    override fun toString() : String =
+        JavaLong.toBinaryString(highBits) + JavaLong.toBinaryString(lowBits)
+}
+
+class IpRange<T : IP<T>>(val start: T, val end: T) {
+    operator fun contains(ip: T): Boolean =
         ip <= end && ip >= start
 
-    operator fun contains(range: IpRange): Boolean =
+    operator fun contains(range: IpRange<T>): Boolean =
         range.start <= range.end && range.end <= end && range.start >= start
 
-    fun overlaps(other: IpRange): Boolean =
+    fun overlaps(other: IpRange<T>): Boolean =
         other.start in this || other.end in this
 }
 
-class Ip(val ip: Int) : Comparable<Ip> {
-    constructor(address: String): this(address.ipToInt())
-
-    override fun compareTo(other: Ip) = Integer.compareUnsigned(ip, other.ip)
-}
-
-fun Int.ip() : Ip = Ip(this)
-
-fun IpRange.isValidInSubnet(subnet: IpRange, allPools: List<IpRange>) : Boolean =
+fun <T: IP<T>> IpRange<T>.isValidInSubnet(subnet: IpRange<T>, allPools: List<IpRange<T>>) : Boolean =
     this in subnet && allPools.minus(this).none { it.overlaps(this) }
 
 fun ipToByte(address: String) : ByteArray =
     InetAddress.getByName(address).address
 
-fun String.ipToInt() : Int {
+fun String.ipv4ToInt() : Int {
     val bytes = ipToByte(trim())
     var result = 0
     for (byte in bytes) {
@@ -45,55 +146,68 @@ fun String.ipToInt() : Int {
     return result
 }
 
-fun String?.equalsIp(ip : Ip) =
-    this?.ipToInt()?.ip() == ip
+fun String.ipv6toLong(range: IntRange) : Long {
+    val bytes = ipToByte(trim())
+    var result : Long = 0
+    for (byte in bytes.slice(range)) {
+        result = result shl 8
+        result = result or (byte.toLong() and 0xffL)
+    }
+    return result
+}
 
-fun String?.ipNotInPools(ip : Ip) : Boolean {
-    if (this != null) {
-        val cleanedPools = trimMultiline()
-        return cleanedPools.isNotBlank() && poolsToRanges(cleanedPools).none { ip in it }
+fun <T: IP<T>> String?.equalsIp(ip : T, ipFactory: (String) -> T): Boolean =
+    if (this != null && this.isNotBlank()) ipFactory(this) == ip else false
+
+fun <T: IP<T>> T.notInPools(pools : String?, ipFactory: (String) -> T) : Boolean {
+    if (pools != null) {
+        val cleanedPools = pools.trimMultiline()
+        return cleanedPools.isBlank() || poolsToRanges(cleanedPools, ipFactory).none { this in it }
     } else {
         return true
     }
 }
 
-fun getNetworkAddress(ip: Int, prefixLen: Int) : Int =
-    ip and (HIGHEST_BINARY shl (MAX_IPv4_PREFIX - prefixLen))
+fun <T: IP<T>> T.getNetworkAddress(prefixLen: Int) : T =
+    this and (highestBinary shl (maxPrefix - prefixLen))
 
-fun getNetworkBroadcastAddress(ip: Int, prefixLen: Int) : Int =
-    ip or (HIGHEST_BINARY ushr prefixLen)
+fun <T: IP<T>> T.getNetworkBroadcastAddress(prefixLen: Int) : T =
+    this or (highestBinary ushr prefixLen)
 
-fun getSubnetRange(cidr: String) : IpRange {
-    val parts = cidr.trim().split('/')
-    val prefixLen = parts[1].toInt()
-    val ip = parts[0].ipToInt()
-    val netAddr = getNetworkAddress(ip, prefixLen)
-    val broadcast = getNetworkBroadcastAddress(ip, prefixLen)
-    return IpRange(Ip(netAddr), Ip(broadcast))
-}
-
-fun poolToRange(pool: String) : IpRange? {
+fun <T : IP<T>> poolToRange(pool: String, ipFactory: (String) -> T) : IpRange<T>? {
     val parts = pool.split('-')
-    val start = Ip(parts[0])
-    val end = Ip(parts[1])
+    val start = ipFactory(parts[0])
+    val end = ipFactory(parts[1])
     if (start > end) return null
     return IpRange(start, end)
 }
 
-fun poolsToRanges(pools: String) : List<IpRange> {
+fun <T : IP<T>> poolsToRanges(pools: String, ipFactory: (String) -> T) : List<IpRange<T>> {
     val lines = pools.split('\n')
-    return lines.map { poolToRange(it) ?: return emptyList() }
+    return lines.map { poolToRange(it, ipFactory) ?: return emptyList() }
 }
 
-fun parseIpv4Pools(cidr: String, pools: String) : Boolean {
-    val subnet = getSubnetRange(cidr.trim())
-    val ranges = poolsToRanges(pools.trimMultiline())
+fun <T : IP<T>> getSubnetRange(cidr: String, ipFactory: (String) -> T) : IpRange<T> {
+    val parts = cidr.trim().split('/')
+    val prefixLen = parts[1].toInt()
+    val ip = ipFactory(parts[0])
+    val netAddr = ip.getNetworkAddress(prefixLen)
+    val broadcast = ip.getNetworkBroadcastAddress(prefixLen)
+    return IpRange(netAddr, broadcast)
+}
+
+fun <T : IP<T>> parsePools(cidr: String, pools: String, ipFactory: (String) -> T) : Boolean {
+    val subnet = getSubnetRange(cidr.trim(), ipFactory)
+    val ranges = poolsToRanges(pools.trimMultiline(), ipFactory)
     if (ranges.isEmpty()) return false
     return ranges.all { it.isValidInSubnet(subnet, ranges) }
 }
 
 fun String.trimMultiline(): String =
     splitMultiline().joinToString( "\n" )
+
+fun String.isNotBlankMultiline(): Boolean =
+    splitMultiline().joinToString( "\n" ).isNotBlank()
 
 fun String.splitMultiline(): List<String> =
     split('\n').map { it.trim() }.filter { it.isNotBlank() }
