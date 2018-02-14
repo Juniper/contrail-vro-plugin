@@ -25,7 +25,7 @@ class FromStringParameter(name: String, value: String) : VisibilityCondition() {
 }
 
 class ConditionConjunction(vararg conditions: VisibilityCondition) : VisibilityCondition() {
-    override val stringCondition: String = conditions.joinToString(" && ") { "(${it.stringCondition})" }
+    override val stringCondition: String = conditions.filter { it != AlwaysVisible }.joinToString(" && ") { "(${it.stringCondition})" }
 }
 
 class ConditionAlternative(vararg conditions: VisibilityCondition) : VisibilityCondition() {

@@ -60,6 +60,7 @@ fun RelationDefinition.mandatoryReferencesOf(clazz: ObjectClass) =
 private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, multipleParents: Boolean, refs: List<ObjectClass>, schema: Schema) {
     createWorkflow(clazz, parentClazz, multipleParents, refs, schema).save(info, clazz)
     editWorkflow(clazz, schema).save(info, clazz)
+    editComplexPropertiesWorkflows(clazz, schema).forEach { it.save(info, clazz) }
     deleteWorkflow(clazz).save(info, clazz)
 }
 

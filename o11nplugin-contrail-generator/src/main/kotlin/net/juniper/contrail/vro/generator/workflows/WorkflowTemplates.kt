@@ -26,12 +26,13 @@ import net.juniper.contrail.vro.workflows.dsl.PresentationParametersBuilder
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
 import net.juniper.contrail.vro.workflows.model.AlwaysVisible
+import net.juniper.contrail.vro.workflows.model.ConditionConjunction
 import net.juniper.contrail.vro.workflows.model.DataBinding
 import net.juniper.contrail.vro.workflows.model.Element
 import net.juniper.contrail.vro.workflows.model.FromBooleanParameter
 import net.juniper.contrail.vro.workflows.model.FromComplexPropertyValue
-import net.juniper.contrail.vro.workflows.model.FromSimplePropertyValue
 import net.juniper.contrail.vro.workflows.model.NullStateOfProperty
+import net.juniper.contrail.vro.workflows.model.VisibilityCondition
 import net.juniper.contrail.vro.workflows.model.WhenNonNull
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.boolean
@@ -69,18 +70,21 @@ val AdvancedParameters = "Advanced parameters"
 val CustomParameters = "Custom parameters"
 
 val String.allLowerCase get() =
-    splitCamel().toLowerCase()
+    removeTypeSuffix().splitCamel().toLowerCase()
 
 val Class<*>.allLowerCase get() =
     pluginName.allLowerCase
 
 val String.allCapitalized get() =
-    replace(typeSuffix, "").camelChunks.joinToString(" ") { it.capitalize() }
+    removeTypeSuffix().camelChunks.joinToString(" ") { it.capitalize() }
 
 val Class<*>.allCapitalized get() =
     pluginName.allCapitalized
 
 val typeSuffix = "Type$".toRegex()
+
+fun String.removeTypeSuffix() =
+    replace(typeSuffix, "")
 
 fun deleteWorkflow(className: String, scriptBody: String) =
     workflow("Delete ${className.allLowerCase}").withScript(scriptBody) {
@@ -91,19 +95,19 @@ fun deleteWorkflow(className: String, scriptBody: String) =
         }
     }
 
-private val Property.title get() = when (propertyName) {
+val Property.title get() = when (propertyName) {
     "mgmt" -> "Configuration"
     "ecmpHashingIncludeFields" -> "ECMP Hashing"
     else -> propertyName.allCapitalized
 }
 
-private fun Property.description(schema: Schema) =
+fun Property.description(schema: Schema) =
 """
 ${propertyName.allCapitalized}
 ${schema.propertyDescription(parent, propertyName) ?: ""}
 """.trim()
 
-private fun Property.conditionDescription(schema: Schema) =
+fun Property.conditionDescription(schema: Schema) =
 """
 Define $title
 ${schema.propertyDescription(parent, propertyName) ?: ""}
@@ -117,66 +121,39 @@ val Class<*>.maxDepth: Int get() =
 val Property.actualListProperty get() =
     clazz.properties.properties[0]
 
-typealias PropertyBinding = (Property) -> DataBinding<Any>
-
-private val Property.simpleBinding: PropertyBinding get() =
-    if (clazz.isStringListWrapper) {
-        { FromComplexPropertyValue(item, "${it.propertyName}.${it.actualListProperty.propertyName}", string.array) }
-    } else {
-        { FromSimplePropertyValue(item, it.propertyName, it.clazz.parameterType) }
-    }
-
-private val Property.childBinding: PropertyBinding get() =
-    if (clazz.isStringListWrapper) {
-        { FromComplexPropertyValue(item, "$propertyName.${it.propertyName}.${it.actualListProperty.propertyName}", string.array) }
-    } else {
-        { FromComplexPropertyValue(item, "$propertyName.${it.propertyName}", it.clazz.parameterType) }
-    }
-
-private fun Property.grandChildBinding(child: Property): PropertyBinding =
-    if (clazz.isStringListWrapper) {
-        { FromComplexPropertyValue(item, "$propertyName.${child.propertyName}.${it.propertyName}.${it.actualListProperty.propertyName}", string.array) }
-    } else {
-        { FromComplexPropertyValue(item, "$propertyName.${child.propertyName}.${it.propertyName}", it.clazz.parameterType) }
-    }
-
-private fun Property.toParameter(builder: ParameterAggregator, schema: Schema, editMode: Boolean) =
-    toParameter(builder, schema, editMode, simpleBinding)
-
-private fun Property.toParameter(builder: ParameterAggregator, schema: Schema, editMode: Boolean, binding: PropertyBinding) =
+private fun Property.toParameter(builder: ParameterAggregator, schema: Schema, propertyPath: String) =
     if (clazz.isStringListWrapper)
-        toStringListWrapperParameter(builder, schema, editMode, binding)
+        toStringListWrapperParameter(builder, schema,
+            FromComplexPropertyValue(item, "${propertyPath.preparePrefix()}$propertyName.${actualListProperty.propertyName}", string.array))
     else
-        toPrimitiveParameter(builder, schema, editMode, binding)
+        toPrimitiveParameter(builder, schema,
+            FromComplexPropertyValue(item, "${propertyPath.preparePrefix()}$propertyName", clazz.parameterType))
 
-private fun Property.toPrimitiveParameter(builder: ParameterAggregator, schema: Schema, editMode: Boolean, binding: PropertyBinding) {
+private fun Property.toPrimitiveParameter(builder: ParameterAggregator, schema: Schema, binding: DataBinding<Any>) {
     builder.parameter(propertyName, clazz) {
         description = description(schema)
-        if (editMode)
-            dataBinding = binding(this@toPrimitiveParameter)
+        dataBinding = binding
         additionalQualifiers += schema.simpleTypeQualifiers(parent, propertyName)
     }
 }
 
-private fun Property.toStringListWrapperParameter(builder: ParameterAggregator, schema: Schema, editMode: Boolean, binding: PropertyBinding) {
+private fun Property.toStringListWrapperParameter(builder: ParameterAggregator, schema: Schema, binding: DataBinding<Any>) {
     // This function should only be called for properties
     // that are just wrappers for lists of Strings
     val actualProperty = actualListProperty
     assert(actualProperty.clazz == String::class.java)
     builder.parameter(propertyName, string.array) {
         description = description(schema)
-        if (editMode)
-            dataBinding = binding(this@toStringListWrapperParameter)
+        dataBinding = binding
         additionalQualifiers += schema.simpleTypeQualifiers(clazz, actualProperty.propertyName)
     }
 }
 
-private fun List<Property>.advancedSwitch(builder: ParameterAggregator, schema: Schema, propertyPrefix: String, editMode: Boolean) {
+private fun List<Property>.advancedSwitch(builder: ParameterAggregator, schema: Schema, propertyPath: String) {
     forEach {
         builder.parameter(it.propertyName.condition, boolean) {
             description = it.conditionDescription(schema)
-            if (editMode)
-                dataBinding = NullStateOfProperty(item, "$propertyPrefix${it.propertyName}")
+            dataBinding = NullStateOfProperty(item, "${propertyPath.preparePrefix()}${it.propertyName}")
         }
     }
 }
@@ -187,38 +164,53 @@ private val workflowPropertiesFilter: (Property) -> Boolean =
         ! it.clazz.ignoredInWorkflow &&
         it.propertyName.isEditableProperty }
 
-private val Sequence<Property>.onlyPrimitives get() =
+val Sequence<Property>.onlyPrimitives get() =
     filter(workflowPropertiesFilter)
     .filter { it.clazz.hasOnlyListOfStrings || ! it.clazz.isApiTypeClass }
 
-private val List<Property>.onlyPrimitives get() =
+val List<Property>.onlyPrimitives get() =
     asSequence().onlyPrimitives.toList()
 
-private val Sequence<Property>.onlyComplex get() =
+val Sequence<Property>.onlyComplex get() =
     filter(workflowPropertiesFilter)
     .filter { it.clazz.isApiTypeClass && ! it.clazz.hasOnlyListOfStrings }
 
-private val List<Property>.onlyComplex get() =
+val List<Property>.onlyComplex get() =
     asSequence().onlyComplex.toList()
 
-fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema: Schema, editMode: Boolean = false) {
+fun Class<*>.complexPropertiesInRange(range: IntRange) =
+    properties.properties.asSequence()
+        .filter(workflowPropertiesFilter)
+        .filter { ! it.isList }
+        .filter { it.clazz.maxDepth in range }
+
+fun String.preparePrefix(): String = when {
+    isBlank() -> this
+    endsWith(".") -> this
+    else -> "$this."
+}
+
+fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema: Schema, propertyPrefix: String = "", extraVisibility: VisibilityCondition = AlwaysVisible) {
     val properties = clazz.properties
     val topPrimitives = properties.simpleProperties.onlyPrimitives
     val topComplex = properties.simpleProperties.onlyComplex
 
-    val stepVisibility = if (editMode) WhenNonNull(item) else AlwaysVisible
+    val propertyPath = propertyPrefix.preparePrefix()
+
+    val basicVisibility = WhenNonNull(item)
+    val stepVisibility = ConditionConjunction(basicVisibility, extraVisibility)
 
     if (!topPrimitives.isEmpty()) {
         step(CustomParameters) {
             visibility = stepVisibility
-            topPrimitives.forEach { it.toParameter(this@step, schema, editMode) }
+            topPrimitives.forEach { it.toParameter(this@step, schema, propertyPath) }
         }
     }
 
     if (!topComplex.isEmpty()) {
         step(AdvancedParameters) {
             visibility = stepVisibility
-            topComplex.advancedSwitch(this@step, schema, "", editMode)
+            topComplex.advancedSwitch(this@step, schema, propertyPath)
         }
     }
 
@@ -232,14 +224,14 @@ fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema: Schema,
                 description = schema.propertyDescription(clazz, prop.propertyName)
                 visibility = FromBooleanParameter(prop.propertyName.condition)
                 group(AdvancedParameters) {
-                    complex.advancedSwitch(this@group, schema, "${prop.propertyName}.", editMode)
+                    complex.advancedSwitch(this@group, schema, "$propertyPath${prop.propertyName}")
                 }
                 for (propProp in complex) {
                     group(propProp.title) {
                         description = schema.propertyDescription(propProp.parent, propProp.propertyName)
                         visibility = FromBooleanParameter(propProp.propertyName.condition)
                         propProp.clazz.properties.simpleProperties.forEach {
-                            it.toParameter(this@group, schema, editMode, prop.grandChildBinding(propProp))
+                            it.toParameter(this@group, schema, "$propertyPath${prop.propertyName}.${propProp.propertyName}")
                         }
                     }
                 }
@@ -247,23 +239,23 @@ fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema: Schema,
             complex.isEmpty() && ! primitives.isEmpty() -> step(prop.title) {
                 description = schema.propertyDescription(clazz, prop.propertyName)
                 visibility = FromBooleanParameter(prop.propertyName.condition)
-                primitives.forEach { it.toParameter(this@step, schema, editMode, prop.childBinding) }
+                primitives.forEach { it.toParameter(this@step, schema, "$propertyPath${prop.propertyName}") }
             }
             else -> groups(prop.title) {
                 description = schema.propertyDescription(clazz, prop.propertyName)
                 visibility = FromBooleanParameter(prop.propertyName.condition)
                 group(CustomParameters) {
-                    primitives.forEach { it.toParameter(this@group, schema, editMode, prop.childBinding) }
+                    primitives.forEach { it.toParameter(this@group, schema, "$propertyPath${prop.propertyName}") }
                 }
                 group(AdvancedParameters) {
-                    complex.advancedSwitch(this@group, schema, "${prop.propertyName}.", editMode)
+                    complex.advancedSwitch(this@group, schema, "$propertyPath${prop.propertyName}")
                 }
                 for (propProp in complex) {
                     group(propProp.title) {
                         visibility = FromBooleanParameter(propProp.propertyName.condition)
                         description = schema.propertyDescription(propProp.parent, propProp.propertyName)
                         propProp.clazz.properties.simpleProperties.onlyPrimitives.forEach {
-                            it.toParameter(this@group, schema, editMode, prop.grandChildBinding(propProp))
+                            it.toParameter(this@group, schema, "$propertyPath${prop.propertyName}.${propProp.propertyName}")
                         }
                     }
                 }

@@ -18,10 +18,15 @@ import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
+import net.juniper.contrail.vro.workflows.model.FromBooleanParameter
+import net.juniper.contrail.vro.workflows.model.NullStateOfProperty
+import net.juniper.contrail.vro.workflows.model.WhenNonNull
+import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.objectDescription
+import net.juniper.contrail.vro.workflows.schema.propertyDescription
 import net.juniper.contrail.vro.workflows.schema.relationDescription
 
 fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, multipleParents: Boolean, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
@@ -69,7 +74,47 @@ fun editWorkflow(clazz: ObjectClass, schema: Schema): WorkflowDefinition {
             showInInventory = true
         }
 
-        addProperties(clazz, schema, editMode = true)
+        addProperties (
+            clazz = clazz,
+            schema = schema
+        )
+    }
+}
+
+fun editComplexPropertiesWorkflows(clazz: ObjectClass, schema: Schema) =
+    clazz.complexPropertiesInRange(2..3)
+        .map { it.complexEditWorkflows(schema) }
+        .flatten()
+        .toList()
+
+private fun Property.complexEditWorkflows(schema: Schema) =
+    clazz.complexPropertiesInRange(1..2)
+        .map { editComplexPropertyWorkflows(this, it, schema) }
+
+private fun editComplexPropertyWorkflows(rootProperty: Property, thisProperty: Property, schema: Schema): WorkflowDefinition {
+
+    val rootClass = rootProperty.parent
+    val workflowName = "Edit ${thisProperty.clazz.allLowerCase} of ${rootClass.allLowerCase}"
+
+    return workflow(workflowName).withScript(editComplexPropertyScriptBody(rootProperty, thisProperty)) {
+        description = schema.propertyDescription(rootProperty.clazz, thisProperty.propertyName)
+        parameter(item, rootClass.reference) {
+            description = "${rootClass.allCapitalized} to edit"
+            mandatory = true
+            showInInventory = true
+        }
+        parameter(thisProperty.propertyName.condition, boolean) {
+            description = "Define ${thisProperty.title}"
+            dataBinding = NullStateOfProperty(item, "${rootProperty.propertyName}.${thisProperty.propertyName}")
+            visibility = WhenNonNull(item)
+        }
+
+        addProperties (
+            clazz = thisProperty.clazz,
+            schema = schema,
+            propertyPrefix = "${rootProperty.propertyName}.${thisProperty.propertyName}",
+            extraVisibility = FromBooleanParameter(thisProperty.propertyName.condition)
+        )
     }
 }
 
@@ -110,6 +155,34 @@ ${clazz.editPropertiesCode(item)}
 ${item.retrieveExecutor}
 ${item.updateAsClass(clazz.pluginName)}
 """.trimIndent()
+
+private fun editComplexPropertyScriptBody(rootProperty: Property, thisProperty: Property) = """
+${initComplexPropertyEdit(rootProperty.propertyName, rootProperty.clazz, thisProperty.propertyName, thisProperty.clazz)}
+${item.retrieveExecutor}
+${item.updateAsClass(rootProperty.parent.pluginName)}
+""".trimIndent()
+
+private fun initComplexPropertyEdit(rootName: String, rootClass: Class<*>, thisName: String, thisClass: Class<*>) = """
+var $rootName = $item.get${rootName.capitalize()}();
+if (${thisName.condition}) {
+    var $thisName = null;
+    if (!$rootName) {
+        $rootName = new Contrail${rootClass.pluginName}();
+        $item.set${rootName.capitalize()}($rootName);
+    } else {
+        $thisName = $rootName.get${thisName.capitalize()}();
+    }
+    if (!$thisName) {
+        $thisName = new Contrail${thisClass.pluginName}();
+        $rootName.set${thisName.capitalize()}($thisName);
+    }
+${thisClass.editPropertiesCode(thisName).prependIndent(tab)}
+} else {
+    if ($rootName) {
+        $rootName.set${thisName.capitalize()}(null);
+    }
+}
+""".trim()
 
 private fun deleteScriptBody(className: String) = """
 $retrieveExecutorFromItem
