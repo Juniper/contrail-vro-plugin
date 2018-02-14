@@ -504,3 +504,21 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
         }
     }
 }
+
+internal fun removePolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
+    val workflowName = "Remove network policy rule"
+
+    return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("removeRuleFromPolicy") {
+        step("Rule") {
+            parameter(parent, reference<NetworkPolicy>()) {
+                extractRelationDescription<Project, NetworkPolicy>(schema)
+                mandatory = true
+            }
+            parameter("rule", string) {
+                visibility = WhenNonNull(parent)
+                description = "Rule to remove"
+                predefinedAnswersAction = actionCallTo(getNetworkPolicyRules).parameter(parent).create()
+            }
+        }
+    }
+}

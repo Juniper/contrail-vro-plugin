@@ -8,12 +8,13 @@ import net.juniper.contrail.api.types.AddressType
 import net.juniper.contrail.api.types.PolicyRuleType
 import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.SecurityGroup
+import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.getNetworkPolicyRules
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.model.ActionCall
 import net.juniper.contrail.vro.workflows.model.FromStringParameter
 import net.juniper.contrail.vro.workflows.model.MultiAddressSecurityGroupRule
 import net.juniper.contrail.vro.workflows.model.WhenNonNull
+import net.juniper.contrail.vro.workflows.model.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
@@ -94,22 +95,19 @@ internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
 
     return customWorkflow<SecurityGroup>(workflowName).withScriptFile("editSecurityGroupRule") {
         step("Rule") {
-            parameter("parent", reference<SecurityGroup>()) {
+            parameter(parent, reference<SecurityGroup>()) {
                 extractRelationDescription<Project, SecurityGroup>(schema)
                 mandatory = true
             }
             parameter("rule", string) {
-                visibility = WhenNonNull("parent")
+                visibility = WhenNonNull(parent)
                 description = "Rule to edit"
-                predefinedAnswersAction = ActionCall(
-                    getNetworkPolicyRules,
-                    "parent"
-                )
-                customValidation = MultiAddressSecurityGroupRule("parent")
+                predefinedAnswersAction = actionCallTo(getNetworkPolicyRules).parameter(parent).create()
+                customValidation = MultiAddressSecurityGroupRule(parent)
             }
         }
         step("Rule attributes") {
-            visibility = WhenNonNull("parent")
+            visibility = WhenNonNull(parent)
             parameter("direction", string) {
                 // direction has no description in the schema
                 description = "Direction"
@@ -148,6 +146,24 @@ internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
                 description = "Port Range"
                 mandatory = true
                 defaultValue = defaultPort
+            }
+        }
+    }
+}
+
+internal fun removeSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
+    val workflowName = "Remove security group rule"
+
+    return customWorkflow<SecurityGroup>(workflowName).withScriptFile("removeRuleFromSecurityGroup") {
+        step("Rule") {
+            parameter(parent, reference<SecurityGroup>()) {
+                extractRelationDescription<Project, SecurityGroup>(schema)
+                mandatory = true
+            }
+            parameter("rule", string) {
+                visibility = WhenNonNull(parent)
+                description = "Rule to remove"
+                predefinedAnswersAction = actionCallTo(getNetworkPolicyRules).parameter(parent).create()
             }
         }
     }
