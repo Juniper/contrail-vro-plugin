@@ -52,4 +52,10 @@ class Executor(private val connection: Connection) {
         connection.getObjects(${relation.childName}::class.java, parent.${relation.getter})
 
     </#list>
+    fun getSubnetsOfVirtualNetwork(parent: VirtualNetwork): List<Subnet> {
+        val ipams = parent.networkIpam ?: return emptyList()
+        return ipams.asSequence().map {
+            it.attr.ipamSubnets.asSequence().map { connection.findById<Subnet>(it.subnetUuid) }.filterNotNull()
+        }.flatten().toList()
+    }
 }

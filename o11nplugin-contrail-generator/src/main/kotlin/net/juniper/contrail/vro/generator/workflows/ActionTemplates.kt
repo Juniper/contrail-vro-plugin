@@ -23,6 +23,7 @@ val ForwardRelation.getReferencesActionName get() =
 val ForwardRelation.getReferencesActionScript
     get() =
 """
+if (!parent) return null;
 var parentId = parent.internalId;
 var executor = ContrailConnectionManager.executor(parentId.toString());
 var elements = executor.$getReferencesActionName(parent);

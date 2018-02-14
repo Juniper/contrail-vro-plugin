@@ -9,6 +9,7 @@ import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.NetworkPolicy
 import net.juniper.contrail.api.types.PolicyRuleType
 import net.juniper.contrail.api.types.PortType
+import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.api.types.SubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.VnSubnetsType
@@ -77,6 +78,18 @@ class Utils {
 
     fun isNetworRelatedToIpam(network: VirtualNetwork, ipam: NetworkIpam): Boolean =
         network.networkIpam?.any { it.uuid == ipam.uuid } ?: false
+
+    fun removeSubnetFromVirtualNetwork(network: VirtualNetwork, subnet: Subnet) {
+        val ipams = network.networkIpam ?: return
+        //first remove subnet from attributes
+        ipams.forEach {
+            it.attr.ipamSubnets.removeIf { it.subnetUuid == subnet.uuid }
+        }
+        //then remove IPAMs if have not subnets
+        ipams.removeIf {
+            it.attr.ipamSubnets.isEmpty()
+        }
+    }
 
     private fun String.clean() =
         replace("\\s+", "")

@@ -13,4 +13,5 @@ fun loadCustomWorkflows(schema: Schema): List<WorkflowDefinition> = mutableListO
     this += addRuleToPolicyWorkflow(schema)
     this += editPolicyRuleWorkflow(schema)
     this += createSubnetWorkflow(schema)
+    this += deleteSubnetWorkflow()
 }

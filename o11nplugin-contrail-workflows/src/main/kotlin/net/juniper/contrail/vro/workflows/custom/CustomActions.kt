@@ -13,6 +13,7 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += cidrValidationAction(version, packageName)
     this += extractListPropertyAction(version, packageName)
     this += getNetworkPolicyRulesAction(version, packageName)
+    this += getSubnetsOfVirtualNetworkAction(version, packageName)
     this += allocValidationAction(version, packageName)
     this += inCidrValidationAction(version, packageName)
     this += isFreeValidationAction(version, packageName)

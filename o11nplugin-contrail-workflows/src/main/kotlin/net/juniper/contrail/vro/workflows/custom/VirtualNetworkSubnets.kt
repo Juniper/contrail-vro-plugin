@@ -7,7 +7,11 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.IpamSubnetType
+import net.juniper.contrail.api.types.Subnet
+import net.juniper.contrail.vro.config.constants.item
+import net.juniper.contrail.vro.config.getSubnetsOfVirtualNetwork
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
 import net.juniper.contrail.vro.workflows.model.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.workflows.schema.Schema
@@ -66,6 +70,25 @@ internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 defaultValue = true
             }
+        }
+    }
+}
+
+internal fun deleteSubnetWorkflow(): WorkflowDefinition {
+
+    val workflowName = "Remove subnet from virtual network"
+
+    return customWorkflow<VirtualNetwork>(workflowName).withScriptFile("deleteSubnet") {
+        parameter(item, reference<VirtualNetwork>()) {
+            description = "Virtual network to remove subnet from"
+            mandatory = true
+        }
+        parameter("subnet", reference<Subnet>()) {
+            description = "Subnet to be removed"
+            mandatory = true
+            visibility = WhenNonNull(item)
+            browserRoot = item.asBrowserRoot()
+            listedBy = actionCallTo(getSubnetsOfVirtualNetwork).parameter(item).create()
         }
     }
 }
