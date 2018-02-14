@@ -55,7 +55,7 @@ internal fun isMultiAddressNetworkPolicyRuleAction(version: String, packageName:
 internal fun isMultiAddressSecurityGroupRuleAction(version: String, packageName: String): Action {
     val name = isMultiAddressSecurityGroupRuleAction
     val resultType = string
-    val parameters = listOf("input" ofType string, "sg" ofType any)
+    val parameters = listOf("input" ofType string, "securityGroup" ofType any)
     return Action(
         name = name,
         packageName = packageName,

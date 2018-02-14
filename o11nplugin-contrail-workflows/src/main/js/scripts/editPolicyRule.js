@@ -1,4 +1,3 @@
-
 // TODO: update "actions" with Services, Mirror
 
 var index = ContrailUtils.ruleStringToIndex(rule);
@@ -9,22 +8,34 @@ if (qos) {
     qosName = qos.getQualifiedName().join(":");
 }
 
+var srcAddress = ContrailUtils.createAddress(srcAddressType, srcAddressCidr, srcAddressNetwork, srcAddressPolicy, srcAddressSecurityGroup);
+var dstAddress = ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAddressNetwork, dstAddressPolicy, dstAddressSecurityGroup);
 theRule.protocol = protocol;
 theRule.direction = direction;
+
 theRule.clearSrcAddresses();
-theRule.addSrcAddresses(ContrailUtils.createAddress(srcAddressType, srcAddressCidr, srcAddressNetwork, srcAddressPolicy));
 theRule.clearDstAddresses();
-theRule.addDstAddresses(ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAddressNetwork, dstAddressPolicy));
 theRule.clearSrcPorts();
-ContrailUtils.parsePorts(srcPorts).forEach(function(port) {
-   theRule.addSrcPorts(port);
-});
-var parsedDstPorts = ContrailUtils.parsePorts(dstPorts);
 theRule.clearDstPorts();
+
+theRule.addSrcAddresses(srcAddress);
+theRule.addDstAddresses(dstAddress);
+
+// src ports need to be added as pairs (start, end).
+// dst ports need to be added as PortType objects.
+ContrailUtils.parsePorts(srcPorts).forEach(function(port) {
+   theRule.addSrcPorts(port.startPort, port.endPort);
+});
 ContrailUtils.parsePorts(dstPorts).forEach(function(port) {
    theRule.addDstPorts(port);
 });
-theRule.setActionList(new ContrailActionListType(simpleAction, null, null, null, null, null, log, null, qosName));
+
+var actions = new ContrailActionListType()
+actions.setSimpleAction(simpleAction);
+actions.setLog(log);
+actions.setQosAction(qosName);
+
+theRule.setActionList(actions);
 
 var executor = ContrailConnectionManager.executor(parent.internalId.toString());
 executor.updateNetworkPolicy(parent);

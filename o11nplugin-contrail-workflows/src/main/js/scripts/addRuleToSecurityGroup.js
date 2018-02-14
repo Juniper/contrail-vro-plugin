@@ -1,5 +1,3 @@
-
-var ruleSequence = new ContrailSequenceType(-1, -1);
 var ruleUuid = ContrailUtils.randomUUID();
 
 var parsedPorts = ContrailUtils.parsePorts(ports);
@@ -24,7 +22,7 @@ if (direction == "ingress") {
     srcPorts = localPorts;
 }
 
-var rule = new ContrailPolicyRuleType(null, ruleUuid, trafficDirection, ContrailUtils.lowercase(protocol), srcAddr, srcPorts, null, dstAddr, dstPorts, null, ethertype);
+var rule = new ContrailPolicyRuleType(null, ruleUuid, trafficDirection, protocol, srcAddr, srcPorts, null, dstAddr, dstPorts, null, ethertype);
 var rules = parent.getEntries();
 if (!rules) {
     rules = new ContrailPolicyEntriesType();

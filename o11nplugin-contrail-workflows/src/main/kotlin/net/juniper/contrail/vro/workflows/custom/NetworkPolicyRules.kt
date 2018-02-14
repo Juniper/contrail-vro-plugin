@@ -241,6 +241,15 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                     FromBooleanParameter(mirrorShowParameterName)
                 )
             }
+            parameter("routingInstance", reference<VirtualNetwork>()) {
+                description = "Routing Instance"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName),
+                    FromStringParameter("juniperHeader", "disabled")
+                )
+            }
             parameter("nexthopMode", string) {
                 description = "Nexthop Mode"
                 mandatory = true
@@ -249,6 +258,33 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 visibility = ConditionConjunction(
                     FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
                     FromBooleanParameter(mirrorShowParameterName)
+                )
+            }
+            parameter("vtepDestIp", string) {
+                description = "VTEP Dest IP"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName),
+                    FromStringParameter("nexthopMode", "static")
+                )
+            }
+            parameter("vtepDestMac", string) {
+                description = "VTEP Dest MAC"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName),
+                    FromStringParameter("nexthopMode", "static")
+                )
+            }
+            parameter("vni", number) {
+                description = "VxLAN ID"
+                mandatory = true
+                visibility = ConditionConjunction(
+                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
+                    FromBooleanParameter(mirrorShowParameterName),
+                    FromStringParameter("nexthopMode", "static")
                 )
             }
 
@@ -509,16 +545,15 @@ internal fun removePolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
     val workflowName = "Remove network policy rule"
 
     return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("removeRuleFromPolicy") {
-        step("Rule") {
-            parameter(parent, reference<NetworkPolicy>()) {
-                extractRelationDescription<Project, NetworkPolicy>(schema)
-                mandatory = true
-            }
-            parameter("rule", string) {
-                visibility = WhenNonNull(parent)
-                description = "Rule to remove"
-                predefinedAnswersAction = actionCallTo(getNetworkPolicyRules).parameter(parent).create()
-            }
+        parameter(parent, reference<NetworkPolicy>()) {
+            extractRelationDescription<Project, NetworkPolicy>(schema)
+            mandatory = true
+        }
+        parameter("rule", string) {
+            visibility = WhenNonNull(parent)
+            description = "Rule to remove"
+            mandatory = true
+            predefinedAnswersAction = actionCallTo(getNetworkPolicyRules).parameter(parent).create()
         }
     }
 }

@@ -1,34 +1,42 @@
 var index = ContrailUtils.ruleStringToIndex(rule);
-var ruule = parent.entries.policyRule[index];
-
-var ruleSequence = new ContrailSequenceType(-1, -1);
-var ruleUuid = ContrailUtils.randomUUID();
+var theRule = parent.entries.policyRule[index];
 
 var parsedPorts = ContrailUtils.parsePorts(ports);
-var addr = [ContrailUtils.createAddress(addressType, addressCidr, null, null, addressSecurityGroup)];
+var addr = ContrailUtils.createAddress(addressType, addressCidr, null, null, addressSecurityGroup);
 
 var localPorts = ContrailUtils.parsePorts("0-65535");
-var localAddr = [ContrailUtils.createAddress("Security Group", null, null, null, null)];
+var localAddr = ContrailUtils.createAddress("Security Group", null, null, null, null);
 
 var trafficDirection = ">"
 
 var srcAddr, dstAddr, srcPorts, dstPorts;
 
+// src ports need to be added as pairs (start, end).
+// dst ports need to be added as PortType objects.
+theRule.clearSrcAddresses()
+theRule.clearDstAddresses()
+theRule.clearSrcPorts()
+theRule.clearDstPorts()
+
 if (direction == "ingress") {
-    ruule.srcAddr = addr;
-    ruule.srcPorts = parsedPorts;
-    ruule.dstAddr = localAddr;
-    ruule.dstPorts = localPorts;
+    theRule.addSrcAddresses(addr);
+    parsedPorts.forEach(function(port) {
+        theRule.addSrcPorts(port.startPort, port.endPort);
+    });
+    theRule.addDstAddresses(localAddr);
+    theRule.addDstPorts(localPorts[0]);
 } else {
-    ruule.dstAddr = addr;
-    ruule.dstPorts = parsedPorts;
-    ruule.srcAddr = localAddr;
-    ruule.srcPorts = localPorts;
+    theRule.addDstAddresses(addr);
+    parsedPorts.forEach(function(port) {
+        theRule.addDstPorts(port);
+    });
+    theRule.addSrcAddresses(localAddr);
+    theRule.addSrcPorts(localPorts[0].startPort, localPorts[0].endPort);
 }
 
-ruule.protocol = protocol;
-ruule.ethertype = ethertype;
+theRule.protocol = protocol;
+theRule.ethertype = ethertype;
 
 var id = parent.internalId;
-var executor = ContrailConnectionManager.getExecutor(id.toString());
+var executor = ContrailConnectionManager.executor(id.toString());
 executor.updateSecurityGroup(parent);

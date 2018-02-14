@@ -155,16 +155,15 @@ internal fun removeSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition
     val workflowName = "Remove security group rule"
 
     return customWorkflow<SecurityGroup>(workflowName).withScriptFile("removeRuleFromSecurityGroup") {
-        step("Rule") {
-            parameter(parent, reference<SecurityGroup>()) {
-                extractRelationDescription<Project, SecurityGroup>(schema)
-                mandatory = true
-            }
-            parameter("rule", string) {
-                visibility = WhenNonNull(parent)
-                description = "Rule to remove"
-                predefinedAnswersAction = actionCallTo(getNetworkPolicyRules).parameter(parent).create()
-            }
+        parameter(parent, reference<SecurityGroup>()) {
+            extractRelationDescription<Project, SecurityGroup>(schema)
+            mandatory = true
+        }
+        parameter("rule", string) {
+            visibility = WhenNonNull(parent)
+            description = "Rule to remove"
+            mandatory = true
+            predefinedAnswersAction = actionCallTo(getNetworkPolicyRules).parameter(parent).create()
         }
     }
 }

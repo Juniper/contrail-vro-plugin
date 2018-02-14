@@ -197,7 +197,7 @@ class Utils {
         cidr: String?,
         network: VirtualNetwork?,
         policy: NetworkPolicy?,
-        securityGroup: SecurityGroup? = null
+        securityGroup: SecurityGroup?
     ): AddressType {
         val subnet = if (type == "CIDR" && cidr != null) parseSubnet(cidr) else null
         val networkName = if (type == "Network" && network != null) network.name else null
