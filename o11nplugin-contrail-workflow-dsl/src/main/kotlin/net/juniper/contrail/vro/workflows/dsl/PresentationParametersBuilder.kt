@@ -92,8 +92,8 @@ open class ParameterAggregator(
     }
 
     @JvmName("parameterStringArray")
-    fun parameter(name: String, type: array<String>, setup: StringArrayParameterBuilder.() -> Unit) {
-        StringArrayParameterBuilder(name, type).updateWith(setup)
+    fun parameter(name: String, type: array<String>, setup: ArrayStringParameterBuilder.() -> Unit) {
+        ArrayStringParameterBuilder(name, type).updateWith(setup)
     }
 
     fun parameter(name: String, type: Class<*>, setup: BasicParameterBuilder<*>.() -> Unit) = when (type) {
@@ -183,6 +183,19 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
 class ArrayPairParameterBuilder(name: String, type: array<Pair<String, String>>) :
         BasicParameterBuilder<List<Pair<String, String>>>(name, type)
 
+class ArrayStringParameterBuilder(name: String, type: array<String>) : BasicParameterBuilder<List<String>>(name, type) {
+    var customValidation: ArrayValidation? = null
+    override val customQualifiers get(): List<ParameterQualifier> {
+        val qualifiers = mutableListOf<ParameterQualifier>()
+        customValidation?.let {
+            when (it) {
+                is AllocationPool -> qualifiers.add(allocValidatorQualifier(parameterName, it.cidr, it.actionName))
+            }
+        }
+        return qualifiers
+    }
+}
+
 class BooleanParameterBuilder(name: String) : BasicParameterBuilder<Boolean>(name, boolean)
 
 class IntParameterBuilder(name: String) : BasicParameterBuilder<Long>(name, number) {
@@ -211,7 +224,6 @@ class StringParameterBuilder(name: String) : BasicParameterBuilder<String>(name,
         customValidation?.let {
             when (it) {
                 is CIDR -> qualifiers.add(cidrValidatorQualifier(parameterName, it.actionName))
-                is AllocationPool -> qualifiers.add(allocValidatorQualifier(parameterName, it.cidr, it.actionName))
                 is InCIDR -> qualifiers.add(inCidrValidatorQualifier(parameterName, it.cidr, it.actionName))
                 is FreeInCIDR -> qualifiers.add(freeInCidrValidatorQualifier(parameterName, it.cidr, it.pools,
                         it.dns, it.actionName))
@@ -246,8 +258,6 @@ class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterB
 }
 
 class ReferenceArrayParameterBuilder(name: String, type: array<Reference>) : BasicParameterBuilder<List<Reference>>(name, type)
-
-class StringArrayParameterBuilder(name: String, type: array<String>) : BasicParameterBuilder<List<String>>(name, type)
 
 class OutputParameterBuilder(val name: String, val type: ParameterType<Any>) {
     var description: String? = null

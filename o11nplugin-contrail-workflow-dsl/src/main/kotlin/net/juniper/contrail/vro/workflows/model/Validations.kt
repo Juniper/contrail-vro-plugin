@@ -12,12 +12,13 @@ import net.juniper.contrail.vro.config.isInCidrAction
 sealed class Validation
 
 sealed class StringValidation : Validation()
+sealed class ArrayValidation : Validation()
 
 class CIDR : StringValidation() {
     val actionName = isCidrAction
 }
 
-class AllocationPool(val cidr: String) : StringValidation() {
+class AllocationPool(val cidr: String) : ArrayValidation() {
     val actionName = isAllocPoolAction
 }
 

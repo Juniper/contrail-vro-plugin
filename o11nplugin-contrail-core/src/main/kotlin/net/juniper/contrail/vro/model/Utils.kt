@@ -36,16 +36,16 @@ class Utils {
     fun isValidIpv4Cidr(input: String): Boolean =
         NetAddressValidator.IPv4.isValidSubnet(input)
 
-    fun isValidPool(input: String): Boolean =
+    fun isValidPool(input: List<String>): Boolean =
         NetAddressValidator.areValidPools(input)
 
-    fun isValidIpv4Pool(input: String): Boolean =
+    fun isValidIpv4Pool(input: List<String>): Boolean =
         NetAddressValidator.IPv4.areValidPools(input)
 
-    fun isValidIpv6Pool(input: String): Boolean =
+    fun isValidIpv6Pool(input: List<String>): Boolean =
         NetAddressValidator.IPv6.areValidPools(input)
 
-    fun isValidAllocationPool(cidr: String, pools: String): Boolean {
+    fun isValidAllocationPool(cidr: String, pools: List<String>): Boolean {
         if (isValidIpv4Cidr(cidr) && isValidIpv4Pool(pools)) {
             return parsePools(cidr, pools, ::IPv4)
         } else if (isValidIpv6Cidr(cidr) && isValidIpv6Pool(pools)) {
@@ -63,15 +63,15 @@ class Utils {
         return false
     }
 
-    fun isFree(cidr: String, address: String, pools: String?, dnsAddr: String?): Boolean {
+    fun isFree(cidr: String, address: String, pools: List<String>?, dnsAddr: String?): Boolean {
         if (isValidIpv4Cidr(cidr) && isValidIpv4Address(address)) {
-            if (pools != null && pools.isNotBlankMultiline() && !isValidIpv4Pool(pools)) return false
+            if (pools != null && !pools.isBlankList() && !isValidIpv4Pool(pools)) return false
             if (dnsAddr != null && dnsAddr.isNotBlank() && !isValidIpv4Address(dnsAddr)) return false
             val ip = IPv4(address)
             return (ip in getSubnetRange(cidr, ::IPv4)) && ip.notInPools(pools, ::IPv4)
                     && !dnsAddr.equalsIp(ip, ::IPv4)
         } else if (isValidIpv6Cidr(cidr) && isValidIpv6Address(address)) {
-            if (pools != null && pools.isNotBlankMultiline() && !isValidIpv6Pool(pools)) return false
+            if (pools != null && !pools.isBlankList() && !isValidIpv6Pool(pools)) return false
             if (dnsAddr != null && dnsAddr.isNotBlank() && !isValidIpv6Address(dnsAddr)) return false
             val ip = IPv6(address)
             return (ip in getSubnetRange(cidr, ::IPv6)) && ip.notInPools(pools, ::IPv6)
@@ -218,6 +218,9 @@ class Utils {
     fun lowercase(s: String) =
         s.toLowerCase()
 
-    fun splitMultiline(s: String): List<String> =
-        s.splitMultiline()
+    fun trimList(s: List<String>) : List<String> =
+        s.trimList()
+
+    fun isBlankList(s: List<String>?) : Boolean =
+        s.isBlankList()
 }

@@ -35,10 +35,9 @@ enum class NetAddressValidator(val maxPrefixLength: Int) {
         return isValidAddress(parts[0])
     }
 
-    fun areValidPools(pools: String): Boolean {
-        val lines = pools.splitMultiline()
-        if (lines.isEmpty()) return false
-        return lines.all { isValidPool(it) }
+    fun areValidPools(pools: List<String>): Boolean {
+        if (pools.isBlankList()) return false
+        return pools.all { isValidPool(it) }
     }
 
     companion object {
@@ -56,7 +55,7 @@ enum class NetAddressValidator(val maxPrefixLength: Int) {
         fun isValidSubnet(subnet: String): Boolean =
             values.asSequence().filter { it.isValidSubnet(subnet) }.any()
 
-        fun areValidPools(pools: String) : Boolean {
+        fun areValidPools(pools: List<String>) : Boolean {
             return values.asSequence().filter { it.areValidPools(pools) }.any()
         }
     }

@@ -58,10 +58,10 @@ class IPv6(val highBits: Long, val lowBits: Long) : IP<IPv6> {
     constructor (address: String) : this(address.ipv6toLong(0..7), address.ipv6toLong(8..15))
 
     override fun equals(other: Any?): Boolean =
-        if (other is IPv6) highBits.equals(other.highBits) && lowBits.equals(other.lowBits) else false
+        if (other is IPv6) highBits == other.highBits && lowBits == other.lowBits else false
 
     override fun hashCode(): Int =
-        BigInteger(JavaLong.toBinaryString(highBits) + JavaLong.toBinaryString(lowBits), 2).hashCode()
+        BigInteger(toString(), 2).hashCode()
 
     override operator fun compareTo(other: IPv6) : Int {
         val high = JavaLong.compareUnsigned(highBits, other.highBits)
@@ -159,10 +159,9 @@ fun String.ipv6toLong(range: IntRange) : Long {
 fun <T: IP<T>> String?.equalsIp(ip : T, ipFactory: (String) -> T): Boolean =
     if (this != null && this.isNotBlank()) ipFactory(this) == ip else false
 
-fun <T: IP<T>> T.notInPools(pools : String?, ipFactory: (String) -> T) : Boolean {
+fun <T: IP<T>> T.notInPools(pools : List<String>?, ipFactory: (String) -> T) : Boolean {
     if (pools != null) {
-        val cleanedPools = pools.trimMultiline()
-        return cleanedPools.isBlank() || poolsToRanges(cleanedPools, ipFactory).none { this in it }
+        return pools.isBlankList() || poolsToRanges(pools.trimList(), ipFactory).none { this in it }
     } else {
         return true
     }
@@ -182,9 +181,8 @@ fun <T : IP<T>> poolToRange(pool: String, ipFactory: (String) -> T) : IpRange<T>
     return IpRange(start, end)
 }
 
-fun <T : IP<T>> poolsToRanges(pools: String, ipFactory: (String) -> T) : List<IpRange<T>> {
-    val lines = pools.split('\n')
-    return lines.map { poolToRange(it, ipFactory) ?: return emptyList() }
+fun <T : IP<T>> poolsToRanges(pools: List<String>, ipFactory: (String) -> T) : List<IpRange<T>> {
+    return pools.map { poolToRange(it, ipFactory) ?: return emptyList() }
 }
 
 fun <T : IP<T>> getSubnetRange(cidr: String, ipFactory: (String) -> T) : IpRange<T> {
@@ -196,18 +194,17 @@ fun <T : IP<T>> getSubnetRange(cidr: String, ipFactory: (String) -> T) : IpRange
     return IpRange(netAddr, broadcast)
 }
 
-fun <T : IP<T>> parsePools(cidr: String, pools: String, ipFactory: (String) -> T) : Boolean {
+fun <T : IP<T>> parsePools(cidr: String, pools: List<String>, ipFactory: (String) -> T) : Boolean {
+    if (pools.isBlankList()) return false
     val subnet = getSubnetRange(cidr.trim(), ipFactory)
-    val ranges = poolsToRanges(pools.trimMultiline(), ipFactory)
+    val ranges = poolsToRanges(pools.trimList(), ipFactory)
     if (ranges.isEmpty()) return false
     return ranges.all { it.isValidInSubnet(subnet, ranges) }
 }
 
-fun String.trimMultiline(): String =
-    splitMultiline().joinToString( "\n" )
+fun List<String>?.isBlankList(): Boolean =
+    this?.all { it.isBlank() } ?: true
 
-fun String.isNotBlankMultiline(): Boolean =
-    splitMultiline().joinToString( "\n" ).isNotBlank()
+fun List<String>.trimList(): List<String> =
+    map { it.trim() }.filter { it.isNotBlank() }
 
-fun String.splitMultiline(): List<String> =
-    split('\n').map { it.trim() }.filter { it.isNotBlank() }

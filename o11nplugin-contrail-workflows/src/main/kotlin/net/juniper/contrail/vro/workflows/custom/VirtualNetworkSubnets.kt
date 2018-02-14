@@ -40,11 +40,10 @@ internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 customValidation = CIDR()
             }
-            parameter("allocationPools", string) {
+            parameter("allocationPools", string.array) {
                 extractPropertyDescription<IpamSubnetType>(schema)
                 mandatory = false
                 customValidation = AllocationPool("subnet")
-                multiline = true
             }
             parameter("addrFromStart", boolean) {
                 // addr_from_start is the only parameter in IpamSubnet that has underscore in name

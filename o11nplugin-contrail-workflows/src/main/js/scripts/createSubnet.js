@@ -22,10 +22,10 @@ ipamSubnet.setSubnetName(subnet_name);
 ipamSubnet.setSubnetUuid(uuid);
 ipamSubnet.setAddrFromStart(addrFromStart);
 
-var pools = ContrailUtils.splitMultiline(allocationPools);
-if (pools.length != 0) {
+if (!ContrailUtils.isBlankList(allocationPools)) {
+    var pools = ContrailUtils.trimList(allocationPools)
     pools.forEach(function(element) {
-       var parts = element.split("-");
+       var parts = element.trim().split("-");
        ipamSubnet.addAllocationPools(parts[0], parts[1]);
     });
 }
