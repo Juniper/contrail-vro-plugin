@@ -23,9 +23,9 @@ ipamSubnet.setSubnetUuid(uuid);
 ipamSubnet.setAddrFromStart(addrFromStart);
 
 if (!ContrailUtils.isBlankList(allocationPools)) {
-    var pools = ContrailUtils.trimList(allocationPools)
+    var pools = ContrailUtils.trimList(allocationPools);
     pools.forEach(function(element) {
-       var parts = element.trim().split("-");
+       var parts = element.split("-");
        ipamSubnet.addAllocationPools(parts[0], parts[1]);
     });
 }

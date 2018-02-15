@@ -49,6 +49,9 @@ class IPv4(val ip: Int) : IP<IPv4> {
 
     override infix fun or(other: IPv4) : IPv4 =
         IPv4(ip or other.ip)
+
+    override fun toString() : String =
+        Integer.toBinaryString(ip)
 }
 
 class IPv6(val highBits: Long, val lowBits: Long) : IP<IPv6> {

@@ -140,56 +140,21 @@ class Utils {
     }
 
     fun parseSubnet(def: String): SubnetType {
-        val cleaned = def.clean()
+        val cleaned = def.trim()
         val parts = cleaned.split(":")
         val (virtualNetworkName, virtualNetworkAddress) = when (parts.size) {
             1 -> Pair(null, parts[0])
             2 -> Pair(parts[0], parts[1])
             else -> throw IllegalArgumentException("Wrong subnet format. use CIDR or VN:CIDR")
         }
-        val subnetIP = parseSubnetIP(virtualNetworkAddress)
+        if (!isValidCidr(virtualNetworkAddress)) throw IllegalArgumentException("Wrong CIDR format.")
+        val (subnetIP, subnetPrefix) = virtualNetworkAddress.split('/')
         val fullNetworkName = if (virtualNetworkName != null) {
             "$virtualNetworkName:$subnetIP"
         } else {
             subnetIP
         }
-        val subnetPrefix = parseSubnetPrefix(virtualNetworkAddress)
-        return SubnetType(fullNetworkName, subnetPrefix)
-    }
-
-    fun parseSubnetIP(virtualNetworkAddress: String): String {
-        val minIpPart = 0
-        val maxIpPart = 255
-
-        val subnetIP = virtualNetworkAddress.split("/")[0]
-        val ipParts = subnetIP.split(".")
-        if (ipParts.size != 4) {
-            throw IllegalArgumentException("Wrong subnet IP format.")
-        }
-        if (ipParts[0].toInt() == 0) {
-            throw IllegalArgumentException("Wrong subnet IP format.")
-        }
-        ipParts.map { it.toInt() }.map {
-            if (it < minIpPart || it > maxIpPart) {
-                throw IllegalArgumentException("Wrong subnet IP format.")
-            }
-        }
-        return subnetIP
-    }
-
-    fun parseSubnetPrefix(virtualNetworkAddress: String): Int {
-        val minSubnetPrefix = 0
-        val maxSubnetPrefix = 32
-
-        val subnetAddressParts = virtualNetworkAddress.split("/")
-        val subnetPrefix = when (subnetAddressParts.size) {
-            2 -> subnetAddressParts[1].toInt()
-            else -> throw IllegalArgumentException("Wrong subnet format. use CIDR or VN:CIDR")
-        }
-        if (subnetPrefix < minSubnetPrefix || subnetPrefix > maxSubnetPrefix) {
-            throw IllegalArgumentException("Subnet prefix $subnetPrefix out of bounds. ($minSubnetPrefix-$maxSubnetPrefix)")
-        }
-        return subnetPrefix
+        return SubnetType(fullNetworkName, subnetPrefix.toInt())
     }
 
     fun createAddress(
