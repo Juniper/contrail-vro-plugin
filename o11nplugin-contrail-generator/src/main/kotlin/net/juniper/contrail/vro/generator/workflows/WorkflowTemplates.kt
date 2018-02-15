@@ -204,7 +204,7 @@ private val List<Property>.onlyComplex get() =
 fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema: Schema, editMode: Boolean = false) {
     val properties = clazz.properties
     val topPrimitives = properties.simpleProperties.onlyPrimitives
-    val topComplex = properties.simpleProperties.onlyComplex.filter { it.clazz.maxDepth < 2 }
+    val topComplex = properties.simpleProperties.onlyComplex
 
     val stepVisibility = if (editMode) WhenNonNull(item) else AlwaysVisible
 

@@ -122,7 +122,7 @@ fun Class<*>.editPropertiesCode(item: String, level: Int = 0) =
 fun Property.editCode(item: String, level: Int) = when {
     ! clazz.isApiTypeClass && level <= maxPrimitiveLevel -> primitiveEditCode(item)
     clazz.isStringListWrapper && level <= maxPrimitiveLevel -> listEditCode(item)
-    clazz.isApiTypeClass && level <= maxComplexLevel -> complexEditCode(item, level)
+    clazz.isApiTypeClass && (level + clazz.maxDepth <= maxComplexLevel || level == 0) -> complexEditCode(item, level)
     else -> ""
 }
 
