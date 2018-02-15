@@ -7,6 +7,9 @@ package net.juniper.contrail.vro.generator.workflows
 import com.sun.xml.internal.bind.marshaller.CharacterEscapeHandler
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.ProjectInfo
+import net.juniper.contrail.vro.config.hasCustomCreateWorkflow
+import net.juniper.contrail.vro.config.hasCustomDeleteWorkflow
+import net.juniper.contrail.vro.config.hasCustomEditWorkflow
 import net.juniper.contrail.vro.config.isRelationMandatory
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
@@ -58,10 +61,14 @@ fun RelationDefinition.mandatoryReferencesOf(clazz: ObjectClass) =
         .toList()
 
 private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, multipleParents: Boolean, refs: List<ObjectClass>, schema: Schema) {
-    createWorkflow(clazz, parentClazz, multipleParents, refs, schema).save(info, clazz)
-    editWorkflow(clazz, schema).save(info, clazz)
-    editComplexPropertiesWorkflows(clazz, schema).forEach { it.save(info, clazz) }
-    deleteWorkflow(clazz).save(info, clazz)
+    if (!clazz.hasCustomCreateWorkflow)
+        createWorkflow(clazz, parentClazz, multipleParents, refs, schema).save(info, clazz)
+    if (!clazz.hasCustomEditWorkflow) {
+        editWorkflow(clazz, schema).save(info, clazz)
+        editComplexPropertiesWorkflows(clazz, schema).forEach { it.save(info, clazz) }
+    }
+    if (!clazz.hasCustomDeleteWorkflow)
+        deleteWorkflow(clazz).save(info, clazz)
 }
 
 private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema) =

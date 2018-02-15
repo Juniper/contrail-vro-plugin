@@ -16,6 +16,8 @@ val modelClasses = setOf(
     "VirtualMachineInterface",
     "RouteTable",
     "ServiceInstance",
+    "ServiceTemplate",
+    "InstanceIp",
     "QosConfig",
     "GlobalQosConfig"
 )
@@ -46,6 +48,20 @@ val nonEditableProperties = setOf(
     "networkId"
 )
 
+val customCreateWorkflows = setOf(
+    "FloatingIpPool",
+    "FloatingIp"
+)
+
+val customEditWorkflows = setOf(
+    "NetworkPolicy",
+    "RouteTable"
+)
+
+val customDeleteWorkflows = setOf(
+    "VirtualMachineInterface"
+)
+
 val directChildren = setOf(
     "FloatingIp"
 )
@@ -71,6 +87,15 @@ val String.isIgnoredInWorkflow get() =
 val String.isEditableProperty get() =
     ! nonEditableProperties.contains(this)
 
+val String.hasCustomCreateWorkflow get() =
+    customCreateWorkflows.contains(this)
+
+val String.hasCustomEditWorkflow get() =
+    customEditWorkflows.contains(this)
+
+val String.hasCustomDeleteWorkflow get() =
+    customDeleteWorkflows.contains(this)
+
 val String.isDirectChild get() =
     directChildren.contains(this)
 
@@ -91,6 +116,15 @@ val Class<*>.isInventoryProperty get() =
 
 val Class<*>.ignoredInWorkflow get() =
     simpleName.isIgnoredInWorkflow
+
+val Class<*>.hasCustomCreateWorkflow get() =
+    simpleName.hasCustomCreateWorkflow
+
+val Class<*>.hasCustomEditWorkflow get() =
+    simpleName.hasCustomEditWorkflow
+
+val Class<*>.hasCustomDeleteWorkflow get() =
+    simpleName.hasCustomDeleteWorkflow
 
 val Class<*>.isDirectChild get() =
     simpleName.isDirectChild
