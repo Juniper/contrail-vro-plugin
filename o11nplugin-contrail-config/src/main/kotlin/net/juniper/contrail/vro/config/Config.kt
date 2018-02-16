@@ -55,6 +55,8 @@ val customCreateWorkflows = setOf(
 
 val customEditWorkflows = setOf(
     "NetworkPolicy",
+    "FloatingIpPool",
+    "FloatingIp",
     "RouteTable"
 )
 
