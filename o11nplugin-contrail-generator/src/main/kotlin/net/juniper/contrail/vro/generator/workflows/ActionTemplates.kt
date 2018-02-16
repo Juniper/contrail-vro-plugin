@@ -28,15 +28,15 @@ var parentId = parent.internalId;
 var executor = ContrailConnectionManager.executor(parentId.toString());
 var elements = executor.$getReferencesActionName(parent);
 for each (e in elements) {
-    e.internalId = parentId.with("$childName", e.uuid);
+    e.internalId = parentId.with("$childPluginName", e.uuid);
 }
 return elements;
 """.trimIndent()
 
 fun ForwardRelation.findReferencesAction(version: String, packageName: String): Action {
     val name = getReferencesActionName
-    val resultType = array(Reference(childName))
-    val parameters = listOf(ActionParameter("parent", Reference(parentName)))
+    val resultType = array(Reference(childPluginName))
+    val parameters = listOf(ActionParameter("parent", Reference(parentPluginName)))
     return Action(
         name = name,
         packageName = packageName,
