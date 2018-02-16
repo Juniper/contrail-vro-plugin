@@ -52,6 +52,11 @@ class Executor(private val connection: Connection) {
         connection.getObjects(${relation.childName}::class.java, parent.${relation.getter})
 
     </#list>
+    fun getProjectsOfFloatingIpPool(child: FloatingIpPool) : List<Project>{
+        val projects = child.projectBackRefs ?: emptyList()
+        return projects.asSequence().map { connection.findById<Project>(it.uuid) }.filterNotNull().toList()
+    }
+
     fun getSubnetsOfVirtualNetwork(parent: VirtualNetwork): List<Subnet> {
         val ipams = parent.networkIpam ?: return emptyList()
         return ipams.asSequence().map {
