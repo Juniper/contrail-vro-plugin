@@ -173,7 +173,7 @@ fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQuali
             )
         }
         "enumerations" -> predefinedAnswersQualifier(string, constraintValue as List<String>)
-        "required" -> mandatoryQualifier
+        "required" -> if (constraintValue.toString() == "true") mandatoryQualifier else null
         else -> null
     }
 

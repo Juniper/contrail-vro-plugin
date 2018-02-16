@@ -88,11 +88,12 @@ private fun Schema.qualifiersOf(element: Node): List<ParameterQualifier> {
             defaultValue == "false" -> false
             else -> defaultValue.toIntOrNull() ?: defaultValue
         }
-        xsdConstraints.put(default, typedValue)
+        xsdConstraints[default] = typedValue
     }
 
-    if (elementAttributes[required] != null) {
-        xsdConstraints.put(required, elementAttributes[required]!!.toBoolean())
+    val requiredValue = elementAttributes[required]
+    if (requiredValue != null) {
+        xsdConstraints[required] = requiredValue
     }
 
     if (elementType !in knownSchemaTypes) {
