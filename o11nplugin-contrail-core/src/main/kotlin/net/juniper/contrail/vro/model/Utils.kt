@@ -157,6 +157,12 @@ class Utils {
         return SubnetType(fullNetworkName, subnetPrefix.toInt())
     }
 
+    fun parseSubnetIP(address: String) : String =
+        address.trim().split('/')[0]
+
+    fun parseSubnetPrefix(address: String) : String =
+        address.trim().split('/')[1]
+
     fun createAddress(
         type: String,
         cidr: String?,
