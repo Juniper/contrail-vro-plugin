@@ -9,6 +9,7 @@ val utilActionPackage = "$actionPackage.util"
 
 val parentConnection = "parentConnection"
 val isCidrAction = "isValidCidr"
+val isIpAction = "isValidIp"
 val propertyNotNull = "propertyNotNull"
 val propertyValue = "propertyValue"
 val isInCidrAction = "isInCidr"

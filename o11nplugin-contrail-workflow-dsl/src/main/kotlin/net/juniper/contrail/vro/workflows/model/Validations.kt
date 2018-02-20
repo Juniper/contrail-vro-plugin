@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.workflows.model
 
 import net.juniper.contrail.vro.config.isAllocPoolAction
+import net.juniper.contrail.vro.config.isIpAction
 import net.juniper.contrail.vro.config.isCidrAction
 import net.juniper.contrail.vro.config.isFreeInCidrAction
 import net.juniper.contrail.vro.config.isInCidrAction
@@ -18,6 +19,10 @@ sealed class ArrayValidation : Validation()
 
 class CIDR : StringValidation() {
     val actionName = isCidrAction
+}
+
+class IP : StringValidation() {
+    val actionName = isIpAction
 }
 
 class AllocationPool(val cidr: String) : ArrayValidation() {

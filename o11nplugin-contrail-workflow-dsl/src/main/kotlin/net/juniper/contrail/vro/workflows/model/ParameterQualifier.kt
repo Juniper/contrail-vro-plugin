@@ -118,6 +118,8 @@ fun <T : Any> bindValueToAction(actionName: String, type: ParameterType<T>, vara
 
 fun multiAddressValidationQualifier(parameter: String, policyFieldName: String, actionName: String) =
     validatorActionQualifier(actionPackage, actionName, "#$parameter", "#$policyFieldName")
+fun ipValidatorQualifier(parameter: String, actionName: String) =
+    validatorActionQualifier(actionPackage, actionName, "#$parameter")
 fun cidrValidatorQualifier(parameter: String, actionName: String) =
     validatorActionQualifier(actionPackage, actionName, "#$parameter")
 fun allocValidatorQualifier(parameter: String, cidr: String, actionName: String) =

@@ -223,6 +223,7 @@ class StringParameterBuilder(name: String) : BasicParameterBuilder<String>(name,
         val qualifiers = mutableListOf<ParameterQualifier>()
         customValidation?.let {
             when (it) {
+                is IP -> qualifiers.add(ipValidatorQualifier(parameterName, it.actionName))
                 is CIDR -> qualifiers.add(cidrValidatorQualifier(parameterName, it.actionName))
                 is InCIDR -> qualifiers.add(inCidrValidatorQualifier(parameterName, it.cidr, it.actionName))
                 is FreeInCIDR -> qualifiers.add(freeInCidrValidatorQualifier(parameterName, it.cidr, it.pools,

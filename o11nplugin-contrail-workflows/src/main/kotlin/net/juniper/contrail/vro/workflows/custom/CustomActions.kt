@@ -11,6 +11,7 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += propertyNotNullAction(version, packageName)
     this += parentConnectionAction(version, packageName)
     this += cidrValidationAction(version, packageName)
+    this += ipValidationAction(version, packageName)
     this += extractListPropertyAction(version, packageName)
     this += getNetworkPolicyRulesAction(version, packageName)
     this += getSubnetsOfVirtualNetworkAction(version, packageName)

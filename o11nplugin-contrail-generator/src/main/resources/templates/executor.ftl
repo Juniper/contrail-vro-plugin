@@ -63,4 +63,8 @@ class Executor(private val connection: Connection) {
             it.attr.ipamSubnets.asSequence().map { connection.findById<Subnet>(it.subnetUuid) }.filterNotNull()
         }.flatten().toList()
     }
+
+    // InstanceIp should be in 1-1 relation to VMI, so only first element is chosen if it exists
+    fun getInstanceIpOfPort(port: VirtualMachineInterface): InstanceIp? =
+        port.instanceIpBackRefs?.getOrNull(0)?.uuid?.let { connection.findById(it) }
 }

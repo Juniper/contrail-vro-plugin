@@ -9,8 +9,9 @@ import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.getSubnetsOfVirtualNetwork
 import net.juniper.contrail.vro.config.isAllocPoolAction
 import net.juniper.contrail.vro.config.isCidrAction
-import net.juniper.contrail.vro.config.isFreeInCidrAction
+import net.juniper.contrail.vro.config.isIpAction
 import net.juniper.contrail.vro.config.isInCidrAction
+import net.juniper.contrail.vro.config.isFreeInCidrAction
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.array
@@ -31,6 +32,21 @@ internal fun getSubnetsOfVirtualNetworkAction(version: String, packageName: Stri
         resultType = resultType,
         parameters = parameters,
         script = Script(ScriptLoader.load(name))
+    )
+}
+
+internal fun ipValidationAction(version: String, packageName: String): Action {
+    val name = isIpAction
+    val resultType = string
+    val parameters = listOf("input" ofType string)
+    return Action(
+            name = name,
+            packageName = packageName,
+            id = generateID(packageName, name),
+            version = version,
+            resultType = resultType,
+            parameters = parameters,
+            script = Script(ScriptLoader.load(name))
     )
 }
 
