@@ -19,7 +19,7 @@ import net.juniper.contrail.vro.config.isPropertyListWrapper
 import net.juniper.contrail.vro.config.isStringListWrapper
 import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.pluginName
-import net.juniper.contrail.vro.config.splitCamel
+import net.juniper.contrail.vro.config.toAcronymOrLowercase
 import net.juniper.contrail.vro.generator.Contrail
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.workflows.dsl.PresentationParametersBuilder
@@ -70,7 +70,7 @@ val AdvancedParameters = "Advanced parameters"
 val CustomParameters = "Custom parameters"
 
 val String.allLowerCase get() =
-    removeTypeSuffix().splitCamel().toLowerCase()
+    removeTypeSuffix().camelChunks.joinToString(" ") { it.toAcronymOrLowercase() }
 
 val Class<*>.allLowerCase get() =
     pluginName.allLowerCase

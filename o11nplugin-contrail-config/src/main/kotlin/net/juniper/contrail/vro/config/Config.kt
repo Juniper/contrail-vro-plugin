@@ -49,18 +49,17 @@ val nonEditableProperties = setOf(
 )
 
 val customCreateWorkflows = setOf(
-    "FloatingIpPool",
     "FloatingIp"
 )
 
 val customEditWorkflows = setOf(
     "NetworkPolicy",
-    "FloatingIpPool",
     "FloatingIp",
     "RouteTable"
 )
 
 val customDeleteWorkflows = setOf(
+    "FloatingIpPool",
     "VirtualMachineInterface"
 )
 

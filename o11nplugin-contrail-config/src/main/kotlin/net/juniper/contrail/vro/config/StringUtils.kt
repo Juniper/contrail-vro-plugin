@@ -75,7 +75,12 @@ fun pluralizeCamelCases(name: String) : String {
     return (uppercasedWords.dropLast(1).plus(pluralWord)).joinToString(" ")
 }
 
-val String.cleanOrRename get() = when (this) {
+fun String.toAcronymOrLowercase(): String {
+    val cleaned = cleanAcronym
+    return if (cleaned == this) toLowerCase() else cleaned
+}
+
+val String.cleanAcronym get() = when (this) {
     "Uuid", "uuid" -> "UUID"
     "Ip", "ip" -> "IP"
     "Bgp", "bgp" -> "BGP"
@@ -83,25 +88,32 @@ val String.cleanOrRename get() = when (this) {
     "Pbb", "pbb" -> "PBB"
     "Evpn", "evpn" -> "EVPN"
     "Rpf", "rpf" -> "RPF"
-    "Src" -> "Source"
-    "Dst" -> "Destination"
     "Vxlan", "vxlan" -> "VxLAN"
     "Qos", "qos" -> "QoS"
     "Ecmp", "ecmp" -> "ECMP"
+    else -> this
+}
+
+val String.rename get() = when (this) {
+    "Src" -> "Source"
+    "Dst" -> "Destination"
     "Entries", "entries" -> "Rules"
     "Mgmt", "mgmt" -> "Configuration"
     "Perms2", "perms2" -> "Permissions"
     else -> this
 }
 
-private val String.alreadyPlural get() = when (this) {
+val String.cleanOrRename get() =
+    cleanAcronym.rename
+
+private val String.isAlreadyPlural get() = when (this) {
     "Pairs", "Details", "Fields", "Type2", "Subnets", "Pools", "Routes", "Rules",
     "Ports", "Annotations", "Addresses", "Entries", "Permissions" -> true
     else -> false
 }
 
 fun String.pluralize(): String = when {
-    alreadyPlural -> this
+    isAlreadyPlural -> this
     matches(ES_SUFFIXES) -> this + "es"
     endsWith("y") && !matches(NON_IES_SUFFIXES_REGEX) -> dropLast(1) + "ies"
     endsWith("list", true) -> this
