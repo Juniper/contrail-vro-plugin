@@ -21,10 +21,8 @@ theRule.clearDstPorts();
 theRule.addSrcAddresses(srcAddress);
 theRule.addDstAddresses(dstAddress);
 
-// src ports need to be added as pairs (start, end).
-// dst ports need to be added as PortType objects.
 ContrailUtils.parsePorts(srcPorts).forEach(function(port) {
-   theRule.addSrcPorts(port.startPort, port.endPort);
+   theRule.addSrcPorts(port);
 });
 ContrailUtils.parsePorts(dstPorts).forEach(function(port) {
    theRule.addDstPorts(port);

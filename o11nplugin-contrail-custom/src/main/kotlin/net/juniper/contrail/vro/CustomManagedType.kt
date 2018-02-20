@@ -11,6 +11,7 @@ import com.vmware.o11n.sdk.modeldrivengen.model.ManagedMethod
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
 import net.juniper.contrail.vro.config.backRefTypeName
 import net.juniper.contrail.vro.config.isApiObjectClass
+import net.juniper.contrail.vro.config.isApiPropertyClass
 import net.juniper.contrail.vro.config.isHiddenProperty
 import net.juniper.contrail.vro.config.isInventoryProperty
 import net.juniper.contrail.vro.config.isModelClassName
@@ -49,9 +50,34 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         CustomProperty(returnTypeOrListType!!.simpleName, name)
 
     init {
+        removeDuplicateMethods()
         generatePropertyMethods()
         generateRefsMethods()
     }
+
+    private fun removeDuplicateMethods() {
+        delegate.methods.asSequence()
+            .filter { it.isPropertyEditor }
+            .groupBy { it.name }
+            .filter { it.value.size > 1 }
+            .values
+            .forEach { it.removeDuplicates() }
+    }
+
+    private fun List<ManagedMethod>.removeDuplicates() {
+        val remaining = methodToRetain
+        asSequence()
+            .filter { it != remaining }
+            .forEach { delegate.methods.remove(it) }
+    }
+
+    private val List<ManagedMethod>.methodToRetain get() =
+        first { it.params.size == 1 && it.params[0].modelType.isApiPropertyClass }
+
+    private val ManagedMethod.isPropertyEditor get() =
+        returns.modelType == Void.TYPE && params.let {
+            it.size >= 1 && ! it[0].modelType.isApiObjectClass
+        }
 
     private fun generateRefsMethods() {
         for (customField in this.refsFields) {

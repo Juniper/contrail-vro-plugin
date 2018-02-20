@@ -21,7 +21,7 @@ theRule.clearDstPorts()
 if (direction == "ingress") {
     theRule.addSrcAddresses(addr);
     parsedPorts.forEach(function(port) {
-        theRule.addSrcPorts(port.startPort, port.endPort);
+        theRule.addSrcPorts(port);
     });
     theRule.addDstAddresses(localAddr);
     theRule.addDstPorts(localPorts[0]);
@@ -31,7 +31,7 @@ if (direction == "ingress") {
         theRule.addDstPorts(port);
     });
     theRule.addSrcAddresses(localAddr);
-    theRule.addSrcPorts(localPorts[0].startPort, localPorts[0].endPort);
+    theRule.addSrcPorts(localPorts[0]);
 }
 
 theRule.protocol = protocol;
