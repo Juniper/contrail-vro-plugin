@@ -115,6 +115,9 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
     fun <T : ApiObjectBase> list(clazz: Class<T>): List<T>? =
         safe { connector.list(clazz, null) as List<T>? }
 
+    inline fun <reified T : ApiObjectBase> list(): List<T>? =
+        list(T::class.java)
+
     fun <T : ApiObjectBase, U : ApiPropertyBase> getObjects(
         clazz: Class<T>,
         references: List<ObjectReference<U>>?

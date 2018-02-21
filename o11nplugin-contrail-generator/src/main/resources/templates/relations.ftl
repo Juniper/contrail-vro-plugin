@@ -33,10 +33,10 @@ import net.juniper.contrail.vro.base.ConnectionRepository
 class ConnectionHas${rootClass.simpleName}
 @Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${rootClass.simpleName}> {
 
-    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${rootClass.simpleName}>? {
-        val connection = connections.getConnection(parentId)
-        return connection?.list(${rootClass.simpleName}::class.java)
-    }
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${rootClass.simpleName}>? =
+        connections.getConnection(parentId)?.run {
+            list<${rootClass.simpleName}>()?.onEach { read(it) }
+        }
 }
 
 </#list>
@@ -47,7 +47,7 @@ class ${relation.parentName}Has${relation.childName}
 
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childName}>? {
         val connection = connections.getConnection(parentId)
-        val parent = connection?.findById(${relation.parentName}::class.java, parentId.getString("${relation.parentPluginName}"))
+        val parent = connection?.findById<${relation.parentName}>(parentId.getString("${relation.parentPluginName}"))
         return connection?.getObjects(${relation.childName}::class.java, parent?.${relation.childNameDecapitalized}s)
     }
 }
