@@ -144,9 +144,11 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
     var mandatory: Boolean = false
     var defaultValue: Type? = null
     var dataBinding: DataBinding<Type> = NoDataBinding
-    // TODO: Unify predefinedAnswers and predefinedAnswersAction
     var predefinedAnswers: List<Type>? = null
-    var predefinedAnswersAction: ActionCall? = null
+    var predefinedAnswersFrom: ActionCallBuilder? = null
+        set(value) {
+            field = value?.freeze()
+        }
     val additionalQualifiers = mutableListOf<ParameterQualifier>()
 
     val parameterInfo get() = ParameterInfo(
@@ -171,8 +173,8 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
         predefinedAnswers?.let {
             add(predefinedAnswersQualifier(type, it))
         }
-        predefinedAnswersAction?.let {
-            add(predefinedAnswersActionQualifier(type, it))
+        predefinedAnswersFrom?.let {
+            add(predefinedAnswersActionQualifier(type, it.create()))
         }
     }
 
@@ -246,14 +248,17 @@ class DateParameterBuilder(name: String) : BasicParameterBuilder<Date>(name, dat
 class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterBuilder<Reference>(name, type) {
 
     var showInInventory: Boolean = false
-    var listedBy: ActionCall? = null
+    var listedBy: ActionCallBuilder? = null
+        set(value) {
+            field = value?.freeze()
+        }
     var browserRoot: InventoryBrowserRoot = DefaultBrowserRoot
 
     override val customQualifiers get(): List<ParameterQualifier> {
         val qualifiers = mutableListOf<ParameterQualifier>()
         if (showInInventory) qualifiers.add(showInInventoryQualifier)
         listedBy?.let {
-            qualifiers.add(listFromAction(it, type))
+            qualifiers.add(listFromAction(it.create(), type))
         }
         browserRoot.ognl?.let { qualifiers.add(displayParentFrom(it)) }
         return qualifiers

@@ -93,7 +93,7 @@ internal fun deleteSubnetWorkflow(): WorkflowDefinition {
             mandatory = true
             visibility = WhenNonNull(item)
             browserRoot = item.asBrowserRoot()
-            listedBy = actionCallTo(getSubnetsOfVirtualNetwork).parameter(item).create()
+            listedBy = actionCallTo(getSubnetsOfVirtualNetwork).parameter(item)
         }
     }
 }

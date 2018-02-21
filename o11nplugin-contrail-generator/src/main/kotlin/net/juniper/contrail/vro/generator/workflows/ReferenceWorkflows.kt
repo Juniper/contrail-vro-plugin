@@ -64,7 +64,7 @@ fun removeReferenceWorkflow(relation: ForwardRelation): WorkflowDefinition {
             mandatory = true
             visibility = WhenNonNull(item)
             browserRoot = item.asBrowserRoot()
-            listedBy = actionCallTo(relation.getReferencesActionName).parameter(item).create()
+            listedBy = actionCallTo(relation.getReferencesActionName).parameter(item)
         }
     }
 }

@@ -24,6 +24,9 @@ class ActionCall private constructor(val name: String, vararg val arguments: Str
 
         fun create() =
             ActionCall(name, *arguments.toTypedArray())
+
+        fun freeze() =
+            ActionCallBuilder(name).also { it.arguments.addAll(arguments) }
     }
 }
 

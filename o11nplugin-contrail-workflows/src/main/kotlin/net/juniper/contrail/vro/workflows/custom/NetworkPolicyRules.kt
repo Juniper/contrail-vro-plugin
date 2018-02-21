@@ -317,7 +317,7 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
             parameter("rule", string) {
                 visibility = WhenNonNull(parent)
                 description = "Rule to edit"
-                predefinedAnswersAction = actionCallTo(getNetworkPolicyRules).parameter(parent).create()
+                predefinedAnswersFrom = actionCallTo(getNetworkPolicyRules).parameter(parent)
                 customValidation = MultiAddressNetworkPolicyRule(parent)
             }
         }
@@ -553,7 +553,7 @@ internal fun removePolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
             visibility = WhenNonNull(parent)
             description = "Rule to remove"
             mandatory = true
-            predefinedAnswersAction = actionCallTo(getNetworkPolicyRules).parameter(parent).create()
+            predefinedAnswersFrom = actionCallTo(getNetworkPolicyRules).parameter(parent)
         }
     }
 }
