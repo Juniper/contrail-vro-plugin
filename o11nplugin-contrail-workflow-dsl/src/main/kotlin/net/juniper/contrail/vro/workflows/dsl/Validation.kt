@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.workflows.model
+package net.juniper.contrail.vro.workflows.dsl
 
 import net.juniper.contrail.vro.config.isAllocPoolAction
 import net.juniper.contrail.vro.config.isIpAction

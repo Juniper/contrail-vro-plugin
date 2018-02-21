@@ -13,9 +13,9 @@ import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
-import net.juniper.contrail.vro.workflows.model.WhenNonNull
+import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
-import net.juniper.contrail.vro.workflows.model.actionCallTo
+import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.relationDescription

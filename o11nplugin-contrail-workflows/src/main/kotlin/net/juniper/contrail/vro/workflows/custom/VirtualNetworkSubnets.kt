@@ -10,7 +10,13 @@ import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.getSubnetsOfVirtualNetwork
+import net.juniper.contrail.vro.workflows.dsl.AllocationPool
+import net.juniper.contrail.vro.workflows.dsl.CIDR
+import net.juniper.contrail.vro.workflows.dsl.FreeInCIDR
+import net.juniper.contrail.vro.workflows.dsl.InCIDR
+import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
 import net.juniper.contrail.vro.workflows.model.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.vro.workflows.util.extractPropertyDescription

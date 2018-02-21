@@ -18,9 +18,9 @@ import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
-import net.juniper.contrail.vro.workflows.model.FromBooleanParameter
-import net.juniper.contrail.vro.workflows.model.NullStateOfProperty
-import net.juniper.contrail.vro.workflows.model.WhenNonNull
+import net.juniper.contrail.vro.workflows.dsl.FromBooleanParameter
+import net.juniper.contrail.vro.workflows.dsl.NullStateOfProperty
+import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string

@@ -4,8 +4,6 @@
 
 package net.juniper.contrail.vro.workflows.dsl
 
-import net.juniper.contrail.vro.workflows.model.ActionCall
-import net.juniper.contrail.vro.workflows.model.ActionCallBuilder
 import net.juniper.contrail.vro.workflows.model.ognl
 
 abstract class InventoryBrowserRoot {

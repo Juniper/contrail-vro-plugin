@@ -15,7 +15,7 @@ import net.juniper.contrail.vro.config.isFreeInCidrAction
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.array
-import net.juniper.contrail.vro.workflows.model.ofType
+import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.util.generateID

@@ -11,7 +11,7 @@ import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.boolean
-import net.juniper.contrail.vro.workflows.model.ofType
+import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.util.generateID
 

@@ -9,6 +9,8 @@ import net.juniper.contrail.vro.config.actionPackage
 import net.juniper.contrail.vro.config.extractListProperty
 import net.juniper.contrail.vro.config.propertyNotNull
 import net.juniper.contrail.vro.config.propertyValue
+import net.juniper.contrail.vro.workflows.dsl.ActionCall
+import net.juniper.contrail.vro.workflows.dsl.VisibilityCondition
 import net.juniper.contrail.vro.workflows.model.QualifierKind.ognl
 import net.juniper.contrail.vro.workflows.model.QualifierKind.static
 import javax.xml.bind.annotation.XmlAccessType

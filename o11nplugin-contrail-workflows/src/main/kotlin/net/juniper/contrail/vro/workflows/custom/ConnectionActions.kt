@@ -10,7 +10,7 @@ import net.juniper.contrail.vro.config.parentConnection
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.any
-import net.juniper.contrail.vro.workflows.model.ofType
+import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.util.generateID
 

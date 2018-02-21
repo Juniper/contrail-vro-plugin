@@ -11,10 +11,10 @@ import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.getNetworkPolicyRules
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.model.FromStringParameter
-import net.juniper.contrail.vro.workflows.model.MultiAddressSecurityGroupRule
-import net.juniper.contrail.vro.workflows.model.WhenNonNull
-import net.juniper.contrail.vro.workflows.model.actionCallTo
+import net.juniper.contrail.vro.workflows.dsl.FromStringParameter
+import net.juniper.contrail.vro.workflows.dsl.MultiAddressSecurityGroupRule
+import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
+import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema

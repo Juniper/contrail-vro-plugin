@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.workflows.model
+package net.juniper.contrail.vro.workflows.dsl
 
 sealed class VisibilityCondition {
     abstract val stringCondition: String

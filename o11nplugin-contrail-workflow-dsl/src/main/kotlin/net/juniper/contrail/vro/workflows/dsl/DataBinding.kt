@@ -2,7 +2,17 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.workflows.model
+package net.juniper.contrail.vro.workflows.dsl
+
+import net.juniper.contrail.vro.workflows.model.ParameterQualifier
+import net.juniper.contrail.vro.workflows.model.ParameterType
+import net.juniper.contrail.vro.workflows.model.any
+import net.juniper.contrail.vro.workflows.model.bindDataTo
+import net.juniper.contrail.vro.workflows.model.bindValueToAction
+import net.juniper.contrail.vro.workflows.model.bindValueToComplexProperty
+import net.juniper.contrail.vro.workflows.model.bindValueToListProperty
+import net.juniper.contrail.vro.workflows.model.bindValueToNullableState
+import net.juniper.contrail.vro.workflows.model.bindValueToSimpleProperty
 
 abstract class DataBinding<in Type : Any> {
     abstract val qualifier: ParameterQualifier?
