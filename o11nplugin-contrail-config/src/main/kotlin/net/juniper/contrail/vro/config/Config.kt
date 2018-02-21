@@ -22,9 +22,6 @@ val modelClasses = setOf(
     "GlobalQosConfig"
 )
 
-val String.isModelClassName get() =
-    modelClasses.contains(this)
-
 val inventoryProperties = setOf(
     "QuotaType"
 )
@@ -71,10 +68,17 @@ val mandatoryReference = setOf(
     Pair("VirtualMachineInterface", "VirtualNetwork")
 )
 
+val hiddenRoots = setOf(
+    "VirtualMachineInterface"
+)
+
 val hiddenRelations = setOf(
     Pair("FloatingIp", "Project"),
     Pair("VirtualNetwork", "NetworkIpam")
 )
+
+val String.isModelClassName get() =
+    modelClasses.contains(this)
 
 val String.isInventoryPropertyClassName get() =
     inventoryProperties.contains(this)
@@ -99,6 +103,9 @@ val String.hasCustomDeleteWorkflow get() =
 
 val String.isDirectChild get() =
     directChildren.contains(this)
+
+val String.isHiddenRoot get() =
+    hiddenRoots.contains(this)
 
 fun Class<*>.isRelationMandatory(child: Class<*>) =
     mandatoryReference.contains(Pair(simpleName, child.simpleName))
@@ -130,11 +137,15 @@ val Class<*>.hasCustomDeleteWorkflow get() =
 val Class<*>.isDirectChild get() =
     simpleName.isDirectChild
 
+val Class<*>.isHiddenRoot get() =
+    simpleName.isHiddenRoot
+
 val ObjectClass.isRootClass: Boolean get() {
     val parentType = newInstance().defaultParentType
 
     if (parentType == null) return false
     if (parentType == "config-root") return true
+    if (isHiddenRoot) return false
 
     return ! parentType.typeToClassName.isModelClassName
 }
