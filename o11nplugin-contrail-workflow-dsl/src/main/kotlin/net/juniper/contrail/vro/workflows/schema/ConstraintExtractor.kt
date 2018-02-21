@@ -30,8 +30,8 @@ private fun Schema.propertyDescriptionImpl(clazz: Class<*>, xsdFieldName: String
     else -> definitionNode(clazz, xsdFieldName).attributeValue(description)
 }
 
-fun Schema.objectDescription(clazz: ObjectClass): String? {
-    return relationDefinitionComment(clazz.parentType ?: return null, clazz.xsdName).description
+fun Schema.objectDescription(clazz: ObjectClass, parent: ObjectClass? = null): String? {
+    return relationDefinitionComment(parent?.xsdName ?: clazz.parentType ?: return null, clazz.xsdName).description
 }
 
 inline fun <reified F : Any, reified T : Any> Schema.relationDescription() =

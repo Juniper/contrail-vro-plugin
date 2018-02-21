@@ -37,7 +37,7 @@ fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, multipleParent
     val parentName = parentClazz?.pluginName ?: Connection
 
     return workflow(workflowName).withScript(clazz.createScriptBody(parentClazz, refs)) {
-        description = schema.createWorkflowDescription(clazz)
+        description = schema.createWorkflowDescription(clazz, parentClazz)
         parameter("name", string) {
             description = "${clazz.allCapitalized} name"
             mandatory = true
@@ -121,8 +121,8 @@ private fun editComplexPropertyWorkflows(rootProperty: Property, thisProperty: P
 fun deleteWorkflow(clazz: ObjectClass) =
     deleteWorkflow(clazz.pluginName, deleteScriptBody(clazz.pluginName))
 
-private fun Schema.createWorkflowDescription(clazz: ObjectClass) : String? {
-    val objectDescription = objectDescription(clazz) ?: return null
+private fun Schema.createWorkflowDescription(clazz: ObjectClass, parentClazz: ObjectClass? = null) : String? {
+    val objectDescription = objectDescription(clazz, parentClazz) ?: return null
     return """
         ${clazz.allCapitalized.bold}
         $objectDescription

@@ -91,6 +91,7 @@ val String.cleanAcronym get() = when (this) {
     "Vxlan", "vxlan" -> "VxLAN"
     "Qos", "qos" -> "QoS"
     "Ecmp", "ecmp" -> "ECMP"
+    "Dscp", "dscp" -> "DSCP"
     else -> this
 }
 
