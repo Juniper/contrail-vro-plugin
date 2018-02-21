@@ -40,7 +40,7 @@ internal fun getNetworkPolicyRulesAction(version: String, packageName: String): 
 internal fun isMultiAddressNetworkPolicyRuleAction(version: String, packageName: String): Action {
     val name = isMultiAddressNetworkPolicyRuleAction
     val resultType = string
-    val parameters = listOf("input" ofType string, "npolicy" ofType any)
+    val parameters = listOf("input" ofType string, "networkPolicy" ofType any)
     return Action(
         name = name,
         packageName = packageName,

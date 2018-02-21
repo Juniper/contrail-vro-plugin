@@ -18,6 +18,10 @@ class ActionCall private constructor(val name: String, vararg val arguments: Str
             arguments.add("#$name")
         }
 
+        fun parameters(vararg names: String) = apply {
+            names.forEach { parameter(it) }
+        }
+
         fun string(string: String) = apply {
             arguments.add("\"$string\"")
         }

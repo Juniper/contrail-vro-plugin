@@ -97,6 +97,8 @@ fun visibilityConditionQualifier(condition: VisibilityCondition) =
     ognlQualifier(visibleQualifierName, boolean, condition.stringCondition)
 fun <T : Any> listFromAction(action: ActionCall, type: ParameterType<T>) =
     ognlQualifier(linkedEnumerationQualifierName, type, action.ognl)
+fun validationQualifier(action: ActionCall) =
+    ognlQualifier(customValidatorQualifierName, any, action.ognl)
 fun displayAsChildOf(parent: String) =
     ognlQualifier(sdkRootObjectQualifierName, any, "#$parent")
 fun displayParentFrom(ognl: String) =
@@ -118,19 +120,8 @@ fun <T : Any> bindValueToListProperty(parentItem: String, childItem: String, lis
 fun <T : Any> bindValueToAction(actionName: String, type: ParameterType<T>, vararg parameters: String) =
     ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, actionName, *parameters))
 
-fun multiAddressValidationQualifier(parameter: String, policyFieldName: String, actionName: String) =
-    validatorActionQualifier(actionPackage, actionName, "#$parameter", "#$policyFieldName")
 fun ipValidatorQualifier(parameter: String, actionName: String) =
     validatorActionQualifier(actionPackage, actionName, "#$parameter")
-fun cidrValidatorQualifier(parameter: String, actionName: String) =
-    validatorActionQualifier(actionPackage, actionName, "#$parameter")
-fun allocValidatorQualifier(parameter: String, cidr: String, actionName: String) =
-    validatorActionQualifier(actionPackage, actionName, "#$cidr", "#$parameter")
-fun inCidrValidatorQualifier(parameter: String, cidr: String, actionName: String) =
-    validatorActionQualifier(actionPackage, actionName, "#$cidr", "#$parameter")
-fun freeInCidrValidatorQualifier(parameter: String, cidr: String, pools: String, dns: String, actionName: String) =
-    validatorActionQualifier(actionPackage, actionName, "#$cidr", "#$parameter", "#$pools", "#$dns")
-
 private fun actionOgnl(packageName: String, name: String, vararg parameters: String) =
     """GetAction("$packageName","$name").call(${parameters.joinToString(", "){"$it"}})"""
 

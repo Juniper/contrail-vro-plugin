@@ -145,6 +145,13 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
     var defaultValue: Type? = null
     var dataBinding: DataBinding<Type> = NoDataBinding
     val additionalQualifiers = mutableListOf<ParameterQualifier>()
+    var validatedBy: ActionCallBuilder? = null
+        set(value) {
+            field = value?.freeze()
+        }
+
+    fun validationActionCallTo(actionName: String) =
+        actionCallTo(actionName).parameter(parameterName)
 
     val parameterInfo get() = ParameterInfo(
         name = parameterName,
@@ -164,6 +171,9 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
         }
         dataBinding.qualifier?.let {
             add(it)
+        }
+        validatedBy?.let {
+            add(validationQualifier(it.create()))
         }
     }
 
@@ -191,16 +201,7 @@ abstract class PrimitiveParameterBuilder<Type: Any>(parameterName: String, type:
 class ArrayPairParameterBuilder(name: String, type: array<Pair<String, String>>) :
     BasicParameterBuilder<List<Pair<String, String>>>(name, type)
 
-class ArrayStringParameterBuilder(name: String, type: array<String>) : BasicParameterBuilder<List<String>>(name, type) {
-    var customValidation: ArrayValidation? = null
-    override val customQualifiers get() = super.customQualifiers.apply {
-        customValidation?.let {
-            when (it) {
-                is AllocationPool -> add(allocValidatorQualifier(parameterName, it.cidr, it.actionName))
-            }
-        }
-    }
-}
+class ArrayStringParameterBuilder(name: String, type: array<String>) : BasicParameterBuilder<List<String>>(name, type)
 
 class BooleanParameterBuilder(name: String) : PrimitiveParameterBuilder<Boolean>(name, boolean)
 
@@ -220,21 +221,9 @@ class IntParameterBuilder(name: String) : PrimitiveParameterBuilder<Long>(name, 
 }
 
 class StringParameterBuilder(name: String) : PrimitiveParameterBuilder<String>(name, string) {
-    var customValidation: StringValidation? = null
     var multiline: Boolean = false
 
     override val customQualifiers get() = super.customQualifiers.apply {
-        customValidation?.let {
-            when (it) {
-                is IP -> add(ipValidatorQualifier(parameterName, it.actionName))
-                is CIDR -> add(cidrValidatorQualifier(parameterName, it.actionName))
-                is InCIDR -> add(inCidrValidatorQualifier(parameterName, it.cidr, it.actionName))
-                is FreeInCIDR -> add(freeInCidrValidatorQualifier(parameterName, it.cidr, it.pools,
-                    it.dns, it.actionName))
-                is MultiAddressNetworkPolicyRule -> add(multiAddressValidationQualifier(parameterName, it.policyFieldName, it.actionName))
-                is MultiAddressSecurityGroupRule -> add(multiAddressValidationQualifier(parameterName, it.securityGroupFieldName, it.actionName))
-            }
-        }
         if (multiline) {
             add(multilineQualifier())
         }

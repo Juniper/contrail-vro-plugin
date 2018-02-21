@@ -10,9 +10,9 @@ import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.getNetworkPolicyRules
+import net.juniper.contrail.vro.config.isMultiAddressSecurityGroupRuleAction
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.FromStringParameter
-import net.juniper.contrail.vro.workflows.dsl.MultiAddressSecurityGroupRule
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
@@ -103,7 +103,7 @@ internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
                 visibility = WhenNonNull(parent)
                 description = "Rule to edit"
                 predefinedAnswersFrom = actionCallTo(getNetworkPolicyRules).parameter(parent)
-                customValidation = MultiAddressSecurityGroupRule(parent)
+                validatedBy = validationActionCallTo(isMultiAddressSecurityGroupRuleAction).parameter(parent)
             }
         }
         step("Rule attributes") {

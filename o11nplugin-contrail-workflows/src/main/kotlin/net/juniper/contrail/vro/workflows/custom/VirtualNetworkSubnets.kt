@@ -10,10 +10,10 @@ import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.getSubnetsOfVirtualNetwork
-import net.juniper.contrail.vro.workflows.dsl.AllocationPool
-import net.juniper.contrail.vro.workflows.dsl.CIDR
-import net.juniper.contrail.vro.workflows.dsl.FreeInCIDR
-import net.juniper.contrail.vro.workflows.dsl.InCIDR
+import net.juniper.contrail.vro.config.isAllocPoolAction
+import net.juniper.contrail.vro.config.isCidrAction
+import net.juniper.contrail.vro.config.isFreeInCidrAction
+import net.juniper.contrail.vro.config.isInCidrAction
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
@@ -22,6 +22,10 @@ import net.juniper.contrail.vro.workflows.model.* // ktlint-disable no-wildcard-
 import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
+
+private val subnet = "subnet"
+private val allocationPools = "allocationPools"
+private val dnsServerAddress = "dnsServerAddress"
 
 internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
 
@@ -41,15 +45,15 @@ internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
             }
         }
         step("Parameters") {
-            parameter("subnet", string) {
+            parameter(subnet, string) {
                 extractPropertyDescription<IpamSubnetType>(schema, title="CIDR")
                 mandatory = true
-                customValidation = CIDR()
+                validatedBy = validationActionCallTo(isCidrAction)
             }
-            parameter("allocationPools", string.array) {
+            parameter(allocationPools, string.array) {
                 extractPropertyDescription<IpamSubnetType>(schema)
                 mandatory = false
-                customValidation = AllocationPool("subnet")
+                validatedBy = validationActionCallTo(isAllocPoolAction).parameter(subnet)
             }
             parameter("addrFromStart", boolean) {
                 // addr_from_start is the only parameter in IpamSubnet that has underscore in name
@@ -62,12 +66,12 @@ internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
             }
             parameter("dnsServerAddress", string) {
                 extractPropertyDescription<IpamSubnetType>(schema)
-                customValidation = InCIDR("subnet")
+                validatedBy = validationActionCallTo(isInCidrAction).parameter(subnet)
                 mandatory = false
             }
             parameter("defaultGateway", string) {
                 extractPropertyDescription<IpamSubnetType>(schema)
-                customValidation = FreeInCIDR("subnet", "allocationPools", "dnsServerAddress")
+                validatedBy = validationActionCallTo(isFreeInCidrAction).parameters(subnet, allocationPools, dnsServerAddress)
                 mandatory = true
             }
             parameter("enableDhcp", boolean) {
