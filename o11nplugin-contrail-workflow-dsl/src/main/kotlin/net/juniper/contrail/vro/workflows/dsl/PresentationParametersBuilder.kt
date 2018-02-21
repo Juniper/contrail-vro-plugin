@@ -133,7 +133,7 @@ abstract class BasicBuilder {
     protected val basicQualifiers get() = mutableListOf<ParameterQualifier>().apply {
         visibility.let {
             when (it) {
-                is AlwaysVisible -> Unit
+                AlwaysVisible -> Unit
                 else -> add(visibilityConditionQualifier(it))
             }
         }
@@ -144,11 +144,6 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
     var mandatory: Boolean = false
     var defaultValue: Type? = null
     var dataBinding: DataBinding<Type> = NoDataBinding
-    var predefinedAnswers: List<Type>? = null
-    var predefinedAnswersFrom: ActionCallBuilder? = null
-        set(value) {
-            field = value?.freeze()
-        }
     val additionalQualifiers = mutableListOf<ParameterQualifier>()
 
     val parameterInfo get() = ParameterInfo(
@@ -170,6 +165,20 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
         dataBinding.qualifier?.let {
             add(it)
         }
+    }
+
+    protected open val customQualifiers: MutableList<ParameterQualifier> get() =
+        ArrayList()
+}
+
+abstract class PrimitiveParameterBuilder<Type: Any>(parameterName: String, type: ParameterType<Type>) : BasicParameterBuilder<Type>(parameterName, type) {
+    var predefinedAnswers: List<Type>? = null
+    var predefinedAnswersFrom: ActionCallBuilder? = null
+        set(value) {
+            field = value?.freeze()
+        }
+
+    private val commonQualifiers get() = mutableListOf<ParameterQualifier>().apply {
         predefinedAnswers?.let {
             add(predefinedAnswersQualifier(type, it))
         }
@@ -177,73 +186,64 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
             add(predefinedAnswersActionQualifier(type, it.create()))
         }
     }
-
-    protected open val customQualifiers: List<ParameterQualifier> get() =
-        emptyList()
 }
 
 class ArrayPairParameterBuilder(name: String, type: array<Pair<String, String>>) :
-        BasicParameterBuilder<List<Pair<String, String>>>(name, type)
+    BasicParameterBuilder<List<Pair<String, String>>>(name, type)
 
 class ArrayStringParameterBuilder(name: String, type: array<String>) : BasicParameterBuilder<List<String>>(name, type) {
     var customValidation: ArrayValidation? = null
-    override val customQualifiers get(): List<ParameterQualifier> {
-        val qualifiers = mutableListOf<ParameterQualifier>()
+    override val customQualifiers get() = super.customQualifiers.apply {
         customValidation?.let {
             when (it) {
-                is AllocationPool -> qualifiers.add(allocValidatorQualifier(parameterName, it.cidr, it.actionName))
+                is AllocationPool -> add(allocValidatorQualifier(parameterName, it.cidr, it.actionName))
             }
         }
-        return qualifiers
     }
 }
 
-class BooleanParameterBuilder(name: String) : BasicParameterBuilder<Boolean>(name, boolean)
+class BooleanParameterBuilder(name: String) : PrimitiveParameterBuilder<Boolean>(name, boolean)
 
-class IntParameterBuilder(name: String) : BasicParameterBuilder<Long>(name, number) {
+class IntParameterBuilder(name: String) : PrimitiveParameterBuilder<Long>(name, number) {
     var min: Long? = null
     var max: Long? = null
 
-    override val customQualifiers get(): List<ParameterQualifier> {
-        val qualifiers = mutableListOf<ParameterQualifier>()
-        qualifiers.add(numberFormatQualifier("#0"))
+    override val customQualifiers get() = super.customQualifiers.apply {
+        add(numberFormatQualifier("#0"))
         min?.let {
-            qualifiers.add(minNumberValueQualifier(it))
+            add(minNumberValueQualifier(it))
         }
         max?.let {
-            qualifiers.add(maxNumberValueQualifier(it))
+            add(maxNumberValueQualifier(it))
         }
-        return qualifiers
     }
 }
 
-class StringParameterBuilder(name: String) : BasicParameterBuilder<String>(name, string) {
+class StringParameterBuilder(name: String) : PrimitiveParameterBuilder<String>(name, string) {
     var customValidation: StringValidation? = null
     var multiline: Boolean = false
 
-    override val customQualifiers get(): List<ParameterQualifier> {
-        val qualifiers = mutableListOf<ParameterQualifier>()
+    override val customQualifiers get() = super.customQualifiers.apply {
         customValidation?.let {
             when (it) {
-                is IP -> qualifiers.add(ipValidatorQualifier(parameterName, it.actionName))
-                is CIDR -> qualifiers.add(cidrValidatorQualifier(parameterName, it.actionName))
-                is InCIDR -> qualifiers.add(inCidrValidatorQualifier(parameterName, it.cidr, it.actionName))
-                is FreeInCIDR -> qualifiers.add(freeInCidrValidatorQualifier(parameterName, it.cidr, it.pools,
-                        it.dns, it.actionName))
-                is MultiAddressNetworkPolicyRule -> qualifiers.add(multiAddressValidationQualifier(parameterName, it.policyFieldName, it.actionName))
-                is MultiAddressSecurityGroupRule -> qualifiers.add(multiAddressValidationQualifier(parameterName, it.securityGroupFieldName, it.actionName))
+                is IP -> add(ipValidatorQualifier(parameterName, it.actionName))
+                is CIDR -> add(cidrValidatorQualifier(parameterName, it.actionName))
+                is InCIDR -> add(inCidrValidatorQualifier(parameterName, it.cidr, it.actionName))
+                is FreeInCIDR -> add(freeInCidrValidatorQualifier(parameterName, it.cidr, it.pools,
+                    it.dns, it.actionName))
+                is MultiAddressNetworkPolicyRule -> add(multiAddressValidationQualifier(parameterName, it.policyFieldName, it.actionName))
+                is MultiAddressSecurityGroupRule -> add(multiAddressValidationQualifier(parameterName, it.securityGroupFieldName, it.actionName))
             }
         }
         if (multiline) {
-            qualifiers.add(multilineQualifier())
+            add(multilineQualifier())
         }
-        return qualifiers
     }
 }
 
 class SecureStringParameterBuilder(name: String) : BasicParameterBuilder<String>(name, SecureString)
 
-class DateParameterBuilder(name: String) : BasicParameterBuilder<Date>(name, date)
+class DateParameterBuilder(name: String) : PrimitiveParameterBuilder<Date>(name, date)
 
 class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterBuilder<Reference>(name, type) {
 
@@ -254,14 +254,12 @@ class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterB
         }
     var browserRoot: InventoryBrowserRoot = DefaultBrowserRoot
 
-    override val customQualifiers get(): List<ParameterQualifier> {
-        val qualifiers = mutableListOf<ParameterQualifier>()
-        if (showInInventory) qualifiers.add(showInInventoryQualifier)
+    override val customQualifiers get() = super.customQualifiers.apply {
+        if (showInInventory) add(showInInventoryQualifier)
         listedBy?.let {
-            qualifiers.add(listFromAction(it.create(), type))
+            add(listFromAction(it.create(), type))
         }
-        browserRoot.ognl?.let { qualifiers.add(displayParentFrom(it)) }
-        return qualifiers
+        browserRoot.ognl?.let { add(displayParentFrom(it)) }
     }
 }
 
