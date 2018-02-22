@@ -65,7 +65,8 @@ val directChildren = setOf(
 )
 
 val mandatoryReference = setOf(
-    Pair("VirtualMachineInterface", "VirtualNetwork")
+    Pair("VirtualMachineInterface", "VirtualNetwork"),
+    Pair("ServiceInstance", "ServiceTemplate")
 )
 
 val hiddenRoots = setOf(
