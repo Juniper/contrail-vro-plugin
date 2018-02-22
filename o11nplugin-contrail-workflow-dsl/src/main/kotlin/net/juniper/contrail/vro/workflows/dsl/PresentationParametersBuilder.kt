@@ -145,9 +145,9 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
     var defaultValue: Type? = null
     var dataBinding: DataBinding<Type> = NoDataBinding
     val additionalQualifiers = mutableListOf<ParameterQualifier>()
-    var validatedBy: ActionCallBuilder? = null
+    var validWhen: ActionCallBuilder? = null
         set(value) {
-            field = value?.freeze()
+            field = value?.snapshot()
         }
 
     fun validationActionCallTo(actionName: String) =
@@ -172,7 +172,7 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
         dataBinding.qualifier?.let {
             add(it)
         }
-        validatedBy?.let {
+        validWhen?.let {
             add(validationQualifier(it.create()))
         }
     }
@@ -185,10 +185,10 @@ abstract class PrimitiveParameterBuilder<Type: Any>(parameterName: String, type:
     var predefinedAnswers: List<Type>? = null
     var predefinedAnswersFrom: ActionCallBuilder? = null
         set(value) {
-            field = value?.freeze()
+            field = value?.snapshot()
         }
 
-    private val commonQualifiers get() = mutableListOf<ParameterQualifier>().apply {
+    override val customQualifiers get() = super.customQualifiers.apply {
         predefinedAnswers?.let {
             add(predefinedAnswersQualifier(type, it))
         }
@@ -239,7 +239,7 @@ class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterB
     var showInInventory: Boolean = false
     var listedBy: ActionCallBuilder? = null
         set(value) {
-            field = value?.freeze()
+            field = value?.snapshot()
         }
     var browserRoot: InventoryBrowserRoot = DefaultBrowserRoot
 

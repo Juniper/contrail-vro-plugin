@@ -16,7 +16,6 @@ import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
-import net.juniper.contrail.vro.config.isIpAction
 import net.juniper.contrail.vro.workflows.schema.relationDescription
 import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.workflows.util.extractRelationDescription
@@ -37,7 +36,7 @@ internal fun createFloatingIpWorkflow(schema: Schema): WorkflowDefinition {
         parameter("address", string) {
             description = "IP address\n Will be allocated dynamically if this input is left empty."
             mandatory = false
-            validatedBy = validationActionCallTo(isIpAction)
+            validWhen = isIPAddress()
         }
         output(item, reference<FloatingIp>()) {
             description = "Floating IP created in this workflow"

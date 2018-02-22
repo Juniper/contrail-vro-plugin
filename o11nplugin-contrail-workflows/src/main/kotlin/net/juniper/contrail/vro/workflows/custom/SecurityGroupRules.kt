@@ -10,7 +10,6 @@ import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.getNetworkPolicyRules
-import net.juniper.contrail.vro.config.isMultiAddressSecurityGroupRuleAction
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.FromStringParameter
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
@@ -103,7 +102,7 @@ internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
                 visibility = WhenNonNull(parent)
                 description = "Rule to edit"
                 predefinedAnswersFrom = actionCallTo(getNetworkPolicyRules).parameter(parent)
-                validatedBy = validationActionCallTo(isMultiAddressSecurityGroupRuleAction).parameter(parent)
+                validWhen = isSingleAddressSecurityGroupRuleOf(parent)
             }
         }
         step("Rule attributes") {
@@ -118,7 +117,7 @@ internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
             parameter("ethertype", string) {
                 // etherType has no description in the schema
                 description = "Ether Type"
-                additionalQualifiers += schema.simpleTypeQualifiers<PolicyRuleType>("ethertype")
+                additionalQualifiers += schema.simpleTypeQualifiers<PolicyRuleType>(parameterName)
             }
             parameter(addressTypeParameterName, string) {
                 description = "Address Type"

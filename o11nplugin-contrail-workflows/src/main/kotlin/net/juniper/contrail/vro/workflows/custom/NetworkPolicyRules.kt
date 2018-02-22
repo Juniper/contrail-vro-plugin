@@ -15,7 +15,6 @@ import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.getNetworkPolicyRules
-import net.juniper.contrail.vro.config.isMultiAddressNetworkPolicyRuleAction
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.ConditionAlternative
 import net.juniper.contrail.vro.workflows.dsl.ConditionConjunction
@@ -318,7 +317,7 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
                 visibility = WhenNonNull(parent)
                 description = "Rule to edit"
                 predefinedAnswersFrom = actionCallTo(getNetworkPolicyRules).parameter(parent)
-                validatedBy = validationActionCallTo(isMultiAddressNetworkPolicyRuleAction).parameter(parent)
+                validWhen = isSingleAddressNetworkPolicyRuleOf(parent)
             }
         }
         step("Basic Attributes") {

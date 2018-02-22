@@ -14,12 +14,12 @@ class ActionCall private constructor(val name: String, vararg val arguments: Str
     class ActionCallBuilder(val name: String) {
         private val arguments = mutableListOf<String>()
 
-        fun parameter(name: String) = apply {
-            arguments.add("#$name")
+        fun parameter(parameter: String) = apply {
+            arguments.add("#$parameter")
         }
 
-        fun parameters(vararg names: String) = apply {
-            names.forEach { parameter(it) }
+        fun parameters(vararg parameters: String) = apply {
+            parameters.forEach { parameter(it) }
         }
 
         fun string(string: String) = apply {
@@ -29,7 +29,7 @@ class ActionCall private constructor(val name: String, vararg val arguments: Str
         fun create() =
             ActionCall(name, *arguments.toTypedArray())
 
-        fun freeze() =
+        fun snapshot() =
             ActionCallBuilder(name).also { it.arguments.addAll(arguments) }
     }
 }

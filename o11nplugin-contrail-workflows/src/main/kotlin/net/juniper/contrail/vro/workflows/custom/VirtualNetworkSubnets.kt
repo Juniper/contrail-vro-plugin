@@ -10,10 +10,6 @@ import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.getSubnetsOfVirtualNetwork
-import net.juniper.contrail.vro.config.isAllocPoolAction
-import net.juniper.contrail.vro.config.isCidrAction
-import net.juniper.contrail.vro.config.isFreeInCidrAction
-import net.juniper.contrail.vro.config.isInCidrAction
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
@@ -48,12 +44,12 @@ internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
             parameter(subnet, string) {
                 extractPropertyDescription<IpamSubnetType>(schema, title="CIDR")
                 mandatory = true
-                validatedBy = validationActionCallTo(isCidrAction)
+                validWhen = isCidr()
             }
             parameter(allocationPools, string.array) {
                 extractPropertyDescription<IpamSubnetType>(schema)
                 mandatory = false
-                validatedBy = validationActionCallTo(isAllocPoolAction).parameter(subnet)
+                validWhen = allocationPoolInSubnet(subnet)
             }
             parameter("addrFromStart", boolean) {
                 // addr_from_start is the only parameter in IpamSubnet that has underscore in name
@@ -66,12 +62,12 @@ internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
             }
             parameter("dnsServerAddress", string) {
                 extractPropertyDescription<IpamSubnetType>(schema)
-                validatedBy = validationActionCallTo(isInCidrAction).parameter(subnet)
+                validWhen = addressInSubnet(subnet)
                 mandatory = false
             }
             parameter("defaultGateway", string) {
                 extractPropertyDescription<IpamSubnetType>(schema)
-                validatedBy = validationActionCallTo(isFreeInCidrAction).parameters(subnet, allocationPools, dnsServerAddress)
+                validWhen = addressIsFreeInSubnet(subnet, allocationPools, dnsServerAddress)
                 mandatory = true
             }
             parameter("enableDhcp", boolean) {
