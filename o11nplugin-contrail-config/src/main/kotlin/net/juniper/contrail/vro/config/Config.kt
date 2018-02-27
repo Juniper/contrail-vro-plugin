@@ -17,6 +17,7 @@ val modelClasses = setOf(
     "RouteTable",
     "ServiceInstance",
     "ServiceTemplate",
+    "PortTuple",
     "InstanceIp",
     "QosConfig",
     "GlobalQosConfig"
