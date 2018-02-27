@@ -4,38 +4,40 @@
 
 package net.juniper.contrail.vro.config
 
+import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
+
 val modelClasses = setOf(
-    "Project",
-    "VirtualNetwork",
-    "Subnet",
-    "NetworkIpam",
-    "FloatingIp",
-    "FloatingIpPool",
-    "NetworkPolicy",
-    "SecurityGroup",
-    "VirtualMachineInterface",
-    "RouteTable",
-    "ServiceInstance",
-    "ServiceTemplate",
-    "PortTuple",
-    "InstanceIp",
-    "QosConfig",
-    "GlobalQosConfig"
+    the<Project>(),
+    the<VirtualNetwork>(),
+    the<Subnet>(),
+    the<NetworkIpam>(),
+    the<FloatingIp>(),
+    the<FloatingIpPool>(),
+    the<NetworkPolicy>(),
+    the<SecurityGroup>(),
+    the<VirtualMachineInterface>(),
+    the<RouteTable>(),
+    the<ServiceInstance>(),
+    the<ServiceTemplate>(),
+    the<PortTuple>(),
+    the<InstanceIp>(),
+    the<QosConfig>(),
+    the<GlobalQosConfig>()
 )
 
 val inventoryProperties = setOf(
-    "QuotaType"
+    the<QuotaType>()
 )
 
 val nonEssentialAttributes = setOf(
-    "VirtualNetworkPolicyType"
+    the<VirtualNetworkPolicyType>()
 )
 
 val ignoredInWorkflows = setOf(
-    "KeyValuePairs",
-    "PermType2",
-    "IdPermsType",
-    "SequenceType"
+    the<KeyValuePairs>(),
+    the<PermType2>(),
+    the<IdPermsType>(),
+    the<SequenceType>()
 )
 
 val nonEditableProperties = setOf(
@@ -47,37 +49,43 @@ val nonEditableProperties = setOf(
 )
 
 val customCreateWorkflows = setOf(
-    "FloatingIp"
+    the<FloatingIp>()
 )
 
 val customEditWorkflows = setOf(
-    "NetworkPolicy",
-    "FloatingIp",
-    "RouteTable"
+    the<NetworkPolicy>(),
+    the<FloatingIp>(),
+    the<RouteTable>()
 )
 
 val customDeleteWorkflows = setOf(
-    "FloatingIpPool",
-    "VirtualMachineInterface"
+    the<FloatingIpPool>(),
+    the<VirtualMachineInterface>()
 )
 
 val directChildren = setOf(
-    "FloatingIp"
+    the<FloatingIp>()
 )
 
 val mandatoryReference = setOf(
-    Pair("VirtualMachineInterface", "VirtualNetwork"),
-    Pair("ServiceInstance", "ServiceTemplate")
+    pair<VirtualMachineInterface, VirtualNetwork>(),
+    pair<ServiceInstance, ServiceTemplate>()
 )
 
 val hiddenRoots = setOf(
-    "VirtualMachineInterface"
+    the<VirtualMachineInterface>()
 )
 
 val hiddenRelations = setOf(
-    Pair("FloatingIp", "Project"),
-    Pair("VirtualNetwork", "NetworkIpam")
+    pair<FloatingIp, Project>(),
+    pair<VirtualNetwork, NetworkIpam>()
 )
+
+private inline fun <reified T> the() =
+    T::class.java.simpleName
+
+private inline fun <reified T1, reified T2> pair() =
+    Pair(the<T1>(), the<T2>())
 
 val String.isModelClassName get() =
     modelClasses.contains(this)
