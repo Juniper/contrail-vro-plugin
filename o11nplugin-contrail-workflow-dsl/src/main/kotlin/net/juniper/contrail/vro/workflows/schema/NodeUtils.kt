@@ -35,15 +35,16 @@ val Node.typeAttribute: String? get() =
     attributeValue(type)
 
 val Node.descriptionAttribute: String? get() =
-    attributeValue(description)
+    attributeNodes
+        .filter { it.nodeName.startsWith(description) }
+        .map { it.nodeValue }.filterNotNull()
+        .joinToString("\n")
+        .let { if (it.isBlank()) null else it }
 
 val Node.baseAttribute: String get() =
     attributeValue(base) ?: throw IllegalStateException(
-        "Mandatory attribute '$base' was not found in restriction of ${grandParent.nameAttribute}."
+        "Mandatory attribute '$base' was not found in restriction of ${parentNode.parentNode.nameAttribute}."
     )
-
-val Node.grandParent get() =
-    parentNode.parentNode!!
 
 val Node.restrictionNode: Node get() =
     children.find { it.nodeName == xsdRestriction } ?: throw IllegalStateException(

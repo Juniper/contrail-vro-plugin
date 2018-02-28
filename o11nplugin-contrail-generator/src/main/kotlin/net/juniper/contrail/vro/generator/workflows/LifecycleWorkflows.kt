@@ -124,9 +124,9 @@ fun deleteWorkflow(clazz: ObjectClass) =
 private fun Schema.createWorkflowDescription(clazz: ObjectClass, parentClazz: ObjectClass? = null) : String? {
     val objectDescription = objectDescription(clazz, parentClazz) ?: return null
     return """
-        ${clazz.allCapitalized.bold}
-        $objectDescription
-    """.trimIndent()
+${clazz.allCapitalized.bold}
+$objectDescription
+""".trimIndent()
 }
 
 private fun Schema.relationInCreateWorkflowDescription(parentClazz: ObjectClass, clazz: ObjectClass) = """

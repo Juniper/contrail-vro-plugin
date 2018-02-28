@@ -11,6 +11,7 @@ val base = "base"
 val default = "default"
 val required = "required"
 val description = "description"
+val schemaLocation = "schemaLocation"
 val optional = "optional"
 
 val xsdString = "xsd:string"

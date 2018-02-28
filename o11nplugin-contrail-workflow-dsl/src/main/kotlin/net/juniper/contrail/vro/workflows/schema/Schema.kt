@@ -15,17 +15,19 @@ private fun loadXSDSchemaFrom(path: Path): Node {
 }
 
 private fun String.buildComments(): List<IdlComment> =
-    split(";").mapNotNull { it.toCommentObject() }
+    replace(ifmapHeaderPattern, "")
+        .split(commentEntrySeparator)
+        .mapNotNull { it.toCommentObject() }
 
-private fun String.toCommentObject(): IdlComment? =
-    when (extractCommentType()) {
-        idlLink -> Link(this)
-        idlProperty -> Property(this)
-        else -> null
-    }
+private fun String.toCommentObject(): IdlComment? = when (commentType) {
+    idlLink -> Link(this)
+    idlProperty -> Property(this)
+    else -> null
+}
 
 private fun extractIncludedSchemaPath(it: Node, path: Path): Path {
-    val relativePath = it.attributesMap["schemaLocation"] ?: throw IllegalStateException("Error in schema")
+    val relativePath = it.attributeValue(schemaLocation) ?:
+        throw IllegalStateException("Required attribute $schemaLocation not found.")
     println("Including extra schema $relativePath")
     val parentDirectory = path.parent.toString()
     return Paths.get(parentDirectory, relativePath)
@@ -40,8 +42,7 @@ fun buildSchema(path: Path): Schema {
     val elements = schemaChildren.filter { it.nodeName == xsdElement }.toSet()
     val comments = schemaChildren.filter { it.nodeName == commentName }
         .map { it.nodeValue.buildComments() }
-        .flatten()
-        .toSet()
+        .flatten().toSet()
 
     val includes = schemaChildren.filter { it.nodeName == xsdInclude }
     val includedSchemas = includes.map {
