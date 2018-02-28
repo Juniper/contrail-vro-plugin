@@ -30,7 +30,7 @@ import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
-import net.juniper.contrail.vro.workflows.schema.simpleTypeQualifiers
+import net.juniper.contrail.vro.workflows.schema.simpleTypeConstraints
 import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.workflows.util.extractRelationDescription
 
@@ -68,7 +68,7 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
             visibility = WhenNonNull("parent")
             parameter("simpleAction", string) {
                 extractPropertyDescription<ActionListType>(schema)
-                additionalQualifiers += schema.simpleTypeQualifiers<ActionListType>("simpleAction")
+                additionalQualifiers += schema.simpleTypeConstraints<ActionListType>("simpleAction")
             }
             parameter("protocol", string) {
                 extractPropertyDescription<PolicyRuleType>(schema)
@@ -80,7 +80,7 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 // direction has no description in the schema
                 description = "Direction"
                 mandatory = true
-                additionalQualifiers += schema.simpleTypeQualifiers<PolicyRuleType>("direction")
+                additionalQualifiers += schema.simpleTypeConstraints<PolicyRuleType>("direction")
             }
         }
         step("Addresses") {
@@ -324,7 +324,7 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
             visibility = WhenNonNull("rule")
             parameter("simpleAction", string) {
                 extractPropertyDescription<ActionListType>(schema)
-                additionalQualifiers += schema.simpleTypeQualifiers<ActionListType>("simpleAction")
+                additionalQualifiers += schema.simpleTypeConstraints<ActionListType>("simpleAction")
                 dataBinding = FromListPropertyValue(
                     "parent",
                     "rule",

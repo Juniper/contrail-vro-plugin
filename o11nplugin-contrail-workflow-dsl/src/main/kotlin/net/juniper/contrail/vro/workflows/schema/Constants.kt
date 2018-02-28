@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.workflows.schema
 val value = "value"
 val name = "name"
 val type = "type"
+val base = "base"
 val default = "default"
 val required = "required"
 val description = "description"
@@ -22,18 +23,24 @@ val xsdElement = "xsd:element"
 val xsdSimpleType = "xsd:simpleType"
 val xsdComplexType = "xsd:complexType"
 val xsdAll = "xsd:all"
-
 val xsdInclude = "xsd:include"
+
 val xsdRestriction = "xsd:restriction"
 val xsdEnumeration = "xsd:enumeration"
+val xsdPattern = "xsd:pattern"
+val xsdMinLength = "xsd:minLength"
+val xsdMaxLength = "xsd:maxLength"
+val xsdMinInclusive = "xsd:minInclusive"
+val xsdMaxInclusive = "xsd:maxInclusive"
 
 val xsdTypes = listOf(xsdComplexType, xsdSimpleType, xsdElement)
-val knownSchemaTypes = listOf(xsdString, xsdBoolean, xsdInteger, xsdTime, xsdDateTime)
+val primitiveTypes = listOf(xsdString, xsdBoolean, xsdInteger, xsdTime, xsdDateTime)
+
+val String.isPrimitiveType get() =
+    this in primitiveTypes
 
 val ifmapIdlName = "#IFMAP-SEMANTICS-IDL"
 val commentName = "#comment"
 val textName = "#text"
 val idlLink = "Link"
 val idlProperty = "Property"
-
-val stringRestrictionRegex = "xsd:(length|pattern|enumeration)".toRegex()

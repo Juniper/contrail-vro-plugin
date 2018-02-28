@@ -18,7 +18,7 @@ import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
-import net.juniper.contrail.vro.workflows.schema.simpleTypeQualifiers
+import net.juniper.contrail.vro.workflows.schema.simpleTypeConstraints
 import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.workflows.util.extractRelationDescription
 
@@ -55,7 +55,7 @@ internal fun addRuleToSecurityGroupWorkflow(schema: Schema): WorkflowDefinition 
             parameter("ethertype", string) {
                 // etherType has no description in the schema
                 description = "Ether Type"
-                additionalQualifiers += schema.simpleTypeQualifiers<PolicyRuleType>("ethertype")
+                additionalQualifiers += schema.simpleTypeConstraints<PolicyRuleType>("ethertype")
             }
             parameter(addressTypeParameterName, string) {
                 description = "Address Type"
@@ -117,7 +117,7 @@ internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
             parameter("ethertype", string) {
                 // etherType has no description in the schema
                 description = "Ether Type"
-                additionalQualifiers += schema.simpleTypeQualifiers<PolicyRuleType>(parameterName)
+                additionalQualifiers += schema.simpleTypeConstraints<PolicyRuleType>(parameterName)
             }
             parameter(addressTypeParameterName, string) {
                 description = "Address Type"

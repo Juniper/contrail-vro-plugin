@@ -28,8 +28,30 @@ val Node.attributeNodes: Sequence<Node> get() = attributes?.run {
 fun Node.attribute(name: String): Node? =
     attributeNodes.find { it.nodeName == name }
 
-val Node.description: String? get() =
-    attributeValue("description")
+val Node.nameAttribute: String? get() =
+    attributeValue(name)
+
+val Node.typeAttribute: String? get() =
+    attributeValue(type)
+
+val Node.descriptionAttribute: String? get() =
+    attributeValue(description)
+
+val Node.baseAttribute: String get() =
+    attributeValue(base) ?: throw IllegalStateException(
+        "Mandatory attribute '$base' was not found in restriction of ${grandParent.nameAttribute}."
+    )
+
+val Node.grandParent get() =
+    parentNode.parentNode!!
+
+val Node.restrictionNode: Node get() =
+    children.find { it.nodeName == xsdRestriction } ?: throw IllegalStateException(
+        "Restriction node was not found in $nameAttribute."
+    )
+
+val Node.restrictionType: String? get() =
+    restrictionNode.baseAttribute
 
 fun Node.attributeValue(name: String): String? =
     attribute(name)?.nodeValue
@@ -45,8 +67,19 @@ val Node.idlComment: Node? get() {
     return null
 }
 
-fun Iterable<Node>.withAttribute(attribute: String, name: String) =
-    asSequence().withAttribute(attribute, name).toList()
+fun Iterable<Node>.theOneNamed(theName: String): Node =
+    asSequence().theOneNamed(theName)
+
+fun Sequence<Node>.theOneNamed(theName: String): Node =
+    withAttribute(name, theName.stripSmi).toList().theOne(theName)
+
+fun List<Node>.theOne(theName: String): Node {
+    if (size > 1)
+        throw IllegalStateException("Multiple definitions of $theName in the schema.")
+
+    return firstOrNull() ?:
+    throw IllegalArgumentException("Definition of $theName was not found in the schema.")
+}
 
 inline fun Iterable<Node>.withAttribute(attribute: String, crossinline condition: (String) -> Boolean) =
     asSequence().withAttribute(attribute, condition).toList()

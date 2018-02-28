@@ -43,7 +43,7 @@ import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
-import net.juniper.contrail.vro.workflows.schema.simpleTypeQualifiers
+import net.juniper.contrail.vro.workflows.schema.simpleTypeConstraints
 
 fun Element.elementInfoPropertiesFor(categoryPath: String) = createElementInfoProperties(
     categoryPath = categoryPath,
@@ -133,7 +133,7 @@ private fun Property.toPrimitiveParameter(builder: ParameterAggregator, schema: 
     builder.parameter(propertyName, clazz) {
         description = description(schema)
         dataBinding = binding
-        additionalQualifiers += schema.simpleTypeQualifiers(parent, propertyName)
+        additionalQualifiers += schema.simpleTypeConstraints(parent, propertyName)
     }
 }
 
@@ -145,7 +145,7 @@ private fun Property.toStringListWrapperParameter(builder: ParameterAggregator, 
     builder.parameter(propertyName, string.array) {
         description = description(schema)
         dataBinding = binding
-        additionalQualifiers += schema.simpleTypeQualifiers(clazz, actualProperty.propertyName)
+        additionalQualifiers += schema.simpleTypeConstraints(clazz, actualProperty.propertyName)
     }
 }
 

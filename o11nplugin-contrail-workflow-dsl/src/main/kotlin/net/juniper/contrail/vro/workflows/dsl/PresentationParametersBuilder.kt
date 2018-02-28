@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.workflows.dsl
 
 import net.juniper.contrail.vro.workflows.model.* // ktlint-disable no-wildcard-imports
+import net.juniper.contrail.vro.workflows.schema.Constraint
 import java.util.Date
 
 @WorkflowBuilder
@@ -175,6 +176,10 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
         validWhen?.let {
             add(validationQualifier(it.create()))
         }
+    }
+
+    operator fun MutableList<ParameterQualifier>.plusAssign(constraints: List<Constraint>) {
+        this.addAll(constraints.map { it.toQualifier() })
     }
 
     protected open val customQualifiers: MutableList<ParameterQualifier> get() =

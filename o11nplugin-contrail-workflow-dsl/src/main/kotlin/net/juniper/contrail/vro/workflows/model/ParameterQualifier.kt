@@ -53,6 +53,9 @@ enum class QualifierKind {
 val mandatoryQualifierName = "mandatory"
 val visibleQualifierName = "visible"
 val defaultValueQualifierName = "defaultValue"
+val regexpQualifierName = "regexp"
+val minStringLengthQualifierName = "minStringLength"
+val maxStringLengthQualifierName = "maxStringLength"
 val numberFormatQualifierName = "numberFormat"
 val minNumberValueQualifierName = "minNumberValue"
 val maxNumberValueQualifierName = "maxNumberValue"
@@ -93,6 +96,9 @@ fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifier
 fun multilineQualifier() = staticQualifier(multilineQualifierName, void, voidValue)
 fun minNumberValueQualifier(value: Long) = staticQualifier(minNumberValueQualifierName, number, value)
 fun maxNumberValueQualifier(value: Long) = staticQualifier(maxNumberValueQualifierName, number, value)
+fun minLengthQualifier(value: Int) = staticQualifier(minStringLengthQualifierName, number, value)
+fun maxLengthQualifier(value: Int) = staticQualifier(maxStringLengthQualifierName, number, value)
+fun regexQualifier(pattern: String) = staticQualifier(regexpQualifierName, Regexp, pattern.cleanRegex())
 fun visibilityConditionQualifier(condition: VisibilityCondition) =
     ognlQualifier(visibleQualifierName, boolean, condition.stringCondition)
 fun <T : Any> listFromAction(action: ActionCall, type: ParameterType<T>) =
@@ -120,8 +126,6 @@ fun <T : Any> bindValueToListProperty(parentItem: String, childItem: String, lis
 fun <T : Any> bindValueToAction(actionName: String, type: ParameterType<T>, vararg parameters: String) =
     ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, actionName, *parameters))
 
-fun ipValidatorQualifier(parameter: String, actionName: String) =
-    validatorActionQualifier(actionPackage, actionName, "#$parameter")
 private fun actionOgnl(packageName: String, name: String, vararg parameters: String) =
     """GetAction("$packageName","$name").call(${parameters.joinToString(", "){"$it"}})"""
 
@@ -130,9 +134,6 @@ val ActionCall.ognl get() =
 
 private fun <T : Any> staticQualifier(name: String, type: ParameterType<T>, value: T) =
     ParameterQualifier(static, name, type.name, value.toString())
-
-private fun validatorActionQualifier(packageName: String, actionName: String, vararg parameters: String) =
-    ognlQualifier(customValidatorQualifierName, string, actionOgnl(packageName, actionName, *parameters))
 
 private fun ognlQualifier(name: String, type: ParameterType<Any>, value: String) =
     ParameterQualifier(ognl, name, type.name, value)
@@ -146,29 +147,3 @@ val whitespaces = "\\s+".toRegex()
 
 private fun String.cleanRegex() =
     replace(whitespaces, "")
-
-fun wrapConstraints(xsdConstraint: String, constraintValue: Any): ParameterQualifier? =
-    when (xsdConstraint) {
-        "default" -> {
-            ParameterQualifier(
-                static,
-                defaultValueQualifierName,
-                constraintValue.javaClass.parameterType.name,
-                constraintValue.toString()
-            )
-        }
-        "minInclusive" -> minNumberValueQualifier(constraintValue.toString().toLong())
-        "maxInclusive" -> maxNumberValueQualifier(constraintValue.toString().toLong())
-        "pattern" -> {
-            ParameterQualifier(
-                static,
-                "regexp",
-                "Regexp",
-                constraintValue.toString().cleanRegex()
-            )
-        }
-        "enumerations" -> predefinedAnswersQualifier(string, constraintValue as List<String>)
-        "required" -> if (constraintValue.toString() == "true") mandatoryQualifier else null
-        else -> null
-    }
-

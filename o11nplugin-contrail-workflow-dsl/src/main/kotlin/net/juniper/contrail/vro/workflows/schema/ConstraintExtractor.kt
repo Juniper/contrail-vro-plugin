@@ -7,17 +7,15 @@ package net.juniper.contrail.vro.workflows.schema
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.parentType
-import net.juniper.contrail.vro.workflows.model.ParameterQualifier
-import net.juniper.contrail.vro.workflows.model.wrapConstraints
 import org.w3c.dom.Node
 
-inline fun <reified T : Any> Schema.simpleTypeQualifiers(propertyName: String): List<ParameterQualifier> =
-    simpleTypeQualifiers(T::class.java, propertyName)
+inline fun <reified T : Any> Schema.simpleTypeConstraints(propertyName: String): List<Constraint> =
+    simpleTypeConstraints(T::class.java, propertyName)
 
-fun Schema.simpleTypeQualifiers(clazz: Class<*>, propertyName: String): List<ParameterQualifier> = when {
-    clazz.isApiObjectClass -> objectFieldQualifiers(clazz.xsdName, propertyName.xsdName)
-    else -> propertyFieldQualifiers(clazz, propertyName.xsdName)
-}
+fun Schema.simpleTypeConstraints(clazz: Class<*>, propertyName: String): List<Constraint> = when {
+    clazz.isApiObjectClass -> objectFieldConstraints(clazz.xsdName, propertyName.xsdName)
+    else -> propertyFieldConstraints(clazz, propertyName.xsdName)
+}.toList()
 
 inline fun <reified T : Any> Schema.propertyDescription(propertyName: String, convertToXsd: Boolean = true): String? =
     propertyDescription(T::class.java, propertyName, convertToXsd)
@@ -27,7 +25,7 @@ fun Schema.propertyDescription(clazz: Class<*>, propertyName: String, convertToX
 
 private fun Schema.propertyDescriptionImpl(clazz: Class<*>, xsdFieldName: String): String? = when {
     clazz.isApiObjectClass -> propertyDefinitionComment(clazz.xsdName, xsdFieldName).description
-    else -> definitionNode(clazz, xsdFieldName).attributeValue(description)
+    else -> definitionNode(clazz, xsdFieldName).descriptionAttribute
 }
 
 fun Schema.objectDescription(clazz: ObjectClass, parent: ObjectClass? = null): String? {
@@ -40,25 +38,23 @@ inline fun <reified F : Any, reified T : Any> Schema.relationDescription() =
 fun Schema.relationDescription(from: Class<*>, to: Class<*>) =
     relationDefinitionComment(from, to).description
 
-private fun Schema.propertyFieldQualifiers(clazz: Class<*>, xsdFieldName: String): List<ParameterQualifier> =
-    qualifiersOf(definitionNode(clazz, xsdFieldName))
+private fun Schema.objectFieldConstraints(xsdParent: String, xsdFieldName: String): Sequence<Constraint> {
+    val fullName = "$xsdParent-$xsdFieldName"
+    val matchingElements = elements.withAttribute(name) { it == xsdFieldName || it == fullName }
+    if (matchingElements.size > 1)
+        throw IllegalStateException("Multiple definitions of property $xsdFieldName")
+    val definitionNode = matchingElements.firstOrNull() ?: return emptySequence()
+    return constraintsOf(definitionNode)
+}
+
+private fun Schema.propertyFieldConstraints(clazz: Class<*>, xsdFieldName: String): Sequence<Constraint> =
+    constraintsOf(definitionNode(clazz, xsdFieldName))
 
 private fun Schema.definitionNode(clazz: Class<*>): Node =
-    complexTypes.find { it.attributeValue(name) == clazz.simpleName } ?:
-        throw IllegalArgumentException("Class ${clazz.simpleName} was not found in the schema.")
+    complexTypes.theOneNamed(clazz.simpleName)
 
-private fun Schema.definitionNode(clazz: Class<*>, xsdFieldName: String): Node {
-    val complexType = definitionNode(clazz)
-
-    val nestedElements = complexType.nestedElements.toList()
-    val matchingElements = nestedElements.withAttribute(name, xsdFieldName).toList()
-
-    if (matchingElements.size > 1)
-        throw IllegalStateException("Multiple definitions of ${clazz.simpleName} in the schema.")
-
-    return matchingElements.firstOrNull() ?:
-        throw IllegalArgumentException("Property $xsdFieldName of class ${clazz.simpleName} was not found in the schema.")
-}
+private fun Schema.definitionNode(clazz: Class<*>, xsdFieldName: String): Node =
+    definitionNode(clazz).nestedElements.theOneNamed(xsdFieldName)
 
 private fun Schema.relationDefinitionComment(from: Class<*>, to: Class<*>): IdlComment =
     relationDefinitionComment(from.xsdName, to .xsdName)
@@ -71,109 +67,88 @@ private fun Schema.propertyDefinitionComment(parent: String, propertyName: Strin
     comments.firstOrNull { it.parentClassName == parent && (it.elementName == propertyName || it.elementName == "$parent-$propertyName") } ?:
         throw IllegalArgumentException("Property $propertyName of class $parent was not found in the schema.")
 
-private fun Schema.qualifiersOf(element: Node): List<ParameterQualifier> {
-    val elementAttributes = element.attributesMap
-    val xsdConstraints = mutableMapOf<String, Any>()
-    xsdConstraints.putAll(elementAttributes.minus(name).minus(type))
+private fun Schema.basicConstraints(element: Node) =
+    sequenceOf(required(element), defaultValue(element)).filterNotNull()
 
-    val elementType = elementAttributes[type] ?: xsdString
-
-    val defaultValue = elementAttributes[default]
-    if (defaultValue != null) {
-        @Suppress("IMPLICIT_CAST_TO_ANY")
-        val typedValue = when {
-            elementType == xsdBoolean -> defaultValue.toBoolean()
-            elementType == xsdInteger -> defaultValue.toInt()
-            defaultValue == "true" -> true
-            defaultValue == "false" -> false
-            else -> defaultValue.toIntOrNull() ?: defaultValue
-        }
-        xsdConstraints[default] = typedValue
-    }
-
-    val requiredValue = elementAttributes[required]
-    if (requiredValue != null) {
-        xsdConstraints[required] = requiredValue
-    }
-
-    if (elementType !in knownSchemaTypes) {
-        val simpleTypeConstraints = simpleTypeConstraints(elementType)
-        xsdConstraints.putAll(simpleTypeConstraints)
-    }
-
-    return xsdConstraints.mapNotNull { (xsdConstraint, value) ->
-        wrapConstraints(xsdConstraint, value)
-    }
+private fun Schema.specificConstraints(element: Node): Sequence<Constraint> {
+    val elementType = element.typeAttribute ?: xsdString
+    return if (elementType.isPrimitiveType)
+        element.constraints(elementType)
+    else
+        simpleTypeConstraints(elementType)
 }
 
-private fun Schema.simpleTypeConstraints(elementTypeName: String): Map<String, Any> {
-    val elementType = elementTypeName.stripSmi
+private fun Schema.constraintsOf(element: Node): Sequence<Constraint> =
+    basicConstraints(element) + specificConstraints(element)
 
-    val matchingSimpleTypes = simpleTypes.withAttribute(name, elementType)
-    if (matchingSimpleTypes.isEmpty())
-        throw IllegalArgumentException("Property $elementType is not a simple type.")
-    if (matchingSimpleTypes.size > 1)
-        throw IllegalStateException("Multiple definitions of property $elementType.")
+private fun Schema.defaultValue(node: Node): Constraint? =
+    node.attributeValue(default)
+        ?.let { toTypedValueOf(node, it) }
+        ?.let { DefaultValue(it) }
 
-    val matchingNode = matchingSimpleTypes.first()
-    val restrictionChild = matchingNode
-        .children
-        .find { it.nodeName == xsdRestriction }
-    val baseType = restrictionChild?.attributesMap?.get("base") ?:
-        throw IllegalStateException("Mandatory attribute 'base' was not found in definition of property $elementType.")
+private fun Schema.toTypedValueOf(node: Node, value: String) =
+    node.typedValueOf(primitiveTypeOf(node), value)
 
-    val xsdConstraints = mutableMapOf<String, Any>()
-    xsdConstraints.putAll(matchingNode.attributesMap.minus(name).minus(type))
-    xsdConstraints.putAll(restrictionChild.attributesMap.minus(name).minus(type))
-    return when (baseType) {
-        xsdString -> stringConstraints(restrictionChild)
-        xsdInteger -> integerConstraints(restrictionChild)
-        else -> mutableMapOf()
+private fun Node.typedValueOf(primitiveType: String, value: String): Any = when (primitiveType) {
+    xsdBoolean -> value.toBoolean()
+    xsdInteger -> value.toInt()
+    xsdString -> value
+    else -> throw UnsupportedOperationException("Cannot create default value for element $typeAttribute.")
+}
+
+private fun required(node: Node): Constraint? =
+    if (node.attributeValue(required) == "true") Required else null
+
+private fun Node.constraints(type: String) = when (type) {
+    xsdString -> stringConstraints()
+    xsdInteger -> integerConstraints()
+    else -> emptySequence()
+}
+
+private fun Schema.primitiveTypeOf(node: Node): String = when {
+    node.nodeName == xsdSimpleType -> node.restrictionType
+    node.nodeName == xsdElement -> node.typeAttribute?.let {
+        if (it.isPrimitiveType) it else primitiveTypeOf(simpleTypes.theOneNamed(it))
     }
-}
+    else -> null
+} ?: throw IllegalArgumentException("Unable to find primitive type of ${node.nameAttribute}.")
 
-private fun integerConstraints(restrictionChild: Node): Map<String, Any> {
-    val constraints = mutableMapOf<String, Any>()
-    val children = restrictionChild.children
+private fun Schema.simpleTypeConstraints(elementTypeName: String): Sequence<Constraint> =
+    simpleTypes.theOneNamed(elementTypeName).
+        restrictionNode.let { it.constraints(it.baseAttribute) }
 
-    val maxInclusive =
-        children.find { it.nodeName == "xsd:maxInclusive" }?.attributesMap?.get(value)?.toLong()
-    if (maxInclusive != null) constraints.put("maxInclusive", maxInclusive)
+private fun Node.integerConstraints(): Sequence<Constraint> =
+    sequenceOf(minValue(), maxValue()).filterNotNull()
 
-    val minInclusive =
-        children.find { it.nodeName == "xsd:minInclusive" }?.attributesMap?.get(value)?.toLong()
-    if (minInclusive != null) constraints.put("minInclusive", minInclusive)
+private fun Node.stringConstraints(): Sequence<Constraint> =
+    sequenceOf(minLength(), maxLength(), pattern(), enumeration()).filterNotNull()
 
-    return constraints
-}
+private fun Node.constraintNode(type: String) =
+    children.firstOrNull { it.nodeName == type }
 
-private fun stringConstraints(restrictionChild: Node): Map<String, Any> {
-    val constraints = mutableMapOf<String, Any>()
-    val children = restrictionChild.children
+private inline fun Node.simpleConstraint(factory: (String) -> Constraint) =
+    attributesMap[value]?.let(factory) ?:
+        throw UnsupportedOperationException("Required attribute '$value' not found.")
 
-    if (children.any { !it.nodeName.matches(stringRestrictionRegex) }) {
-        val unsupportedOperation = children
-            .find { !it.nodeName.matches(stringRestrictionRegex) }
-            ?.nodeName
-        throw UnsupportedOperationException("Implement restriction: $unsupportedOperation")
-    }
+private inline fun Node.simpleConstraint(nodeName: String, factory: (String) -> Constraint) =
+    constraintNode(nodeName)?.simpleConstraint(factory)
 
-    val enumerations = children.filter { it.nodeName == xsdEnumeration }.toList()
-    if (enumerations.isNotEmpty()) {
-        constraints.put("enumerations", enumerations.mapNotNull { it.attributesMap[value] })
-    }
+private fun Node.minValue() =
+    simpleConstraint(xsdMinInclusive) { MinValue(it.toLong()) }
 
-    val pattern = children.find { it.nodeName == "xsd:pattern" }?.attributesMap?.get(value)
-    if (pattern != null) constraints.put("pattern", pattern)
+private fun Node.maxValue() =
+    simpleConstraint(xsdMaxInclusive) { MaxValue(it.toLong()) }
 
-    return constraints
-}
+private fun Node.minLength() =
+    simpleConstraint(xsdMinLength) { MinLength(it.toInt()) }
 
-private fun Schema.objectFieldQualifiers(xsdParent: String, xsdFieldName: String): List<ParameterQualifier> {
-    val fullName = "$xsdParent-$xsdFieldName"
-    val matchingElements = elements.withAttribute(name) { it == xsdFieldName || it == fullName }
-    if (matchingElements.size > 1)
-        throw IllegalStateException("Multiple definitions of property $xsdFieldName")
-    val definitionNode = matchingElements.firstOrNull() ?: return emptyList()
-    return qualifiersOf(definitionNode)
-}
+private fun Node.maxLength() =
+    simpleConstraint(xsdMaxLength) { MaxLength(it.toInt()) }
+
+private fun Node.pattern() =
+    simpleConstraint(xsdPattern) { Regexp(it) }
+
+private fun Node.enumeration() =
+    children.filter { it.nodeName == xsdEnumeration }
+        .mapNotNull { it.attributesMap[value] }
+        .toList().let { if (it.isEmpty()) null else Enumeration(it) }
