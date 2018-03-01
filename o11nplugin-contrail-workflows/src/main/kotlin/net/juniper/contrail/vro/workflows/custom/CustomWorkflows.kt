@@ -22,4 +22,5 @@ fun loadCustomWorkflows(schema: Schema): List<WorkflowDefinition> = mutableListO
     this += addRuleToSecurityGroupWorkflow(schema)
 //    this += editSecurityGroupRuleWorkflow(schema)
     this += removeSecurityGroupRuleWorkflow(schema)
+    this += addPortTupleToServiceInstance(schema)
 }

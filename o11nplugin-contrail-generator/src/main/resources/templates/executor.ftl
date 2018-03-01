@@ -52,6 +52,12 @@ class Executor(private val connection: Connection) {
         connection.getObjects(${relation.childName}::class.java, parent.${relation.getter})
 
     </#list>
+
+    fun getPortsOfVirtualNetwork(child: VirtualNetwork) : List<VirtualMachineInterface>{
+        val ports = child.virtualMachineInterfaceBackRefs ?: emptyList()
+        return ports.asSequence().map { connection.findById<VirtualMachineInterface>(it.uuid) }.filterNotNull().toList()
+    }
+
     fun getProjectsOfFloatingIpPool(child: FloatingIpPool) : List<Project>{
         val projects = child.projectBackRefs ?: emptyList()
         return projects.asSequence().map { connection.findById<Project>(it.uuid) }.filterNotNull().toList()
@@ -67,4 +73,18 @@ class Executor(private val connection: Connection) {
     // InstanceIp should be in 1-1 relation to VMI, so only first element is chosen if it exists
     fun getInstanceIpOfPort(port: VirtualMachineInterface): InstanceIp? =
         port.instanceIpBackRefs?.getOrNull(0)?.uuid?.let { connection.findById(it) }
+
+    fun serviceHasInterfaceWithName(serviceInstance: ServiceInstance, name: String): Boolean? {
+        val template = connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid)!!
+        val interfaceNames = template.properties.interfaceType.map { it.serviceInterfaceType }
+        return (name in interfaceNames)
+    }
+
+    fun getNetworkOfServiceInterface(serviceInstance: ServiceInstance, name: String): VirtualNetwork? {
+        val template = connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid)!!
+        val interfaceNames = template.properties.interfaceType.map { it.serviceInterfaceType }
+        val index = interfaceNames.indexOf(name)
+        if(serviceInstance.properties.interfaceList.size <= index) return null
+        return connection.findByFQN(serviceInstance.properties.interfaceList[index].virtualNetwork)
+    }
 }

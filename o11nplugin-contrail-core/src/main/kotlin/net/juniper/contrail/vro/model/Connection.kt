@@ -112,6 +112,9 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
     fun <T : ApiObjectBase> findByFQN(clazz: Class<T>, fqn: String): T? =
         safe { connector.findByFQN(clazz, fqn) as T? }?.also { cache.add(it) }
 
+    inline fun <reified T : ApiObjectBase> findByFQN(fqn: String): T? =
+            findByFQN(T::class.java, fqn)
+
     fun <T : ApiObjectBase> list(clazz: Class<T>): List<T>? =
         safe { connector.list(clazz, null) as List<T>? }
 

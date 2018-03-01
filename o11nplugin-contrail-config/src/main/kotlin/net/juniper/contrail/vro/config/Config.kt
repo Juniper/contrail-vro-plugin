@@ -22,7 +22,8 @@ val modelClasses = setOf(
     the<PortTuple>(),
     the<InstanceIp>(),
     the<QosConfig>(),
-    the<GlobalQosConfig>()
+    the<GlobalQosConfig>(),
+    the<PortTuple>()
 )
 
 val inventoryProperties = setOf(
