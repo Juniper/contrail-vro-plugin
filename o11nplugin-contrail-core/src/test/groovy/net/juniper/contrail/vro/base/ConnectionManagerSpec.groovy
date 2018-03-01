@@ -5,7 +5,9 @@
 package net.juniper.contrail.vro.base
 
 import com.vmware.o11n.plugin.sdk.spring.platform.GlobalPluginNotificationHandler
+import net.juniper.contrail.api.ApiConnector
 import net.juniper.contrail.api.ApiConnectorMock
+import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.ConnectionInfo
 import spock.lang.Specification
@@ -13,7 +15,6 @@ import spock.lang.Specification
 class ConnectionManagerSpec extends Specification {
 
     def info = new ConnectionInfo("connection name", "host", 8080, "user", "secret")
-    def connector = new ApiConnectorMock(info.hostname, info.port)
     def connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
     def repository = Mock(ConnectionRepository)
     def factory = Mock(ConnectorFactory)
@@ -21,7 +22,9 @@ class ConnectionManagerSpec extends Specification {
     def manager = new ConnectionManager(repository, factory, notifier)
 
     def setup() {
+        def connector = Mock(ApiConnector)
         factory.create(_) >> connector
+        connector.list(_, _) >> new ArrayList<ApiObjectBase>()
     }
 
     def "Calling create inserts connection into repository and notifies plugin" () {

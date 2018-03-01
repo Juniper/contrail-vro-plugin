@@ -10,11 +10,15 @@ import ch.dunes.vso.sdk.endpoints.IEndpointConfiguration
 import ch.dunes.vso.sdk.endpoints.IEndpointConfigurationService
 import com.vmware.o11n.plugin.sdk.spring.platform.GlobalPluginNotificationHandler
 import com.vmware.o11n.sdk.modeldriven.Sid
+import net.juniper.contrail.api.ApiConnector
 import net.juniper.contrail.api.ApiConnectorMock
+import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.ContrailPluginAdaptor
 import net.juniper.contrail.vro.base.ConnectionManager
+import net.juniper.contrail.vro.base.ConnectorFactory
 import net.juniper.contrail.vro.base.DefaultConnectionRepository
 import net.juniper.contrail.vro.model.Connection
+import net.juniper.contrail.vro.model.ConnectionException
 import net.juniper.contrail.vro.model.ConnectionInfo
 import spock.lang.Shared
 import spock.lang.Specification
@@ -25,9 +29,9 @@ class SpringContextSpec extends Specification {
     static def info = new ConnectionInfo("connection name", "host", 8080, "user", "secret")
     def connection = new Connection(info, new ApiConnectorMock(info.hostname, info.port))
     @Shared
-    def pluginFactory
-    @Shared
     def manager
+    @Shared
+    def mockedManager
     @Shared
     def repository
     @Shared
@@ -45,6 +49,12 @@ class SpringContextSpec extends Specification {
         manager = context.getBean(ConnectionManager)
         repository = context.getBean(DefaultConnectionRepository)
         notifier = context.getBean(GlobalPluginNotificationHandler)
+
+        def apiConnector = Mock(ApiConnector)
+        apiConnector.list(_, _) >> new ArrayList<ApiObjectBase>()
+        def connectorFactory = Mock(ConnectorFactory)
+        connectorFactory.create(_) >> apiConnector
+        mockedManager = new ConnectionManager(repository, connectorFactory, notifier)
     }
 
     def mockServiceRegistry(configurationService) {
@@ -72,13 +82,23 @@ class SpringContextSpec extends Specification {
     }
 
     def "Calling create inserts connection into repository"() {
-        when:
+        given:
         def old_size = repository.connections.size()
-        def newConnection = manager.create(info.name, info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
+
+        when:
+        def newConnection = mockedManager.create(info.name, info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
 
         then:
         old_size + 1 == repository.connections.size()
         info == repository.getConnection(Sid.valueOf(info.name)).info
+    }
+
+    def "Calling create with invalid credentials throws ConnectionException"() {
+        when:
+        manager.create(info.name, info.hostname, info.port, info.username, info.password, info.tenant, info.authServer)
+
+        then:
+        thrown ConnectionException
     }
 
     def "Calling deleted removes connection from repository"() {
@@ -88,7 +108,6 @@ class SpringContextSpec extends Specification {
 
         then:
         old_size - 1 == repository.connections.size()
-
     }
 }
 

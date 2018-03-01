@@ -49,7 +49,7 @@
         <configuration>
           <buildNumberPropertyName>build.number</buildNumberPropertyName>
           <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
-          <format>{0,number}</format>
+          <format>{0,number,#}</format>
           <items>
             <item>buildNumber</item>
           </items>
