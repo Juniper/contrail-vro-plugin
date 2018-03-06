@@ -68,7 +68,7 @@ internal fun cidrValidationAction(version: String, packageName: String): Action 
 internal fun allocValidationAction(version: String, packageName: String): Action {
     val name = isAllocPoolAction
     val resultType = string
-    val parameters = listOf("pools" ofType string, "cidr" ofType string)
+    val parameters = listOf("pools" ofType string.array, "cidr" ofType string)
     return Action(
         name = name,
         packageName = packageName,
@@ -98,7 +98,7 @@ internal fun inCidrValidationAction(version: String, packageName: String): Actio
 internal fun isFreeValidationAction(version: String, packageName: String): Action {
     val name = isFreeInCidrAction
     val resultType = string
-    val parameters = listOf("ip" ofType string, "cidr" ofType string, "pools" ofType string, "dns" ofType string)
+    val parameters = listOf("ip" ofType string, "cidr" ofType string, "pools" ofType string.array, "dns" ofType string)
     return Action(
         name = name,
         packageName = packageName,

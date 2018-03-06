@@ -160,7 +160,7 @@ fun String.ipv6toLong(range: IntRange) : Long {
 }
 
 fun <T: IP<T>> String?.equalsIp(ip : T, ipFactory: (String) -> T): Boolean =
-    if (this != null && this.isNotBlank()) ipFactory(this) == ip else false
+    if (this != null && isNotBlank()) ipFactory(this) == ip else false
 
 fun <T: IP<T>> T.notInPools(pools : List<String>?, ipFactory: (String) -> T) : Boolean {
     if (pools != null) {
@@ -184,9 +184,8 @@ fun <T : IP<T>> poolToRange(pool: String, ipFactory: (String) -> T) : IpRange<T>
     return IpRange(start, end)
 }
 
-fun <T : IP<T>> poolsToRanges(pools: List<String>, ipFactory: (String) -> T) : List<IpRange<T>> {
-    return pools.map { poolToRange(it, ipFactory) ?: return emptyList() }
-}
+fun <T : IP<T>> poolsToRanges(pools: List<String>, ipFactory: (String) -> T) : List<IpRange<T>> =
+    pools.map { poolToRange(it, ipFactory) ?: return emptyList() }
 
 fun <T : IP<T>> getSubnetRange(cidr: String, ipFactory: (String) -> T) : IpRange<T> {
     val parts = cidr.trim().split('/')

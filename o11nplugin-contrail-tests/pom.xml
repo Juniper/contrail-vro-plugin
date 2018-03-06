@@ -18,6 +18,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>net.juniper.contrail.vro</groupId>
+            <artifactId>o11nplugin-contrail-workflows</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.juniper.contrail.vro</groupId>
+            <artifactId>o11nplugin-contrail-core</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>net.juniper.contrail</groupId>
             <artifactId>juniper-contrail-api</artifactId>
             <scope>compile</scope>

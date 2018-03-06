@@ -25,4 +25,7 @@ class Script(
 
     @XmlAttribute(name = "encoded")
     val encoded: String? = encoded.toString()
+
+    @Transient
+    val rawString = value
 }
