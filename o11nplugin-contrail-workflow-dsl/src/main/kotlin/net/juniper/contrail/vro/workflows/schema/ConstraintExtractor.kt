@@ -13,6 +13,8 @@ import net.juniper.contrail.vro.config.parentType
 import net.juniper.contrail.vro.config.pluginName
 import org.w3c.dom.Node
 
+val emptyAnswer = ""
+
 inline fun <reified T : Any> Schema.simpleTypeConstraints(propertyName: String): List<Constraint> =
     simpleTypeConstraints(T::class.java, propertyName)
 
@@ -20,6 +22,17 @@ fun Schema.simpleTypeConstraints(clazz: Class<*>, propertyName: String): List<Co
     clazz.isApiObjectClass -> objectFieldConstraints(clazz.xsdName, propertyName.xsdName)
     else -> propertyFieldConstraints(clazz, propertyName.xsdName)
 }.toList()
+
+inline fun <reified T : Any> Schema.predefinedAnswers(propertyName: String, mandatory: Boolean, convertToXsd: Boolean = true)
+        : List<String> =
+    predefinedAnswers(T::class.java, propertyName.maybeToXsd(convertToXsd), mandatory)
+
+fun Schema.predefinedAnswers(clazz : Class<*>, xsdFieldName: String, mandatory: Boolean)
+        : List<String> {
+    val type = definitionNode(clazz, xsdFieldName).typeAttribute
+    return nodeByName(type).restrictionNode.enumeration(mandatory)?.elements ?:
+        throw IllegalStateException("No enumeration defined for this node")
+}
 
 inline fun <reified T : Any> Schema.propertyDescription(propertyName: String, convertToXsd: Boolean = true): String? =
     propertyDescription(T::class.java, propertyName, convertToXsd)
@@ -163,7 +176,12 @@ private fun Node.maxLength() =
 private fun Node.pattern() =
     simpleConstraint(xsdPattern) { Regexp(it) }
 
-private fun Node.enumeration() =
-    children.filter { it.nodeName == xsdEnumeration }
-        .mapNotNull { it.attributesMap[value] }
-        .toList().let { if (it.isEmpty()) null else Enumeration(it) }
+private fun Node.enumeration(mandatory: Boolean = true) : Enumeration? {
+    val list = children.filter { it.nodeName == xsdEnumeration }
+            .mapNotNull { it.attributesMap[value] }.toMutableList()
+    if (!mandatory && !list.isEmpty()) list.add(0, emptyAnswer)
+    return list.let { if (it.isEmpty()) null else Enumeration(it) }
+}
+
+private fun Schema.nodeByName(name: String?) : Node =
+    if (name != null) simpleTypes.theOneNamed(name) else throw IllegalStateException()

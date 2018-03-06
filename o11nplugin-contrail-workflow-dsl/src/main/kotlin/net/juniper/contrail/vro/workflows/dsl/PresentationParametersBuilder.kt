@@ -206,7 +206,19 @@ abstract class PrimitiveParameterBuilder<Type: Any>(parameterName: String, type:
 class ArrayPairParameterBuilder(name: String, type: array<Pair<String, String>>) :
     BasicParameterBuilder<List<Pair<String, String>>>(name, type)
 
-class ArrayStringParameterBuilder(name: String, type: array<String>) : BasicParameterBuilder<List<String>>(name, type)
+class ArrayStringParameterBuilder(name: String, type: array<String>) : BasicParameterBuilder<List<String>>(name, type) {
+    var sameValues: Boolean? = null
+    var predefinedAnswers : List<String>? = null
+
+    override val customQualifiers get() = super.customQualifiers.apply {
+        sameValues?.let {
+            add(sameValuesQualifier(it))
+        }
+        predefinedAnswers?.let {
+            add(predefinedAnswersQualifier(string, it))
+        }
+    }
+}
 
 class BooleanParameterBuilder(name: String) : PrimitiveParameterBuilder<Boolean>(name, boolean)
 

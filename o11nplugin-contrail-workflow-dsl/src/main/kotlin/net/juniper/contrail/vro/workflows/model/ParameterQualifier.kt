@@ -51,6 +51,7 @@ enum class QualifierKind {
 
 //TODO convert strings to sealed classes
 val mandatoryQualifierName = "mandatory"
+val sameValuesQualifierName = "sameValues"
 val visibleQualifierName = "visible"
 val defaultValueQualifierName = "defaultValue"
 val regexpQualifierName = "regexp"
@@ -92,6 +93,7 @@ fun <T : Any> predefinedAnswersActionQualifier(
         action.ognl)
 }
 
+fun sameValuesQualifier(value: Boolean) = staticQualifier(sameValuesQualifierName, boolean, value)
 fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifierName, string, value)
 fun multilineQualifier() = staticQualifier(multilineQualifierName, void, voidValue)
 fun minNumberValueQualifier(value: Long) = staticQualifier(minNumberValueQualifierName, number, value)

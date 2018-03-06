@@ -23,7 +23,9 @@ val modelClasses = setOf(
     the<InstanceIp>(),
     the<QosConfig>(),
     the<GlobalQosConfig>(),
-    the<PortTuple>()
+    the<PortTuple>(),
+    the<ServiceApplianceSet>(),
+    the<ServiceAppliance>()
 )
 
 val inventoryProperties = setOf(
@@ -50,13 +52,15 @@ val nonEditableProperties = setOf(
 )
 
 val customCreateWorkflows = setOf(
-    the<FloatingIp>()
+    the<FloatingIp>(),
+    the<ServiceTemplate>()
 )
 
 val customEditWorkflows = setOf(
     the<NetworkPolicy>(),
     the<FloatingIp>(),
-    the<RouteTable>()
+    the<RouteTable>(),
+    the<ServiceTemplate>()
 )
 
 val customDeleteWorkflows = setOf(
@@ -86,7 +90,8 @@ val hiddenRelations = setOf(
     pair<FloatingIp, Project>(),
     pair<VirtualNetwork, NetworkIpam>(),
     pair<VirtualMachineInterface, VirtualMachineInterface>(),
-    pair<VirtualMachineInterface, PortTuple>()
+    pair<VirtualMachineInterface, PortTuple>(),
+    pair<ServiceTemplate, ServiceApplianceSet>()
 )
 
 private inline fun <reified T> the() =
