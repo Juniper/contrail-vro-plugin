@@ -39,6 +39,23 @@ fun String.toTitle(): String =
 fun String.splitCamel(): String =
     camelChunks.joinToString(" ")
 
+val String.allLowerCase get() =
+    removeTypeSuffix().camelChunks.joinToString(" ") { it.toAcronymOrLowercase() }
+
+val Class<*>.allLowerCase get() =
+    pluginName.allLowerCase
+
+val String.allCapitalized get() =
+    removeTypeSuffix().camelChunks.joinToString(" ") { it.capitalize() }
+
+val Class<*>.allCapitalized get() =
+    pluginName.allCapitalized
+
+val typeSuffix = "Type$".toRegex()
+
+fun String.removeTypeSuffix() =
+    replace(typeSuffix, "")
+
 val String.camelChunks get() =
     split(CAMEL_CASE_REGEX)
 

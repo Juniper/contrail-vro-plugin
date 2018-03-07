@@ -53,7 +53,8 @@ var id = parent.internalId;
 var executor = ContrailConnectionManager.executor(id.toString());
 var portTuple = new ContrailPortTuple();
 portTuple.setName(name);
-executor.createPortTupleInServiceInstance(portTuple, parent);
+portTuple.setParentServiceInstance(parent);
+executor.createPortTuple(portTuple);
 executor.readPortTuple(portTuple);
 
 try {

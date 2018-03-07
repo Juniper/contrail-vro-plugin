@@ -6,7 +6,8 @@ package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.ObjectClass
-import net.juniper.contrail.vro.config.bold
+import net.juniper.contrail.vro.config.allCapitalized
+import net.juniper.contrail.vro.config.allLowerCase
 import net.juniper.contrail.vro.config.constants.id
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
@@ -25,7 +26,7 @@ import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
-import net.juniper.contrail.vro.workflows.schema.objectDescription
+import net.juniper.contrail.vro.workflows.schema.createWorkflowDescription
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
 import net.juniper.contrail.vro.workflows.schema.relationDescription
 
@@ -120,14 +121,6 @@ private fun editComplexPropertyWorkflows(rootProperty: Property, thisProperty: P
 
 fun deleteWorkflow(clazz: ObjectClass) =
     deleteWorkflow(clazz.pluginName, deleteScriptBody(clazz.pluginName))
-
-private fun Schema.createWorkflowDescription(clazz: ObjectClass, parentClazz: ObjectClass? = null) : String? {
-    val objectDescription = objectDescription(clazz, parentClazz) ?: return null
-    return """
-${clazz.allCapitalized.bold}
-$objectDescription
-""".trimIndent()
-}
 
 private fun Schema.relationInCreateWorkflowDescription(parentClazz: ObjectClass, clazz: ObjectClass) = """
 ${clazz.allCapitalized}

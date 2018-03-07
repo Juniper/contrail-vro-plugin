@@ -4,9 +4,13 @@
 
 package net.juniper.contrail.vro.workflows.schema
 
+import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.config.ObjectClass
+import net.juniper.contrail.vro.config.allCapitalized
+import net.juniper.contrail.vro.config.bold
 import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.parentType
+import net.juniper.contrail.vro.config.pluginName
 import org.w3c.dom.Node
 
 inline fun <reified T : Any> Schema.simpleTypeConstraints(propertyName: String): List<Constraint> =
@@ -37,6 +41,17 @@ inline fun <reified F : Any, reified T : Any> Schema.relationDescription() =
 
 fun Schema.relationDescription(from: Class<*>, to: Class<*>) =
     relationDefinitionComment(from, to).description
+
+inline fun <reified F : ApiObjectBase, reified T : ApiObjectBase> Schema.createWorkflowDescription() =
+    createWorkflowDescription(T::class.java, F::class.java)
+
+fun Schema.createWorkflowDescription(clazz: ObjectClass, parentClazz: ObjectClass? = null) : String? {
+    val objectDescription = objectDescription(clazz, parentClazz) ?: return null
+    return """
+${clazz.pluginName.allCapitalized.bold}
+$objectDescription
+""".trimIndent()
+}
 
 private fun Schema.objectFieldConstraints(xsdParent: String, xsdFieldName: String): Sequence<Constraint> {
     val fullName = "$xsdParent-$xsdFieldName"

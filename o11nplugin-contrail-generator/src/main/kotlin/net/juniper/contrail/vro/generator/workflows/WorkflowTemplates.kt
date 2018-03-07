@@ -5,7 +5,8 @@
 package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.vro.config.ObjectClass
-import net.juniper.contrail.vro.config.camelChunks
+import net.juniper.contrail.vro.config.allCapitalized
+import net.juniper.contrail.vro.config.allLowerCase
 import net.juniper.contrail.vro.config.ignoredInWorkflow
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.Property
@@ -19,7 +20,6 @@ import net.juniper.contrail.vro.config.isPropertyListWrapper
 import net.juniper.contrail.vro.config.isStringListWrapper
 import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.pluginName
-import net.juniper.contrail.vro.config.toAcronymOrLowercase
 import net.juniper.contrail.vro.generator.Contrail
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.workflows.dsl.PresentationParametersBuilder
@@ -68,23 +68,6 @@ val executor = "executor"
 val tab = "    "
 val AdvancedParameters = "Advanced parameters"
 val CustomParameters = "Custom parameters"
-
-val String.allLowerCase get() =
-    removeTypeSuffix().camelChunks.joinToString(" ") { it.toAcronymOrLowercase() }
-
-val Class<*>.allLowerCase get() =
-    pluginName.allLowerCase
-
-val String.allCapitalized get() =
-    removeTypeSuffix().camelChunks.joinToString(" ") { it.capitalize() }
-
-val Class<*>.allCapitalized get() =
-    pluginName.allCapitalized
-
-val typeSuffix = "Type$".toRegex()
-
-fun String.removeTypeSuffix() =
-    replace(typeSuffix, "")
 
 fun deleteWorkflow(className: String, scriptBody: String) =
     workflow("Delete ${className.allLowerCase}").withScript(scriptBody) {

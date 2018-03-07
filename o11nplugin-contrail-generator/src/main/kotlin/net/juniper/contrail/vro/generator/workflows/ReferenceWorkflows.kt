@@ -5,6 +5,8 @@
 package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.vro.config.ObjectClass
+import net.juniper.contrail.vro.config.allCapitalized
+import net.juniper.contrail.vro.config.allLowerCase
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.parentConnection

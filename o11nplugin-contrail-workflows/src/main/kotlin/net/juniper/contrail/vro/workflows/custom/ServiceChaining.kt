@@ -5,9 +5,9 @@
 package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.PortTuple
-import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualMachineInterface
+import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
@@ -15,10 +15,11 @@ import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
-import net.juniper.contrail.vro.workflows.util.extractRelationDescription
 import net.juniper.contrail.vro.config.getPortsForServiceInterface
 import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
 import net.juniper.contrail.vro.workflows.dsl.FromActionVisibility
+import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
+import net.juniper.contrail.vro.workflows.schema.createWorkflowDescription
 
 val maxOtherInterfacesSupported = 8
 val supportedOtherInterfaces = (0 until maxOtherInterfacesSupported).map { "other$it" }
@@ -30,19 +31,23 @@ val supportedInterfaceNames = listOf(
 val maxInterfacesSupported = supportedInterfaceNames.size
 
 internal fun addPortTupleToServiceInstance(schema: Schema): WorkflowDefinition {
-    val workflowName = "Add Port tuple to service instance"
+    val workflowName = "Add port tuple to service instance"
 
     return customWorkflow<ServiceInstance>(workflowName).withScriptFile("addPortTupleToServiceInstance") {
+        description = schema.createWorkflowDescription<ServiceInstance, PortTuple>()
         parameter("name", string) {
-            extractRelationDescription<ServiceInstance, PortTuple>(schema)
+            description = "${PortTuple::class.java.allCapitalized} name"
             mandatory = true
         }
         parameter(parent, reference<ServiceInstance>()) {
-            extractRelationDescription<Project, ServiceInstance>(schema)
+            description = ServiceInstance::class.java.allCapitalized
             mandatory = true
         }
-        (0 until maxInterfacesSupported).forEach {
-            generatePortInput(it)
+        step("Interfaces") {
+            visibility = WhenNonNull(parent)
+            (0 until maxInterfacesSupported).forEach {
+                generatePortInput(it)
+            }
         }
     }
 }
@@ -50,7 +55,7 @@ internal fun addPortTupleToServiceInstance(schema: Schema): WorkflowDefinition {
 private fun ParameterAggregator.generatePortInput(index: Int) {
     val interfaceName = supportedInterfaceNames[index]
     parameter("port$index", reference<VirtualMachineInterface>()) {
-        description = interfaceName
+        description = interfaceName.capitalize()
         listedBy = actionCallTo(getPortsForServiceInterface).parameters(parent).string(interfaceName)
         visibility = FromActionVisibility(
             actionCallTo(serviceHasInterfaceWithName).parameter(parent).string(interfaceName)
