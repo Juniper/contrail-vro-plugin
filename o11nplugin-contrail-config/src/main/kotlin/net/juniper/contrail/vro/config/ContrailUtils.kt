@@ -53,9 +53,6 @@ val ObjectClass.parentType: String? get() = when {
     else -> defaultParentType
 }
 
-val ObjectClass.objectType: String get() =
-    newInstance().objectType
-
 val Method.returnsObjectReferences: Boolean get() =
     returnListGenericClass.isA<ObjectReference<*>>()
 

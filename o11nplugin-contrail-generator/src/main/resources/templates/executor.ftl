@@ -8,29 +8,12 @@ import java.io.IOException
 
 class Executor(private val connection: Connection) {
 
-    <#list relations as relation>
-    @Throws(IOException::class)
-    fun create${relation.childPluginName}In${relation.parentName}(obj: ${relation.childName}, parent: ${relation.parentName}) {
-        obj.setParent(parent)
-        connection.create(obj)
-    }
-    </#list>
-
-    <#list rootClasses as rootClass>
-    @Throws(IOException::class)
-    fun create${rootClass.pluginName}(obj: ${rootClass.simpleName}) {
-        connection.create(obj)
-    }
-    </#list>
-
-    <#list internalClasses as internalClass>
-    @Throws(IOException::class)
-    fun create${internalClass.pluginName}(obj: ${internalClass.simpleName}) {
-        connection.create(obj)
-    }
-    </#list>
-
     <#list findableClasses as klass>
+    @Throws(IOException::class)
+    fun create${klass.pluginName}(obj: ${klass.simpleName}) {
+        connection.create(obj)
+    }
+
     @Throws(IOException::class)
     fun update${klass.pluginName}(obj: ${klass.simpleName}) {
         connection.update(obj)
@@ -45,6 +28,12 @@ class Executor(private val connection: Connection) {
     fun delete${klass.pluginName}(obj: ${klass.simpleName}) {
         connection.delete(obj)
     }
+    </#list>
+
+    <#list relations as relation>
+    fun get${relation.childPluginNamePluralized}Of${relation.parentPluginName}(parent: ${relation.parentName}) =
+        connection.getObjects(${relation.childName}::class.java, parent.${relation.childNameDecapitalized}s)
+
     </#list>
 
     <#list forwardRelations as relation>

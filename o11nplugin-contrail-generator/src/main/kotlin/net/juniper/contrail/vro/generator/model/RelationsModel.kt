@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.generator.model
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.isDirectChild
 import net.juniper.contrail.vro.config.pluginName
+import net.juniper.contrail.vro.config.pluralize
 import net.juniper.contrail.vro.config.toPluginName
 
 data class RelationsModel(
@@ -19,13 +20,17 @@ data class RelationsModel(
 data class RelationModel(
     val parentName: String,
     val childName: String,
-    val parentPluginName: String,
-    val childPluginName: String,
-    val childNameDecapitalized: String,
     val name: String,
     val isDirectChild: Boolean,
     val folderName: String
-)
+) {
+    val childNameDecapitalized = childName.decapitalize()
+    val parentPluginName = parentName.toPluginName
+    val childPluginName = childName.toPluginName
+    val childPluginNameDecapitalized = childPluginName.decapitalize()
+    val childPluginNamePluralized = childPluginName.pluralize()
+    val childPluginNamePluralizedDecapitalized = childPluginNamePluralized.decapitalize()
+}
 
 data class NestedRelationModel(
     val childWrapperName: String,
@@ -49,9 +54,6 @@ data class GetterModel(
 fun Relation.toRelationModel() = RelationModel(
     parentName,
     childName,
-    parentName.toPluginName,
-    childName.toPluginName,
-    childName.decapitalize(),
     name,
     childName.isDirectChild,
     folderName

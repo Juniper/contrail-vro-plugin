@@ -79,7 +79,9 @@ val hiddenRoots = setOf(
 
 val hiddenRelations = setOf(
     pair<FloatingIp, Project>(),
-    pair<VirtualNetwork, NetworkIpam>()
+    pair<VirtualNetwork, NetworkIpam>(),
+    pair<VirtualMachineInterface, VirtualMachineInterface>(),
+    pair<VirtualMachineInterface, PortTuple>()
 )
 
 private inline fun <reified T> the() =
@@ -161,9 +163,6 @@ val ObjectClass.isRootClass: Boolean get() {
     return ! parentType.typeToClassName.isModelClassName
 }
 
-val ObjectClass.isInternal: Boolean get() =
-    newInstance().defaultParentType == null
-
 private val VirtualMachineInterfaceName = "VirtualMachineInterface"
 private val PortName = "Port"
 
@@ -182,4 +181,3 @@ val Class<*>.pluginName get() =
 val inventoryPropertyFilter: PropertyClassFilter = { it.isInventoryProperty }
 val modelClassFilter: ObjectClassFilter = { it.isModelClass }
 val rootClassFilter: ObjectClassFilter = { it.isRootClass }
-val internalClassFilter: ObjectClassFilter = { it.isInternal }

@@ -31,7 +31,13 @@ inline private fun <reified T> findFolderIcon() =
 
 private val renamePolicy = object : MethodRenamePolicy {
     override fun rename(m: Method): String =
-        m.name.toPluginMethodName
+        m.renameParent() ?: m.name.toPluginMethodName
+
+    private fun Method.renameParent() =
+        if (name == "setParent" && parameterTypes[0].superclass == ApiObjectBase::class.java)
+            "setParent" + parameterTypes[0].simpleName
+        else
+            null
 }
 
 class CustomMapping: AbstractMapping() {

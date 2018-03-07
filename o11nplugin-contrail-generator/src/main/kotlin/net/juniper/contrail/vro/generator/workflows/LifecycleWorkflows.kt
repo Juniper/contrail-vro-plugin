@@ -134,11 +134,11 @@ ${clazz.allCapitalized}
 ${relationDescription(parentClazz, clazz)}
 """.trim()
 
-private fun Class<*>.createCall(parentClazz: ObjectClass?) =
+private fun setParentCall(parentClazz: ObjectClass?) =
     if (parentClazz == null)
-        "$executor.create$pluginName($item);"
+        ""
     else
-        "$executor.create${pluginName}In${parentClazz.pluginName}($item, $parent);"
+        "$item.setParent${parentClazz.pluginName}($parent);"
 
 private fun Class<*>.createScriptBody(parentClazz: ObjectClass?, references: List<ObjectClass>) = """
 $item = new Contrail$pluginName();
@@ -146,7 +146,8 @@ $item.setName(name);
 ${references.addAllReferences}
 var $id = $parent.internalId;
 var $executor = ContrailConnectionManager.executor($id.toString());
-${createCall(parentClazz)}
+${setParentCall(parentClazz)}
+$executor.create$pluginName($item);
 $item.internalId = id.with("$pluginName", item.uuid);
 """.trimIndent()
 
