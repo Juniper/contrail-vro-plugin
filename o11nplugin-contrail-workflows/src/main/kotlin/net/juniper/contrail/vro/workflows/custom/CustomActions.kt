@@ -18,6 +18,7 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += getNetworkOfServiceInterface(version, packageName)
     this += serviceHasInterfaceWithName(version, packageName)
     this += getPortsForServiceInterface(version, packageName)
+    this += getPortTuplesOfServiceInstance(version, packageName)
     this += getSubnetsOfVirtualNetworkAction(version, packageName)
     this += allocValidationAction(version, packageName)
     this += inCidrValidationAction(version, packageName)

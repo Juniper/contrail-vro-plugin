@@ -47,6 +47,11 @@ class Executor(private val connection: Connection) {
         return ports.asSequence().map { connection.findById<VirtualMachineInterface>(it.uuid) }.filterNotNull().toList()
     }
 
+    fun getPortsOfPortTuple(child: PortTuple) : List<VirtualMachineInterface>{
+        val ports = child.virtualMachineInterfaceBackRefs ?: emptyList()
+        return ports.asSequence().map { connection.findById<VirtualMachineInterface>(it.uuid) }.filterNotNull().toList()
+    }
+
     fun getProjectsOfFloatingIpPool(child: FloatingIpPool) : List<Project>{
         val projects = child.projectBackRefs ?: emptyList()
         return projects.asSequence().map { connection.findById<Project>(it.uuid) }.filterNotNull().toList()

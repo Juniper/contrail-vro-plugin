@@ -61,7 +61,8 @@ val customEditWorkflows = setOf(
 
 val customDeleteWorkflows = setOf(
     the<FloatingIpPool>(),
-    the<VirtualMachineInterface>()
+    the<VirtualMachineInterface>(),
+    the<PortTuple>()
 )
 
 val directChildren = setOf(

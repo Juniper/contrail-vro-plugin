@@ -17,6 +17,7 @@ import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.config.getPortsForServiceInterface
 import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
+import net.juniper.contrail.vro.config.getPortTuplesOfServiceInstance
 import net.juniper.contrail.vro.workflows.dsl.FromActionVisibility
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.schema.createWorkflowDescription
@@ -62,4 +63,33 @@ private fun ParameterAggregator.generatePortInput(index: Int) {
         )
         mandatory = true
     }
+}
+
+internal fun deletePortTuple(schema: Schema): WorkflowDefinition {
+    val workflowName = "Delete port tuple"
+
+    return customWorkflow<PortTuple>(workflowName).withScriptFile("deletePortTuple") {
+        parameter("portTuple", reference<PortTuple>()) {
+            description = PortTuple::class.java.allCapitalized
+            mandatory = true
+        }
+    }
+}
+
+internal fun removePortTuplefromServiceInstance(schema: Schema): WorkflowDefinition {
+    val workflowName = "Remove port tuple from service instance"
+
+    return customWorkflow<ServiceInstance>(workflowName).withScriptFile("deletePortTuple") {
+        parameter(parent, reference<ServiceInstance>()) {
+            description = ServiceInstance::class.java.allCapitalized
+            mandatory = true
+        }
+        parameter("portTuple", reference<PortTuple>()) {
+            description = PortTuple::class.java.allCapitalized
+            visibility = WhenNonNull(parent)
+            listedBy = actionCallTo(getPortTuplesOfServiceInstance).parameter(parent)
+            mandatory = true
+        }
+    }
+
 }

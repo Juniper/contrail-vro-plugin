@@ -23,7 +23,7 @@ var interfaceTypes = [
     "other4",
     "other5",
     "other6",
-    "other7",
+    "other7"
 ];
 
 var oldPortInterfaceTypes = ports.map(function(port){
