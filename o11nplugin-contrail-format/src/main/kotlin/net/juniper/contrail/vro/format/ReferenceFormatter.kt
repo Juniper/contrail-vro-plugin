@@ -18,7 +18,7 @@ import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.VnSubnetsType
 
 class ReferenceFormatter(val factory: IPluginFactory) {
-    fun <T : ApiPropertyBase> formatReferences(wrapper: AbstractWrapper, references: List<ObjectReference<T>>?, type: String): String? {
+    fun <T : ApiPropertyBase> format(wrapper: AbstractWrapper, references: List<ObjectReference<T>>?, type: String): String? {
         if (references == null) return null
 
         val parentSid: Sid = if (wrapper is Findable) wrapper.internalId else return null

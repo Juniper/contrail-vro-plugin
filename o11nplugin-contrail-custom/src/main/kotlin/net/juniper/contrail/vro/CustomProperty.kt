@@ -5,6 +5,8 @@
 package net.juniper.contrail.vro
 
 import net.juniper.contrail.vro.config.displayedPropertySuffix
+import net.juniper.contrail.vro.config.returnTypeOrListType
+import java.lang.reflect.Method
 
 class CustomProperty(
     val propertyType: String,
@@ -17,3 +19,6 @@ class CustomProperty(
     private fun String.methodToView() =
         replaceFirst("get", "").decapitalize()
 }
+
+fun Method.toCustomProperty() =
+    CustomProperty(returnTypeOrListType!!.simpleName, name)

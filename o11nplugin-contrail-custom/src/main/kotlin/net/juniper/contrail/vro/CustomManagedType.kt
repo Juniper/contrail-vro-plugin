@@ -10,23 +10,31 @@ import com.vmware.o11n.sdk.modeldrivengen.model.ManagedConstructor
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedMethod
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
 import net.juniper.contrail.vro.config.backRefTypeName
+import net.juniper.contrail.vro.config.constants.apiTypesPackageName
 import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.isApiPropertyClass
 import net.juniper.contrail.vro.config.isHiddenProperty
 import net.juniper.contrail.vro.config.isInventoryProperty
 import net.juniper.contrail.vro.config.isModelClassName
-import net.juniper.contrail.vro.config.returnTypeOrListType
 import net.juniper.contrail.vro.config.returnsApiPropertyOrList
-import java.lang.reflect.Method
 
 class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
 
-    val refsFields: List<CustomRefsField> = delegate.modelClass?.run {
+    val isObjectClass get() =
+        delegate.modelClass?.isApiObjectClass ?: false
+
+    val references: List<CustomReference> = delegate.modelClass?.run {
+        declaredMethods.asSequence()
+            .map { it.toCustomReference() }.filterNotNull()
+            .toList()
+    } ?: emptyList()
+
+    val referenceProperties: List<CustomReferenceProperty> = delegate.modelClass?.run {
         declaredFields
             .asSequence()
             .filter { it.name.endsWith("back_refs") }
             .filter { it.backRefTypeName.isModelClassName }
-            .map { CustomRefsField.wrapField(it) }
+            .map { CustomReferenceProperty.wrapField(it) }
             .toList()
     } ?: emptyList()
 
@@ -43,16 +51,11 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
             null
     } ?: emptyList()
 
-    val isObjectClass get() =
-        delegate.modelClass?.isApiObjectClass ?: false
-
-    private fun Method.toCustomProperty() =
-        CustomProperty(returnTypeOrListType!!.simpleName, name)
-
     init {
         removeDuplicateMethods()
+        generateReferenceMethods()
         generatePropertyMethods()
-        generateRefsMethods()
+        generateReferencePropertiesMethods()
     }
 
     private fun removeDuplicateMethods() {
@@ -79,50 +82,62 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
             it.size >= 1 && ! it[0].modelType.isApiObjectClass
         }
 
-    private fun generateRefsMethods() {
-        for (customField in this.refsFields) {
-            val name = customField.wrapperMethodName
-            val originalProperty = customField.propertyName
-            val returnParameter = createReturnsFormalParameter()
+    private fun generateReferenceMethods() =
+        references.forEach { methods.add(it.toManagedMethod()) }
 
-            val method = ManagedMethod()
-            method.setName(name, name)
-            method.originalPropertyName = originalProperty
-            method.propertyName = originalProperty
-            method.params = emptyList()
-            method.setIsInheritedWrapperMethod(true)
-            method.isPropertyReadOnly = true
-            method.returns = returnParameter
+    private fun generateReferencePropertiesMethods() =
+        referenceProperties.forEach { methods.add(it.toManagedMethod()) }
 
-            methods.add(method)
-        }
+    private fun generatePropertyMethods() =
+        propertyViews.forEach { methods.add(it.toManagedMethod()) }
+
+    private fun CustomReference.toManagedMethod() = ManagedMethod().apply {
+        setName(methodName, methodName)
+        params = emptyList()
+        // trick to avoid generating standard wrapper method
+        setIsInheritedWrapperMethod(true)
+        isPropertyReadOnly = true
+        returns = collectionReturnFormalParameter()
     }
 
-    private fun generatePropertyMethods() {
-        for (property in propertyViews) {
-            val returnParameter = createReturnsFormalParameter()
+    private fun CustomReferenceProperty.toManagedMethod() = ManagedMethod().apply {
+        val originalProperty = this@toManagedMethod.propertyName
 
-            val method = ManagedMethod()
-            method.setName(property.viewMethodName, property.viewMethodName)
-            method.propertyName = property.viewPropertyName
-            method.originalPropertyName = property.viewPropertyName
-            method.params = emptyList()
-            method.setIsInheritedWrapperMethod(true)
-            method.isPropertyReadOnly = true
-            method.returns = returnParameter
-
-            methods.add(method)
-        }
+        setName(wrapperMethodName, wrapperMethodName)
+        originalPropertyName = originalProperty
+        propertyName = originalProperty
+        params = emptyList()
+        setIsInheritedWrapperMethod(true)
+        isPropertyReadOnly = true
+        returns = stringReturnFormalParameter()
     }
 
-    private fun createReturnsFormalParameter(): FormalParameter {
-        val returnParameter = FormalParameter()
-        returnParameter.name = "_result"
-        returnParameter.modelType = String::class.java
-        returnParameter.fullClassName = String::class.java.name
-        returnParameter.typeName = "String"
-        returnParameter.isWrapped = false
-        return returnParameter
+    private fun CustomProperty.toManagedMethod() = ManagedMethod().apply {
+        setName(viewMethodName, viewMethodName)
+        propertyName = viewPropertyName
+        originalPropertyName = viewPropertyName
+        params = emptyList()
+        setIsInheritedWrapperMethod(true)
+        isPropertyReadOnly = true
+        returns = stringReturnFormalParameter()
+    }
+
+    private fun CustomReference.collectionReturnFormalParameter() = FormalParameter().apply {
+        name = "_result"
+        modelType = List::class.java
+        fullClassName = List::class.java.name
+        typeName = "[Contrail$className"
+        componentTypeName = "Contrail$className"
+        componentClassName = "$apiTypesPackageName.$className"
+        isWrapped = true
+    }
+
+    private fun stringReturnFormalParameter() = FormalParameter().apply {
+        name = "_result"
+        modelType = String::class.java
+        fullClassName = String::class.java.name
+        typeName = "String"
+        isWrapped = false
     }
 
     companion object {

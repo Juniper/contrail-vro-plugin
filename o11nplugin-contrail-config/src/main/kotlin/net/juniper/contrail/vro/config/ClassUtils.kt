@@ -32,23 +32,36 @@ val <T> Class<T>.kotlinClassName: String get() = when (this) {
 
 val BackRefs = "BackRefs"
 val back_refs = "_back_refs"
+val className = "[A-Za-z0-9]+"
 
-private val getterPattern = "^get".toRegex()
-private val referencePattern = "get([A-Za-z0-9]+)s".toRegex()
-private val backRefsPattern = "$BackRefs$".toRegex()
-private val fieldBackRefsPattern = "$back_refs$".toRegex()
+val getPrefix = "^get".toRegex()
+val backRefsPostfix = "$BackRefs$".toRegex()
+val fieldBackRefsPostfix = "$back_refs$".toRegex()
+
+val childReferencePattern = "get($className)s".toRegex()
+val forwardReferencePattern = "get($className)".toRegex()
+val backReferencePattern = "get($className)$BackRefs".toRegex()
+
+val referencePatterns = sequenceOf(
+    backReferencePattern,
+    childReferencePattern,
+    forwardReferencePattern
+)
 
 val Method.isChildReferenceGetter get() =
-    referencePattern.matchEntire(name) != null && returnListGenericClass == ObjectReference::class.java
+    childReferencePattern.matchEntire(name) != null && returnListGenericClass == ObjectReference::class.java
 
 val Method.childClassName get() =
-    referencePattern.matchEntire(name)?.groupValues?.get(1)
+    childReferencePattern.matchEntire(name)?.groupValues?.get(1)
+
+fun String.removeGet() =
+    replace(getPrefix, "")
 
 val Method.nameWithoutGet get() =
-    name.replace(getterPattern, "")
+    name.replace(getPrefix, "")
 
 val Method.nameWithoutGetAndBackRefs get() =
-    nameWithoutGet.replace(backRefsPattern, "")
+    nameWithoutGet.replace(backRefsPostfix, "")
 
 val Method.propertyName get() =
     nameWithoutGet.decapitalize()
@@ -63,7 +76,7 @@ val Field.isBackRef get() =
     name.endsWith(back_refs)
 
 val Field.backRefTypeName get() =
-    name.replace(fieldBackRefsPattern, "").fieldToClassName
+    name.replace(fieldBackRefsPostfix, "").fieldToClassName
 
 val Type.parameterClass: Class<*>? get() =
     parameterType?.unwrapped

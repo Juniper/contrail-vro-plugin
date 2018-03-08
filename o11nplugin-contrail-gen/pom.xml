@@ -41,6 +41,10 @@
   <build>
     <plugins>
       <plugin>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <groupId>org.jetbrains.kotlin</groupId>
+      </plugin>
+      <plugin>
         <groupId>com.vmware.o11n</groupId>
         <artifactId>o11n-modeldriven-mojo</artifactId>
         <version>${vco.version}</version>

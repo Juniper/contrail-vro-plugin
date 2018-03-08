@@ -11,7 +11,7 @@ import net.juniper.contrail.vro.config.toPluginName
 import java.lang.reflect.Field
 import java.lang.reflect.ParameterizedType
 
-class CustomRefsField(
+class CustomReferenceProperty(
     val name: String,
     val returnTypeName: String,
     val refObjectType: String
@@ -22,11 +22,11 @@ class CustomRefsField(
     val refObjectPluginType = refObjectType.toPluginName
 
     companion object {
-        fun wrapField(field: Field): CustomRefsField {
+        fun wrapField(field: Field): CustomReferenceProperty {
             val objectType = field.backRefTypeName
             val fieldGenericType = field.genericType as ParameterizedType
             val returnTypeName = fieldGenericType.actualTypeArguments[0].toString()
-            return CustomRefsField(
+            return CustomReferenceProperty(
                 name = field.name,
                 returnTypeName = returnTypeName,
                 refObjectType = objectType

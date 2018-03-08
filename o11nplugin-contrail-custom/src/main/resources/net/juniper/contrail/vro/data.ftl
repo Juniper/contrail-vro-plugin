@@ -6,8 +6,8 @@ import org.springframework.beans.factory.BeanFactory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.List;
 import net.juniper.contrail.vro.ContrailPluginFactory;
+import net.juniper.contrail.vro.model.Connection;
 import net.juniper.contrail.vro.format.*;
 import net.juniper.contrail.api.*;
 import net.juniper.contrail.api.types.*;
@@ -23,18 +23,24 @@ public class ${className}
 </@compress>
 
     private static final long serialVersionUID = 1L;
-    private ReferenceFormatter referenceFormatter;
+    <#if objectClass >
+    private ReferenceFormatter formatter;
+    private WrapperUtil util;
+    </#if>
 
     @Override
     public void setContext(PluginContext ctx) {
         <#if interceptor??>
         _ctx = new WrapperContext(ctx, ${interceptor.canonicalName}.class);
         <#else>
-		_ctx = new WrapperContext(ctx, null);
-		</#if>
+        _ctx = new WrapperContext(ctx, null);
+        </#if>
+        <#if objectClass >
         BeanFactory beanFactory = _ctx.getPluginContext().getApplicationContext().getAutowireCapableBeanFactory();
         ContrailPluginFactory factory = beanFactory.getBean(ContrailPluginFactory.class);
-		referenceFormatter = new ReferenceFormatter(factory);
+        formatter = new ReferenceFormatter(factory);
+        util = new WrapperUtil(_ctx, factory);
+        </#if>
     }
 
     <#if findable>
@@ -49,37 +55,37 @@ public class ${className}
     }
     </#if>
 
-	@Override
+    @Override
     public ${modelClass.canonicalName} __getTarget() {
         return (${modelClass.canonicalName}) _target;
     }
 
-	<#list constructors as c> <#if !c.extensionClass??>
-	<#if !(c.params?has_content)><#assign defaultConstructor = true></#if>
+    <#list constructors as c> <#if !c.extensionClass??>
+    <#if !(c.params?has_content)><#assign defaultConstructor = true></#if>
     <@compress single_line=true>public ${className}(<@params c />)<@thrown c /> {</@compress>
-	    setContext(AnonymousPluginContext.get());
+        setContext(AnonymousPluginContext.get());
 
         <@locals c />
 
         __setTarget(new ${c.declaringClass.canonicalName}(<@localNames c />));
-	}
-	</#if></#list>
+    }
+    </#if></#list>
 
-	<#list constructors as c> <#if c.extensionClass??>
-	<#if !(c.params?has_content)><#assign defaultConstructor = true></#if>
+    <#list constructors as c> <#if c.extensionClass??>
+    <#if !(c.params?has_content)><#assign defaultConstructor = true></#if>
     <@compress single_line=true>public ${className}(<@params c />)<@thrown c /> {</@compress>
         setContext(AnonymousPluginContext.get());
 
         <@locals c />
 
         __setTarget(_ctx.constructWith(${c.extensionClass.canonicalName}.class).${c.extensionMethod}(<@localNames c />));
-	}
-	</#if></#list>
+    }
+    </#if></#list>
 
-	<#if !defaultConstructor??>
-	public ${className}() {
-		// Empty default constructor
-	}</#if>
+    <#if !defaultConstructor??>
+    public ${className}() {
+        // Empty default constructor
+    }</#if>
 
     <#list methods as m> <#if !m.extensionClass?? && !interceptor?? && !m.inheritedWrapperMethod && (m.name != 'getDisplayName' || !objectClass)>
     <@compress single_line=true>public ${m.returns.returnFriendlyClassName} ${m.name}(<@params m />)<@thrown m /> {</@compress>
@@ -99,14 +105,14 @@ public class ${className}
         return _res$pl;
         </#if>
     }
-	</#if></#list>
+    </#if></#list>
 
     <#list methods as m> <#if !m.extensionClass?? && interceptor??>
     <@compress single_line=true>public ${m.returns.returnFriendlyClassName} ${m.name} (<@params m />) throws Throwable {</@compress>
         <@locals m />
 
         <@compress single_line=true><#if m.returns.returnFriendlyClassName != 'void'>Object _res$ = <#else> </#if>
-		_ctx.intercept(__getTarget(), <#if findable>getInternalId()<#else>null</#if>, "${m.originalName}", new Class<?>[] {<@types m />}<#if m.params?has_content>, new Object[]{<@localNames m />}</#if>);
+        _ctx.intercept(__getTarget(), <#if findable>getInternalId()<#else>null</#if>, "${m.originalName}", new Class<?>[] {<@types m />}<#if m.params?has_content>, new Object[]{<@localNames m />}</#if>);
         </@compress>
 
         <#if m.returns.returnFriendlyClassName != 'void'>
@@ -119,7 +125,7 @@ public class ${className}
         return _res$pl;
         </#if>
     }
-	</#if></#list>
+    </#if></#list>
 
     <#list methods as m> <#if m.extensionClass??>
     <@compress single_line=true>public ${m.returns.returnFriendlyClassName} ${m.name} (<@params m />)<@thrown m /> {</@compress>
@@ -138,26 +144,31 @@ public class ${className}
         return _res$pl;
         </#if>
     }
-	</#if></#list>
+    </#if></#list>
 
-	<#if singleton >
-	    <@singletonMethod />
-	</#if>
+    <#if singleton >
+        <@singletonMethod />
+    </#if>
 
     <#if objectClass >
     public String getDisplayName() {
         return DisplayNameFormatter.INSTANCE.format(__getTarget());
     }
-    </#if>
 
-    <#list refsFields as field>
-    public String ${field.wrapperMethodName}() {
-        List<${field.returnTypeName}> ref_list = __getTarget().get${field.methodName}();
-
-        return referenceFormatter.formatReferences(this, ref_list, "${field.refObjectPluginType}");
+    <#list references as ref>
+    //List returned by this method is read-only. Changes to the list will not be reflected in the state of the object.
+    public java.util.List<${ref.className}_Wrapper> ${ref.pluginMethodName}() {
+        return util.references(_internalId, ${ref.className}.class, __getTarget().${ref.methodName}());
     }
 
     </#list>
+    <#list referenceProperties as prop>
+    public String ${prop.wrapperMethodName}() {
+        return formatter.format(this, __getTarget().get${prop.methodName}(), "${prop.refObjectPluginType}");
+    }
+    </#list>
+    </#if>
+
     <#list propertyViews as property>
     public String ${property.viewMethodName}() {
         ${property.propertyType} prop = __getTarget().${property.methodName}();
