@@ -40,13 +40,13 @@ internal fun ipValidationAction(version: String, packageName: String): Action {
     val resultType = string
     val parameters = listOf("input" ofType string)
     return Action(
-            name = name,
-            packageName = packageName,
-            id = generateID(packageName, name),
-            version = version,
-            resultType = resultType,
-            parameters = parameters,
-            script = Script(ScriptLoader.load(name))
+        name = name,
+        packageName = packageName,
+        id = generateID(packageName, name),
+        version = version,
+        resultType = resultType,
+        parameters = parameters,
+        script = Script(ScriptLoader.load(name))
     )
 }
 

@@ -27,4 +27,5 @@ fun loadCustomWorkflows(schema: Schema): List<WorkflowDefinition> = mutableListO
     this += deletePortTuple()
     this += removePortTupleFromServiceInstance()
     this += createServiceInstance(schema)
+    this += addRouteToRoutingTableWorkflow(schema)
 }

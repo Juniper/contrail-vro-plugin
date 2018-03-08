@@ -24,4 +24,5 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += isFreeValidationAction(version, packageName)
     this += isMultiAddressNetworkPolicyRuleAction(version, packageName)
     this += isMultiAddressSecurityGroupRuleAction(version, packageName)
+    this += areValidCommunityAttributes(version, packageName)
 }

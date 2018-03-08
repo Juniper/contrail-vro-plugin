@@ -14,6 +14,7 @@ import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRuleAction
 import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
 import net.juniper.contrail.vro.config.getNetworkOfServiceInterface
 import net.juniper.contrail.vro.config.portsForServiceInterface
+import net.juniper.contrail.vro.config.areValidCommunityAttributes
 import net.juniper.contrail.vro.config.templateHasInterfaceWithName
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Script
@@ -138,6 +139,21 @@ internal fun isMultiAddressSecurityGroupRuleAction(version: String, packageName:
     val name = isSingleAddressSecurityGroupRuleAction
     val resultType = string
     val parameters = listOf("input" ofType string, "securityGroup" ofType any)
+    return Action(
+        name = name,
+        packageName = packageName,
+        id = generateID(packageName, name),
+        version = version,
+        resultType = resultType,
+        parameters = parameters,
+        script = Script(ScriptLoader.load(name))
+    )
+}
+
+internal fun areValidCommunityAttributes(version: String, packageName: String): Action {
+    val name = areValidCommunityAttributes
+    val resultType = boolean
+    val parameters = listOf("communityAttributes" ofType string)
     return Action(
         name = name,
         packageName = packageName,

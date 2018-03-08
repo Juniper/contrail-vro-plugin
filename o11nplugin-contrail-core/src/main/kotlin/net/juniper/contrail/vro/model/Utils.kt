@@ -81,6 +81,20 @@ class Utils {
         return false
     }
 
+    fun areValidCommunityAttributes(communityAttributes: List<String>): Boolean =
+        communityAttributes.isEmpty() ||
+        communityAttributes.map { isValidCommunityAttribute(it) }.reduceRight { b, acc -> b && acc }
+
+    private fun isValidCommunityAttribute(communityAttribute: String): Boolean {
+        val parts = communityAttribute.split(":")
+        if (parts.size > 2) return false
+        parts.forEach {
+            val numericValue = it.toIntOrNull() ?: return false
+            if (numericValue > 65535 || numericValue < 0) return false
+        }
+        return true
+    }
+
     fun getVnSubnet(network: VirtualNetwork, ipam: NetworkIpam): VnSubnetsType =
         network.networkIpam?.find { it.uuid == ipam.uuid }?.attr ?: VnSubnetsType()
 

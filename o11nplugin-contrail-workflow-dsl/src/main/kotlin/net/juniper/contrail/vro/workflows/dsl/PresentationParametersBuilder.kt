@@ -93,8 +93,8 @@ open class ParameterAggregator(
     }
 
     @JvmName("parameterStringArray")
-    fun parameter(name: String, type: array<String>, setup: ArrayStringParameterBuilder.() -> Unit) {
-        ArrayStringParameterBuilder(name, type).updateWith(setup)
+    fun parameter(name: String, type: array<String>, setup: ArrayPrimitiveParameterBuilder<String>.() -> Unit) {
+        ArrayPrimitiveParameterBuilder(name, type).updateWith(setup)
     }
 
     fun parameter(name: String, type: Class<*>, setup: BasicParameterBuilder<*>.() -> Unit) = when (type) {
@@ -203,19 +203,32 @@ abstract class PrimitiveParameterBuilder<Type: Any>(parameterName: String, type:
     }
 }
 
-class ArrayPairParameterBuilder(name: String, type: array<Pair<String, String>>) :
-    BasicParameterBuilder<List<Pair<String, String>>>(name, type)
-
-class ArrayStringParameterBuilder(name: String, type: array<String>) : BasicParameterBuilder<List<String>>(name, type) {
+abstract class ArrayParameterBuilder<Type: Any>(name: String, type: array<Type>) : BasicParameterBuilder<List<Type>>(name, type) {
     var sameValues: Boolean? = null
-    var predefinedAnswers : List<String>? = null
 
     override val customQualifiers get() = super.customQualifiers.apply {
         sameValues?.let {
             add(sameValuesQualifier(it))
         }
+    }
+}
+
+class ArrayPairParameterBuilder(name: String, type: array<Pair<String, String>>) :
+    ArrayParameterBuilder<Pair<String, String>>(name, type)
+
+class ArrayPrimitiveParameterBuilder<Type: Any>(name: String, type: array<Type>) : ArrayParameterBuilder<Type>(name, type) {
+    var predefinedAnswers: List<Type>? = null
+    var predefinedAnswersFrom: ActionCallBuilder? = null
+        set(value) {
+            field = value?.snapshot()
+        }
+
+    override val customQualifiers get() = super.customQualifiers.apply {
         predefinedAnswers?.let {
-            add(predefinedAnswersQualifier(string, it))
+            add(predefinedAnswersQualifier(type, it))
+        }
+        predefinedAnswersFrom?.let {
+            add(predefinedAnswersActionQualifier(type, it.create()))
         }
     }
 }
@@ -269,7 +282,7 @@ class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterB
     }
 }
 
-class ReferenceArrayParameterBuilder(name: String, type: array<Reference>) : BasicParameterBuilder<List<Reference>>(name, type)
+class ReferenceArrayParameterBuilder(name: String, type: array<Reference>) : ArrayParameterBuilder<Reference>(name, type)
 
 class OutputParameterBuilder(val name: String, val type: ParameterType<Any>) {
     var description: String? = null

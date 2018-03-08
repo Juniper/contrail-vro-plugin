@@ -11,6 +11,7 @@ import net.juniper.contrail.vro.config.isInCidrAction
 import net.juniper.contrail.vro.config.isIpAction
 import net.juniper.contrail.vro.config.isSingleAddressNetworkPolicyRuleAction
 import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRuleAction
+import net.juniper.contrail.vro.config.areValidCommunityAttributes
 import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
 
 fun BasicParameterBuilder<String>.isCidr() =
@@ -34,3 +35,5 @@ fun BasicParameterBuilder<String>.isSingleAddressNetworkPolicyRuleOf(networkPoli
 fun BasicParameterBuilder<String>.isSingleAddressSecurityGroupRuleOf(securityGroup: String) =
     validationActionCallTo(isSingleAddressSecurityGroupRuleAction).parameter(securityGroup)
 
+fun BasicParameterBuilder<List<String>>.isCommunityAttribute() =
+    validationActionCallTo(areValidCommunityAttributes)
