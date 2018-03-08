@@ -7,8 +7,10 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.RouteTable
 import net.juniper.contrail.vro.config.constants.parent
+import net.juniper.contrail.vro.config.getRouteTableRoutes
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
@@ -62,6 +64,23 @@ internal fun addRouteToRoutingTableWorkflow(schema: Schema): WorkflowDefinition 
                 sameValues = false
                 validWhen = isCommunityAttribute()
             }
+        }
+    }
+}
+
+internal fun removeTableRouteWorkflow(schema: Schema): WorkflowDefinition {
+    val workflowName = "Remove route table route"
+
+    return customWorkflow<RouteTable>(workflowName).withScriptFile("removeRouteFromTable") {
+        parameter(parent, reference<RouteTable>()) {
+            extractRelationDescription<Project, RouteTable>(schema)
+            mandatory = true
+        }
+        parameter("route", string) {
+            visibility = WhenNonNull(parent)
+            description = "Route to remove"
+            mandatory = true
+            predefinedAnswersFrom = actionCallTo(getRouteTableRoutes).parameter(parent)
         }
     }
 }

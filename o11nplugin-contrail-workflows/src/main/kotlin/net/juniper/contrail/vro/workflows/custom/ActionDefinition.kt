@@ -16,6 +16,7 @@ import net.juniper.contrail.vro.config.getNetworkOfServiceInterface
 import net.juniper.contrail.vro.config.portsForServiceInterface
 import net.juniper.contrail.vro.config.areValidCommunityAttributes
 import net.juniper.contrail.vro.config.templateHasInterfaceWithName
+import net.juniper.contrail.vro.config.getRouteTableRoutes
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.any
@@ -37,6 +38,21 @@ internal fun getNetworkPolicyRulesAction(version: String, packageName: String): 
     val name = getNetworkPolicyRules
     val resultType = array(string)
     val parameters = listOf("netpolicy" ofType any)
+    return Action(
+        name = name,
+        packageName = packageName,
+        id = generateID(packageName, name),
+        version = version,
+        resultType = resultType,
+        parameters = parameters,
+        script = Script(ScriptLoader.load(name))
+    )
+}
+
+internal fun getRouteTableRoutes(version: String, packageName: String): Action {
+    val name = getRouteTableRoutes
+    val resultType = array(string)
+    val parameters = listOf("parent" ofType any)
     return Action(
         name = name,
         packageName = packageName,
@@ -152,8 +168,8 @@ internal fun isMultiAddressSecurityGroupRuleAction(version: String, packageName:
 
 internal fun areValidCommunityAttributes(version: String, packageName: String): Action {
     val name = areValidCommunityAttributes
-    val resultType = boolean
-    val parameters = listOf("communityAttributes" ofType string)
+    val resultType = string
+    val parameters = listOf("communityAttributes" ofType array(string))
     return Action(
         name = name,
         packageName = packageName,

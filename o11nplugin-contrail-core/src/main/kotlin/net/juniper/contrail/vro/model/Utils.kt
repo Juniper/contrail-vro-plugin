@@ -9,6 +9,7 @@ import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.NetworkPolicy
 import net.juniper.contrail.api.types.PolicyRuleType
 import net.juniper.contrail.api.types.PortType
+import net.juniper.contrail.api.types.RouteType
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.api.types.SubnetType
@@ -81,11 +82,7 @@ class Utils {
         return false
     }
 
-    fun areValidCommunityAttributes(communityAttributes: List<String>): Boolean =
-        communityAttributes.isEmpty() ||
-        communityAttributes.map { isValidCommunityAttribute(it) }.reduceRight { b, acc -> b && acc }
-
-    private fun isValidCommunityAttribute(communityAttribute: String): Boolean {
+    fun isValidCommunityAttribute(communityAttribute: String): Boolean {
         val parts = communityAttribute.split(":")
         if (parts.size > 2) return false
         parts.forEach {
@@ -213,6 +210,15 @@ class Utils {
 
     fun ruleStringToIndex(ruleString: String): Int =
         ruleString.split(":")[0].toInt()
+
+    fun routeToString(route: RouteType, index: Int): String {
+        return "$index: prefix ${route.prefix} next-hop-type ${route.nextHopType} next-hop ${route.nextHop} " +
+            "community-attributes ${route.communityAttributes.communityAttribute.joinToString(",")}"
+    }
+
+    fun routeStringToIndex(routeString: String): Int {
+        return routeString.split(":")[0].toInt()
+    }
 
     fun lowercase(s: String) =
         s.toLowerCase()

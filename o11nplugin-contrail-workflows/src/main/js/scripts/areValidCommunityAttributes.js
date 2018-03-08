@@ -1,4 +1,9 @@
-if (!communityAttributes || ContrailUtils.areValidCommunityAttributes(communityAttributes)){
-    return null;
+if (!communityAttributes) return null;
+
+for (i = 0; i < communityAttributes.length; ++i) {
+    var attribute = communityAttributes[i];
+    if (!ContrailUtils.isValidCommunityAttribute(attribute)) {
+        return "Invalid community attribute format: " + attribute + " ; Use 'number:number'.";
+    }
 }
-return "Enter valid IPv4 or IPv6 Subnet/Mask";
+return null;
