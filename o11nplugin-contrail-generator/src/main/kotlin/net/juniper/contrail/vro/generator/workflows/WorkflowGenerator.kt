@@ -10,6 +10,7 @@ import net.juniper.contrail.vro.config.ProjectInfo
 import net.juniper.contrail.vro.config.hasCustomCreateWorkflow
 import net.juniper.contrail.vro.config.hasCustomDeleteWorkflow
 import net.juniper.contrail.vro.config.hasCustomEditWorkflow
+import net.juniper.contrail.vro.config.isRealtionEditable
 import net.juniper.contrail.vro.config.isRelationMandatory
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
@@ -60,6 +61,9 @@ fun RelationDefinition.mandatoryReferencesOf(clazz: ObjectClass) =
         .map { it.childClass }
         .toList()
 
+val ForwardRelation.isEditable get() =
+    parentClass.isRealtionEditable(childClass)
+
 private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, multipleParents: Boolean, refs: List<ObjectClass>, schema: Schema) {
     if (!clazz.hasCustomCreateWorkflow)
         createWorkflow(clazz, parentClazz, multipleParents, refs, schema).save(info, clazz)
@@ -76,8 +80,11 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, re
 
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation, schema: Schema) {
     relation.findReferencesAction(info.workflowVersion, info.workflowPackage).save(info)
-    addReferenceWorkflow(relation, schema).save(info, relation.parentClass)
-    removeReferenceWorkflow(relation).save(info, relation.parentClass)
+
+    if (relation.isEditable) {
+        addReferenceWorkflow(relation, schema).save(info, relation.parentClass)
+        removeReferenceWorkflow(relation).save(info, relation.parentClass)
+    }
 }
 
 private fun createCustomWorkflows(info: ProjectInfo, schema: Schema) {

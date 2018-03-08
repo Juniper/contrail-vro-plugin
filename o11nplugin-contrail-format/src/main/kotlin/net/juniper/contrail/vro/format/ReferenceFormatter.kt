@@ -30,11 +30,11 @@ class ReferenceFormatter(val factory: IPluginFactory) {
         val sid = parentSid.with(type, ref.uuid)
         val element = factory.find(type, sid.toString()) as? ModelWrapper ?: return null
         val obj = element.__getTarget() as ApiObjectBase
-        return format(obj, ref.attr, sid)
+        return format(obj, ref.attr)
     }
 
-    private fun <T : ApiPropertyBase> format(obj: ApiObjectBase, attr: T?, sid: Sid): String? = when(attr) {
-        is VnSubnetsType -> format(obj as VirtualNetwork, attr, sid)
+    private fun <T : ApiPropertyBase> format(obj: ApiObjectBase, attr: T?): String? = when(attr) {
+        is VnSubnetsType -> format(obj as VirtualNetwork, attr)
         else -> format(obj)
     }
 
@@ -43,11 +43,11 @@ class ReferenceFormatter(val factory: IPluginFactory) {
         else -> obj.name
     }
 
-    private fun format(virtualNetwork: VirtualNetwork, subnet: VnSubnetsType, sid: Sid): String? {
+    private fun format(virtualNetwork: VirtualNetwork, subnet: VnSubnetsType): String? {
         if (subnet.ipamSubnets == null || subnet.ipamSubnets.isEmpty()) return null
-        return subnet.ipamSubnets.joinToString("\n") { format(virtualNetwork.name, it) }
+        return subnet.ipamSubnets.joinToString("\n") { format(virtualNetwork, it) }
     }
 
-    private fun format(networkName: String, subnet: IpamSubnetType): String =
-        "$networkName (${PropertyFormatter.format(subnet.subnet)})"
+    private fun format(virtualNetwork: VirtualNetwork, subnet: IpamSubnetType): String =
+        "$${virtualNetwork.name} (${PropertyFormatter.format(subnet.subnet)})"
 }

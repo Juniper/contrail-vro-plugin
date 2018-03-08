@@ -74,6 +74,10 @@ val mandatoryReference = setOf(
     pair<ServiceInstance, ServiceTemplate>()
 )
 
+val nonEditableReference = setOf(
+    pair<ServiceInstance, ServiceTemplate>()
+)
+
 val hiddenRoots = setOf(
     the<VirtualMachineInterface>()
 )
@@ -123,6 +127,9 @@ val String.isHiddenRoot get() =
 
 fun Class<*>.isRelationMandatory(child: Class<*>) =
     mandatoryReference.contains(Pair(simpleName, child.simpleName))
+
+fun Class<*>.isRealtionEditable(child: Class<*>) =
+    ! nonEditableReference.contains(Pair(simpleName, child.simpleName))
 
 infix fun String.isDisplayableChildOf(parent: String) =
     ! hiddenRelations.contains(Pair(parent, this))
