@@ -5,7 +5,6 @@
 package net.juniper.contrail.vro.config
 
 val actionPackage = globalProjectInfo.workflowPackage
-val utilActionPackage = "$actionPackage.util"
 
 val parentConnection = "parentConnection"
 val isCidrAction = "isValidCidr"
@@ -19,9 +18,7 @@ val isSingleAddressNetworkPolicyRuleAction = "isSingleAddressNetworkPolicyRule"
 val isSingleAddressSecurityGroupRuleAction = "isSingleAddressSecurityGroupRule"
 val extractListProperty = "getListPropertyValue"
 val getNetworkPolicyRules = "getNetworkPolicyRules"
-val getPortsOfVirtualNetwork = "getPortsOfVirtualNetwork"
 val serviceHasInterfaceWithName = "serviceHasInterfaceWithName"
 val getNetworkOfServiceInterface = "getNetworkOfServiceInterface"
-val getPortsForServiceInterface = "getPortsForServiceInterface"
-val getPortTuplesOfServiceInstance = "getPortTuplesOfServiceInstance"
+val portsForServiceInterface = "portsForServiceInterface"
 val getSubnetsOfVirtualNetwork = "getSubnetsOfVirtualNetwork"

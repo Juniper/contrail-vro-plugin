@@ -30,33 +30,6 @@ class Executor(private val connection: Connection) {
     }
     </#list>
 
-    <#list relations as relation>
-    fun get${relation.childPluginNamePluralized}Of${relation.parentPluginName}(parent: ${relation.parentName}) =
-        connection.getObjects(${relation.childName}::class.java, parent.${relation.childNameDecapitalized}s)
-
-    </#list>
-
-    <#list forwardRelations as relation>
-    fun get${relation.childNamePluralized}Of${relation.parentPluginName}(parent: ${relation.parentName}) =
-        connection.getObjects(${relation.childName}::class.java, parent.${relation.getter})
-
-    </#list>
-
-    fun getPortsOfVirtualNetwork(child: VirtualNetwork) : List<VirtualMachineInterface>{
-        val ports = child.virtualMachineInterfaceBackRefs ?: emptyList()
-        return ports.asSequence().map { connection.findById<VirtualMachineInterface>(it.uuid) }.filterNotNull().toList()
-    }
-
-    fun getPortsOfPortTuple(child: PortTuple) : List<VirtualMachineInterface>{
-        val ports = child.virtualMachineInterfaceBackRefs ?: emptyList()
-        return ports.asSequence().map { connection.findById<VirtualMachineInterface>(it.uuid) }.filterNotNull().toList()
-    }
-
-    fun getProjectsOfFloatingIpPool(child: FloatingIpPool) : List<Project>{
-        val projects = child.projectBackRefs ?: emptyList()
-        return projects.asSequence().map { connection.findById<Project>(it.uuid) }.filterNotNull().toList()
-    }
-
     fun getSubnetsOfVirtualNetwork(parent: VirtualNetwork): List<Subnet> {
         val ipams = parent.networkIpam ?: return emptyList()
         return ipams.asSequence().map {

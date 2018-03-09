@@ -48,6 +48,24 @@ val referencePatterns = sequenceOf(
     forwardReferencePattern
 )
 
+val Class<*>.refPropertyName get() =
+    pluginName.decapitalize()
+
+val Class<*>.backRefPropertyName get() =
+    refPropertyName + BackRefs
+
+val Class<*>.childRefPropertyName get() =
+    refPropertyName + "s"
+
+inline fun <reified T> asForwardRef() =
+    T::class.java.refPropertyName
+
+inline fun <reified T> asBackRef() =
+    T::class.java.backRefPropertyName
+
+inline fun <reified T> asChildRef() =
+    T::class.java.childRefPropertyName
+
 val Method.isChildReferenceGetter get() =
     childReferencePattern.matchEntire(name) != null && returnListGenericClass == ObjectReference::class.java
 

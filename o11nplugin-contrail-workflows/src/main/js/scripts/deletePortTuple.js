@@ -1,11 +1,11 @@
-var id = portTuple.internalId;
+var id = item.internalId;
 var executor = ContrailConnectionManager.executor(id.toString());
 
-var ports = executor.getPortsOfPortTuple(portTuple);
+var ports = item.getPortBackRefs();
 
-ports.forEach(function(portObject){
-    portObject.removePortTuple(portTuple);
-    executor.updatePort(portObject);
+ports.forEach(function(port){
+    port.removePortTuple(item);
+    executor.updatePort(port);
 });
 
-executor.deletePortTuple(portTuple);
+executor.deletePortTuple(item);

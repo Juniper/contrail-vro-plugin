@@ -11,6 +11,8 @@ import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.parentConnection
 import net.juniper.contrail.vro.config.pluginName
+import net.juniper.contrail.vro.config.propertyValue
+import net.juniper.contrail.vro.config.refPropertyName
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withScript
@@ -66,7 +68,7 @@ fun removeReferenceWorkflow(relation: ForwardRelation): WorkflowDefinition {
             mandatory = true
             visibility = WhenNonNull(item)
             browserRoot = item.asBrowserRoot()
-            listedBy = actionCallTo(relation.getReferencesActionName).parameter(item)
+            listedBy = actionCallTo(propertyValue).parameter(item).string(relation.childClass.refPropertyName)
         }
     }
 }

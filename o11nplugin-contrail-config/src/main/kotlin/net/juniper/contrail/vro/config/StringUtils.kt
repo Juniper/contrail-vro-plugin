@@ -51,6 +51,9 @@ val String.allCapitalized get() =
 val Class<*>.allCapitalized get() =
     pluginName.allCapitalized
 
+inline fun <reified T> descriptionOf() =
+    T::class.java.allCapitalized
+
 val typeSuffix = "Type$".toRegex()
 
 fun String.removeTypeSuffix() =

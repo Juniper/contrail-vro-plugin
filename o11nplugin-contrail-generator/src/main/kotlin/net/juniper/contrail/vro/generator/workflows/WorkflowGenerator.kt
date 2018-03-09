@@ -79,8 +79,6 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, re
     generateLifecycleWorkflows(info, clazz, null, false, refs, schema)
 
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation, schema: Schema) {
-    relation.findReferencesAction(info.workflowVersion, info.workflowPackage).save(info)
-
     if (relation.isEditable) {
         addReferenceWorkflow(relation, schema).save(info, relation.parentClass)
         removeReferenceWorkflow(relation).save(info, relation.parentClass)

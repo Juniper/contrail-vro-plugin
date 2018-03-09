@@ -7,17 +7,11 @@ package net.juniper.contrail.vro.generator.model
 import net.juniper.contrail.vro.config.ObjectClass
 
 data class ExecutorModel (
-    val findableClasses: List<ClassInfoModel>,
-    val relations: List<RelationModel>,
-    val forwardRelations: List<ForwardRelation>
+    val findableClasses: List<ClassInfoModel>
 ) : GenericModel()
 
 fun generateExecutorModel(
-    objectClasses: List<ObjectClass>,
-    relations: List<Relation>,
-    forwardRelations: List<ForwardRelation>
+    objectClasses: List<ObjectClass>
 ) = ExecutorModel(
-    objectClasses.map { it.toClassInfoModel() },
-    relations.map { it.toRelationModel() },
-    forwardRelations
+    objectClasses.map { it.toClassInfoModel() }
 )
