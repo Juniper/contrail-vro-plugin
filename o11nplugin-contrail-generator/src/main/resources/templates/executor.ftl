@@ -78,7 +78,7 @@ class Executor(private val connection: Connection) {
         val template = connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid)!!
         val interfaceNames = template.properties.interfaceType.map { it.serviceInterfaceType }
         val index = interfaceNames.indexOf(name)
-        if(serviceInstance.properties.interfaceList.size <= index) return null
+        if(serviceInstance.properties.interfaceList.size <= index || index < 0) return null
         return connection.findByFQN(serviceInstance.properties.interfaceList[index].virtualNetwork)
     }
 }
