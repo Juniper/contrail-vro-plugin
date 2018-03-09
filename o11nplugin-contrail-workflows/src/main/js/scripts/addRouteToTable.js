@@ -2,12 +2,16 @@ var id = parent.internalId;
 var executor = ContrailConnectionManager.executor(id.toString());
 
 var communityAttributes = new ContrailCommunityAttributes();
-knownCommunityAttributes.forEach(function(attr){
-    communityAttributes.addCommunityAttribute(attr)
-});
-customCommunityAttributes.forEach(function(attr){
-    communityAttributes.addCommunityAttribute(attr)
-});
+if(knownCommunityAttributes){
+    knownCommunityAttributes.forEach(function(attr){
+        communityAttributes.addCommunityAttribute(attr)
+    });
+}
+if(customCommunityAttributes){
+    customCommunityAttributes.forEach(function(attr){
+        communityAttributes.addCommunityAttribute(attr)
+    });
+}
 
 var route = new ContrailRouteType();
 route.setPrefix(prefix);

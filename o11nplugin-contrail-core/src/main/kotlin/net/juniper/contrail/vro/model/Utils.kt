@@ -20,6 +20,8 @@ import java.util.UUID
 
 class Utils {
 
+    private val integerRegex = "\\d+".toRegex()
+
     fun isValidAddress(input: String): Boolean =
         NetAddressValidator.isValidAddress(input)
 
@@ -82,14 +84,13 @@ class Utils {
         return false
     }
 
+    // first part must be an integer in range [0, 65535]; second number must be a positive integer.
     fun isValidCommunityAttribute(communityAttribute: String): Boolean {
         val parts = communityAttribute.split(":")
-        if (parts.size > 2) return false
-        parts.forEach {
-            val numericValue = it.toIntOrNull() ?: return false
-            if (numericValue > 65535 || numericValue < 0) return false
-        }
-        return true
+        if (parts.size != 2) return false
+        val firstPartNumericValue = parts[0].toIntOrNull() ?: return false
+        if (firstPartNumericValue > 65535 || firstPartNumericValue < 0) return false
+        return parts[1].matches(integerRegex)
     }
 
     fun getVnSubnet(network: VirtualNetwork, ipam: NetworkIpam): VnSubnetsType =
@@ -213,7 +214,7 @@ class Utils {
 
     fun routeToString(route: RouteType, index: Int): String {
         return "$index: prefix ${route.prefix} next-hop-type ${route.nextHopType} next-hop ${route.nextHop} " +
-            "community-attributes ${route.communityAttributes.communityAttribute.joinToString(",")}"
+            "community-attributes ${route.communityAttributes?.communityAttribute?.joinToString(",") ?: ""}"
     }
 
     fun routeStringToIndex(routeString: String): Int {

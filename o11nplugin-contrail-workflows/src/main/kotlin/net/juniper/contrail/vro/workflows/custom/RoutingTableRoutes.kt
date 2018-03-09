@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.RouteTable
+import net.juniper.contrail.api.types.RouteType
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.getRouteTableRoutes
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
@@ -15,6 +16,7 @@ import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
+import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.workflows.util.extractRelationDescription
 
 val knownCommunityAttributes = listOf(
@@ -31,7 +33,7 @@ val currentlyAllowedNextHopTypes = listOf(
 )
 
 internal fun addRouteToRoutingTableWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Add route to routing table"
+    val workflowName = "Add route to route table"
 
     return customWorkflow<RouteTable>(workflowName).withScriptFile("addRouteToTable") {
         step("Parent route table") {
@@ -43,24 +45,28 @@ internal fun addRouteToRoutingTableWorkflow(schema: Schema): WorkflowDefinition 
         step("Route attributes") {
             visibility = WhenNonNull(parent)
             parameter("prefix", string) {
+                extractPropertyDescription<RouteType>(schema)
                 mandatory = true
                 validWhen = isCidr()
             }
+            // As of 14.03.2018 12:11:04, there is no description for this parameter available in the schema
             parameter("nextHopType", string) {
+                description = "Next hop type"
                 predefinedAnswers = currentlyAllowedNextHopTypes
                 mandatory = true
             }
             parameter("nextHop", string) {
+                extractPropertyDescription<RouteType>(schema)
                 mandatory = true
                 validWhen = isIPAddress()
             }
             parameter("knownCommunityAttributes", array(string)) {
-                mandatory = true
+                description = "Known communities"
                 sameValues = false
                 predefinedAnswers = knownCommunityAttributes
             }
             parameter("customCommunityAttributes", array(string)) {
-                mandatory = true
+                description = "Custom communities"
                 sameValues = false
                 validWhen = isCommunityAttribute()
             }
