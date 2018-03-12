@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.base
 import net.juniper.contrail.api.ApiConnector
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ObjectReference
+import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.ConnectionInfo
@@ -26,6 +27,8 @@ class ConnectionSpec extends Specification {
     def someObjectFQN = "someObjectFQN"
     def someAncestryList = ["ancestor1", "ancestor2", someObjectName]
     def someReferenceList = [Mock(ObjectReference), Mock(ObjectReference)]
+    def success = Status.success()
+    def failure = Status.failure("Not supported")
 
     def "calling create operation on connector throwing IOException" () {
         given: "a connector failing with IOException"
@@ -95,7 +98,7 @@ class ConnectionSpec extends Specification {
 
     def "calling create operation on connector returning error value" () {
         given: "a connector returning false"
-        connector.create(someApiObject) >> false
+        connector.create(someApiObject) >> failure
 
         when: "trying to create some Contrail object"
         connection.create(someApiObject)
@@ -106,7 +109,7 @@ class ConnectionSpec extends Specification {
 
     def "calling read operation on connector returning error value" () {
         given: "a connector returning false"
-        connector.read(someApiObject) >> false
+        connector.read(someApiObject) >> failure
 
         when: "trying to read some Contrail object"
         connection.read(someApiObject)
@@ -117,7 +120,7 @@ class ConnectionSpec extends Specification {
 
     def "calling update operation on connector returning error value" () {
         given: "a connector returning false"
-        connector.update(someApiObject) >> false
+        connector.update(someApiObject) >> failure
 
         when: "trying to update some Contrail object"
         connection.update(someApiObject)
@@ -128,7 +131,7 @@ class ConnectionSpec extends Specification {
 
     def "calling sync operation on connector returning error value" () {
         given: "a connector returning false"
-        connector.sync(someApiUri) >> false
+        connector.sync(someApiUri) >> failure
 
         when: "trying to sync some Contrail object"
         connection.sync(someApiUri)
@@ -211,7 +214,7 @@ class ConnectionSpec extends Specification {
         connection.create(someApiObject)
 
         then: "it calls the correct connector method with the same arguments"
-        1 * connector.create(someApiObject) >> true
+        1 * connector.create(someApiObject) >> success
     }
 
     def "calling read in connection calls the underlying connector method" () {
@@ -219,7 +222,7 @@ class ConnectionSpec extends Specification {
         connection.read(someApiObject)
 
         then: "it calls the correct connector method with the same arguments"
-        1 * connector.read(someApiObject) >> true
+        1 * connector.read(someApiObject) >> success
     }
 
     def "calling update in connection calls the underlying connector method" () {
@@ -227,7 +230,7 @@ class ConnectionSpec extends Specification {
         connection.update(someApiObject)
 
         then: "it calls the correct connector method with the same arguments"
-        1 * connector.update(someApiObject) >> true
+        1 * connector.update(someApiObject) >> success
     }
 
     def "calling delete in connection calls the underlying connector method" () {
@@ -235,7 +238,7 @@ class ConnectionSpec extends Specification {
         connection.delete(someApiObject)
 
         then: "it calls the correct connector method with the same arguments"
-        1 * connector.delete(someApiObject)
+        1 * connector.delete(someApiObject) >> success
     }
 
     def "calling another version of delete in connection calls the underlying connector method" () {
@@ -243,7 +246,7 @@ class ConnectionSpec extends Specification {
         connection.delete(someApiClass, someObjectId)
 
         then: "it calls the correct connector method with the same arguments"
-        1 * connector.delete(someApiClass, someObjectId)
+        1 * connector.delete(someApiClass, someObjectId) >> success
     }
 
     def "calling sync in connection calls the underlying connector method" () {
@@ -251,7 +254,7 @@ class ConnectionSpec extends Specification {
         connection.sync(someApiUri)
 
         then: "it calls the correct connector method with the same arguments"
-        1 * connector.sync(someApiUri) >> true
+        1 * connector.sync(someApiUri) >> success
     }
 
     def "calling findByName in connection calls the underlying connector method" () {

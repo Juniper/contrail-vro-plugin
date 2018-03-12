@@ -11,6 +11,7 @@ import net.juniper.contrail.api.ApiConnector
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
+import net.juniper.contrail.api.Status
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -58,40 +59,27 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
 
     @Throws(IOException::class, ConnectionException::class)
     fun create(obj: ApiObjectBase) =
-        asserted("Create") {
-            connector.create(obj)
-        }.apply {
-            cache.add(obj)
-        }
+        connector.create(obj).checkStatus("Create").apply { cache.add(obj) }
 
     @Throws(IOException::class, ConnectionException::class)
     fun read(obj: ApiObjectBase) =
-        asserted("Read") {
-            connector.read(obj)
-        }.apply {
-            cache.add(obj)
-        }
+        connector.read(obj).checkStatus("Read").apply { cache.add(obj) }
 
     @Throws(IOException::class, ConnectionException::class)
     fun update(obj: ApiObjectBase) =
-        asserted("Update") {
-            connector.update(obj)
-        }.apply {
-            cache.add(obj)
-        }
+        connector.update(obj).checkStatus("Update").apply { cache.add(obj) }
 
     @Throws(IOException::class, ConnectionException::class)
     fun sync(uri: String) =
-        asserted("Sync") { connector.sync(uri) }
+        connector.sync(uri).checkStatus("Sync")
 
     @Throws(IOException::class)
     fun delete(obj: ApiObjectBase) =
-        // there is no way to check if delete was successful
-        connector.delete(obj).apply { cache.remove(obj) }
+        connector.delete(obj).checkStatus("Delete").apply { cache.remove(obj) }
 
     @Throws(IOException::class)
     fun delete(clazz: Class<out ApiObjectBase>, objectId: String) =
-        connector.delete(clazz, objectId).apply { cache.remove(clazz, objectId) }
+        connector.delete(clazz, objectId).checkStatus("Delete").apply { cache.remove(clazz, objectId) }
 
     fun findByName(clazz: Class<out ApiObjectBase>, parent: ApiObjectBase, name: String): String? =
         safe { connector.findByName(clazz, parent, name) }
@@ -141,12 +129,8 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
     }
 
     @Throws(ConnectionException::class)
-    private fun asserted(operationName: String, operation: () -> Boolean) {
-        val success = operation()
-        if (!success) {
-            throw ConnectionException("$operationName operation failed.")
-        }
-    }
+    private fun Status.checkStatus(operation: String): Unit =
+        ifFailure { throw ConnectionException("$operation failed: $it") }
 
     private fun IOException.log() =
         log.error("IO error in Contrail API: {}", message)
