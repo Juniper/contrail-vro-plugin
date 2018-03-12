@@ -16,6 +16,7 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += getNetworkPolicyRulesAction(version, packageName)
     this += getNetworkOfServiceInterface(version, packageName)
     this += serviceHasInterfaceWithName(version, packageName)
+    this += templateHasInterfaceWithName(version, packageName)
     this += getPortsForServiceInterface(version, packageName)
     this += getSubnetsOfVirtualNetworkAction(version, packageName)
     this += allocValidationAction(version, packageName)

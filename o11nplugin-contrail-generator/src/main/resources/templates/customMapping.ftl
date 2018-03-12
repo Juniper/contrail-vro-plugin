@@ -56,6 +56,7 @@ class CustomMapping: AbstractMapping() {
 
     private fun doSingletons() {
         singleton(Utils::class.java)
+        singleton(Constants::class.java)
         singleton(ConnectionManager::class.java)
     }
 

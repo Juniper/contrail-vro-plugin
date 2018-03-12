@@ -21,6 +21,7 @@ import net.juniper.contrail.vro.workflows.util.extractRelationDescription
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.constants.Connection
+import net.juniper.contrail.vro.config.constants.supportedInterfaceNames
 import net.juniper.contrail.vro.workflows.schema.relationDescription
 
 val supportedVersion : Long = 2

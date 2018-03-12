@@ -197,9 +197,8 @@ class Utils {
         return group.entries.policyRule[index]
     }
 
-    fun ruleStringToIndex(ruleString: String): Int {
-        return ruleString.split(":")[0].toInt()
-    }
+    fun ruleStringToIndex(ruleString: String): Int =
+        ruleString.split(":")[0].toInt()
 
     fun lowercase(s: String) =
         s.toLowerCase()

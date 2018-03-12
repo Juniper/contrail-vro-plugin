@@ -49,9 +49,14 @@ class Executor(private val connection: Connection) {
 
     fun serviceHasInterfaceWithName(serviceInstance: ServiceInstance, name: String): Boolean? {
         val template = connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid)!!
-        val interfaceNames = template.properties.interfaceType.map { it.serviceInterfaceType }
-        return (name in interfaceNames)
+        return templateHasInterfaceWithName(template, name)
     }
+
+    fun templateHasInterfaceWithName(template: ServiceTemplate, name: String?) : Boolean =
+        name in getInterfaceNamesFromTemplate(template)
+
+    fun getInterfaceNamesFromTemplate(template: ServiceTemplate) : List<String> =
+        template.properties?.interfaceType?.map { it.serviceInterfaceType } ?: emptyList()
 
     fun getNetworkOfServiceInterface(serviceInstance: ServiceInstance, name: String): VirtualNetwork? {
         val template = connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid)!!

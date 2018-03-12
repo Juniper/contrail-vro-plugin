@@ -14,3 +14,12 @@ val parent = "parent"
 val child = "child"
 val item = "item"
 val id = "id"
+
+val maxOtherInterfacesSupported = 8
+val supportedOtherInterfaces = (0 until maxOtherInterfacesSupported).map { "other$it" }
+val supportedInterfaceNames = listOf(
+        "left",
+        "right",
+        "management"
+) + supportedOtherInterfaces
+val maxInterfacesSupported = supportedInterfaceNames.size

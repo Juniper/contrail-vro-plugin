@@ -7,12 +7,14 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.api.types.VirtualNetwork
+import net.juniper.contrail.api.types.ServiceTemplate
 import net.juniper.contrail.vro.config.getNetworkPolicyRules
 import net.juniper.contrail.vro.config.isSingleAddressNetworkPolicyRuleAction
 import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRuleAction
 import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
 import net.juniper.contrail.vro.config.getNetworkOfServiceInterface
 import net.juniper.contrail.vro.config.portsForServiceInterface
+import net.juniper.contrail.vro.config.templateHasInterfaceWithName
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.any
@@ -60,6 +62,24 @@ internal fun serviceHasInterfaceWithName(version: String, packageName: String): 
         resultType = resultType,
         parameters = parameters,
         script = Script(ScriptLoader.load(name))
+    )
+}
+
+internal fun templateHasInterfaceWithName(version: String, packageName: String): Action {
+    val name = templateHasInterfaceWithName
+    val resultType = boolean
+    val parameters = listOf(
+            "serviceTemplate" ofType reference<ServiceTemplate>(),
+            "name" ofType string
+    )
+    return Action(
+            name = name,
+            packageName = packageName,
+            id = generateID(packageName, name),
+            version = version,
+            resultType = resultType,
+            parameters = parameters,
+            script = Script(ScriptLoader.load(name))
     )
 }
 

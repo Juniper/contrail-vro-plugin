@@ -9,11 +9,13 @@ import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.vro.config.asChildRef
 import net.juniper.contrail.vro.config.constants.item
+import net.juniper.contrail.vro.config.constants.maxInterfacesSupported
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.descriptionOf
 import net.juniper.contrail.vro.config.portsForServiceInterface
 import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
 import net.juniper.contrail.vro.config.propertyValue
+import net.juniper.contrail.vro.config.constants.supportedInterfaceNames
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
@@ -23,15 +25,6 @@ import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.dsl.FromActionVisibility
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.schema.createWorkflowDescription
-
-val maxOtherInterfacesSupported = 8
-val supportedOtherInterfaces = (0 until maxOtherInterfacesSupported).map { "other$it" }
-val supportedInterfaceNames = listOf(
-    "left",
-    "right",
-    "management"
-) + supportedOtherInterfaces
-val maxInterfacesSupported = supportedInterfaceNames.size
 
 internal fun addPortTupleToServiceInstance(schema: Schema): WorkflowDefinition {
     val workflowName = "Add port tuple to service instance"
