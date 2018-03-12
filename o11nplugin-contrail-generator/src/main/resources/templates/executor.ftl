@@ -1,12 +1,18 @@
 ${editWarning}
 package net.juniper.contrail.vro.generated
 
-import net.juniper.contrail.api.* // ktlint-disable no-wildcard-imports
-import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
+/* ktlint-disable no-wildcard-imports */
+import com.vmware.o11n.sdk.modeldriven.*
+import net.juniper.contrail.api.*
+import net.juniper.contrail.api.types.*
 import net.juniper.contrail.vro.model.Connection
 import java.io.IOException
+/* ktlint-enable no-wildcard-imports */
 
 class Executor(private val connection: Connection) {
+
+    val id: Sid get() =
+        connection.info.sid
 
     <#list findableClasses as klass>
     @Throws(IOException::class)

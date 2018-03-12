@@ -15,4 +15,3 @@ if (projects && projects.length > 0){
 var id = parent.internalId;
 var executor = ContrailConnectionManager.executor(id.toString());
 executor.createFloatingIp(item);
-item.internalId = id.with("FloatingIp", item.uuid);

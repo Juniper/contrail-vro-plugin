@@ -69,4 +69,3 @@ try {
 	executor.deletePortTuple(portTuple);
 	throw err;
 }
-portTuple.internalId = id.with("PortTuple", portTuple.uuid);

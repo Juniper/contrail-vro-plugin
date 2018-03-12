@@ -36,6 +36,9 @@ private fun ObjectCache.remove(clazz: Class<out ApiObjectBase>, id: String?) =
 class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
     private val log: Logger = LoggerFactory.getLogger(Connection::class.java)
 
+    val id: Sid get() =
+        info.sid
+
     val name: String get() =
         info.name
 
@@ -113,7 +116,7 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
         safe { connector.findByFQN(clazz, fqn) as T? }?.also { cache.add(it) }
 
     inline fun <reified T : ApiObjectBase> findByFQN(fqn: String): T? =
-            findByFQN(T::class.java, fqn)
+        findByFQN(T::class.java, fqn)
 
     fun <T : ApiObjectBase> list(clazz: Class<T>): List<T>? =
         safe { connector.list(clazz, null) as List<T>? }

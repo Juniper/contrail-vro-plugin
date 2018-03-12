@@ -141,7 +141,6 @@ var $id = $parent.internalId;
 var $executor = ContrailConnectionManager.executor($id.toString());
 ${setParentCall(parentClazz)}
 $executor.create$pluginName($item);
-$item.internalId = id.with("$pluginName", item.uuid);
 """.trimIndent()
 
 private fun editScriptBody(clazz: Class<*>) = """

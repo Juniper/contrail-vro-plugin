@@ -95,6 +95,10 @@ public class ${className}
         Object _res$ = <#else>        </#if><#if m.originalName == 'setModel'>__getTarget().${m.originalName}((__getTarget().getModel()).getClass().cast(<@localNames m />));
         <#else>__getTarget().${m.originalName}(<@localNames m />);</#if>
 
+        <#if modelClass.simpleName == 'Executor' && m.name?starts_with('create')>
+        ((Findable)${m.params[0].name}).setInternalId(__getTarget().getId().with("${m.name?keep_after('create')}", _local$${m.params[0].name}.getUuid()));
+        </#if>
+
         <#if m.returns.returnFriendlyClassName != 'void'>
         ${m.returns.returnFriendlyClassName} _res$pl = _ctx.createPluginObject(_res$, ${m.returns.convertFriendlyClassName});
         <#if findable>
