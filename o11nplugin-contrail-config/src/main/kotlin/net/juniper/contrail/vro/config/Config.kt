@@ -52,11 +52,13 @@ val nonEditableProperties = setOf(
 )
 
 val customCreateWorkflows = setOf(
+    the<VirtualMachineInterface>(),
     the<FloatingIp>(),
     the<ServiceTemplate>()
 )
 
 val customEditWorkflows = setOf(
+    the<VirtualMachineInterface>(),
     the<NetworkPolicy>(),
     the<FloatingIp>(),
     the<RouteTable>(),
@@ -64,6 +66,7 @@ val customEditWorkflows = setOf(
 )
 
 val customDeleteWorkflows = setOf(
+    the<VirtualMachineInterface>(),
     the<FloatingIpPool>(),
     the<PortTuple>()
 )
@@ -78,9 +81,9 @@ val mandatoryReference = setOf(
 )
 
 val nonEditableReference = setOf(
+    pair<VirtualMachineInterface, VirtualNetwork>(),
     pair<ServiceInstance, ServiceTemplate>(),
-    pair<Subnet, VirtualMachineInterface>(),
-    pair<VirtualMachineInterface, VirtualNetwork>()
+    pair<Subnet, VirtualMachineInterface>()
 )
 
 val hiddenRoots = setOf(
