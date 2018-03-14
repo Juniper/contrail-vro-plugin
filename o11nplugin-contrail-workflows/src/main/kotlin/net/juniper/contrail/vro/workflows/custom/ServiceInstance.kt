@@ -22,8 +22,8 @@ import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.dsl.FromActionVisibility
-import net.juniper.contrail.vro.config.getServiceInstanceInterfaceNames
-import net.juniper.contrail.vro.config.getAllowedAddressPairs
+import net.juniper.contrail.vro.config.serviceInstanceInterfaceNames
+import net.juniper.contrail.vro.config.allowedAddressPairs
 import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
@@ -83,7 +83,7 @@ internal fun addAllowedAddressPair(schema: Schema) : WorkflowDefinition {
             parameter("interfaceName", string) {
                 description = "Interface to add allowed address pair to"
                 mandatory = true
-                predefinedAnswersFrom = actionCallTo(getServiceInstanceInterfaceNames).parameter(item)
+                predefinedAnswersFrom = actionCallTo(serviceInstanceInterfaceNames).parameter(item)
             }
             parameter("ip", string) {
                 description = "CIDR"
@@ -118,13 +118,13 @@ internal fun removeAllowedAddressPair(schema: Schema) : WorkflowDefinition {
             parameter(interfaceName, string) {
                 description = "Interface from which allowed address pair should be removed"
                 mandatory = true
-                predefinedAnswersFrom = actionCallTo(getServiceInstanceInterfaceNames).parameter(item)
+                predefinedAnswersFrom = actionCallTo(serviceInstanceInterfaceNames).parameter(item)
             }
             parameter("allowedAddressPair", string) {
                 description = "Allowed address pair to be removed"
                 mandatory = true
                 visibility = WhenNonNull(interfaceName)
-                predefinedAnswersFrom = actionCallTo(getAllowedAddressPairs).parameters(item, interfaceName)
+                predefinedAnswersFrom = actionCallTo(allowedAddressPairs).parameters(item, interfaceName)
             }
         }
     }

@@ -36,7 +36,7 @@ class Executor(private val connection: Connection) {
     }
     </#list>
 
-    fun getSubnetsOfVirtualNetwork(parent: VirtualNetwork): List<Subnet> {
+    fun subnetsOfVirtualNetwork(parent: VirtualNetwork): List<Subnet> {
         val ipams = parent.networkIpam ?: return emptyList()
         return ipams.asSequence().map {
             it.attr.ipamSubnets.asSequence().map { connection.findById<Subnet>(it.subnetUuid) }.filterNotNull()
@@ -44,7 +44,7 @@ class Executor(private val connection: Connection) {
     }
 
     // InstanceIp should be in 1-1 relation to VMI, so only first element is chosen if it exists
-    fun getInstanceIpOfPort(port: VirtualMachineInterface): InstanceIp? =
+    fun instanceIpOfPort(port: VirtualMachineInterface): InstanceIp? =
         port.instanceIpBackRefs?.getOrNull(0)?.uuid?.let { connection.findById(it) }
 
     fun serviceHasInterfaceWithName(serviceInstance: ServiceInstance, name: String): Boolean? {
@@ -52,28 +52,28 @@ class Executor(private val connection: Connection) {
         return templateHasInterfaceWithName(template, name)
     }
 
-    fun getInterfaceIndexByName(serviceInstance: ServiceInstance, name: String): Int {
+    fun interfaceIndexByName(serviceInstance: ServiceInstance, name: String): Int {
         val template = connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid)
-        return getInterfaceNamesFromTemplate(template).indexOf(name)
+        return interfaceNamesFromTemplate(template).indexOf(name)
     }
 
-    fun getInterfaceNamesFromService(serviceInstance: ServiceInstance) : List<String> =
-        getInterfaceNamesFromTemplate(connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid))
+    fun interfaceNamesFromService(serviceInstance: ServiceInstance) : List<String> =
+        interfaceNamesFromTemplate(connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid))
 
     fun templateHasInterfaceWithName(template: ServiceTemplate, name: String?) : Boolean =
-        name in getInterfaceNamesFromTemplate(template)
+        name in interfaceNamesFromTemplate(template)
 
-    fun getInterfaceNamesFromTemplate(template: ServiceTemplate?) : List<String> =
+    fun interfaceNamesFromTemplate(template: ServiceTemplate?) : List<String> =
         template?.properties?.interfaceType?.map { it.serviceInterfaceType } ?: emptyList()
 
-    fun getAllowedAddressPairs(instance: ServiceInstance, name: String) : List<AllowedAddressPair> {
-        val idx = getInterfaceNamesFromService(instance).indexOf(name)
+    fun allowedAddressPairs(instance: ServiceInstance, name: String) : List<AllowedAddressPair> {
+        val idx = interfaceNamesFromService(instance).indexOf(name)
         val interfaceList = instance.properties?.interfaceList ?: emptyList()
         if (interfaceList.size <= idx || idx < 0) return emptyList()
         return interfaceList[idx]?.allowedAddressPairs?.allowedAddressPair ?: emptyList()
     }
 
-    fun getNetworkOfServiceInterface(serviceInstance: ServiceInstance, name: String): VirtualNetwork? {
+    fun networkOfServiceInterface(serviceInstance: ServiceInstance, name: String): VirtualNetwork? {
         val template = connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid)!!
         val interfaceNames = template.properties.interfaceType.map { it.serviceInterfaceType }
         val index = interfaceNames.indexOf(name)

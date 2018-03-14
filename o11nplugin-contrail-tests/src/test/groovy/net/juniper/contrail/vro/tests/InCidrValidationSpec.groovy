@@ -4,10 +4,10 @@
 
 package net.juniper.contrail.vro.tests
 
-import static net.juniper.contrail.vro.config.ActionsKt.isInCidrAction
+import static net.juniper.contrail.vro.config.ActionsKt.isInCidr
 
 class InCidrValidationSpec extends ActionSpec {
-    def validateIp = engine.getFunctionFromActionScript(actions, isInCidrAction)
+    def validateIp = engine.getFunctionFromActionScript(actions, isInCidr)
     def ipValidationMessage = "IP must be in defined CIDR"
 
     def "validating ip with ip and cidr not defined should pass" () {

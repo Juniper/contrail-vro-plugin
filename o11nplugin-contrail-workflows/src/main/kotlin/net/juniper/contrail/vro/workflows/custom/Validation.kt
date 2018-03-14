@@ -4,44 +4,44 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
-import net.juniper.contrail.vro.config.isCidrAction
-import net.juniper.contrail.vro.config.isSubnetAction
-import net.juniper.contrail.vro.config.isMacAction
-import net.juniper.contrail.vro.config.isIpAction
-import net.juniper.contrail.vro.config.isFreeInCidrAction
-import net.juniper.contrail.vro.config.isInCidrAction
-import net.juniper.contrail.vro.config.isAllocPoolAction
-import net.juniper.contrail.vro.config.isSingleAddressNetworkPolicyRuleAction
-import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRuleAction
+import net.juniper.contrail.vro.config.isValidAllocactionPool
+import net.juniper.contrail.vro.config.isValidCidr
+import net.juniper.contrail.vro.config.isValidSubnet
+import net.juniper.contrail.vro.config.isValidMac
+import net.juniper.contrail.vro.config.isFreeInCidr
+import net.juniper.contrail.vro.config.isInCidr
+import net.juniper.contrail.vro.config.isValidIp
+import net.juniper.contrail.vro.config.isSingleAddressNetworkPolicyRule
+import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRule
 import net.juniper.contrail.vro.config.areValidCommunityAttributes
 import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
 
 fun BasicParameterBuilder<String>.isSubnet() =
-    validationActionCallTo(isSubnetAction)
+    validationActionCallTo(isValidSubnet)
 
 fun BasicParameterBuilder<String>.isCidr() =
-    validationActionCallTo(isCidrAction)
+    validationActionCallTo(isValidCidr)
 
 fun BasicParameterBuilder<String>.isMac() =
-    validationActionCallTo(isMacAction)
+    validationActionCallTo(isValidMac)
 
 fun BasicParameterBuilder<String>.isIPAddress() =
-    validationActionCallTo(isIpAction)
+    validationActionCallTo(isValidIp)
 
 fun BasicParameterBuilder<String>.addressIsFreeInSubnet(subnet: String, allocationPools: String, dnsServerAddress: String) =
-    validationActionCallTo(isFreeInCidrAction).parameters(subnet, allocationPools, dnsServerAddress)
+    validationActionCallTo(isFreeInCidr).parameters(subnet, allocationPools, dnsServerAddress)
 
 fun BasicParameterBuilder<String>.addressInSubnet(subnet: String) =
-    validationActionCallTo(isInCidrAction).parameter(subnet)
+    validationActionCallTo(isInCidr).parameter(subnet)
 
 fun BasicParameterBuilder<List<String>>.allocationPoolInSubnet(subnet: String) =
-    validationActionCallTo(isAllocPoolAction).parameter(subnet)
+    validationActionCallTo(isValidAllocactionPool).parameter(subnet)
 
 fun BasicParameterBuilder<String>.isSingleAddressNetworkPolicyRuleOf(networkPolicy: String) =
-    validationActionCallTo(isSingleAddressNetworkPolicyRuleAction).parameter(networkPolicy)
+    validationActionCallTo(isSingleAddressNetworkPolicyRule).parameter(networkPolicy)
 
 fun BasicParameterBuilder<String>.isSingleAddressSecurityGroupRuleOf(securityGroup: String) =
-    validationActionCallTo(isSingleAddressSecurityGroupRuleAction).parameter(securityGroup)
+    validationActionCallTo(isSingleAddressSecurityGroupRule).parameter(securityGroup)
 
 fun BasicParameterBuilder<List<String>>.isCommunityAttribute() =
     validationActionCallTo(areValidCommunityAttributes)

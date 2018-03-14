@@ -9,7 +9,7 @@ import net.juniper.contrail.api.types.PolicyRuleType
 import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.vro.config.constants.parent
-import net.juniper.contrail.vro.config.getNetworkPolicyRules
+import net.juniper.contrail.vro.config.networkPolicyRules
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.FromStringParameter
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
@@ -101,7 +101,7 @@ internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
             parameter("rule", string) {
                 visibility = WhenNonNull(parent)
                 description = "Rule to edit"
-                predefinedAnswersFrom = actionCallTo(getNetworkPolicyRules).parameter(parent)
+                predefinedAnswersFrom = actionCallTo(networkPolicyRules).parameter(parent)
                 validWhen = isSingleAddressSecurityGroupRuleOf(parent)
             }
         }
@@ -162,7 +162,7 @@ internal fun removeSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition
             visibility = WhenNonNull(parent)
             description = "Rule to remove"
             mandatory = true
-            predefinedAnswersFrom = actionCallTo(getNetworkPolicyRules).parameter(parent)
+            predefinedAnswersFrom = actionCallTo(networkPolicyRules).parameter(parent)
         }
     }
 }

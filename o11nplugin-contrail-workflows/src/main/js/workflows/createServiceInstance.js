@@ -21,7 +21,7 @@ item.setServiceTemplate(serviceTemplate);
 
 var properties = new ContrailServiceInstanceType();
 
-var names = executor.getInterfaceNamesFromTemplate(serviceTemplate);
+var names = executor.interfaceNamesFromTemplate(serviceTemplate);
 names.forEach(function(name) {
     var idx = ContrailConstants.serviceInterfaceNames.indexOf(name);
     var network = interfaces[idx];

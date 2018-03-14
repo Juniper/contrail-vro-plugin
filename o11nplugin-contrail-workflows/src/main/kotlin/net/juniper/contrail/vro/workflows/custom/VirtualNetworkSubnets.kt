@@ -9,7 +9,7 @@ import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.vro.config.constants.item
-import net.juniper.contrail.vro.config.getSubnetsOfVirtualNetwork
+import net.juniper.contrail.vro.config.subnetsOfVirtualNetwork
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
@@ -93,7 +93,7 @@ internal fun deleteSubnetWorkflow(): WorkflowDefinition {
             mandatory = true
             visibility = WhenNonNull(item)
             browserRoot = item.asBrowserRoot()
-            listedBy = actionCallTo(getSubnetsOfVirtualNetwork).parameter(item)
+            listedBy = actionCallTo(subnetsOfVirtualNetwork).parameter(item)
         }
     }
 }

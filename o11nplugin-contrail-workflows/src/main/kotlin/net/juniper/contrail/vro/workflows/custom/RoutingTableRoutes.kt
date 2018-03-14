@@ -8,7 +8,7 @@ import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.RouteTable
 import net.juniper.contrail.api.types.RouteType
 import net.juniper.contrail.vro.config.constants.parent
-import net.juniper.contrail.vro.config.getRouteTableRoutes
+import net.juniper.contrail.vro.config.routeTableRoutes
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
@@ -86,7 +86,7 @@ internal fun removeTableRouteWorkflow(schema: Schema): WorkflowDefinition {
             visibility = WhenNonNull(parent)
             description = "Route to remove"
             mandatory = true
-            predefinedAnswersFrom = actionCallTo(getRouteTableRoutes).parameter(parent)
+            predefinedAnswersFrom = actionCallTo(routeTableRoutes).parameter(parent)
         }
     }
 }

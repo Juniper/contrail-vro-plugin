@@ -4,10 +4,10 @@
 
 package net.juniper.contrail.vro.tests
 
-import static net.juniper.contrail.vro.config.ActionsKt.isSubnetAction
+import static net.juniper.contrail.vro.config.ActionsKt.isValidSubnet
 
 class CidrValidationSpec extends ActionSpec {
-    def validateCidr = engine.getFunctionFromActionScript(actions, isSubnetAction)
+    def validateCidr = engine.getFunctionFromActionScript(actions, isValidSubnet)
     def cidrValidationMessage = "Enter valid IPv4 or IPv6 Subnet/Mask"
 
     def "validating cidr not defined should pass" () {

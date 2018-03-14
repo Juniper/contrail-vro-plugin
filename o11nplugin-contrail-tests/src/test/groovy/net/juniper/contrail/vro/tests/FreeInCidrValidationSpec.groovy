@@ -4,10 +4,10 @@
 
 package net.juniper.contrail.vro.tests
 
-import static net.juniper.contrail.vro.config.ActionsKt.isFreeInCidrAction
+import static net.juniper.contrail.vro.config.ActionsKt.isFreeInCidr
 
 class FreeInCidrValidationSpec extends ActionSpec {
-    def validateFreeIp = engine.getFunctionFromActionScript(actions, isFreeInCidrAction)
+    def validateFreeIp = engine.getFunctionFromActionScript(actions, isFreeInCidr)
     def freeIpMsg = "Default Gateway IP must be in CIDR and not be in allocation pools or be the same as DNS server IP"
 
     def "validating free ip in cidr with all parameters not defined should pass" () {

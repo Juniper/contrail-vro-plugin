@@ -4,10 +4,10 @@
 
 package net.juniper.contrail.vro.tests
 
-import static net.juniper.contrail.vro.config.ActionsKt.isAllocPoolAction
+import static net.juniper.contrail.vro.config.ActionsKt.isValidAllocactionPool
 
 class AllocationPoolValidationSpec extends ActionSpec {
-    def validatePool = engine.getFunctionFromActionScript(actions, isAllocPoolAction)
+    def validatePool = engine.getFunctionFromActionScript(actions, isValidAllocactionPool)
     def allocationValidationMessage = "e.g. 192.168.2.3-192.168.2.10 <enter>... and IPs should be from CIDR"
 
     def "validating allocation pool with pools and cidr not defined should pass" () {

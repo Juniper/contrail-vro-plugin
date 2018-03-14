@@ -9,7 +9,7 @@ if (addressMode){
     pair.setAddressMode(addressMode);
 }
 
-var index = executor.getInterfaceIndexByName(item, interfaceName);
+var index = executor.interfaceIndexByName(item, interfaceName);
 var pairs = item.getProperties().getInterfaceList()[index].getAllowedAddressPairs();
 if (!pairs){
     pairs = new ContrailAllowedAddressPairs();
