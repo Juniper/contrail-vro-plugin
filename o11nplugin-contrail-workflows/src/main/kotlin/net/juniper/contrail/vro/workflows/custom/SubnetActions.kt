@@ -7,9 +7,11 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.getSubnetsOfVirtualNetwork
-import net.juniper.contrail.vro.config.isAllocPoolAction
-import net.juniper.contrail.vro.config.isCidrAction
+import net.juniper.contrail.vro.config.isSubnetAction
 import net.juniper.contrail.vro.config.isIpAction
+import net.juniper.contrail.vro.config.isMacAction
+import net.juniper.contrail.vro.config.isCidrAction
+import net.juniper.contrail.vro.config.isAllocPoolAction
 import net.juniper.contrail.vro.config.isInCidrAction
 import net.juniper.contrail.vro.config.isFreeInCidrAction
 import net.juniper.contrail.vro.workflows.model.Action
@@ -35,6 +37,21 @@ internal fun getSubnetsOfVirtualNetworkAction(version: String, packageName: Stri
     )
 }
 
+internal fun macValidationAction(version: String, packageName: String): Action {
+    val name = isMacAction
+    val resultType = string
+    val parameters = listOf("input" ofType string)
+    return Action(
+            name = name,
+            packageName = packageName,
+            id = generateID(packageName, name),
+            version = version,
+            resultType = resultType,
+            parameters = parameters,
+            script = Script(ScriptLoader.load(name))
+    )
+}
+
 internal fun ipValidationAction(version: String, packageName: String): Action {
     val name = isIpAction
     val resultType = string
@@ -50,8 +67,8 @@ internal fun ipValidationAction(version: String, packageName: String): Action {
     )
 }
 
-internal fun cidrValidationAction(version: String, packageName: String): Action {
-    val name = isCidrAction
+internal fun subnetValidationAction(version: String, packageName: String): Action {
+    val name = isSubnetAction
     val resultType = string
     val parameters = listOf("cidr" ofType string)
     return Action(
@@ -62,6 +79,21 @@ internal fun cidrValidationAction(version: String, packageName: String): Action 
         resultType = resultType,
         parameters = parameters,
         script = Script(ScriptLoader.load(name))
+    )
+}
+
+internal fun cidrValidationAction(version: String, packageName: String): Action {
+    val name = isCidrAction
+    val resultType = string
+    val parameters = listOf("input" ofType string)
+    return Action(
+            name = name,
+            packageName = packageName,
+            id = generateID(packageName, name),
+            version = version,
+            resultType = resultType,
+            parameters = parameters,
+            script = Script(ScriptLoader.load(name))
     )
 }
 

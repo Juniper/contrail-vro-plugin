@@ -4,18 +4,26 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
-import net.juniper.contrail.vro.config.isAllocPoolAction
 import net.juniper.contrail.vro.config.isCidrAction
+import net.juniper.contrail.vro.config.isSubnetAction
+import net.juniper.contrail.vro.config.isMacAction
+import net.juniper.contrail.vro.config.isIpAction
 import net.juniper.contrail.vro.config.isFreeInCidrAction
 import net.juniper.contrail.vro.config.isInCidrAction
-import net.juniper.contrail.vro.config.isIpAction
+import net.juniper.contrail.vro.config.isAllocPoolAction
 import net.juniper.contrail.vro.config.isSingleAddressNetworkPolicyRuleAction
 import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRuleAction
 import net.juniper.contrail.vro.config.areValidCommunityAttributes
 import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
 
+fun BasicParameterBuilder<String>.isSubnet() =
+    validationActionCallTo(isSubnetAction)
+
 fun BasicParameterBuilder<String>.isCidr() =
     validationActionCallTo(isCidrAction)
+
+fun BasicParameterBuilder<String>.isMac() =
+    validationActionCallTo(isMacAction)
 
 fun BasicParameterBuilder<String>.isIPAddress() =
     validationActionCallTo(isIpAction)

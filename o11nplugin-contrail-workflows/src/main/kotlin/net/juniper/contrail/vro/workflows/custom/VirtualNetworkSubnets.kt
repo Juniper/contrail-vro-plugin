@@ -44,7 +44,7 @@ internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
             parameter(subnet, string) {
                 extractPropertyDescription<IpamSubnetType>(schema, title="CIDR")
                 mandatory = true
-                validWhen = isCidr()
+                validWhen = isSubnet()
             }
             parameter(allocationPools, string.array) {
                 extractPropertyDescription<IpamSubnetType>(schema)

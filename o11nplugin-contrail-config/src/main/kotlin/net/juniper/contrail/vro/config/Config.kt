@@ -54,7 +54,8 @@ val nonEditableProperties = setOf(
 val customCreateWorkflows = setOf(
     the<VirtualMachineInterface>(),
     the<FloatingIp>(),
-    the<ServiceTemplate>()
+    the<ServiceTemplate>(),
+    the<ServiceInstance>()
 )
 
 val customEditWorkflows = setOf(
@@ -62,7 +63,8 @@ val customEditWorkflows = setOf(
     the<NetworkPolicy>(),
     the<FloatingIp>(),
     the<RouteTable>(),
-    the<ServiceTemplate>()
+    the<ServiceTemplate>(),
+    the<ServiceInstance>()
 )
 
 val customDeleteWorkflows = setOf(

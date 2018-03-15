@@ -29,4 +29,6 @@ fun loadCustomWorkflows(schema: Schema): List<WorkflowDefinition> = mutableListO
     this += createServiceInstance(schema)
     this += addRouteToRoutingTableWorkflow(schema)
     this += removeTableRouteWorkflow(schema)
+    this += addAllowedAddressPair(schema)
+    this += removeAllowedAddressPair(schema)
 }

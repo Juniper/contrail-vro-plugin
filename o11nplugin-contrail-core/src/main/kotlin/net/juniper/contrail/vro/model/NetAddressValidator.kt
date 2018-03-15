@@ -27,11 +27,17 @@ enum class NetAddressValidator(val maxPrefixLength: Int) {
         return isValidAddress(parts[0]) && isValidAddress(parts[1])
     }
 
-    fun isValidSubnet(subnet: String): Boolean {
-        val parts = subnet.trim().split('/')
+    fun isValidSubnet(subnet: String): Boolean =
+        isCidr(subnet, maxPrefixLength)
+
+    fun isValidCidr(subnet: String): Boolean =
+        isCidr(subnet, maxPrefixLength + 2)
+
+    fun isCidr(cidr: String, maxPrefix: Int) : Boolean {
+        val parts = cidr.trim().split('/')
         if (parts.size != 2) return false
         val prefixLen = parts[1].toIntOrNull() ?: return false
-        if (prefixLen < 0 || prefixLen > maxPrefixLength) return false
+        if (prefixLen < 0 || prefixLen > maxPrefix) return false
         return isValidAddress(parts[0])
     }
 
@@ -54,6 +60,9 @@ enum class NetAddressValidator(val maxPrefixLength: Int) {
 
         fun isValidSubnet(subnet: String): Boolean =
             values.asSequence().filter { it.isValidSubnet(subnet) }.any()
+
+        fun isValidCidr(subnet: String): Boolean =
+            values.asSequence().filter { it.isValidCidr(subnet) }.any()
 
         fun areValidPools(pools: List<String>) : Boolean {
             return values.asSequence().filter { it.areValidPools(pools) }.any()

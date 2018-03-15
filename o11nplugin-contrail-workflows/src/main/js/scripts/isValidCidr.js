@@ -1,4 +1,4 @@
-if (!cidr || ContrailUtils.isValidCidr(cidr)){
+if (!input || ContrailUtils.isValidCidr(input)){
     return null;
 }
-return "Enter valid IPv4 or IPv6 Subnet/Mask";
+return "Enter valid CIDR address";

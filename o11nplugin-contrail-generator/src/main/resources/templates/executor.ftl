@@ -52,11 +52,26 @@ class Executor(private val connection: Connection) {
         return templateHasInterfaceWithName(template, name)
     }
 
+    fun getInterfaceIndexByName(serviceInstance: ServiceInstance, name: String): Int {
+        val template = connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid)
+        return getInterfaceNamesFromTemplate(template).indexOf(name)
+    }
+
+    fun getInterfaceNamesFromService(serviceInstance: ServiceInstance) : List<String> =
+        getInterfaceNamesFromTemplate(connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid))
+
     fun templateHasInterfaceWithName(template: ServiceTemplate, name: String?) : Boolean =
         name in getInterfaceNamesFromTemplate(template)
 
-    fun getInterfaceNamesFromTemplate(template: ServiceTemplate) : List<String> =
-        template.properties?.interfaceType?.map { it.serviceInterfaceType } ?: emptyList()
+    fun getInterfaceNamesFromTemplate(template: ServiceTemplate?) : List<String> =
+        template?.properties?.interfaceType?.map { it.serviceInterfaceType } ?: emptyList()
+
+    fun getAllowedAddressPairs(instance: ServiceInstance, name: String) : List<AllowedAddressPair> {
+        val idx = getInterfaceNamesFromService(instance).indexOf(name)
+        val interfaceList = instance.properties?.interfaceList ?: emptyList()
+        if (interfaceList.size <= idx || idx < 0) return emptyList()
+        return interfaceList[idx]?.allowedAddressPairs?.allowedAddressPair ?: emptyList()
+    }
 
     fun getNetworkOfServiceInterface(serviceInstance: ServiceInstance, name: String): VirtualNetwork? {
         val template = connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid)!!

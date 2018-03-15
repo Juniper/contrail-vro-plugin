@@ -15,10 +15,14 @@ import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.api.types.SubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.VnSubnetsType
+import net.juniper.contrail.api.types.AllowedAddressPair
 import net.juniper.contrail.vro.format.PropertyFormatter
 import java.util.UUID
+import java.util.regex.Pattern
 
 class Utils {
+    private val macPattern = Pattern.compile(
+        "^(?:[\\p{XDigit}]{1,2}([-:]))(?:[\\p{XDigit}]{1,2}\\1){4}[\\p{XDigit}]{1,2}$")
 
     private val integerRegex = "\\d+".toRegex()
 
@@ -31,14 +35,23 @@ class Utils {
     fun isValidIpv6Address(input: String): Boolean =
         NetAddressValidator.IPv6.isValidAddress(input)
 
-    fun isValidCidr(input: String): Boolean =
+    fun isValidSubnet(input: String): Boolean =
         NetAddressValidator.isValidSubnet(input)
 
-    fun isValidIpv6Cidr(input: String): Boolean =
+    fun isValidIpv6Subnet(input: String): Boolean =
         NetAddressValidator.IPv6.isValidSubnet(input)
 
-    fun isValidIpv4Cidr(input: String): Boolean =
+    fun isValidIpv4Subnet(input: String): Boolean =
         NetAddressValidator.IPv4.isValidSubnet(input)
+
+    fun isValidCidr(input: String): Boolean =
+        NetAddressValidator.isValidCidr(input)
+
+    fun isValidIpv6Cidr(input: String): Boolean =
+        NetAddressValidator.IPv6.isValidCidr(input)
+
+    fun isValidIpv4Cidr(input: String): Boolean =
+        NetAddressValidator.IPv4.isValidCidr(input)
 
     fun isValidPool(input: List<String>): Boolean =
         NetAddressValidator.areValidPools(input)
@@ -50,31 +63,31 @@ class Utils {
         NetAddressValidator.IPv6.areValidPools(input)
 
     fun isValidAllocationPool(cidr: String, pools: List<String>): Boolean {
-        if (isValidIpv4Cidr(cidr) && isValidIpv4Pool(pools)) {
+        if (isValidIpv4Subnet(cidr) && isValidIpv4Pool(pools)) {
             return parsePools(cidr, pools, ::IPv4)
-        } else if (isValidIpv6Cidr(cidr) && isValidIpv6Pool(pools)) {
+        } else if (isValidIpv6Subnet(cidr) && isValidIpv6Pool(pools)) {
             return parsePools(cidr, pools, ::IPv6)
         }
         return false
     }
 
     fun isInCidr(cidr: String, address: String): Boolean {
-        if (isValidIpv4Address(address) && isValidIpv4Cidr(cidr)) {
+        if (isValidIpv4Address(address) && isValidIpv4Subnet(cidr)) {
             return IPv4(address) in getSubnetRange(cidr, ::IPv4)
-        } else if (isValidIpv6Address(address) && isValidIpv6Cidr(cidr)) {
+        } else if (isValidIpv6Address(address) && isValidIpv6Subnet(cidr)) {
             return IPv6(address) in getSubnetRange(cidr, ::IPv6)
         }
         return false
     }
 
     fun isFree(cidr: String, address: String, pools: List<String>?, dnsAddr: String?): Boolean {
-        if (isValidIpv4Cidr(cidr) && isValidIpv4Address(address)) {
+        if (isValidIpv4Subnet(cidr) && isValidIpv4Address(address)) {
             if (pools != null && !pools.isBlankList() && !isValidIpv4Pool(pools)) return false
             if (dnsAddr != null && dnsAddr.isNotBlank() && !isValidIpv4Address(dnsAddr)) return false
             val ip = IPv4(address)
             return (ip in getSubnetRange(cidr, ::IPv4)) && ip.notInPools(pools, ::IPv4)
                     && !dnsAddr.equalsIp(ip, ::IPv4)
-        } else if (isValidIpv6Cidr(cidr) && isValidIpv6Address(address)) {
+        } else if (isValidIpv6Subnet(cidr) && isValidIpv6Address(address)) {
             if (pools != null && !pools.isBlankList() && !isValidIpv6Pool(pools)) return false
             if (dnsAddr != null && dnsAddr.isNotBlank() && !isValidIpv6Address(dnsAddr)) return false
             val ip = IPv6(address)
@@ -83,6 +96,9 @@ class Utils {
         }
         return false
     }
+
+    fun isValidMacAddress(mac : String) : Boolean =
+        macPattern.matcher(mac).matches()
 
     // first part must be an integer in range [0, 65535]; second number must be a positive integer.
     fun isValidCommunityAttribute(communityAttribute: String): Boolean {
@@ -159,7 +175,7 @@ class Utils {
             2 -> Pair(parts[0], parts[1])
             else -> throw IllegalArgumentException("Wrong subnet format. use CIDR or VN:CIDR")
         }
-        if (!isValidCidr(virtualNetworkAddress)) throw IllegalArgumentException("Wrong CIDR format.")
+        if (!isValidSubnet(virtualNetworkAddress)) throw IllegalArgumentException("Wrong CIDR format.")
         val (subnetIP, subnetPrefix) = virtualNetworkAddress.split('/')
         val fullNetworkName = if (virtualNetworkName != null) {
             "$virtualNetworkName:$subnetIP"
@@ -193,6 +209,15 @@ class Utils {
 
     fun randomUUID(): String =
         UUID.randomUUID().toString()
+
+    fun allowedAddressPairToString(pair: AllowedAddressPair, index: Int) : String {
+        val mac = if (pair.mac != null && pair.mac.isNotBlank()) "mac ${pair.mac}" else ""
+        val addressMode = if (pair.addressMode != null && pair.addressMode.isNotBlank())
+            "allowed address mode ${pair.addressMode}" else ""
+        val ipPrefix = if (pair.ip != null) "ip ${pair.ip.ipPrefix}" else ""
+        val ipPrefixLen = if (pair.ip != null && pair.ip.ipPrefixLen != null) "/${pair.ip.ipPrefixLen}" else ""
+        return "$index: $ipPrefix$ipPrefixLen $mac $addressMode"
+    }
 
     fun ruleToString(rule: PolicyRuleType, index: Int): String {
         return "$index: ${rule.actionList?.simpleAction ?: ""} protocol ${rule.protocol} ${PropertyFormatter.format(rule.srcAddresses[0])} ports ${rule.srcPorts.joinToString(", "){PropertyFormatter.format(it)}} " +

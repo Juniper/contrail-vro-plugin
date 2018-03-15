@@ -15,8 +15,10 @@ import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
 import net.juniper.contrail.vro.config.getNetworkOfServiceInterface
 import net.juniper.contrail.vro.config.portsForServiceInterface
 import net.juniper.contrail.vro.config.areValidCommunityAttributes
-import net.juniper.contrail.vro.config.templateHasInterfaceWithName
 import net.juniper.contrail.vro.config.getRouteTableRoutes
+import net.juniper.contrail.vro.config.templateHasInterfaceWithName
+import net.juniper.contrail.vro.config.getServiceInstanceInterfaceNames
+import net.juniper.contrail.vro.config.getAllowedAddressPairs
 import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.any
@@ -133,6 +135,36 @@ internal fun getPortsForServiceInterface(version: String, packageName: String): 
         resultType = resultType,
         parameters = parameters,
         script = Script(ScriptLoader.load(name))
+    )
+}
+
+internal fun getServiceInstanceInterfaceNames(version: String, packageName: String) : Action {
+    val name = getServiceInstanceInterfaceNames
+    val resultType = array(string)
+    val parameters = listOf("serviceInstance" ofType reference<ServiceInstance>())
+    return Action(
+            name = name,
+            packageName = packageName,
+            id = generateID(packageName, name),
+            version = version,
+            resultType = resultType,
+            parameters = parameters,
+            script = Script(ScriptLoader.load(name))
+    )
+}
+
+internal fun getAllowedAddressPairs(version: String, packageName: String) : Action {
+    val name = getAllowedAddressPairs
+    val resultType = array(string)
+    val parameters = listOf("serviceInstance" ofType reference<ServiceInstance>(), "interfaceName" ofType string)
+    return Action(
+            name = name,
+            packageName = packageName,
+            id = generateID(packageName, name),
+            version = version,
+            resultType = resultType,
+            parameters = parameters,
+            script = Script(ScriptLoader.load(name))
     )
 }
 
