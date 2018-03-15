@@ -8,11 +8,6 @@ var dstAddr = [ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAd
 
 var application = [];
 
-var qosName = null;
-if (qos) {
-    qosName = qos.getQualifiedName().join(":");
-}
-
 var mirrorAction = null;
 if (mirror) {
     var instanceName = analyzerName;
@@ -45,7 +40,6 @@ if (mirror) {
 var actions = new ContrailActionListType()
 actions.setSimpleAction(simpleAction);
 actions.setLog(log);
-actions.setQosAction(qosName);
 if (serviceInstances != null) {
     serviceInstances.forEach(function(instance){
         actions.addApplyService(instance.getQualifiedName().join(":"));

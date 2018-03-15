@@ -10,7 +10,6 @@ import net.juniper.contrail.api.ObjectReference
 import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.vro.config.constants.apiPackageName
 import net.juniper.contrail.vro.config.constants.apiTypesPackageName
-import net.juniper.contrail.vro.config.constants.basePackageName
 import java.lang.reflect.Method
 
 fun objectClasses() =
@@ -24,9 +23,6 @@ val Class<*>.isApiPropertyClass get() =
 
 val Class<*>.isApiTypeClass get() =
     isApiObjectClass || isApiPropertyClass
-
-val Class<*>.isModelClass get() =
-    `package`.name.startsWith(basePackageName)
 
 val String.asApiClass get() =
     classForName("$apiTypesPackageName.$this") ?: classForName("$apiPackageName.$this")

@@ -44,10 +44,6 @@ fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDef
             mandatory = true
             browserRoot = actionCallTo(parentConnection).parameter(item).asBrowserRoot()
         }
-
-        if ( ! relation.simpleReference) {
-            addProperties(relation.attribute, schema)
-        }
     }
 }
 
@@ -85,19 +81,17 @@ private fun ForwardRelation.addReferenceRelationScriptBody() =
         addRelationWithAttributeScriptBody()
 
 private fun ForwardRelation.addRelationWithAttributeScriptBody() = """
-var attribute = new Contrail${attribute.pluginName}();
-${ attribute.attributeCode("attribute") }
-$item.add$childPluginName($child, attribute);
+$item.add$childPluginName($child, null);
 $retrieveExecutorAndUpdateItem
-"""
-
-private val ForwardRelation.child get() =
-    childClass.pluginName.parameterName
+""".trim()
 
 private fun ForwardRelation.addSimpleReferenceRelationScriptBody() = """
 $item.add$childPluginName($child);
 $retrieveExecutorAndUpdateItem
-"""
+""".trim()
+
+private val ForwardRelation.child get() =
+    childClass.pluginName.parameterName
 
 private fun ForwardRelation.removeReferenceRelationScriptBody() = """
 ${if (simpleReference)

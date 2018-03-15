@@ -9,7 +9,6 @@ import net.juniper.contrail.api.types.AddressType
 import net.juniper.contrail.api.types.NetworkPolicy
 import net.juniper.contrail.api.types.PolicyRuleType
 import net.juniper.contrail.api.types.Project
-import net.juniper.contrail.api.types.QosConfig
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualNetwork
@@ -302,17 +301,6 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                     FromStringParameter("nexthopMode", "static")
                 )
             }
-
-            parameter("QoSShow", boolean) {
-                description = "QoS"
-                mandatory = true
-                defaultValue = false
-            }
-            parameter("qos", reference<QosConfig>()) {
-                description = "QoS"
-                mandatory = true
-                visibility = FromBooleanParameter("QoSShow")
-            }
         }
     }
 }
@@ -554,17 +542,6 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
                     FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
                     FromBooleanParameter(mirrorShowParameterName)
                 )
-            }
-
-            parameter("QoSShow", boolean) {
-                description = "QoS"
-                mandatory = true
-                defaultValue = false
-            }
-            parameter("qos", reference<QosConfig>()) {
-                description = "QoS"
-                mandatory = true
-                visibility = FromBooleanParameter("QoSShow")
             }
         }
     }

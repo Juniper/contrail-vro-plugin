@@ -44,14 +44,14 @@ internal fun createFloatingIpWorkflow(schema: Schema): WorkflowDefinition {
     }
 }
 
-internal fun associatePortToFloatingIpWorkflow(schema: Schema): WorkflowDefinition {
+internal fun addPortToFloatingIpWorkflow(schema: Schema): WorkflowDefinition {
 
-    val workflowName = "Associate port to floating IP"
+    val workflowName = "Add port to floating IP"
 
-    return customWorkflow<FloatingIp>(workflowName).withScriptFile("associatePortToFloatingIp") {
-        description = "Associate port to floating IP"
+    return customWorkflow<FloatingIp>(workflowName).withScriptFile("addPortToFloatingIp") {
+        description = "Add port to floating IP"
         parameter(item, reference<FloatingIp>()) {
-            description = "Floating IP to associate port to"
+            description = "Floating IP to add port to"
             mandatory = true
         }
         parameter("port", reference<VirtualMachineInterface>()) {

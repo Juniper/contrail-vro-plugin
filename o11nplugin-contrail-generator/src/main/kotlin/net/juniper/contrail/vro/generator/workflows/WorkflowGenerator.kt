@@ -7,10 +7,13 @@ package net.juniper.contrail.vro.generator.workflows
 import com.sun.xml.internal.bind.marshaller.CharacterEscapeHandler
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.ProjectInfo
+import net.juniper.contrail.vro.config.hasCustomAddReferenceWorkflow
 import net.juniper.contrail.vro.config.hasCustomCreateWorkflow
 import net.juniper.contrail.vro.config.hasCustomDeleteWorkflow
 import net.juniper.contrail.vro.config.hasCustomEditWorkflow
-import net.juniper.contrail.vro.config.isRealtionEditable
+import net.juniper.contrail.vro.config.hasCustomRemoveReferenceWorkflow
+import net.juniper.contrail.vro.config.hasMultipleParents
+import net.juniper.contrail.vro.config.isRelationEditable
 import net.juniper.contrail.vro.config.isRelationMandatory
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
@@ -37,13 +40,9 @@ fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: 
         generateLifecycleWorkflows(info, it, refs, schema)
     }
 
-    val multipleParents = relations.relations.groupBy({ it.childClass }, { it })
-        .filterValues { it.size > 1 }.keys
-
     relations.relations.forEach {
         val refs = relations.mandatoryReferencesOf(it.childClass)
-        val multiParents = multipleParents.contains(it.childClass)
-        generateLifecycleWorkflows(info, it.childClass, it.parentClass, multiParents, refs, schema)
+        generateLifecycleWorkflows(info, it.childClass, it.parentClass, it.childClass.hasMultipleParents, refs, schema)
     }
 
     relations.forwardRelations.forEach {
@@ -62,7 +61,13 @@ fun RelationDefinition.mandatoryReferencesOf(clazz: ObjectClass) =
         .toList()
 
 val ForwardRelation.isEditable get() =
-    parentClass.isRealtionEditable(childClass)
+    parentClass.isRelationEditable(childClass)
+
+val ForwardRelation.hasCustomAddWorkflow get() =
+    parentClass.hasCustomAddReferenceWorkflow(childClass)
+
+val ForwardRelation.hasCustomRemoveWorkflow get() =
+    parentClass.hasCustomRemoveReferenceWorkflow(childClass)
 
 private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, multipleParents: Boolean, refs: List<ObjectClass>, schema: Schema) {
     if (!clazz.hasCustomCreateWorkflow)
@@ -80,8 +85,10 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, re
 
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation, schema: Schema) {
     if (relation.isEditable) {
-        addReferenceWorkflow(relation, schema).save(info, relation.parentClass)
-        removeReferenceWorkflow(relation).save(info, relation.parentClass)
+        if (!relation.hasCustomAddWorkflow)
+            addReferenceWorkflow(relation, schema).save(info, relation.parentClass)
+        if (!relation.hasCustomRemoveWorkflow)
+            removeReferenceWorkflow(relation).save(info, relation.parentClass)
     }
 }
 

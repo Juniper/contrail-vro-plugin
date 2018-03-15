@@ -8,7 +8,6 @@ import net.juniper.contrail.api.types.PortTuple
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.vro.config.asChildRef
-import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.maxInterfacesSupported
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.descriptionOf
@@ -60,21 +59,10 @@ private fun ParameterAggregator.generatePortInput(index: Int) {
     }
 }
 
-internal fun deletePortTuple(): WorkflowDefinition {
-    val workflowName = "Delete port tuple"
-
-    return customWorkflow<PortTuple>(workflowName).withScriptFile("deletePortTuple") {
-        parameter(item, reference<PortTuple>()) {
-            description = descriptionOf<PortTuple>()
-            mandatory = true
-        }
-    }
-}
-
 internal fun removePortTupleFromServiceInstance(): WorkflowDefinition {
     val workflowName = "Remove port tuple from service instance"
 
-    return customWorkflow<ServiceInstance>(workflowName).withScriptFile("deletePortTuple") {
+    return customWorkflow<ServiceInstance>(workflowName).withScriptFile("removePortTupleFromServiceInstance") {
         parameter(parent, reference<ServiceInstance>()) {
             description = descriptionOf<ServiceInstance>()
             mandatory = true

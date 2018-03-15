@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.config
 
+import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 
 val modelClasses = setOf(
@@ -16,16 +17,11 @@ val modelClasses = setOf(
     the<NetworkPolicy>(),
     the<SecurityGroup>(),
     the<VirtualMachineInterface>(),
-    the<RouteTable>(),
     the<ServiceInstance>(),
     the<ServiceTemplate>(),
     the<PortTuple>(),
     the<InstanceIp>(),
-    the<QosConfig>(),
-    the<GlobalQosConfig>(),
-    the<PortTuple>(),
-    the<ServiceApplianceSet>(),
-    the<ServiceAppliance>()
+    the<PortTuple>()
 )
 
 val inventoryProperties = setOf(
@@ -52,24 +48,26 @@ val nonEditableProperties = setOf(
 )
 
 val customCreateWorkflows = setOf(
+    the<Project>(),
     the<VirtualMachineInterface>(),
     the<FloatingIp>(),
     the<ServiceTemplate>(),
-    the<ServiceInstance>()
+    the<ServiceInstance>(),
+    the<PortTuple>()
 )
 
 val customEditWorkflows = setOf(
     the<VirtualMachineInterface>(),
     the<NetworkPolicy>(),
     the<FloatingIp>(),
-    the<RouteTable>(),
     the<ServiceTemplate>(),
-    the<ServiceInstance>()
+    the<ServiceInstance>(),
+    the<PortTuple>()
 )
 
 val customDeleteWorkflows = setOf(
+    the<Project>(),
     the<VirtualMachineInterface>(),
-    the<FloatingIpPool>(),
     the<PortTuple>()
 )
 
@@ -84,8 +82,17 @@ val mandatoryReference = setOf(
 
 val nonEditableReference = setOf(
     pair<VirtualMachineInterface, VirtualNetwork>(),
-    pair<ServiceInstance, ServiceTemplate>(),
-    pair<Subnet, VirtualMachineInterface>()
+    pair<Project, FloatingIpPool>(),
+    pair<ServiceInstance, ServiceTemplate>()
+)
+
+val customAddReference = setOf(
+    pair<FloatingIp, VirtualMachineInterface>(),
+    pair<VirtualNetwork, NetworkIpam>()
+)
+
+val customRemoveReference = setOf(
+    pair<VirtualNetwork, NetworkIpam>()
 )
 
 val hiddenRoots = setOf(
@@ -95,7 +102,6 @@ val hiddenRoots = setOf(
 val hiddenRelations = setOf(
     pair<FloatingIp, Project>(),
     pair<VirtualNetwork, NetworkIpam>(),
-    pair<VirtualMachineInterface, VirtualMachineInterface>(),
     pair<VirtualMachineInterface, PortTuple>(),
     pair<ServiceTemplate, ServiceApplianceSet>()
 )
@@ -136,19 +142,24 @@ val String.isDirectChild get() =
 val String.isHiddenRoot get() =
     hiddenRoots.contains(this)
 
-fun Class<*>.isRelationMandatory(child: Class<*>) =
+fun ObjectClass.isRelationMandatory(child: ObjectClass) =
     mandatoryReference.contains(Pair(simpleName, child.simpleName))
 
-fun Class<*>.isRealtionEditable(child: Class<*>) =
+fun ObjectClass.isRelationEditable(child: ObjectClass) =
+    ! isInternal &&
+    ! child.isInternal &&
     ! nonEditableReference.contains(Pair(simpleName, child.simpleName))
 
+fun ObjectClass.hasCustomAddReferenceWorkflow(child: Class<*>) =
+    customAddReference.contains(Pair(simpleName, child.simpleName))
+
+fun ObjectClass.hasCustomRemoveReferenceWorkflow(child: Class<*>) =
+    customRemoveReference.contains(Pair(simpleName, child.simpleName))
+
 infix fun String.isDisplayableChildOf(parent: String) =
-    ! hiddenRelations.contains(Pair(parent, this))
+    this != parent && ! hiddenRelations.contains(Pair(parent, this))
 
-val Class<*>.isRequiredAttributeClass get() =
-    simpleName.isRequiredAttribute
-
-val ObjectClass.isModelClass get() =
+val Class<*>.isModelClass get() =
     simpleName.isModelClassName
 
 val Class<*>.isInventoryProperty get() =
@@ -172,10 +183,41 @@ val Class<*>.isDirectChild get() =
 val Class<*>.isHiddenRoot get() =
     simpleName.isHiddenRoot
 
-val ObjectClass.isRootClass: Boolean get() {
-    val parentType = newInstance().defaultParentType
+val ObjectClass.isInternal get() =
+    !hasParents
 
-    if (parentType == null) return false
+val ObjectClass.hasParents get() =
+    numberOfParents > 0
+
+val ObjectClass.hasParentsInModel get() =
+    numberOfParentsInModel > 0
+
+val ObjectClass.hasMultipleParents get() =
+    numberOfParents > 1
+
+val ObjectClass.hasMultipleParentsInModel get() =
+    numberOfParentsInModel > 1
+
+val ObjectClass.numberOfParents get() =
+    setParentMethods.count()
+
+val ObjectClass.numberOfParentsInModel get() =
+    setParentMedhodsInModel.count()
+
+private val ObjectClass.setParentMedhodsInModel get() =
+    declaredMethods
+        .filter { it.parameters[0].type.isModelClass }
+
+private val ObjectClass.setParentMethods get() =
+    declaredMethods.asSequence()
+        .filter { it.name == "setParent" }
+        .filter { it.parameterCount == 1 }
+        .filter { it.parameters[0].type.superclass == ApiObjectBase::class.java }
+
+val ObjectClass.isRootClass: Boolean get() {
+    if (isInternal) return false
+    val parentType = newInstance().defaultParentType ?: return false
+
     if (parentType == "config-root") return true
     if (isHiddenRoot) return false
 
