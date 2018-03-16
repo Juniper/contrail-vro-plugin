@@ -8,8 +8,8 @@ if (qos) {
     qosName = qos.getQualifiedName().join(":");
 }
 
-var srcAddress = ContrailUtils.createAddress(srcAddressType, srcAddressCidr, srcAddressNetwork, srcAddressPolicy, srcAddressSecurityGroup);
-var dstAddress = ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAddressNetwork, dstAddressPolicy, dstAddressSecurityGroup);
+var srcAddress = ContrailUtils.createAddress(srcAddressType, srcAddressCidr, srcAddressNetworkType, srcAddressNetwork, srcAddressPolicy, srcAddressSecurityGroup);
+var dstAddress = ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAddressNetworkType, dstAddressNetwork, dstAddressPolicy, dstAddressSecurityGroup);
 theRule.protocol = protocol;
 theRule.direction = direction;
 

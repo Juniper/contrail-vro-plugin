@@ -42,7 +42,7 @@ private val mirrorTypeParameterName = "mirrorType"
 private val defaultPort = "any"
 private val defaultProtocol = "any"
 private val allowedProtocols = listOf("any", "tcp", "udp", "icmp", "icmp6")
-private val defaultAddressType = "CIDR"
+private val defaultAddressType = "Network"
 private val allowedAddressTypes = listOf("CIDR", "Network", "Policy", "Security Group")
 private val defaultDirection = "<>"
 private val allowedDirections = listOf("<>", ">")
@@ -52,6 +52,8 @@ private val defaultJuniperHeaderOption = "enabled"
 private val allowedJuniperHeaderOptions = listOf("enabled", "disabled")
 private val defaultNexthopMode = "dynamic"
 private val allowedNexthopModes = listOf("dynamic", "static")
+private val defaultNetworkType = "any"
+private val allowedNetworkTypes = listOf("any", "local", "reference")
 
 internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
 
@@ -96,10 +98,17 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 visibility = FromStringParameter(sourceAddressTypeParameterName, "CIDR")
             }
+            parameter("srcAddressNetworkType", string) {
+                description = "Type of source network address"
+                mandatory = true
+                visibility = FromStringParameter(sourceAddressTypeParameterName, "Network")
+                defaultValue = defaultNetworkType
+                predefinedAnswers = allowedNetworkTypes
+            }
             parameter("srcAddressNetwork", reference<VirtualNetwork>()) {
                 description = schema.propertyDescription<AddressType>("virtual_network")
                 mandatory = true
-                visibility = FromStringParameter(sourceAddressTypeParameterName, "Network")
+                visibility = FromStringParameter("srcAddressNetworkType", "reference")
             }
             parameter("srcAddressPolicy", reference<NetworkPolicy>()) {
                 description = schema.propertyDescription<AddressType>("network-policy")
@@ -127,10 +136,17 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 visibility = FromStringParameter(destinationAddressTypeParameterName, "CIDR")
             }
+            parameter("dstAddressNetworkType", string) {
+                description = "Type of destination network address"
+                mandatory = true
+                visibility = FromStringParameter(destinationAddressTypeParameterName, "Network")
+                defaultValue = defaultNetworkType
+                predefinedAnswers = allowedNetworkTypes
+            }
             parameter("dstAddressNetwork", reference<VirtualNetwork>()) {
                 description = schema.propertyDescription<AddressType>("virtual_network")
                 mandatory = true
-                visibility = FromStringParameter(destinationAddressTypeParameterName, "Network")
+                visibility = FromStringParameter("dstAddressNetworkType", "reference")
             }
             parameter("dstAddressPolicy", reference<NetworkPolicy>()) {
                 description = schema.propertyDescription<AddressType>("network-policy")
@@ -371,10 +387,17 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 visibility = FromStringParameter(sourceAddressTypeParameterName, "CIDR")
             }
+            parameter("srcAddressNetworkType", string) {
+                description = "Type of source network address"
+                mandatory = true
+                visibility = FromStringParameter(sourceAddressTypeParameterName, "Network")
+                defaultValue = defaultNetworkType
+                predefinedAnswers = allowedNetworkTypes
+            }
             parameter("srcAddressNetwork", reference<VirtualNetwork>()) {
                 description = schema.propertyDescription<AddressType>("virtual-network")
                 mandatory = true
-                visibility = FromStringParameter(sourceAddressTypeParameterName, "Network")
+                visibility = FromStringParameter("srcAddressNetworkType", "reference")
             }
             parameter("srcAddressPolicy", reference<NetworkPolicy>()) {
                 description = schema.propertyDescription<AddressType>("network-policy")
@@ -402,10 +425,17 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 visibility = FromStringParameter(destinationAddressTypeParameterName, "CIDR")
             }
+            parameter("dstAddressNetworkType", string) {
+                description = "Type of destination network address"
+                mandatory = true
+                visibility = FromStringParameter(destinationAddressTypeParameterName, "Network")
+                defaultValue = defaultNetworkType
+                predefinedAnswers = allowedNetworkTypes
+            }
             parameter("dstAddressNetwork", reference<VirtualNetwork>()) {
                 description = schema.propertyDescription<AddressType>("virtual-network")
                 mandatory = true
-                visibility = FromStringParameter(destinationAddressTypeParameterName, "Network")
+                visibility = FromStringParameter("dstAddressNetworkType", "reference")
             }
             parameter("dstAddressPolicy", reference<NetworkPolicy>()) {
                 description = schema.propertyDescription<AddressType>("network-policy")

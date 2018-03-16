@@ -3,8 +3,8 @@ var ruleUuid = ContrailUtils.randomUUID();
 var parsedSrcPorts = ContrailUtils.parsePorts(srcPorts);
 var parsedDstPorts = ContrailUtils.parsePorts(dstPorts);
 
-var srcAddr = [ContrailUtils.createAddress(srcAddressType, srcAddressCidr, srcAddressNetwork, srcAddressPolicy, srcAddressSecurityGroup)];
-var dstAddr = [ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAddressNetwork, dstAddressPolicy, dstAddressSecurityGroup)];
+var srcAddr = [ContrailUtils.createAddress(srcAddressType, srcAddressCidr, srcAddressNetworkType, srcAddressNetwork, srcAddressPolicy, srcAddressSecurityGroup)];
+var dstAddr = [ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAddressNetworkType, dstAddressNetwork, dstAddressPolicy, dstAddressSecurityGroup)];
 
 var application = [];
 

@@ -194,12 +194,20 @@ class Utils {
     fun createAddress(
         type: String,
         cidr: String?,
+        networkType: String?,
         network: VirtualNetwork?,
         policy: NetworkPolicy?,
         securityGroup: SecurityGroup?
     ): AddressType {
         val subnet = if (type == "CIDR" && cidr != null) parseSubnet(cidr) else null
-        val networkName = if (type == "Network" && network != null) network.name else null
+        val networkName = if (type == "Network") {
+            if (networkType == "reference") {
+                network?.name
+            } else {
+                // "any" or "local"
+                networkType
+            }
+        } else null
         val policyName = if (type == "Policy" && policy != null) policy.name else null
         val securityGroupName = if (type == "Security Group") {
             securityGroup?.qualifiedName?.joinToString(":") ?: "local"

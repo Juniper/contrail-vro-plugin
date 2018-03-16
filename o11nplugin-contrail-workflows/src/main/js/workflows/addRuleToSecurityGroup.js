@@ -1,10 +1,10 @@
 var ruleUuid = ContrailUtils.randomUUID();
 
 var parsedPorts = ContrailUtils.parsePorts(ports);
-var addr = [ContrailUtils.createAddress(addressType, addressCidr, null, null, addressSecurityGroup)];
+var addr = [ContrailUtils.createAddress(addressType, addressCidr, null, null, null, addressSecurityGroup)];
 
 var localPorts = ContrailUtils.parsePorts("0-65535");
-var localAddr = [ContrailUtils.createAddress("Security Group", null, null, null, null)];
+var localAddr = [ContrailUtils.createAddress("Security Group", null, null, null, null, null)];
 
 var trafficDirection = ">"
 
