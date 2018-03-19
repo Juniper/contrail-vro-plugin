@@ -9,11 +9,9 @@
 dist/
 target/
 o11nplugin-contrail-package/src
-o11nplugin-contrail-package/templates/main/resources/Workflow
-o11nplugin-contrail-package/templates/main/resources/ScriptModule
-o11nplugin-contrail-package/templates/main/resources/META-INF/dunes-meta-inf.xml
 
 #Ignore dependencies
-controller/
 generateds/
+controller/
+contrail-api-client/
 contrail-java-api/
