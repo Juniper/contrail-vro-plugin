@@ -1,7 +1,7 @@
 var ruleUuid = ContrailUtils.randomUUID();
 
-var parsedSrcPorts = ContrailUtils.parsePorts(srcPorts);
-var parsedDstPorts = ContrailUtils.parsePorts(dstPorts);
+var parsedSrcPorts = ContrailUtils.parsePortsOfNetworkPolicyRule(srcPorts);
+var parsedDstPorts = ContrailUtils.parsePortsOfNetworkPolicyRule(dstPorts);
 
 var srcAddr = [ContrailUtils.createAddress(srcAddressType, srcAddressCidr, srcAddressNetworkType, srcAddressNetwork, srcAddressPolicy, srcAddressSecurityGroup)];
 var dstAddr = [ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAddressNetworkType, dstAddressNetwork, dstAddressPolicy, dstAddressSecurityGroup)];

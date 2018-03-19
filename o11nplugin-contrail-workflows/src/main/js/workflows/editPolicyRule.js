@@ -21,10 +21,10 @@ theRule.clearDstPorts();
 theRule.addSrcAddresses(srcAddress);
 theRule.addDstAddresses(dstAddress);
 
-ContrailUtils.parsePorts(srcPorts).forEach(function(port) {
+ContrailUtils.parsePortsOfNetworkPolicyRule(srcPorts).forEach(function(port) {
    theRule.addSrcPorts(port);
 });
-ContrailUtils.parsePorts(dstPorts).forEach(function(port) {
+ContrailUtils.parsePortsOfNetworkPolicyRule(dstPorts).forEach(function(port) {
    theRule.addDstPorts(port);
 });
 

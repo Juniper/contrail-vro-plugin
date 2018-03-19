@@ -21,10 +21,15 @@ import java.util.UUID
 import java.util.regex.Pattern
 
 class Utils {
+    private val minPort = 0
+    private val maxPort = 65535
+
     private val macPattern = Pattern.compile(
         "^(?:[\\p{XDigit}]{1,2}([-:]))(?:[\\p{XDigit}]{1,2}\\1){4}[\\p{XDigit}]{1,2}$")
 
     private val integerRegex = "\\d+".toRegex()
+
+    private val whitespacePattern = "\\s+".toRegex()
 
     fun isValidAddress(input: String): Boolean =
         NetAddressValidator.isValidAddress(input)
@@ -105,7 +110,7 @@ class Utils {
         val parts = communityAttribute.split(":")
         if (parts.size != 2) return false
         val firstPartNumericValue = parts[0].toIntOrNull() ?: return false
-        if (firstPartNumericValue > 65535 || firstPartNumericValue < 0) return false
+        if (firstPartNumericValue < minPort || firstPartNumericValue > maxPort) return false
         return parts[1].matches(integerRegex)
     }
 
@@ -128,20 +133,29 @@ class Utils {
     }
 
     private fun String.clean() =
-        replace("\\s+", "")
+        replace(whitespacePattern, "")
 
-    fun parsePorts(ports: String): List<PortType> {
-        val cleaned = ports.clean()
-        val ranges = cleaned.split(",")
-        return ranges.map { parsePortRange(it) }
+    fun parsePortsOfNetworkPolicyRule(ports: String): List<PortType> {
+        val ranges = ports.split(",").map { it.clean() }
+        return ranges.map { parsePortRange(it, anyAsFullRange = false) }
     }
 
-    private fun parsePortRange(def: String): PortType {
+    fun parsePortsOfSecurityGroupRule(ports: String): List<PortType> {
+        val ranges = ports.split(",").map { it.clean() }
+        if (ranges.size > 1) throw IllegalArgumentException("Only one port range is allowed in security group rule")
+        return ranges.map { parsePortRange(it, anyAsFullRange = true) }
+    }
+
+    private fun parsePortRange(def: String, anyAsFullRange: Boolean): PortType {
         val ends = def.split("-")
         return when (ends.size) {
             1 ->
                 if (ends[0] == "any") {
-                    PortType(-1, -1)
+                    if (anyAsFullRange) {
+                        PortType(minPort, maxPort)
+                    } else {
+                        PortType(-1, -1)
+                    }
                 } else {
                     val portNumber = parsePort(ends[0])
                     PortType(portNumber, portNumber)
@@ -157,12 +171,9 @@ class Utils {
     }
 
     private fun parsePort(port: String): Int {
-        val minPortNumber = 0
-        val maxPortNumber = 65535
-
         val portNumber = port.toInt()
-        if (portNumber < minPortNumber || portNumber > maxPortNumber) {
-            throw IllegalArgumentException("Port number $portNumber out of bounds ($minPortNumber-$maxPortNumber)")
+        if (portNumber < minPort || portNumber > maxPort) {
+            throw IllegalArgumentException("Port number $portNumber out of bounds ($minPort-$maxPort)")
         }
         return portNumber
     }
