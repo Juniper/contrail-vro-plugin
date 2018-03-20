@@ -5,4 +5,5 @@ var instanceIp = executor.instanceIpOfPort(port);
 if (fixedIpAddress && instanceIp && instanceIp.getAddress()){
     item.setFixedIpAddress(instanceIp.getAddress());
 }
-executor.updateFloatingIp(item);
+
+item.update();

@@ -9,19 +9,45 @@ import com.vmware.o11n.sdk.modeldrivengen.model.FormalParameter
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedConstructor
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedMethod
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
-import net.juniper.contrail.vro.config.backRefTypeName
+import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.constants.apiTypesPackageName
+import net.juniper.contrail.vro.config.backRefTypeName
 import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.isApiPropertyClass
 import net.juniper.contrail.vro.config.isHiddenProperty
+import net.juniper.contrail.vro.config.isInternal
 import net.juniper.contrail.vro.config.isInventoryProperty
 import net.juniper.contrail.vro.config.isModelClassName
+import net.juniper.contrail.vro.config.isRootClass
+import net.juniper.contrail.vro.config.isSubclassOf
+import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.returnsApiPropertyOrList
+import net.juniper.contrail.vro.config.setParentMethodsInModel
+import net.juniper.contrail.vro.model.Connection
 
 class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
 
     val isObjectClass get() =
         delegate.modelClass?.isApiObjectClass ?: false
+
+    val isConnectionChild get() =
+        delegate.modelClass?.let {
+            if (it.isSubclassOf<ApiObjectBase>()) {
+                @Suppress("UNCHECKED_CAST")
+                it as ObjectClass
+                it.isRootClass || it.isInternal
+            } else {
+                false
+            }
+        } ?: false
+
+    val pluginName = delegate.modelClass?.pluginName
+
+    val parents = if (isConnectionChild)
+        listOf(Connection::class.java)
+    else
+        delegate.modelClass?.setParentMethodsInModel?.map { it.parameterTypes[0] }?.toList() ?: emptyList()
 
     val references: List<CustomReference> = delegate.modelClass?.run {
         declaredMethods.asSequence()

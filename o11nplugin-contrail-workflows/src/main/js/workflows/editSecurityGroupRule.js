@@ -37,6 +37,4 @@ if (direction == "ingress") {
 theRule.protocol = protocol;
 theRule.ethertype = ethertype;
 
-var id = parent.internalId;
-var executor = ContrailConnectionManager.executor(id.toString());
-executor.updateSecurityGroup(parent);
+parent.update();

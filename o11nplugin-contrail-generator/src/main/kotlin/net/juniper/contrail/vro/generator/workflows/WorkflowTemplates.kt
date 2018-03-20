@@ -8,13 +8,11 @@ import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.allLowerCase
 import net.juniper.contrail.vro.config.ignoredInWorkflow
-import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.generator.model.properties
 import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isEditableProperty
 import net.juniper.contrail.vro.config.constants.item
-import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.hasOnlyListOfStrings
 import net.juniper.contrail.vro.config.isPropertyListWrapper
 import net.juniper.contrail.vro.config.isStringListWrapper
@@ -293,27 +291,3 @@ fun List<Property>.assign(ref: String, prefix: String = tab) =
 
 fun List<Property>.prepare(prefix: String) =
     joinToString(separator = "") { it.propertyCode(prefix) }
-
-val String.retrieveExecutor get() =
-    "var $executor = ContrailConnectionManager.executor($this.internalId.toString());"
-
-val retrieveExecutorFromItem get() =
-    item.retrieveExecutor
-
-fun String.updateAsClass(className: String) =
-    "$executor.update$className($this);"
-
-fun String.deleteAsClass(className: String) =
-    "$executor.delete$className($this);"
-
-val ForwardRelation.updateParent get() =
-    parent.updateAsClass(parentClass.pluginName)
-
-val ForwardRelation.updateItem get() =
-    item.updateAsClass(parentClass.pluginName)
-
-val ForwardRelation.retrieveExecutorAndUpdateItem get() =
-"""
-$retrieveExecutorFromItem
-$updateItem
-""".trimIndent()

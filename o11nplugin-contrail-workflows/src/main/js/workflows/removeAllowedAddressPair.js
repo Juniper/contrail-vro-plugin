@@ -7,4 +7,4 @@ var interfaceIndex = executor.getInterfaceIndexByName(item, interfaceName);
 
 item.getProperties().getInterfaceList()[interfaceIndex].setAllowedAddressPairs(new ContrailAllowedAddressPairs(list));
 
-executor.updateServiceInstance(item);
+item.update();

@@ -1,15 +1,16 @@
-var executor = ContrailConnectionManager.executor(parent.internalId.toString());
-var ip_prefix = ContrailUtils.parseSubnetIP(subnet.trim());
-var ip_prefix_len = ContrailUtils.parseSubnetPrefix(subnet.trim());
-var subnet_name = ContrailUtils.randomUUID();
+var connection = ContrailConnectionManager.connection(parent.internalId.toString());
+var ipPrefix = ContrailUtils.parseSubnetIP(subnet.trim());
+var ipPrefixLen = ContrailUtils.parseSubnetPrefix(subnet.trim());
+var subnetName = ContrailUtils.randomUUID();
 
 var ipamSubnet = new ContrailIpamSubnetType();
-var subnetType = new ContrailSubnetType(ip_prefix, ip_prefix_len);
+var subnetType = new ContrailSubnetType(ipPrefix, ipPrefixLen);
 var csubnet = new ContrailSubnet();
 
 csubnet.setIpPrefix(subnetType);
-csubnet.setName(subnet_name);
-executor.createSubnet(csubnet);
+csubnet.setName(subnetName);
+csubnet.setParentConnection(connection);
+csubnet.create();
 var uuid = csubnet.getUuid();
 
 ipamSubnet.setEnableDhcp(enableDhcp);
@@ -18,7 +19,7 @@ if (dnsServerAddress){
     ipamSubnet.setDnsServerAddress(dnsServerAddress.trim());
 }
 ipamSubnet.setSubnet(subnetType);
-ipamSubnet.setSubnetName(subnet_name);
+ipamSubnet.setSubnetName(subnetName);
 ipamSubnet.setSubnetUuid(uuid);
 ipamSubnet.setAddrFromStart(addrFromStart);
 
@@ -37,4 +38,4 @@ if (!ContrailUtils.isNetworRelatedToIpam(parent, ipam)){
 	parent.addNetworkIpam(ipam, vnSubnet);
 }
 
-executor.updateVirtualNetwork(parent);
+parent.update();

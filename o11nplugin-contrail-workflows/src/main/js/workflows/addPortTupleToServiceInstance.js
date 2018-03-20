@@ -37,7 +37,7 @@ function addTupleToPort(executor, portTuple, portObject, portIndex) {
     if(portObject){
         portObject.addPortTuple(portTuple);
         portObject.properties.setServiceInterfaceType(interfaceTypes[portIndex]);
-        executor.updatePort(portObject);
+        portObject.update();
     }
 }
 
@@ -45,7 +45,7 @@ function removeTupleFromPort(executor, portTuple, portObject, portIndex) {
     if(portObject){
         portObject.removePortTuple(portTuple);
         portObject.properties.setServiceInterfaceType(oldPortInterfaceTypes[portIndex]);
-        executor.updatePort(portObject);
+        portObject.update();
     }
 }
 
@@ -54,8 +54,7 @@ var executor = ContrailConnectionManager.executor(id.toString());
 var portTuple = new ContrailPortTuple();
 portTuple.setName(name);
 portTuple.setParentServiceInstance(parent);
-executor.createPortTuple(portTuple);
-executor.readPortTuple(portTuple);
+portTuple.create();
 
 try {
     ports.forEach(function(element, index){
@@ -66,6 +65,6 @@ try {
         removeTupleFromPort(executor, portTuple, element, index);
     });
 
-	executor.deletePortTuple(portTuple);
-	throw err;
+    portTuple.delete();
+    throw err;
 }

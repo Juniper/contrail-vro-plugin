@@ -78,12 +78,12 @@ private fun ForwardRelation.addReferenceRelationScriptBody() =
 
 private fun ForwardRelation.addRelationWithAttributeScriptBody() = """
 $item.add$childPluginName($child, null);
-$retrieveExecutorAndUpdateItem
+$item.update();
 """.trim()
 
 private fun ForwardRelation.addSimpleReferenceRelationScriptBody() = """
 $item.add$childPluginName($child);
-$retrieveExecutorAndUpdateItem
+$item.update();
 """.trim()
 
 private val ForwardRelation.child get() =
@@ -95,5 +95,5 @@ ${if (simpleReference)
 else
     "$item.remove$childName($child, null);"
 }
-$retrieveExecutorAndUpdateItem
+$item.update();
 """.trimIndent()

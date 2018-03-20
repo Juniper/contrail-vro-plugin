@@ -1,8 +1,6 @@
 item = new ContrailServiceTemplate();
 item.setName(name);
-
-var id = parent.internalId;
-var executor = ContrailConnectionManager.executor(id.toString());
+item.setParentConnection(parent);
 
 var properties = new ContrailServiceTemplateType();
 properties.setServiceMode(serviceMode);
@@ -33,4 +31,4 @@ if (serviceApplianceSet){
    });
 }
 
-executor.createServiceTemplate(item);
+item.create();

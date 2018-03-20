@@ -4,14 +4,6 @@
 
 package net.juniper.contrail.vro.generator.model
 
-import net.juniper.contrail.vro.config.ObjectClass
+class ExecutorModel : GenericModel()
 
-data class ExecutorModel (
-    val findableClasses: List<ClassInfoModel>
-) : GenericModel()
-
-fun generateExecutorModel(
-    objectClasses: List<ObjectClass>
-) = ExecutorModel(
-    objectClasses.map { it.toClassInfoModel() }
-)
+fun generateExecutorModel() = ExecutorModel()

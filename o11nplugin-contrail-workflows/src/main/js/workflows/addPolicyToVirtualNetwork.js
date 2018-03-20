@@ -5,5 +5,4 @@ var attribute = new ContrailVirtualNetworkPolicyType(sequence);
 
 item.addNetworkPolicy(networkPolicy, attribute);
 
-var executor = ContrailConnectionManager.executor(item.internalId.toString());
-executor.updateVirtualNetwork(item);
+item.update();

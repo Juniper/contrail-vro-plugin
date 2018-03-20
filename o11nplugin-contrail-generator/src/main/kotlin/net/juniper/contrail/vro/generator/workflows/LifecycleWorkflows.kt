@@ -8,7 +8,6 @@ import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.allLowerCase
-import net.juniper.contrail.vro.config.constants.id
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.isApiTypeClass
@@ -120,7 +119,7 @@ private fun editComplexPropertyWorkflows(rootProperty: Property, thisProperty: P
 }
 
 fun deleteWorkflow(clazz: ObjectClass) =
-    deleteWorkflow(clazz.pluginName, deleteScriptBody(clazz.pluginName))
+    deleteWorkflow(clazz.pluginName, deleteScriptBody())
 
 private fun Schema.relationInCreateWorkflowDescription(parentClazz: ObjectClass, clazz: ObjectClass) = """
 ${clazz.allCapitalized}
@@ -129,7 +128,7 @@ ${relationDescription(parentClazz, clazz)}
 
 private fun setParentCall(parentClazz: ObjectClass?) =
     if (parentClazz == null)
-        ""
+        "$item.setParent$Connection($parent);"
     else
         "$item.setParent${parentClazz.pluginName}($parent);"
 
@@ -137,22 +136,18 @@ private fun Class<*>.createScriptBody(parentClazz: ObjectClass?, references: Lis
 $item = new Contrail$pluginName();
 $item.setName(name);
 ${references.addAllReferences}
-var $id = $parent.internalId;
-var $executor = ContrailConnectionManager.executor($id.toString());
 ${setParentCall(parentClazz)}
-$executor.create$pluginName($item);
+$item.create();
 """.trimIndent()
 
 private fun editScriptBody(clazz: Class<*>) = """
 ${clazz.editPropertiesCode(item)}
-${item.retrieveExecutor}
-${item.updateAsClass(clazz.pluginName)}
+$item.update();
 """.trimIndent()
 
 private fun editComplexPropertyScriptBody(rootProperty: Property, thisProperty: Property) = """
 ${initComplexPropertyEdit(rootProperty.propertyName, rootProperty.clazz, thisProperty.propertyName, thisProperty.clazz)}
-${item.retrieveExecutor}
-${item.updateAsClass(rootProperty.parent.pluginName)}
+$item.update();
 """.trimIndent()
 
 private fun initComplexPropertyEdit(rootName: String, rootClass: Class<*>, thisName: String, thisClass: Class<*>) = """
@@ -177,9 +172,8 @@ ${thisClass.editPropertiesCode(thisName).prependIndent(tab)}
 }
 """.trim()
 
-private fun deleteScriptBody(className: String) = """
-$retrieveExecutorFromItem
-${item.deleteAsClass(className)}
+private fun deleteScriptBody() = """
+$item.delete();
 """.trimIndent()
 
 fun Class<*>.editPropertiesCode(item: String, level: Int = 0) =

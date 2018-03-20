@@ -13,6 +13,7 @@ val hiddenProperties = setOf(
 )
 
 val hiddenMethods = setOf(
+    "setParent",
     "getObjectType",
     "getDefaultParentType",
     "getDefaultParent",

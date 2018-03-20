@@ -29,17 +29,6 @@ inline private fun <reified T> findItemIcon() =
 inline private fun <reified T> findFolderIcon() =
     findIcon(folderIconName<T>(), defaultFolderIconName)
 
-private val renamePolicy = object : MethodRenamePolicy {
-    override fun rename(m: Method): String =
-        m.renameParent() ?: m.name.toPluginMethodName
-
-    private fun Method.renameParent() =
-        if (name == "setParent" && parameterTypes[0].superclass == ApiObjectBase::class.java)
-            "setParent" + parameterTypes[0].simpleName
-        else
-            null
-}
-
 class CustomMapping: AbstractMapping() {
 
     val methodsToHide = hiddenMethods.toTypedArray()
@@ -71,7 +60,6 @@ class CustomMapping: AbstractMapping() {
         <#list findableClasses as klass>
         wrap(${klass.simpleName}::class.java)
           .`as`("${klass.pluginName}")
-          .rename(renamePolicy)
           .hiding(*methodsToHide)
           .andFind()
           .`as`("${klass.pluginName}")

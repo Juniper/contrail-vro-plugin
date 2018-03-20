@@ -35,5 +35,4 @@ actions.setQosAction(qosName);
 
 theRule.setActionList(actions);
 
-var executor = ContrailConnectionManager.executor(parent.internalId.toString());
-executor.updateNetworkPolicy(parent);
+parent.update();

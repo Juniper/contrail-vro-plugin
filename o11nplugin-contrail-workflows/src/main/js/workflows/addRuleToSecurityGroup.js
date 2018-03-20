@@ -30,6 +30,4 @@ if (!rules) {
 }
 rules.addPolicyRule(rule);
 
-var id = parent.internalId;
-var executor = ContrailConnectionManager.executor(id.toString());
-executor.updateSecurityGroup(parent);
+parent.update();

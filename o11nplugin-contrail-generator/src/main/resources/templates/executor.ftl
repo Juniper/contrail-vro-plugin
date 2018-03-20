@@ -14,28 +14,6 @@ class Executor(private val connection: Connection) {
     val id: Sid get() =
         connection.info.sid
 
-    <#list findableClasses as klass>
-    @Throws(IOException::class)
-    fun create${klass.pluginName}(obj: ${klass.simpleName}) {
-        connection.create(obj)
-    }
-
-    @Throws(IOException::class)
-    fun update${klass.pluginName}(obj: ${klass.simpleName}) {
-        connection.update(obj)
-    }
-
-    @Throws(IOException::class)
-    fun read${klass.pluginName}(obj: ${klass.simpleName}) {
-        connection.read(obj)
-    }
-
-    @Throws(IOException::class)
-    fun delete${klass.pluginName}(obj: ${klass.simpleName}) {
-        connection.delete(obj)
-    }
-    </#list>
-
     fun subnetsOfVirtualNetwork(parent: VirtualNetwork): List<Subnet> {
         val ipams = parent.networkIpam ?: return emptyList()
         return ipams.asSequence().map {

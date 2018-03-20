@@ -21,16 +21,37 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
     private fun <M> defaultList(): List<M> =
         mutableListOf()
 
+    private fun findConnection(sid: Sid): Connection? {
+        val connectionWrapper = factory.find(ConnectionName, sid.toString()) as ModelWrapper?
+        return connectionWrapper?.__getTarget() as Connection?
+    }
+
+    private fun raiseNoConnection(sid: Sid): Nothing =
+        throw IllegalStateException("Did not find connection with id: ${sid.id}")
+
+    private inline fun <T : ApiObjectBase> crud(obj: T, sid: Sid, operation: Connection.(T) -> Unit) =
+        findConnection(sid)?.operation(obj) ?: raiseNoConnection(sid)
+
+    fun <T : ApiObjectBase> create(sid: Sid, obj: T) =
+        crud(obj, sid) { create(it); read(it) }
+
+    fun <T : ApiObjectBase> update(sid: Sid, obj: T) =
+        crud(obj, sid) { update(it) }
+
+    fun <T : ApiObjectBase> delete(sid: Sid, obj: T) =
+        crud(obj, sid) { delete(it) }
+
+    fun <T : ApiObjectBase> read(sid: Sid, obj: T) =
+        crud(obj, sid) { read(it) }
+
     fun <T : ApiObjectBase, U : ApiPropertyBase, M: Findable>
         references(sid: Sid?, clazz: Class<T>, references: List<ObjectReference<U>>?): List<M> {
         if (sid == null || references == null) return defaultList()
-        val connectionWrapper = factory.find(ConnectionName, sid.toString()) as ModelWrapper? ?: return defaultList()
-        val connection: Connection = connectionWrapper.__getTarget() as Connection
-        val objects: List<T> = connection.getObjects(clazz, references) ?: return defaultList()
-        return objects.map { it.toWrapper<T, M>(clazz, sid) }
+        return findConnection(sid)?.getObjects(clazz, references)?.map { it.toWrapper<T, M>(sid, clazz) }
+            ?: defaultList()
     }
 
-    private fun <T : ApiObjectBase, M : Findable> T.toWrapper(clazz: Class<T>, sid: Sid): M {
+    private fun <T : ApiObjectBase, M : Findable> T.toWrapper(sid: Sid, clazz: Class<T>): M {
         val wrapper: M = ctx.createPluginObject(this, clazz)
         wrapper.internalId = sid.with(clazz.pluginName, uuid)
         return wrapper

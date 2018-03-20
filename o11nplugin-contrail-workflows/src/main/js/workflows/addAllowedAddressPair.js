@@ -17,4 +17,4 @@ if (!pairs){
 pairs.addAllowedAddressPair(pair);
 item.getProperties().getInterfaceList()[index].setAllowedAddressPairs(pairs);
 
-executor.updateServiceInstance(item);
+item.update();

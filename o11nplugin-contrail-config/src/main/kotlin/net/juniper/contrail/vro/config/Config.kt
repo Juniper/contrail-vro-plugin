@@ -203,13 +203,13 @@ val ObjectClass.numberOfParents get() =
     setParentMethods.count()
 
 val ObjectClass.numberOfParentsInModel get() =
-    setParentMedhodsInModel.count()
+    setParentMethodsInModel.count()
 
-private val ObjectClass.setParentMedhodsInModel get() =
-    declaredMethods
+val Class<*>.setParentMethodsInModel get() =
+    setParentMethods
         .filter { it.parameters[0].type.isModelClass }
 
-private val ObjectClass.setParentMethods get() =
+val Class<*>.setParentMethods get() =
     declaredMethods.asSequence()
         .filter { it.name == "setParent" }
         .filter { it.parameterCount == 1 }
