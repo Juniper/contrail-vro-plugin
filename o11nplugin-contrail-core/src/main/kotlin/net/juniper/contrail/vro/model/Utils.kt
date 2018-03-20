@@ -18,16 +18,15 @@ import net.juniper.contrail.api.types.VnSubnetsType
 import net.juniper.contrail.api.types.AllowedAddressPair
 import net.juniper.contrail.vro.format.PropertyFormatter
 import java.util.UUID
-import java.util.regex.Pattern
 
 class Utils {
     private val minPort = 0
     private val maxPort = 65535
 
-    private val macPattern = Pattern.compile(
-        "^(?:[\\p{XDigit}]{1,2}([-:]))(?:[\\p{XDigit}]{1,2}\\1){4}[\\p{XDigit}]{1,2}$")
+    private val macPattern =
+        "^(?:[\\p{XDigit}]{1,2}([-:]))(?:[\\p{XDigit}]{1,2}\\1){4}[\\p{XDigit}]{1,2}$".toRegex()
 
-    private val integerRegex = "\\d+".toRegex()
+    private val integerPattern = "\\d+".toRegex()
 
     private val whitespacePattern = "\\s+".toRegex()
 
@@ -103,7 +102,7 @@ class Utils {
     }
 
     fun isValidMacAddress(mac : String) : Boolean =
-        macPattern.matcher(mac).matches()
+        mac.matches(macPattern)
 
     // first part must be an integer in range [0, 65535]; second number must be a positive integer.
     fun isValidCommunityAttribute(communityAttribute: String): Boolean {
@@ -111,7 +110,7 @@ class Utils {
         if (parts.size != 2) return false
         val firstPartNumericValue = parts[0].toIntOrNull() ?: return false
         if (firstPartNumericValue < minPort || firstPartNumericValue > maxPort) return false
-        return parts[1].matches(integerRegex)
+        return parts[1].matches(integerPattern)
     }
 
     fun getVnSubnet(network: VirtualNetwork, ipam: NetworkIpam): VnSubnetsType =
