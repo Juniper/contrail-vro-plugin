@@ -88,6 +88,7 @@ val nonEditableReference = setOf(
 
 val customAddReference = setOf(
     pair<FloatingIp, VirtualMachineInterface>(),
+    pair<VirtualNetwork, NetworkPolicy>(),
     pair<VirtualNetwork, NetworkIpam>()
 )
 

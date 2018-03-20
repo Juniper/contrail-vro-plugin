@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.IpamSubnetType
+import net.juniper.contrail.api.types.NetworkPolicy
 import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.subnetsOfVirtualNetwork
@@ -18,10 +19,27 @@ import net.juniper.contrail.vro.workflows.model.* // ktlint-disable no-wildcard-
 import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
+import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
+import net.juniper.contrail.vro.workflows.util.childDescriptionInCreateRelation
+import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
 
 private val subnet = "subnet"
 private val allocationPools = "allocationPools"
 private val dnsServerAddress = "dnsServerAddress"
+
+internal fun addPolicyToVirtualNetwork(schema: Schema): WorkflowDefinition {
+    val workflowName = schema.addRelationWorkflowName<VirtualNetwork, NetworkPolicy>()
+    return customWorkflow<VirtualNetwork>(workflowName).withScriptFile("addPolicyToVirtualNetwork") {
+        parameter(item, reference<VirtualNetwork>()) {
+            description = schema.parentDescriptionInCreateRelation<VirtualNetwork, NetworkPolicy>()
+            mandatory = true
+        }
+        parameter("networkPolicy", reference<NetworkPolicy>()) {
+            description = schema.childDescriptionInCreateRelation<VirtualNetwork, NetworkPolicy>()
+            mandatory = true
+        }
+    }
+}
 
 internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
 
