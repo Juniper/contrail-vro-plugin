@@ -8,7 +8,7 @@ import com.vmware.o11n.plugin.sdk.spring.platform.GlobalPluginNotificationHandle
 import com.vmware.o11n.sdk.modeldriven.Sid
 import net.juniper.contrail.api.ApiConnector
 import net.juniper.contrail.api.types.Domain
-import net.juniper.contrail.vro.generated.Executor
+import net.juniper.contrail.vro.model.Executor
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.ConnectionException
 import net.juniper.contrail.vro.model.ConnectionInfo

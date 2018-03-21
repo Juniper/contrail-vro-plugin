@@ -1,13 +1,17 @@
-${editWarning}
-package net.juniper.contrail.vro.generated
+/*
+ * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
+ */
 
-/* ktlint-disable no-wildcard-imports */
-import com.vmware.o11n.sdk.modeldriven.*
-import net.juniper.contrail.api.*
-import net.juniper.contrail.api.types.*
-import net.juniper.contrail.vro.model.Connection
-import java.io.IOException
-/* ktlint-enable no-wildcard-imports */
+package net.juniper.contrail.vro.model
+
+import com.vmware.o11n.sdk.modeldriven.Sid
+import net.juniper.contrail.api.types.AllowedAddressPair
+import net.juniper.contrail.api.types.InstanceIp
+import net.juniper.contrail.api.types.ServiceInstance
+import net.juniper.contrail.api.types.ServiceTemplate
+import net.juniper.contrail.api.types.Subnet
+import net.juniper.contrail.api.types.VirtualMachineInterface
+import net.juniper.contrail.api.types.VirtualNetwork
 
 class Executor(private val connection: Connection) {
 
@@ -55,7 +59,7 @@ class Executor(private val connection: Connection) {
         val template = connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid)!!
         val interfaceNames = template.properties.interfaceType.map { it.serviceInterfaceType }
         val index = interfaceNames.indexOf(name)
-        if(serviceInstance.properties.interfaceList.size <= index || index < 0) return null
+        if (serviceInstance.properties.interfaceList.size <= index || index < 0) return null
         return connection.findByFQN(serviceInstance.properties.interfaceList[index].virtualNetwork)
     }
 }
