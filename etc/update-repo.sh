@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+#
+# Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
+#
+
 set -e
 
 if [ "$#" -ne 2 ]; then
@@ -21,4 +25,3 @@ git checkout -B master origin/master
 git pull
 
 cd ..
-

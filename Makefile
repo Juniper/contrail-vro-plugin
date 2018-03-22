@@ -1,27 +1,36 @@
-MVN_OPT=-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
-TOOLS=tools
+#
+# Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
+#
+
+GENERATEDS_DIR = generateds
+API_CLIENT_DIR = contrail-api-client
+JAVA_API_DIR = contrail-java-api
+
+SCRIPT_DIR = etc
+
+MVN = mvn -Drepo.host=$(REPO_HOST) -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
 
 ifneq (,$(findstring dev,$(MAKECMDGOALS)))
-    DEPS=deps
+    DEPS = deps
 endif
 
 .PHONY: deps generateds contrail-api-client contrail-java-api contrail-java-api-install
 generateds:
-	$(TOOLS)/update.sh https://github.com/Juniper/contrail-generateDS.git generateds
+	$(SCRIPT_DIR)/update-repo.sh https://github.com/Juniper/contrail-generateDS.git $(GENERATEDS_DIR)
 
 contrail-api-client:
-	$(TOOLS)/update.sh https://github.com/Juniper/contrail-api-client.git contrail-api-client
+	$(SCRIPT_DIR)/update-repo.sh https://github.com/Juniper/contrail-api-client.git $(API_CLIENT_DIR)
 
 contrail-java-api:
-	$(TOOLS)/update.sh https://github.com/Juniper/contrail-java-api.git contrail-java-api
+	$(SCRIPT_DIR)/update-repo.sh https://github.com/Juniper/contrail-java-api.git $(JAVA_API_DIR)
 
 deps: generateds contrail-api-client contrail-java-api
 
 contrail-java-api-install: $(DEPS)
-	cd contrail-java-api && mvn install
+	cd $(JAVA_API_DIR) && mvn install
 
 dist/o11nplugin-contrail.vmoapp: contrail-java-api-install
-	mvn install -Drepo.host=$(REPO_HOST) -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
+	$(MVN) install
 
 .PHONY: dev build test clean
 
@@ -34,4 +43,4 @@ build: vmoapp
 test: build
 
 clean:
-	mvn clean
+	$(MVN) clean

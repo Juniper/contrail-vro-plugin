@@ -11,7 +11,7 @@ target/
 o11nplugin-contrail-package/src
 
 #Ignore dependencies
-generateds/
-controller/
-contrail-api-client/
-contrail-java-api/
+**/generateds/
+**/controller/
+**/contrail-api-client/
+**/contrail-java-api/
