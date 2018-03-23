@@ -88,68 +88,6 @@ internal fun addRuleToSecurityGroupWorkflow(schema: Schema): WorkflowDefinition 
     }
 }
 
-// TODO: Add data bindings
-internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Edit security group rule"
-
-    return customWorkflow<SecurityGroup>(workflowName).withScriptFile("editSecurityGroupRule") {
-        step("Rule") {
-            parameter(parent, reference<SecurityGroup>()) {
-                extractRelationDescription<Project, SecurityGroup>(schema)
-                mandatory = true
-            }
-            parameter("rule", string) {
-                visibility = WhenNonNull(parent)
-                description = "Rule to edit"
-                predefinedAnswersFrom = actionCallTo(networkPolicyRules).parameter(parent)
-                validWhen = isSingleAddressSecurityGroupRuleOf(parent)
-            }
-        }
-        step("Rule attributes") {
-            visibility = WhenNonNull(parent)
-            parameter("direction", string) {
-                // direction has no description in the schema
-                description = "Direction"
-                mandatory = true
-                defaultValue = defaultDirection
-                predefinedAnswers = allowedDirections
-            }
-            parameter("ethertype", string) {
-                // etherType has no description in the schema
-                description = "Ether Type"
-                additionalQualifiers += schema.simpleTypeConstraints<PolicyRuleType>(parameterName)
-            }
-            parameter(addressTypeParameterName, string) {
-                description = "Address Type"
-                mandatory = true
-                defaultValue = defaultAddressType
-                predefinedAnswers = allowedAddressTypes
-            }
-            parameter("addressCidr", string) {
-                description = schema.propertyDescription<AddressType>("subnet")
-                mandatory = true
-                visibility = FromStringParameter(addressTypeParameterName, "CIDR")
-            }
-            parameter("addressSecurityGroup", reference<SecurityGroup>()) {
-                description = schema.propertyDescription<AddressType>("security-group")
-                mandatory = true
-                visibility = FromStringParameter(addressTypeParameterName, "Security Group")
-            }
-            parameter("protocol", string) {
-                extractPropertyDescription<PolicyRuleType>(schema)
-                mandatory = true
-                defaultValue = defaultProtocol
-                predefinedAnswers = allowedProtocols
-            }
-            parameter("ports", string) {
-                description = "Port Range"
-                mandatory = true
-                defaultValue = defaultPort
-            }
-        }
-    }
-}
-
 internal fun removeSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
     val workflowName = "Remove security group rule"
 
