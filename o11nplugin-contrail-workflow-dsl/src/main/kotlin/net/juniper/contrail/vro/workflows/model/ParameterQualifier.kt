@@ -5,14 +5,6 @@
 package net.juniper.contrail.vro.workflows.model
 
 import net.juniper.contrail.vro.config.CDATA
-import net.juniper.contrail.vro.config.actionPackage
-import net.juniper.contrail.vro.config.listPropertyValue
-import net.juniper.contrail.vro.config.propertyNotNull
-import net.juniper.contrail.vro.config.propertyValue
-import net.juniper.contrail.vro.workflows.dsl.ActionCall
-import net.juniper.contrail.vro.workflows.dsl.VisibilityCondition
-import net.juniper.contrail.vro.workflows.model.QualifierKind.ognl
-import net.juniper.contrail.vro.workflows.model.QualifierKind.static
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -41,7 +33,6 @@ class ParameterQualifier(
 
     @XmlValue
     val value: String? = value.CDATA
-
 }
 
 enum class QualifierKind {
@@ -49,103 +40,38 @@ enum class QualifierKind {
     ognl;
 }
 
-//TODO convert strings to sealed classes
-val mandatoryQualifierName = "mandatory"
-val sameValuesQualifierName = "sameValues"
-val visibleQualifierName = "visible"
-val defaultValueQualifierName = "defaultValue"
-val regexpQualifierName = "regexp"
-val minStringLengthQualifierName = "minStringLength"
-val maxStringLengthQualifierName = "maxStringLength"
-val numberFormatQualifierName = "numberFormat"
-val minNumberValueQualifierName = "minNumberValue"
-val maxNumberValueQualifierName = "maxNumberValue"
-val showInInventoryQualifierName = "contextualParameter"
-val genericEnumerationQualifierName = "genericEnumeration"
-val linkedEnumerationQualifierName = "linkedEnumeration"
-val dataBindingQualifierName = "dataBinding"
-val sdkRootObjectQualifierName = "sdkRootObject"
-val selectAsQualifierName = "show-select-as"
-val beforeDateQualifierName = "beforeDate"
-val afterDateQualifierName = "afterDate"
-val customValidatorQualifierName = "ognlValidator"
-val multilineQualifierName = "textInput"
+enum class QualifierName {
+    mandatory,
+    visible,
+    defaultValue,
+    genericEnumeration,
+    dataBinding,
+    ognlValidator,
 
-val voidValue = "__NULL__"
+    regexp,
+    minStringLength,
+    maxStringLength,
+    textInput,
+    sameValues,
 
-val showInInventoryQualifier = staticQualifier(showInInventoryQualifierName, void, voidValue)
-val mandatoryQualifier = staticQualifier(mandatoryQualifierName, boolean, true)
-val selectAsListQualifier = staticQualifier(selectAsQualifierName, string, "list")
-val selectAsTreeQualifier = staticQualifier(selectAsQualifierName, string, "tree")
-fun <T : Any> defaultValueQualifier(type: ParameterType<T>, value: T) = staticQualifier(defaultValueQualifierName, type, value)
-fun <T : Any> predefinedAnswersQualifier(type: ParameterType<T>, values: List<T>): ParameterQualifier {
-    val simpleType = type.unArrayed
-    return staticQualifier(genericEnumerationQualifierName, array(simpleType), cDATAListFormat(simpleType, values))
-}
-fun <T : Any> predefinedAnswersActionQualifier(
-    type: ParameterType<T>,
-    action: ActionCall
-): ParameterQualifier {
-    val simpleType = type.unArrayed
-    return ognlQualifier(
-        genericEnumerationQualifierName,
-        array(simpleType),
-        action.ognl)
+    numberFormat,
+    minNumberValue,
+    maxNumberValue,
+
+    sdkRootObject,
+    linkedEnumeration,
+    contextualParameter,
+    showSelectAs { override fun toString() = "show-select-as" },
+
+    beforeDate,
+    afterDate,
 }
 
-fun sameValuesQualifier(value: Boolean) = staticQualifier(sameValuesQualifierName, boolean, value)
-fun numberFormatQualifier(value: String) = staticQualifier(numberFormatQualifierName, string, value)
-fun multilineQualifier() = staticQualifier(multilineQualifierName, void, voidValue)
-fun minNumberValueQualifier(value: Long) = staticQualifier(minNumberValueQualifierName, number, value)
-fun maxNumberValueQualifier(value: Long) = staticQualifier(maxNumberValueQualifierName, number, value)
-fun minLengthQualifier(value: Int) = staticQualifier(minStringLengthQualifierName, number, value)
-fun maxLengthQualifier(value: Int) = staticQualifier(maxStringLengthQualifierName, number, value)
-fun regexQualifier(pattern: String) = staticQualifier(regexpQualifierName, Regexp, pattern.cleanRegex())
-fun visibilityConditionQualifier(condition: VisibilityCondition) =
-    ognlQualifier(visibleQualifierName, boolean, condition.stringCondition)
-fun <T : Any> listFromAction(action: ActionCall, type: ParameterType<T>) =
-    ognlQualifier(linkedEnumerationQualifierName, type, action.ognl)
-fun validationQualifier(action: ActionCall) =
-    ognlQualifier(customValidatorQualifierName, any, action.ognl)
-fun displayAsChildOf(parent: String) =
-    ognlQualifier(sdkRootObjectQualifierName, any, "#$parent")
-fun displayParentFrom(ognl: String) =
-    ognlQualifier(sdkRootObjectQualifierName, any, ognl)
-fun bindDataTo(parameter: String, type: ParameterType<Any>) =
-    ognlQualifier(dataBindingQualifierName, type, "#$parameter")
-fun bindValueToNullableState(item: String, propertyPath: String) =
-    ognlQualifier(dataBindingQualifierName, boolean, actionOgnl(actionPackage, propertyNotNull, "#$item", "\"$propertyPath\""))
-fun <T : Any> bindValueToSimpleProperty(item: String, property: String, type: ParameterType<T>) =
-    ognlQualifier(dataBindingQualifierName, type, "#$item.$property")
-fun <T : Any> bindValueToComplexProperty(item: String, propertyPath: String, type: ParameterType<T>) =
-    ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, propertyValue, "#$item", "\"$propertyPath\""))
-fun <T : Any> bindValueToListProperty(parentItem: String, childItem: String, listAccessor: String, propertyPath: String, type: ParameterType<T>) =
-    ognlQualifier(dataBindingQualifierName, type, actionOgnl(
-        packageName = actionPackage,
-        name = listPropertyValue,
-        parameters = *arrayOf("#$parentItem", "#$childItem", "\"$listAccessor\"", "\"$propertyPath\"")
-    ))
-fun <T : Any> bindValueToAction(actionName: String, type: ParameterType<T>, vararg parameters: String) =
-    ognlQualifier(dataBindingQualifierName, type, actionOgnl(actionPackage, actionName, *parameters))
+enum class ReferenceSelector {
+    list,
+    tree,
+    drop_down;
 
-private fun actionOgnl(packageName: String, name: String, vararg parameters: String) =
-    """GetAction("$packageName","$name").call(${parameters.joinToString(", "){"$it"}})"""
-
-val ActionCall.ognl get() =
-    actionOgnl(actionPackage, name, *arguments)
-
-private fun <T : Any> staticQualifier(name: String, type: ParameterType<T>, value: T) =
-    ParameterQualifier(static, name, type.name, value.toString())
-
-private fun ognlQualifier(name: String, type: ParameterType<Any>, value: String) =
-    ParameterQualifier(ognl, name, type.name, value)
-
-private fun <T : Any> cDATAListFormat(type: ParameterType<T>, values: List<T>): String {
-    val elements = values.joinToString(";") { "#$type#$it#" }
-    return "#{$elements}#"
+    override fun toString() =
+        name.replace('_', '-')
 }
-
-val whitespaces = "\\s+".toRegex()
-
-private fun String.cleanRegex() =
-    replace(whitespaces, "")

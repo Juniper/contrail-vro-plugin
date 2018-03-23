@@ -7,9 +7,10 @@ package net.juniper.contrail.vro.config
 import java.nio.file.Path
 import java.nio.file.Paths
 
-val CAMEL_CASE_REGEX = "(?<=[a-z0-9])(?=[A-Z])".toRegex()
-val ES_SUFFIXES = ".*(s|x|z|ch|sh)$".toRegex()
-val NON_IES_SUFFIXES_REGEX = "(ay|ey|iy|oy|uy)$".toRegex()
+val whitespacesPattern = "\\s+".toRegex()
+
+fun String.removeWhitespaces() =
+    replace(whitespacesPattern, "")
 
 val String.typeToClassName: String get() =
     split("-").toClassName()
@@ -59,8 +60,10 @@ val typeSuffix = "Type$".toRegex()
 fun String.removeTypeSuffix() =
     replace(typeSuffix, "")
 
+val camelCasePattern = "(?<=[a-z0-9])(?=[A-Z])".toRegex()
+
 val String.camelChunks get() =
-    split(CAMEL_CASE_REGEX)
+    split(camelCasePattern)
 
 fun String.folderName() : String = when (this) {
     "BgpAsAService" -> "BGPs As Services"
@@ -87,7 +90,7 @@ val Class<*>.pluralParameterName get() =
     pluginName.pluralParameterName
 
 fun pluralizeCamelCases(name: String) : String {
-    val nameParts = name.split(CAMEL_CASE_REGEX)
+    val nameParts = name.split(camelCasePattern)
     val uppercasedWords = nameParts.map { it.cleanOrRename }.run {
         if (last() == "List") dropLast(1) else this
     }
@@ -134,10 +137,13 @@ private val String.isAlreadyPlural get() = when (this) {
     else -> false
 }
 
+val esSuffixesPattern = ".*(s|x|z|ch|sh)$".toRegex()
+val nonIesSuffixesPattern = "(ay|ey|iy|oy|uy)$".toRegex()
+
 fun String.pluralize(): String = when {
     isAlreadyPlural -> this
-    matches(ES_SUFFIXES) -> this + "es"
-    endsWith("y") && !matches(NON_IES_SUFFIXES_REGEX) -> dropLast(1) + "ies"
+    matches(esSuffixesPattern) -> this + "es"
+    endsWith("y") && !matches(nonIesSuffixesPattern) -> dropLast(1) + "ies"
     endsWith("list", true) -> this
     else -> this + "s"
 }

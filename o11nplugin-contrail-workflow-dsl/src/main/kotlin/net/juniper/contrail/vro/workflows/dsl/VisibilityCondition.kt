@@ -4,8 +4,6 @@
 
 package net.juniper.contrail.vro.workflows.dsl
 
-import net.juniper.contrail.vro.workflows.model.ognl
-
 sealed class VisibilityCondition {
     abstract val stringCondition: String
 }

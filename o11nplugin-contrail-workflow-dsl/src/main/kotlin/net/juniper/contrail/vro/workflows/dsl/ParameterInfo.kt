@@ -11,7 +11,6 @@ import net.juniper.contrail.vro.workflows.model.ParameterSet
 import net.juniper.contrail.vro.workflows.model.ParameterType
 import net.juniper.contrail.vro.workflows.model.PresentationParameter
 import net.juniper.contrail.vro.workflows.model.Reference
-import net.juniper.contrail.vro.workflows.model.showInInventoryQualifier
 
 class ParameterInfo(
     val name: String,
