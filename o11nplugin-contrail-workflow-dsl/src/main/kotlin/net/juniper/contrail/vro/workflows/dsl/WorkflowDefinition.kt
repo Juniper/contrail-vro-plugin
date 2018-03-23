@@ -45,6 +45,9 @@ data class WorkflowDefinition(
         attributes = attributes,
         position = position
     )
+
+    // workflowItem containing the script should be at index 1
+    val scriptString: String? = workflowItems.getOrNull(1)?.script?.rawString
 }
 
 fun workflow(name: String) =
