@@ -10,7 +10,9 @@ import com.vmware.o11n.sdk.modeldriven.PluginContext
 import com.vmware.o11n.sdk.modeldriven.Sid
 import net.juniper.contrail.vro.base.ConnectionRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
+@Component
 class ConnectionFinder
 @Autowired constructor(private val connectionRepository: ConnectionRepository) : ObjectFinder<Connection>
 {

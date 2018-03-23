@@ -1,13 +1,13 @@
 <#ftl strip_whitespace=true>
 package ${packageName};
 
+import ch.dunes.vso.sdk.api.IPluginFactory;
 import com.vmware.o11n.sdk.modeldriven.*;
 import org.springframework.beans.factory.BeanFactory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
-import net.juniper.contrail.vro.ContrailPluginFactory;
 import net.juniper.contrail.vro.model.Connection;
 import net.juniper.contrail.vro.model.Executor;
 import net.juniper.contrail.vro.format.*;
@@ -39,7 +39,7 @@ public class ${className}
         </#if>
         <#if objectClass >
         BeanFactory beanFactory = _ctx.getPluginContext().getApplicationContext().getAutowireCapableBeanFactory();
-        ContrailPluginFactory factory = beanFactory.getBean(ContrailPluginFactory.class);
+        IPluginFactory factory = beanFactory.getBean(IPluginFactory.class);
         formatter = new ReferenceFormatter(factory);
         util = new WrapperUtil(_ctx, factory);
         </#if>
