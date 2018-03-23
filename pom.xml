@@ -68,7 +68,6 @@
         <groupId>net.juniper.contrail.vro</groupId>
         <artifactId>o11nplugin-contrail-generator</artifactId>
         <version>${project.version}</version>
-        <type>provided</type>
       </dependency>
       <dependency>
         <groupId>net.juniper.contrail.vro</groupId>
