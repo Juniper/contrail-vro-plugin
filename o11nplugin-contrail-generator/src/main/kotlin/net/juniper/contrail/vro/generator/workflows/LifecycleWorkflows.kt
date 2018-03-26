@@ -15,6 +15,7 @@ import net.juniper.contrail.vro.config.isStringListWrapper
 import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.generator.model.Property
+import net.juniper.contrail.vro.generator.model.properties
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
@@ -24,10 +25,12 @@ import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.schema.DefaultValue
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.createWorkflowDescription
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
 import net.juniper.contrail.vro.workflows.schema.relationDescription
+import net.juniper.contrail.vro.workflows.schema.simpleTypeConstraints
 
 fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, multipleParents: Boolean, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
 
@@ -36,7 +39,7 @@ fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, multipleParent
     val workflowName = workflowBaseName + workflowNameSuffix
     val parentName = parentClazz?.pluginName ?: Connection
 
-    return workflow(workflowName).withScript(clazz.createScriptBody(parentClazz, refs)) {
+    return workflow(workflowName).withScript(clazz.createScriptBody(parentClazz, refs, schema)) {
         description = schema.createWorkflowDescription(clazz, parentClazz)
         parameter("name", string) {
             description = "${clazz.allCapitalized} name"
@@ -132,11 +135,24 @@ private fun setParentCall(parentClazz: ObjectClass?) =
     else
         "$item.setParent${parentClazz.pluginName}($parent);"
 
-private fun Class<*>.createScriptBody(parentClazz: ObjectClass?, references: List<ObjectClass>) = """
+private fun Class<*>.setBooleanDefaults(schema: Schema) =
+    properties.simpleProperties.asSequence()
+        .filter { it.clazz == java.lang.Boolean.TYPE }
+        .filter { it.isTrueByDefault(schema) }
+        .joinToString("\n") { "$item.${it.propertyName} = true;" }
+
+private fun Property.isTrueByDefault(schema: Schema) =
+    schema.simpleTypeConstraints(parent, propertyName)
+        .filterIsInstance(DefaultValue::class.java)
+        .filter { it.value == true }
+        .any()
+
+private fun Class<*>.createScriptBody(parentClazz: ObjectClass?, references: List<ObjectClass>, schema: Schema) = """
 $item = new Contrail$pluginName();
 $item.setName(name);
 ${references.addAllReferences}
 ${setParentCall(parentClazz)}
+${setBooleanDefaults(schema)}
 $item.create();
 """.trimIndent()
 
