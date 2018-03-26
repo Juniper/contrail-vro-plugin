@@ -23,6 +23,4 @@ fun loadCustomWorkflows(schema: Schema): List<WorkflowDefinition> = mutableListO
     this += createServiceTemplate(schema)
     this += removePortTupleFromServiceInstance()
     this += createServiceInstance(schema)
-    this += addAllowedAddressPair(schema)
-    this += removeAllowedAddressPair(schema)
 }

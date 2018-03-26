@@ -8,8 +8,6 @@ import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.ServiceInstanceType
 import net.juniper.contrail.api.types.ServiceTemplate
-import net.juniper.contrail.api.types.ServiceInstanceInterfaceType
-import net.juniper.contrail.api.types.AllowedAddressPair
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.config.constants.item
@@ -22,14 +20,11 @@ import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.dsl.FromActionVisibility
-import net.juniper.contrail.vro.config.serviceInstanceInterfaceNames
-import net.juniper.contrail.vro.config.allowedAddressPairs
 import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
 import net.juniper.contrail.vro.workflows.schema.relationDescription
-import net.juniper.contrail.vro.workflows.util.extractPredefinedAnswers
 import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.workflows.util.extractRelationDescription
 
@@ -65,67 +60,6 @@ internal fun createServiceInstance(schema: Schema) : WorkflowDefinition {
         }
         output(item, reference<ServiceInstance>()) {
             description = "Service instance created in this workflow"
-        }
-    }
-}
-
-internal fun addAllowedAddressPair(schema: Schema) : WorkflowDefinition {
-    val workflowName = "Add allowed address pair to service instance"
-
-    return customWorkflow<ServiceInstance>(workflowName).withScriptFile("addAllowedAddressPair") {
-        parameter(item, reference<ServiceInstance>()) {
-            description = "Service instance to add allowed address pair to"
-            mandatory = true
-        }
-        step("Properties") {
-            visibility = WhenNonNull(item)
-            description = schema.propertyDescription<ServiceInstanceInterfaceType>("allowedAddressPairs")
-            parameter("interfaceName", string) {
-                description = "Interface to add allowed address pair to"
-                mandatory = true
-                predefinedAnswersFrom = actionCallTo(serviceInstanceInterfaceNames).parameter(item)
-            }
-            parameter("ip", string) {
-                description = "CIDR"
-                mandatory = true
-                validWhen = isCidr()
-            }
-            parameter("mac", string) {
-                description = "MAC"
-                mandatory = false
-                validWhen = isMac()
-            }
-            parameter("addressMode", string) {
-                extractPropertyDescription<AllowedAddressPair>(schema)
-                mandatory = false
-                extractPredefinedAnswers<AllowedAddressPair>(schema)
-            }
-        }
-    }
-}
-
-internal fun removeAllowedAddressPair(schema: Schema) : WorkflowDefinition {
-    val workflowName = "Remove allowed address pair from service instance"
-    val interfaceName = "interfaceName"
-
-    return customWorkflow<ServiceInstance>(workflowName).withScriptFile("removeAllowedAddressPair") {
-        parameter(item, reference<ServiceInstance>()) {
-            description = "Service instance to remove allowed address pair from"
-            mandatory = true
-        }
-        step("Properties") {
-            visibility = WhenNonNull(item)
-            parameter(interfaceName, string) {
-                description = "Interface from which allowed address pair should be removed"
-                mandatory = true
-                predefinedAnswersFrom = actionCallTo(serviceInstanceInterfaceNames).parameter(item)
-            }
-            parameter("allowedAddressPair", string) {
-                description = "Allowed address pair to be removed"
-                mandatory = true
-                visibility = WhenNonNull(interfaceName)
-                predefinedAnswersFrom = actionCallTo(allowedAddressPairs).parameters(item, interfaceName)
-            }
         }
     }
 }

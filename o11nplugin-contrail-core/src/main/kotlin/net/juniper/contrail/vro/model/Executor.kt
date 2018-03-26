@@ -5,7 +5,6 @@
 package net.juniper.contrail.vro.model
 
 import com.vmware.o11n.sdk.modeldriven.Sid
-import net.juniper.contrail.api.types.AllowedAddressPair
 import net.juniper.contrail.api.types.InstanceIp
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.ServiceTemplate
@@ -47,13 +46,6 @@ class Executor(private val connection: Connection) {
 
     fun interfaceNamesFromTemplate(template: ServiceTemplate?) : List<String> =
         template?.properties?.interfaceType?.map { it.serviceInterfaceType } ?: emptyList()
-
-    fun allowedAddressPairs(instance: ServiceInstance, name: String) : List<AllowedAddressPair> {
-        val idx = interfaceNamesFromService(instance).indexOf(name)
-        val interfaceList = instance.properties?.interfaceList ?: emptyList()
-        if (interfaceList.size <= idx || idx < 0) return emptyList()
-        return interfaceList[idx]?.allowedAddressPairs?.allowedAddressPair ?: emptyList()
-    }
 
     fun networkOfServiceInterface(serviceInstance: ServiceInstance, name: String): VirtualNetwork? {
         val template = connection.findById<ServiceTemplate>(serviceInstance.serviceTemplate[0].uuid)!!

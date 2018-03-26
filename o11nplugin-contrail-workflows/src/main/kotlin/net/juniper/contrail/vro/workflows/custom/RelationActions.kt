@@ -8,7 +8,6 @@ import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.api.types.VirtualNetwork
-import net.juniper.contrail.vro.config.allowedAddressPairs
 import net.juniper.contrail.vro.config.serviceInstanceInterfaceNames
 import net.juniper.contrail.vro.config.networkPolicyRules
 import net.juniper.contrail.vro.config.subnetsOfVirtualNetwork
@@ -67,10 +66,4 @@ val serviceInstanceInterfaceNamesAction = ActionDefinition (
     name = serviceInstanceInterfaceNames,
     resultType = array(string),
     parameters = listOf("serviceInstance" ofType reference<ServiceInstance>())
-)
-
-val allowedAddressPairsAction = ActionDefinition (
-    name = allowedAddressPairs,
-    resultType = array(string),
-    parameters = listOf("serviceInstance" ofType reference<ServiceInstance>(), "interfaceName" ofType string)
 )

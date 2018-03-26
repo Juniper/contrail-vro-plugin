@@ -29,5 +29,4 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += propertyRetrievalAction(version, packageName)
     this += serviceHasInterfaceWithNameAction(version, packageName)
     this += templateHasInterfaceWithNameAction(version, packageName)
-    this += allowedAddressPairsAction(version, packageName)
 }
