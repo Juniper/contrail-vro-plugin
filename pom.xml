@@ -11,25 +11,25 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <vco.version>7.3.0</vco.version>
+    <repo.url>http://${repo.host}:8280/vco-repo</repo.url>
     <spring.version>4.3.7.RELEASE</spring.version>
     <installation.mode>version</installation.mode>
     <kotlin.version>1.2.31</kotlin.version>
     <workflow.package>net.juniper.contrail</workflow.package>
+    <schema.file>${project.basedir}/../../src/contrail-api-client/schema/all_cfg.xsd</schema.file>
   </properties>
 
   <repositories>
     <repository>
-      <id>added-by-archetype</id>
-      <name>This repo was added by the archetype. There are better way to handle it</name>
-      <url>http://${repo.host}:8280/vco-repo</url>
+      <id>vro-repo</id>
+      <url>${repo.url}</url>
     </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
-      <id>added-by-archetype</id>
-      <name>This repo was added by the archetype. There are better way to handle it</name>
-      <url>http://${repo.host}:8280/vco-repo</url>
+      <id>vro-repo</id>
+      <url>${repo.url}</url>
     </pluginRepository>
   </pluginRepositories>
 

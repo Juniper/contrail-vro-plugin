@@ -18,7 +18,7 @@ import net.juniper.contrail.vro.config.isPropertyListWrapper
 import net.juniper.contrail.vro.config.isStringListWrapper
 import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.pluginName
-import net.juniper.contrail.vro.generator.Contrail
+import net.juniper.contrail.vro.config.constants.Contrail
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.workflows.dsl.PresentationParametersBuilder
 import net.juniper.contrail.vro.workflows.dsl.withScript
@@ -61,8 +61,6 @@ fun dunesPropertiesFor(packageName: String, version: String) = createDunesProper
 val maxComplexLevel = 1
 val maxPrimitiveLevel = 2
 
-val attribute = "attribute"
-val executor = "executor"
 val tab = "    "
 val AdvancedParameters = "Advanced parameters"
 val CustomParameters = "Custom parameters"

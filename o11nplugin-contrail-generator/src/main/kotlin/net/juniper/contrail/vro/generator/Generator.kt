@@ -24,14 +24,10 @@ object Generator {
 }
 
 fun generatePlugin(projectInfo: ProjectInfo) {
-    val generatorRoot = Paths.get(projectInfo.generatorRoot)
-    val repositoryRoot = generatorRoot.parent
-
     val objectClasses = objectClasses().filter(modelClassFilter)
     val propertyClasses = objectClasses.propertyClasses()
 
-    val schemaPath = repositoryRoot / schemaFilePath
-    val schema = buildSchema(schemaPath)
+    val schema = buildSchema(Paths.get(projectInfo.schemaFile))
     val relations = buildRelationDefinition(objectClasses, inventoryPropertyFilter)
 
     generateModel(projectInfo, relations, objectClasses, propertyClasses)

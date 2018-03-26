@@ -14,36 +14,36 @@ fun readProjectInfo(): ProjectInfo {
     val configRoot = props["project.dir"] as String
     val configPattern = "-config$".toRegex()
     val finalProjectRoot = configRoot.replace(configPattern, "")
-    val generatorRoot = configRoot.replace(configPattern, "-core")
     val coreRoot = configRoot.replace(configPattern, "-core")
     val customRoot = configRoot.replace(configPattern, "-custom")
     val packageRoot = configRoot.replace(configPattern, "-package")
     val version = props["project.version"] as String
     val buildNumber = props["build.number"] as String
     val workflowPackage = props["workflow.package"] as String
+    val schemaFile = props["schema.file"] as String
     val baseVersion = version.replace("-SNAPSHOT", "")
 
     return ProjectInfo(
         finalProjectRoot = finalProjectRoot,
         configRoot = configRoot,
-        generatorRoot = generatorRoot,
         coreRoot = coreRoot,
         customRoot = customRoot,
         packageRoot = packageRoot,
         version = version,
         baseVersion = baseVersion,
         buildNumber = buildNumber,
-        workflowPackage = workflowPackage)
+        workflowPackage = workflowPackage,
+        schemaFile = schemaFile)
 }
 
 data class ProjectInfo(
     val finalProjectRoot: String,
     val configRoot: String,
-    val generatorRoot: String,
     val coreRoot: String,
     val customRoot: String,
     val packageRoot: String,
     val version: String,
     val baseVersion: String,
     val buildNumber: String,
-    val workflowPackage: String)
+    val workflowPackage: String,
+    val schemaFile: String)

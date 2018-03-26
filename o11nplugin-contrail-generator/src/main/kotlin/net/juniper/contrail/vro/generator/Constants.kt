@@ -4,14 +4,11 @@
 
 package net.juniper.contrail.vro.generator
 
-val Contrail = "Contrail"
-
 val generatedPackageName = "net.juniper.contrail.vro.generated"
 
 val generatedSourcesRoot = "/target/generated-sources"
 val generatedTestsRoot = "/target/generated-tests"
 val templatePath = "/templates"
-val schemaFilePath = "/contrail-api-client/schema/all_cfg.xsd"
 
 val editWarningMessage: String =
 """
