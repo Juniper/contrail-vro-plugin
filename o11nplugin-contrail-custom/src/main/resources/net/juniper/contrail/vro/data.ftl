@@ -6,8 +6,10 @@ import org.springframework.beans.factory.BeanFactory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.List;
 import net.juniper.contrail.vro.ContrailPluginFactory;
 import net.juniper.contrail.vro.model.Connection;
+import net.juniper.contrail.vro.model.Executor;
 import net.juniper.contrail.vro.format.*;
 import net.juniper.contrail.api.*;
 import net.juniper.contrail.api.types.*;
@@ -102,6 +104,11 @@ public class ${className}
         <#elseif rootIdPropagated>
         _ctx.assignId(${m.returns.convertFriendlyClassName}, _res$pl, getRootId());
         </#if>
+        <#if pluginName=='ConnectionManager' && m.returns.modelType.simpleName=='Connection'>
+        Connection connection = (Connection) _res$;
+        Connection_Wrapper wrapper = (Connection_Wrapper) _res$pl;
+        wrapper.setInternalId(connection.getId());
+        </#if>
         return _res$pl;
         </#if>
     }
@@ -168,22 +175,47 @@ public class ${className}
     </#list>
 
     public void create() {
-        util.create(_internalId, __getTarget());
+        util.create(getInternalId(), __getTarget());
         // objects do not have valid uuid before create operation
-        _internalId = _internalId.with("${pluginName}", __getTarget().getUuid());
+        _internalId = getInternalId().with("${pluginName}", __getTarget().getUuid());
     }
 
     public void update() {
-        util.update(_internalId, __getTarget());
+        util.update(getInternalId(), __getTarget());
     }
 
     public void read() {
-        util.read(_internalId, __getTarget());
+        util.read(getInternalId(), __getTarget());
     }
 
     public void delete() {
-        util.delete(_internalId, __getTarget());
+        util.delete(getInternalId(), __getTarget());
     }
+
+    <#list executorMethods as m>
+    <@compress single_line=true>public ${m.returns.typeName} ${m.name}(<@params m />)<@thrown m /> {</@compress>
+        <@locals m />
+
+        ${m.returns.fullClassName} _res$ = util.executor(getInternalId()).${m.name}(__getTarget()<#if m.params?has_content>,</#if><@localNames m />);
+
+        <#if m.returns.fullClassName != 'boolean'>
+        if(_res$ == null) return null;
+        </#if>
+
+        ${m.returns.typeName} _res$pl = _ctx.createPluginObject(_res$, ${m.returns.convertFriendlyClassName});
+        <#if m.returns.componentTypeName??>
+        <#if m.returns.componentClassName??>
+        for(int i = 0; i < _res$.size(); i++) {
+            _res$pl.get(i).setInternalId(getInternalId().with("${m.returns.componentTypeName}",_res$.get(i).getUuid()));
+        }
+        <#else>
+        _res$pl.setInternalId(getInternalId().with("${m.returns.componentTypeName}",_res$.getUuid()));
+        </#if>
+        </#if>
+        return _res$pl;
+    }
+
+    </#list>
 
     public String getDisplayName() {
         return DisplayNameFormatter.INSTANCE.format(__getTarget());

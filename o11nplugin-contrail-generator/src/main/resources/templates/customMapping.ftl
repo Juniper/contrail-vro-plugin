@@ -29,6 +29,11 @@ inline private fun <reified T> findItemIcon() =
 inline private fun <reified T> findFolderIcon() =
     findIcon(folderIconName<T>(), defaultFolderIconName)
 
+private val renamePolicy = object : MethodRenamePolicy {
+    override fun rename(m: Method): String =
+        m.name.toPluginMethodName
+}
+
 class CustomMapping: AbstractMapping() {
 
     val methodsToHide = hiddenMethods.toTypedArray()
@@ -55,11 +60,10 @@ class CustomMapping: AbstractMapping() {
            .using(ConnectionFinder::class.java)
            .withIcon("controller.png")
 
-        wrap(Executor::class.java)
-
         <#list findableClasses as klass>
         wrap(${klass.simpleName}::class.java)
           .`as`("${klass.pluginName}")
+          .rename(renamePolicy)
           .hiding(*methodsToHide)
           .andFind()
           .`as`("${klass.pluginName}")

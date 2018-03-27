@@ -14,6 +14,7 @@ import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.config.pluginName
+import net.juniper.contrail.vro.model.Executor
 import net.juniper.contrail.vro.config.constants.Connection as ConnectionName
 
 class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
@@ -21,16 +22,22 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
     private fun <M> defaultList(): List<M> =
         mutableListOf()
 
-    private fun findConnection(sid: Sid): Connection? {
+    private fun maybeFindConnection(sid: Sid): Connection? {
         val connectionWrapper = factory.find(ConnectionName, sid.toString()) as ModelWrapper?
         return connectionWrapper?.__getTarget() as Connection?
     }
 
+    private fun findConnection(sid: Sid): Connection =
+        maybeFindConnection(sid) ?: raiseNoConnection(sid)
+
     private fun raiseNoConnection(sid: Sid): Nothing =
         throw IllegalStateException("Did not find connection with id: ${sid.id}")
 
+    fun executor(sid: Sid) =
+        Executor(findConnection(sid))
+
     private inline fun <T : ApiObjectBase> crud(obj: T, sid: Sid, operation: Connection.(T) -> Unit) =
-        findConnection(sid)?.operation(obj) ?: raiseNoConnection(sid)
+        findConnection(sid).operation(obj)
 
     fun <T : ApiObjectBase> create(sid: Sid, obj: T) =
         crud(obj, sid) { create(it); read(it) }
@@ -47,7 +54,7 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
     fun <T : ApiObjectBase, U : ApiPropertyBase, M: Findable>
         references(sid: Sid?, clazz: Class<T>, references: List<ObjectReference<U>>?): List<M> {
         if (sid == null || references == null) return defaultList()
-        return findConnection(sid)?.getObjects(clazz, references)?.map { it.toWrapper<T, M>(sid, clazz) }
+        return maybeFindConnection(sid)?.getObjects(clazz, references)?.map { it.toWrapper<T, M>(sid, clazz) }
             ?: defaultList()
     }
 

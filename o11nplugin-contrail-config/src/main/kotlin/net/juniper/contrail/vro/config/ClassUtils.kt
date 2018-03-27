@@ -72,9 +72,6 @@ val Method.isChildReferenceGetter get() =
 val Method.childClassName get() =
     childReferencePattern.matchEntire(name)?.groupValues?.get(1)
 
-fun String.removeGet() =
-    replace(getPrefix, "")
-
 val Method.nameWithoutGet get() =
     name.replace(getPrefix, "")
 
@@ -116,6 +113,9 @@ fun Method.declaredIn(clazz: Class<*>) =
 
 val Method.objectReferenceAttributeClass: Class<*>? get() =
     genericReturnType?.parameterType?.parameterClass
+
+val Method.isPublic get() =
+    Modifier.isPublic(modifiers)
 
 val <T> Class<T>.isAbstract: Boolean get() =
     Modifier.isAbstract(modifiers)

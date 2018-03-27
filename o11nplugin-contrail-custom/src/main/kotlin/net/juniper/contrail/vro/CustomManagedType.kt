@@ -18,13 +18,94 @@ import net.juniper.contrail.vro.config.isApiPropertyClass
 import net.juniper.contrail.vro.config.isHiddenProperty
 import net.juniper.contrail.vro.config.isInternal
 import net.juniper.contrail.vro.config.isInventoryProperty
+import net.juniper.contrail.vro.config.isModelClass
 import net.juniper.contrail.vro.config.isModelClassName
+import net.juniper.contrail.vro.config.isPublic
 import net.juniper.contrail.vro.config.isRootClass
 import net.juniper.contrail.vro.config.isSubclassOf
+import net.juniper.contrail.vro.config.parameterClass
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.returnsApiPropertyOrList
 import net.juniper.contrail.vro.config.setParentMethodsInModel
 import net.juniper.contrail.vro.model.Connection
+import net.juniper.contrail.vro.model.Executor
+import java.lang.reflect.Method
+import java.lang.reflect.Parameter
+
+private val listClass = List::class.java
+
+private val executorTypes = Executor::class.java.declaredMethods.asSequence()
+    .filter { it.isPublic }
+    // only methods with at least one parameter should be in executor
+    .groupBy { it.parameterTypes[0] }
+
+private fun ManagedType.createExecutorMethods(): List<ManagedMethod> {
+    if (!modelClass.isApiObjectClass) return emptyList()
+    val methods = executorTypes[modelClass] ?: emptyList()
+    return methods.map { it.toExecutorMethod() }
+}
+
+private fun Method.toExecutorMethod() = ManagedMethod().apply {
+    val methodName = this@toExecutorMethod.name
+    setName(methodName, null)
+    params = executorMethodParameters()
+    // trick to avoid generating standard wrapper method
+    setIsInheritedWrapperMethod(true)
+    isPropertyReadOnly = true
+    returns = executorFormalParameter(returnType, "_result", genericReturnType.parameterClass)
+}
+
+private fun Method.executorMethodParameters() =
+    parameters.asSequence().drop(1)
+        .map { it.toExecutorFormalParameter() }
+        .toList()
+
+private fun Parameter.toExecutorFormalParameter() =
+    executorFormalParameter(type, name, parameterizedType.parameterClass)
+
+/**
+ * Formal parameter created by this function has the following content:
+ * typeName - always not null, type of plugin class
+ * componentTypeName - not null if parameter is wrapped model class
+ * componentClassName - not null if parameter is list
+ */
+private fun executorFormalParameter(clazz: Class<*>, parameterName: String, component: Class<*>?) : FormalParameter {
+    val parameter = commonFormalParameter(clazz, parameterName)
+    return when {
+        listClass.isAssignableFrom(clazz) -> listParamConfig(parameter, component!!)
+        clazz.isModelClass -> clazz.modelParamConfig(parameter)
+        else -> clazz.simpleParamConfig(parameter)
+    }
+}
+
+private fun commonFormalParameter(clazz: Class<*>, parameterName: String) = FormalParameter().apply {
+    name = parameterName
+    modelType = clazz
+    isWrapped = clazz.isModelClass
+}
+
+private fun listParamConfig(parameter: FormalParameter, component: Class<*>) = parameter.apply {
+    componentClassName = component.canonicalName
+    val className = component.simpleName
+    fullClassName = "List<$className>"
+    if (component.isModelClass) {
+        typeName = "List<${className}_Wrapper>"
+        componentTypeName = component.pluginName
+    } else {
+        typeName = "List<$className>"
+    }
+}
+
+private fun Class<*>.modelParamConfig(parameter: FormalParameter) = parameter.apply {
+    fullClassName = canonicalName
+    typeName = "${simpleName}_Wrapper"
+    componentTypeName = pluginName
+}
+
+private fun Class<*>.simpleParamConfig(parameter: FormalParameter) = parameter.apply {
+    fullClassName = canonicalName
+    typeName = canonicalName
+}
 
 class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
 
@@ -48,6 +129,8 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         listOf(Connection::class.java)
     else
         delegate.modelClass?.setParentMethodsInModel?.map { it.parameterTypes[0] }?.toList() ?: emptyList()
+
+    val executorMethods = delegate.createExecutorMethods()
 
     val references: List<CustomReference> = delegate.modelClass?.run {
         declaredMethods.asSequence()

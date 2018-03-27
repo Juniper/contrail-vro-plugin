@@ -1,9 +1,6 @@
 item = new ContrailServiceInstance();
 item.setName(name);
 
-var id = parent.internalId;
-var executor = ContrailConnectionManager.executor(id.toString());
-
 item.setParentProject(parent);
 item.setServiceTemplate(serviceTemplate);
 
@@ -22,7 +19,7 @@ var interfaces = [
 ];
 
 var properties = new ContrailServiceInstanceType();
-var names = executor.interfaceNamesFromTemplate(serviceTemplate);
+var names = serviceTemplate.interfaceNames();
 names.forEach(function(name) {
     var idx = ContrailConstants.serviceInterfaceNames.indexOf(name);
     var network = interfaces[idx];

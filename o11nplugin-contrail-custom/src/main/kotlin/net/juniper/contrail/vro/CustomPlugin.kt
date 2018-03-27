@@ -39,7 +39,8 @@ class CustomPlugin : Plugin() {
         while (iterator.hasNext()) {
             val type = iterator.next()
             if (type !is CustomManagedType) {
-                iterator.set(CustomManagedType.wrap(type))
+                val cmt = CustomManagedType.wrap(type)
+                iterator.set(cmt)
             }
         }
     }
