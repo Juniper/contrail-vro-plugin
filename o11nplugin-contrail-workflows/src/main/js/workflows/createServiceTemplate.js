@@ -25,10 +25,4 @@ if (interfaceType){
 
 item.setProperties(properties);
 
-if (serviceApplianceSet){
-    serviceApplianceSet.forEach(function(element) {
-       item.addServiceApplianceSet(element);
-   });
-}
-
 item.create();

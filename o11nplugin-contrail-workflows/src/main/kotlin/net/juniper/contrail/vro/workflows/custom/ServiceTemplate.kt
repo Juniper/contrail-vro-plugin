@@ -5,7 +5,6 @@
 package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.Domain
-import net.juniper.contrail.api.types.ServiceApplianceSet
 import net.juniper.contrail.api.types.ServiceTemplateType
 import net.juniper.contrail.api.types.ServiceTemplate
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
@@ -17,7 +16,6 @@ import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.util.extractPredefinedAnswers
 import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
-import net.juniper.contrail.vro.workflows.util.extractRelationDescription
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.constants.Connection
@@ -67,10 +65,6 @@ internal fun createServiceTemplate(schema: Schema) : WorkflowDefinition {
             mandatory = true
             predefinedAnswers = supportedInterfaceNames
             sameValues = false
-        }
-        parameter("serviceApplianceSet", reference<ServiceApplianceSet>().array) {
-            extractRelationDescription<ServiceTemplate, ServiceApplianceSet>(schema)
-            mandatory = false
         }
         parameter("vrouterInstanceType", string) {
             extractPropertyDescription<ServiceTemplateType>(schema)
