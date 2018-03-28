@@ -73,7 +73,7 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, pa
     if (!clazz.hasCustomCreateWorkflow)
         createWorkflow(clazz, parentClazz, multipleParents, refs, schema).save(info, clazz)
     if (!clazz.hasCustomEditWorkflow) {
-        editWorkflow(clazz, schema).save(info, clazz)
+        editWorkflow(clazz, schema)?.save(info, clazz)
         editComplexPropertiesWorkflows(clazz, schema).forEach { it.save(info, clazz) }
     }
     if (!clazz.hasCustomDeleteWorkflow)

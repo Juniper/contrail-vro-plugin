@@ -73,7 +73,8 @@ fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, multipleParent
     }
 }
 
-fun editWorkflow(clazz: ObjectClass, schema: Schema): WorkflowDefinition {
+fun editWorkflow(clazz: ObjectClass, schema: Schema): WorkflowDefinition? {
+    if (! clazz.hasAnyEditableProperty(schema)) return null
 
     val workflowName = "Edit ${clazz.allLowerCase}"
 
