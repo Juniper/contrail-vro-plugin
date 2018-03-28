@@ -38,7 +38,6 @@ open class Relation (
 ) {
     val parentName: String = parentClass.simpleName
     val childName: String = childClass.simpleName
-    val name: String = relationName(parentName, childName)
     val folderName = childClass.pluginName.folderName()
 }
 
@@ -83,9 +82,6 @@ private fun ObjectClass.relations() = methods.asSequence()
     .filter { it.isModelClassName }
     .map { it.asObjectClass }.filterNotNull()
     .map { Relation(this, it) }
-
-private fun relationName(parentType: String, childType: String) =
-    "${parentType}To$childType"
 
 fun List<ObjectClass>.generateReferenceRelations(): List<ForwardRelation> =
     asSequence()
