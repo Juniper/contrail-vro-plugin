@@ -6,9 +6,9 @@ package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.PropertyClass
-import net.juniper.contrail.vro.config.rootClassFilter
 import net.juniper.contrail.vro.config.div
 import net.juniper.contrail.vro.config.ProjectInfo
+import net.juniper.contrail.vro.config.isRootClass
 import net.juniper.contrail.vro.generator.generatedPackageName
 import net.juniper.contrail.vro.generator.generatedSourcesRoot
 import net.juniper.contrail.vro.generator.templatePath
@@ -16,17 +16,18 @@ import net.juniper.contrail.vro.generator.templatePath
 fun generateModel(
     info: ProjectInfo,
     definition: RelationDefinition,
-    objectClasses: List<ObjectClass>,
+    pluginClasses: List<ObjectClass>,
+    modelClasses: List<ObjectClass>,
     propertyClasses: List<PropertyClass>
 ) {
     val relations = definition.relations
     val forwardRelations = definition.forwardRelations
     val propertyRelations = definition.propertyRelations
-    val rootClasses = objectClasses.filter(rootClassFilter)
+    val rootClasses = modelClasses.filter { it.isRootClass }
 
     val relationsModel = generateRelationsModel(relations, forwardRelations, propertyRelations, rootClasses)
-    val customMappingModel = generateCustomMappingModel(info, objectClasses, rootClasses, propertyClasses, relations, forwardRelations, propertyRelations)
-    val findersModel = generateFindersModel(objectClasses, propertyRelations)
+    val customMappingModel = generateCustomMappingModel(info, pluginClasses, rootClasses, propertyClasses, relations, forwardRelations, propertyRelations)
+    val findersModel = generateFindersModel(pluginClasses, propertyRelations)
 
     val customMappingConfig = GeneratorConfig(
         baseDir = info.customRoot / generatedSourcesRoot,
