@@ -5,9 +5,9 @@
 package net.juniper.contrail.vro.generator
 
 import net.juniper.contrail.vro.config.ProjectInfo
-import net.juniper.contrail.vro.config.inventoryPropertyFilter
-import net.juniper.contrail.vro.config.modelClassFilter
 import net.juniper.contrail.vro.config.globalProjectInfo
+import net.juniper.contrail.vro.config.isModelClass
+import net.juniper.contrail.vro.config.isPluginClass
 import net.juniper.contrail.vro.generator.model.buildRelationDefinition
 import net.juniper.contrail.vro.generator.model.generateModel
 import net.juniper.contrail.vro.config.objectClasses
@@ -27,11 +27,13 @@ object Generator {
 }
 
 fun generatePlugin(projectInfo: ProjectInfo, schema: Schema) {
-    val objectClasses = objectClasses().filter(modelClassFilter)
-    val propertyClasses = objectClasses.propertyClasses()
+    val objectClasses = objectClasses()
+    val pluginClasses = objectClasses.filter { it.isPluginClass }
+    val modelClasses = pluginClasses.filter { it.isModelClass }
+    val propertyClasses = pluginClasses.propertyClasses()
 
-    val relations = buildRelationDefinition(objectClasses, inventoryPropertyFilter)
+    val relations = buildRelationDefinition(modelClasses)
 
-    generateModel(projectInfo, relations, objectClasses, propertyClasses)
+    generateModel(projectInfo, relations, pluginClasses, modelClasses, propertyClasses)
     generateWorkflows(projectInfo, relations, schema)
 }

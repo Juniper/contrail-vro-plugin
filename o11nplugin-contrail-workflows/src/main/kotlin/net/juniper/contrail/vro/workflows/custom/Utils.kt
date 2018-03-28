@@ -16,3 +16,6 @@ fun WorkflowDefinition.withScriptFile(name: String, setup: ParameterDefinition) 
 
 inline fun <reified T : Any> customWorkflow(name: String) =
     workflow(name).inCategory(T::class.java.pluginName)
+
+fun String.toScriptName() =
+    split(' ').joinToString("") { it.capitalize() }.decapitalize()
