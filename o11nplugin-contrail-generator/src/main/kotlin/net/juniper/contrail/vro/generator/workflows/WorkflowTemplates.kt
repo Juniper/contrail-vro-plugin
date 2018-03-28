@@ -198,6 +198,11 @@ fun Class<*>.complexPropertiesInRange(range: IntRange, schema: Schema, createMod
         .filter { ! it.isList }
         .filter { it.clazz.maxDepth(schema, createMode, level + 1) in range }
 
+fun Class<*>.hasAnyEditableProperty(schema: Schema) =
+    ! properties.run {
+        onlyPrimitives(schema, false, 0).isEmpty() &&
+        onlyComplex(schema, false, 0).isEmpty() }
+
 fun Schema.propertyEditableInMode(property: Property, createMode: Boolean, level: Int) =
     crudStatus(property.declaringClass, property.propertyName).run {
         if (createMode) isCreateOnly || level > 0 else isUpdate

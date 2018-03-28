@@ -23,7 +23,15 @@ val modelClasses = setOf(
     the<ServiceTemplate>(),
     the<PortTuple>(),
     the<InstanceIp>(),
-    the<PortTuple>()
+    the<PortTuple>(),
+    the<PolicyManagement>(),
+    the<Tag>(),
+    the<TagType>(),
+    the<ApplicationPolicySet>(),
+    the<FirewallPolicy>(),
+    the<FirewallRule>(),
+    the<ServiceGroup>(),
+    the<AddressGroup>()
 )
 
 val inventoryProperties = setOf(
@@ -42,7 +50,10 @@ val ignoredInWorkflows = setOf(
     the<KeyValuePairs>(),
     the<PermType2>(),
     the<IdPermsType>(),
-    the<SequenceType>()
+    the<SequenceType>(),
+    the<ActionListType>(),
+    the<FirewallServiceType>(),
+    the<FirewallRuleEndpointType>()
 )
 
 val nonEditableProperties = setOf(
@@ -199,6 +210,18 @@ fun String.isInReversedRelationTo(child: String) =
 fun Class<*>.isInReversedRelationTo(child: Class<*>) =
     simpleName.isInReversedRelationTo(child.simpleName)
 
+val Class<*>?.isConfigRoot get() =
+    isA<ConfigRoot>()
+
+val Class<*>?.isDomain get() =
+    isA<Domain>()
+
+val Class<*>?.isDefaultRoot get() =
+    isConfigRoot || isDomain
+
+val Class<*>?.isPluginClass get() =
+    isModelClass || isDefaultRoot
+
 val Class<*>?.isModelClass get() =
     this?.simpleName?.isModelClassName ?: false
 
@@ -244,15 +267,20 @@ val ObjectClass.hasMultipleParents get() =
 val ObjectClass.hasMultipleParentsInModel get() =
     numberOfParentsInModel > 1
 
+val ObjectClass.hasRootParent get() =
+    parents.any { it.isDefaultRoot }
+
 val ObjectClass.numberOfParents get() =
-    setParentMethods.count()
+    parents.count()
 
 val ObjectClass.numberOfParentsInModel get() =
-    setParentMethodsInModel.count()
+    parentsInModel.count()
 
-val Class<*>.setParentMethodsInModel get() =
-    setParentMethods
-        .filter { it.parameters[0].type.isModelClass }
+val Class<*>.parentsInModel get() =
+    parents.filter { it.isModelClass }
+
+val Class<*>.parentsInPlugin get() =
+    parents.filter { it.isPluginClass }
 
 val Class<*>.setParentMethods get() =
     declaredMethods.asSequence()
@@ -260,12 +288,16 @@ val Class<*>.setParentMethods get() =
         .filter { it.parameterCount == 1 }
         .filter { it.parameters[0].type.superclass == ApiObjectBase::class.java }
 
-val ObjectClass.isRootClass: Boolean get() {
-    if (isInternal) return false
-    val parentType = newInstance().defaultParentType ?: return false
+val Class<*>.parents get() =
+    setParentMethods.map { it.parameters[0].type as ObjectClass }
 
-    if (parentType == "config-root") return true
-    if (isHiddenRoot) return false
+val ObjectClass.isRootClass: Boolean get() {
+    if (isInternal || isHiddenRoot || isDefaultRoot) return false
+
+    val childOfRoot = parents.any { it.isDefaultRoot }
+    if (childOfRoot) return true
+
+    val parentType = defaultParentType ?: return false
 
     return ! parentType.typeToClassName.isModelClassName
 }
@@ -287,7 +319,3 @@ val Method.pluginPropertyName get() =
 
 val Class<*>.pluginName get() =
     simpleName.toPluginName
-
-val inventoryPropertyFilter: PropertyClassFilter = { it.isInventoryProperty }
-val modelClassFilter: ObjectClassFilter = { it.isModelClass }
-val rootClassFilter: ObjectClassFilter = { it.isRootClass }
