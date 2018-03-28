@@ -10,13 +10,16 @@ import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.base.ConnectionRepository
 
+private val rootObject: (ApiObjectBase) -> Boolean =
+    { it.parentType == null || it.parentType == "domain" || it.parentType == "config-root" }
+
 <#list rootClasses as rootClass>
 class ConnectionHas${rootClass.simpleName}
 @Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${rootClass.simpleName}> {
 
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${rootClass.simpleName}>? =
         connections.getConnection(parentId)?.run {
-            list<${rootClass.simpleName}>()?.onEach { read(it) }
+            list<${rootClass.simpleName}>()?.filter(rootObject)?.onEach { read(it) }
         }
 }
 
