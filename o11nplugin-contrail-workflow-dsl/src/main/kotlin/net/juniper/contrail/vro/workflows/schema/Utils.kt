@@ -15,7 +15,12 @@ private val String.xsdChunk get() =
     toLowerCase().handleShortcuts
 
 val String.xsdName get() =
-    replace("_", "-").camelChunks.joinToString(separator = "-") { it.xsdChunk }
+    endNumberWithDash.replace("_", "-").camelChunks.joinToString(separator = "-") { it.xsdChunk }
+
+private val endWithNumberPattern = "(\\w+)(\\d+)".toRegex()
+
+val String.endNumberWithDash get() =
+    endWithNumberPattern.matchEntire(this)?.groupValues?.let { "${it[1]}-${it[2]}" } ?: this
 
 fun String.maybeToXsd(convert: Boolean) =
     if (convert) xsdName else this

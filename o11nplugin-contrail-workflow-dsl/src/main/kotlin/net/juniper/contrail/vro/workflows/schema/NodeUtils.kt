@@ -12,6 +12,10 @@ val Node.children: Sequence<Node> get() = childNodes.run {
         .filter { it.nodeName != textName }
 }
 
+val Node.nestedChildren: Sequence<Node> get() = children
+    .map { it.nestedChildren + it }
+    .flatten()
+
 val Node.nestedElements: Sequence<Node> get() = children
     .map { it.nestedElements + it }
     .flatten()
@@ -47,7 +51,7 @@ val Node.baseAttribute: String get() =
     )
 
 val Node.restrictionNode: Node get() =
-    children.find { it.nodeName == xsdRestriction } ?: throw IllegalStateException(
+    nestedChildren.find { it.nodeName == xsdRestriction } ?: throw IllegalStateException(
         "Restriction node was not found in $nameAttribute."
     )
 
@@ -71,16 +75,21 @@ val Node.idlComment: Node? get() {
 fun Iterable<Node>.theOneNamed(theName: String): Node =
     asSequence().theOneNamed(theName)
 
+fun Iterable<Node>.theOneNamedOrNull(theName: String): Node? =
+    asSequence().theOneNamedOrNull(theName)
+
+fun Sequence<Node>.withName(theName: String) =
+    withAttribute(name, theName.stripSmi)
+
 fun Sequence<Node>.theOneNamed(theName: String): Node =
-    withAttribute(name, theName.stripSmi).toList().theOne(theName)
+    withName(theName).theOne(theName)
 
-fun List<Node>.theOne(theName: String): Node {
-    if (size > 1)
-        throw IllegalStateException("Multiple definitions of $theName in the schema.")
+fun Sequence<Node>.theOneNamedOrNull(theName: String): Node? =
+    withName(theName).firstOrNull()
 
-    return firstOrNull() ?:
-    throw IllegalArgumentException("Definition of $theName was not found in the schema.")
-}
+fun Sequence<Node>.theOne(theName: String): Node =
+    firstOrNull() ?:
+        throw IllegalArgumentException("Definition of $theName was not found in the schema.")
 
 inline fun Iterable<Node>.withAttribute(attribute: String, crossinline condition: (String) -> Boolean) =
     asSequence().withAttribute(attribute, condition).toList()

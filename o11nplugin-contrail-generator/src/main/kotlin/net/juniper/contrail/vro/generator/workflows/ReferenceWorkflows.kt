@@ -41,7 +41,7 @@ fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDef
         }
 
         parameter(childReferenceName, child.reference) {
-            description = schema.childDescriptionInCreateRelation(parent, child)
+            description = schema.childDescriptionInCreateRelation(parent, child, ignoreMissing = true)
             mandatory = true
             browserRoot = actionCallTo(parentConnection).parameter(item).asBrowserRoot()
         }

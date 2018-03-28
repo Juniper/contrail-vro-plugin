@@ -28,7 +28,7 @@ class Link(comment: String) : IdlComment() {
         parentClassName = properties[1]
         propertyClassName = properties[2]
         isRequired = properties.getOrNull(4).isRequired
-        description = properties.getOrNull(6)
+        description = properties.getOrNull(6).cleanDescription
     }
 }
 
@@ -46,7 +46,25 @@ class Property(comment: String) : IdlComment() {
         elementName = properties[0]
         parentClassName = properties[1]
         isRequired = properties.getOrNull(2).isRequired
-        description = properties.getOrNull(4)
+        description = properties.getOrNull(4).cleanDescription
+    }
+}
+
+class ListProperty(comment: String) : IdlComment() {
+    override val type: String get() = idlListProperty
+    override val parentClassName: String
+    override val elementName: String
+    override val description: String?
+    override val isRequired: Boolean
+
+    init {
+        val properties = comment.commentProperties
+        if (properties.size < 2)
+            throw IllegalArgumentException("ListProperty definition should have at least 2 elements.")
+        elementName = properties[0]
+        parentClassName = properties[1]
+        isRequired = properties.getOrNull(2).isRequired
+        description = properties.getOrNull(4).cleanDescription
     }
 }
 
@@ -55,6 +73,7 @@ private val arraySeparatorPattern = "'\\s*,\\s*'".toRegex()
 private val idlTypePattern = "(?s)(\\w+)\\s*\\(.+\\)".toRegex()
 val ifmapHeaderPattern = "\\s*$ifmapIdlName\\s+".toRegex()
 val commentEntrySeparator = "\\s*;\\s*".toRegex()
+val descriptionIndent = "\n\\s+".toRegex()
 
 private val String.commentProperties get() =
     linkElementPattern.findAll(this)
@@ -70,6 +89,9 @@ private fun MatchResult.linkElementValue(): String {
 
 private val String?.isRequired get() =
     if (this == null) false else this != optional
+
+private val String?.cleanDescription get() =
+    if (this == null) this else replace(descriptionIndent, " ")
 
 val String.commentType get() =
     idlTypePattern.find(this)?.groupValues?.get(1)

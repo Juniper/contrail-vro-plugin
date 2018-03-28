@@ -119,7 +119,7 @@ class CustomMapping: AbstractMapping() {
         <#list forwardRelations as relation>
         relate(${relation.parentName}::class.java)
             .to(${relation.childName}::class.java)
-            .using(${relation.parentName}Has${relation.childName}::class.java)
+            .using(${relation.parentName}To${relation.childName}::class.java)
             .`as`("${relation.parentName}To${relation.childName}")
             .`in`(FolderDef(folderName("${relation.folderName}", "${relation.parentName}", "${relation.getter}"), findFolderIcon<${relation.childName}>()))
         </#list>

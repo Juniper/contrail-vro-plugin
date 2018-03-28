@@ -55,7 +55,7 @@ class ${relation.parentName}Has${relation.childName}
 </#list>
 
 <#list forwardRelations as relation>
-class ${relation.parentName}Has${relation.childName}
+class ${relation.parentName}To${relation.childName}
 @Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${relation.childName}> {
 
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${relation.childName}>? {

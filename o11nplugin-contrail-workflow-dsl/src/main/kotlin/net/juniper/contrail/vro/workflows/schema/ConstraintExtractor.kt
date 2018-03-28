@@ -18,9 +18,9 @@ val emptyAnswer = ""
 inline fun <reified T : Any> Schema.simpleTypeConstraints(propertyName: String): List<Constraint> =
     simpleTypeConstraints(T::class.java, propertyName)
 
-fun Schema.simpleTypeConstraints(clazz: Class<*>, propertyName: String): List<Constraint> = when {
+fun Schema.simpleTypeConstraints(clazz: Class<*>, propertyName: String, ignoreMissing: Boolean = false): List<Constraint> = when {
     clazz.isApiObjectClass -> objectFieldConstraints(clazz.xsdName, propertyName.xsdName)
-    else -> propertyFieldConstraints(clazz, propertyName.xsdName)
+    else -> propertyFieldConstraints(clazz, propertyName.xsdName, ignoreMissing)
 }.toList()
 
 inline fun <reified T : Any> Schema.predefinedAnswers(propertyName: String, mandatory: Boolean, convertToXsd: Boolean = true)
@@ -52,8 +52,11 @@ fun Schema.objectDescription(clazz: ObjectClass, parent: ObjectClass? = null): S
 inline fun <reified F : Any, reified T : Any> Schema.relationDescription() =
     relationDescription(F::class.java, T::class.java)
 
-fun Schema.relationDescription(from: Class<*>, to: Class<*>) =
-    relationDefinitionComment(from, to).description
+fun Schema.relationDescription(from: Class<*>, to: Class<*>, ignoreMissing: Boolean = false) =
+    if (ignoreMissing)
+        relationDefinitionCommentIfPresent(from, to)?.description
+    else
+        relationDefinitionComment(from, to).description
 
 inline fun <reified F : ApiObjectBase, reified T : ApiObjectBase> Schema.createWorkflowDescription() =
     createWorkflowDescription(T::class.java, F::class.java)
@@ -72,11 +75,11 @@ private fun Schema.objectFieldConstraints(xsdParent: String, xsdFieldName: Strin
     if (matchingElements.size > 1)
         throw IllegalStateException("Multiple definitions of property $xsdFieldName")
     val definitionNode = matchingElements.firstOrNull() ?: return emptySequence()
-    return constraintsOf(definitionNode)
+    return constraintsOf(definitionNode, ignoreMissing = false)
 }
 
-private fun Schema.propertyFieldConstraints(clazz: Class<*>, xsdFieldName: String): Sequence<Constraint> =
-    constraintsOf(definitionNode(clazz, xsdFieldName))
+private fun Schema.propertyFieldConstraints(clazz: Class<*>, xsdFieldName: String, ignoreMissing: Boolean): Sequence<Constraint> =
+    constraintsOf(definitionNode(clazz, xsdFieldName), ignoreMissing)
 
 private fun Schema.definitionNode(clazz: Class<*>): Node =
     complexTypes.theOneNamed(clazz.simpleName)
@@ -87,8 +90,14 @@ private fun Schema.definitionNode(clazz: Class<*>, xsdFieldName: String): Node =
 private fun Schema.relationDefinitionComment(from: Class<*>, to: Class<*>): IdlComment =
     relationDefinitionComment(from.xsdName, to .xsdName)
 
+private fun Schema.relationDefinitionCommentIfPresent(from: Class<*>, to: Class<*>): IdlComment? =
+    relationDefinitionCommentIfPresent(from.xsdName, to .xsdName)
+
+private fun Schema.relationDefinitionCommentIfPresent(from: String, to: String): IdlComment? =
+    comments.asSequence().mapNotNull { it as? Link }.find { it.parentClassName == from && it.propertyClassName == to }
+
 private fun Schema.relationDefinitionComment(from: String, to: String): IdlComment =
-    comments.asSequence().mapNotNull { it as? Link }.find { it.parentClassName == from && it.propertyClassName == to } ?:
+    relationDefinitionCommentIfPresent(from, to) ?:
         throw IllegalArgumentException("Relation $from-$to was not found in the schema.")
 
 private fun Schema.propertyDefinitionComment(parent: String, propertyName: String): IdlComment =
@@ -98,16 +107,16 @@ private fun Schema.propertyDefinitionComment(parent: String, propertyName: Strin
 private fun Schema.basicConstraints(element: Node) =
     sequenceOf(required(element), defaultValue(element)).filterNotNull()
 
-private fun Schema.specificConstraints(element: Node): Sequence<Constraint> {
+private fun Schema.specificConstraints(element: Node, ignoreMissing: Boolean): Sequence<Constraint> {
     val elementType = element.typeAttribute ?: xsdString
     return if (elementType.isPrimitiveType)
         element.constraints(elementType)
     else
-        simpleTypeConstraints(elementType)
+        simpleTypeConstraints(elementType, ignoreMissing)
 }
 
-private fun Schema.constraintsOf(element: Node): Sequence<Constraint> =
-    basicConstraints(element) + specificConstraints(element)
+private fun Schema.constraintsOf(element: Node, ignoreMissing: Boolean): Sequence<Constraint> =
+    basicConstraints(element) + specificConstraints(element, ignoreMissing)
 
 private fun Schema.defaultValue(node: Node): Constraint? =
     node.attributeValue(default)
@@ -141,9 +150,9 @@ private fun Schema.primitiveTypeOf(node: Node): String = when {
     else -> null
 } ?: throw IllegalArgumentException("Unable to find primitive type of ${node.nameAttribute}.")
 
-private fun Schema.simpleTypeConstraints(elementTypeName: String): Sequence<Constraint> =
-    simpleTypes.theOneNamed(elementTypeName).
-        restrictionNode.let { it.constraints(it.baseAttribute) }
+private fun Schema.simpleTypeConstraints(elementTypeName: String, ignoreMissing: Boolean = false): Sequence<Constraint> =
+    simpleTypes.run { if (ignoreMissing) theOneNamedOrNull(elementTypeName) else theOneNamed(elementTypeName) }
+        ?.restrictionNode?.let { it.constraints(it.baseAttribute) } ?: emptySequence()
 
 private fun Node.integerConstraints(): Sequence<Constraint> =
     sequenceOf(minValue(), maxValue()).filterNotNull()

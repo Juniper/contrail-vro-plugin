@@ -53,7 +53,7 @@ fun Schema.parentDescriptionInCreateRelation(parentClazz: Class<*>, clazz: Class
 inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> Schema.childDescriptionInCreateRelation() =
     childDescriptionInCreateRelation(Parent::class.java, Child::class.java)
 
-fun Schema.childDescriptionInCreateRelation(parentClazz: Class<*>, clazz: Class<*>) = """
+fun Schema.childDescriptionInCreateRelation(parentClazz: Class<*>, clazz: Class<*>, ignoreMissing: Boolean = false) = """
 ${clazz.allCapitalized} to be added
-${relationDescription(parentClazz, clazz)}
+${relationDescription(parentClazz, clazz, ignoreMissing) ?: ""}
 """.trim()

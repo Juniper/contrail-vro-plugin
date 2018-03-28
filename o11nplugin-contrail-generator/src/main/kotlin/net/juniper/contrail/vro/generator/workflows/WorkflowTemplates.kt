@@ -112,7 +112,7 @@ private fun Property.toPrimitiveParameter(builder: ParameterAggregator, schema: 
     builder.parameter(propertyName, clazz) {
         description = description(schema)
         dataBinding = binding
-        additionalQualifiers += schema.simpleTypeConstraints(parent, propertyName)
+        additionalQualifiers += schema.simpleTypeConstraints(parent, propertyName, ignoreMissing = true)
     }
 }
 
@@ -124,7 +124,7 @@ private fun Property.toStringListWrapperParameter(builder: ParameterAggregator, 
     builder.parameter(propertyName, string.array) {
         description = description(schema)
         dataBinding = binding
-        additionalQualifiers += schema.simpleTypeConstraints(clazz, actualProperty.propertyName)
+        additionalQualifiers += schema.simpleTypeConstraints(clazz, actualProperty.propertyName, ignoreMissing = true)
     }
 }
 

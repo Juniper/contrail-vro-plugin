@@ -22,6 +22,7 @@ private fun String.buildComments(): List<IdlComment> =
 private fun String.toCommentObject(): IdlComment? = when (commentType) {
     idlLink -> Link(this)
     idlProperty -> Property(this)
+    idlListProperty -> ListProperty(this)
     else -> null
 }
 
