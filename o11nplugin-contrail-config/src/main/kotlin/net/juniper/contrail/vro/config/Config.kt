@@ -21,7 +21,15 @@ val modelClasses = setOf(
     the<ServiceTemplate>(),
     the<PortTuple>(),
     the<InstanceIp>(),
-    the<PortTuple>()
+    the<PortTuple>(),
+    the<PolicyManagement>(),
+    the<Tag>(),
+    the<TagType>(),
+    the<ApplicationPolicySet>(),
+    the<FirewallPolicy>(),
+    the<FirewallRule>(),
+    the<ServiceGroup>(),
+    the<AddressGroup>()
 )
 
 val inventoryProperties = setOf(
