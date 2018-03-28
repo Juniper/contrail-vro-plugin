@@ -48,6 +48,9 @@ val String.isApiObjectClass get() =
 val String.isApiPropertyClass get() =
     asPropertyClass != null
 
+val ObjectClass.objectType: String get() =
+    newInstance().objectType
+
 val ObjectClass.defaultParentType: String? get() =
     newInstance().defaultParentType
 

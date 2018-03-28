@@ -161,7 +161,7 @@ public class ${className}
     <#list parents as parent>
     public void setParent${parent.simpleName}(${packageName}.${parent.simpleName}_Wrapper _parent) {
 
-    <#if !connectionChild>
+    <#if parent.simpleName != 'Connection'>
         __getTarget().setParent(_parent.__getTarget());
     </#if>
 

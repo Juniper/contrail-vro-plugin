@@ -92,8 +92,8 @@ class CustomMapping: AbstractMapping() {
 
         relate(NetworkIpam::class.java)
             .to(IpamSubnetType::class.java)
-            .using(NetworkIpamHasSubnet::class.java)
-            .`as`("NetworkIpamHasSubnet")
+            .using(NetworkIpamToSubnet::class.java)
+            .`as`("NetworkIpamToSubnet")
 
         <#list rootClasses as rootClass>
         relate(Connection::class.java)
@@ -107,9 +107,9 @@ class CustomMapping: AbstractMapping() {
         relate(${relation.parentName}::class.java)
             .to(${relation.childName}::class.java)
             .using(${relation.parentName}Has${relation.childName}::class.java)
-            .`as`("${relation.name}")
+            .`as`("${relation.parentPluginName}Has${relation.childPluginName}")
             <#if !relation.directChild >
-            .`in`(FolderDef(folderName("${relation.folderName}", "${relation.parentName}", "${relation.childName}"), findFolderIcon<${relation.childName}>()))
+            .`in`(FolderDef(folderName("${relation.folderName}", "${relation.parentName}", "${relation.getter}"), findFolderIcon<${relation.childName}>()))
             </#if>
         </#list>
 

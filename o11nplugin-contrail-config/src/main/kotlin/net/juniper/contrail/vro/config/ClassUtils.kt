@@ -14,9 +14,6 @@ import java.lang.reflect.Type
 val <T> Class<T>.nestedName get() =
     canonicalName.replace("${`package`?.name}.", "")
 
-val <T> Class<T>.collapsedNestedName get() =
-    nestedName.replace(".", "")
-
 val <T> Class<T>.underscoredNestedName get() =
     nestedName.replace(".", "_")
 
@@ -144,11 +141,14 @@ val <T> Class<T>.isNotAbstract: Boolean get() =
 inline fun <reified T> Class<*>?.isA() =
     this == T::class.java
 
-inline fun <reified T> Class<*>?.isAn() =
-    isA<T>()
-
 fun Class<*>.isSubclassOf(other: Class<*>) =
     other.isAssignableFrom(this)
+
+inline fun <reified T> Collection<Class<*>>.contains() =
+    contains(T::class.java)
+
+inline fun <reified T> Sequence<Class<*>>.contains() =
+    contains(T::class.java)
 
 inline fun <reified T> Class<*>?.isSubclassOf() =
     this?.isSubclassOf(T::class.java) ?: false
