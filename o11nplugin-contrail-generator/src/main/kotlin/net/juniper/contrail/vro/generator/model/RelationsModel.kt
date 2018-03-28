@@ -20,7 +20,6 @@ data class RelationsModel(
 data class RelationModel(
     val parentName: String,
     val childName: String,
-    val name: String,
     val isDirectChild: Boolean,
     val folderName: String
 ) {
@@ -35,7 +34,6 @@ data class RelationModel(
 fun Relation.toRelationModel() = RelationModel(
     parentName,
     childName,
-    name,
     childName.isDirectChild,
     folderName
 )

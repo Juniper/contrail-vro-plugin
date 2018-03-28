@@ -22,7 +22,15 @@ val modelClasses = setOf(
     the<ServiceTemplate>(),
     the<PortTuple>(),
     the<InstanceIp>(),
-    the<PortTuple>()
+    the<PortTuple>(),
+    the<PolicyManagement>(),
+    the<Tag>(),
+    the<TagType>(),
+    the<ApplicationPolicySet>(),
+    the<FirewallPolicy>(),
+    the<FirewallRule>(),
+    the<ServiceGroup>(),
+    the<AddressGroup>()
 )
 
 val inventoryProperties = setOf(
@@ -41,7 +49,10 @@ val ignoredInWorkflows = setOf(
     the<KeyValuePairs>(),
     the<PermType2>(),
     the<IdPermsType>(),
-    the<SequenceType>()
+    the<SequenceType>(),
+    the<ActionListType>(),
+    the<FirewallServiceType>(),
+    the<FirewallRuleEndpointType>()
 )
 
 val nonEditableProperties = setOf(
@@ -258,12 +269,16 @@ val Class<*>.setParentMethods get() =
         .filter { it.parameterCount == 1 }
         .filter { it.parameters[0].type.superclass == ApiObjectBase::class.java }
 
-val ObjectClass.isRootClass: Boolean get() {
-    if (isInternal) return false
-    val parentType = newInstance().defaultParentType ?: return false
+val ObjectClass.parents get() =
+    setParentMethods.map { it.parameters[0].type }
 
-    if (parentType == "config-root") return true
-    if (isHiddenRoot) return false
+val ObjectClass.isRootClass: Boolean get() {
+    if (isInternal || isHiddenRoot) return false
+
+    val childOfRoot = parents.run { contains(ConfigRoot::class.java) || contains(Domain::class.java) }
+    if (childOfRoot) return true
+
+    val parentType = defaultParentType ?: return false
 
     return ! parentType.typeToClassName.isModelClassName
 }

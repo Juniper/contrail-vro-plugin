@@ -12,7 +12,7 @@ import net.juniper.contrail.vro.config.hasCustomCreateWorkflow
 import net.juniper.contrail.vro.config.hasCustomDeleteWorkflow
 import net.juniper.contrail.vro.config.hasCustomEditWorkflow
 import net.juniper.contrail.vro.config.hasCustomRemoveReferenceWorkflow
-import net.juniper.contrail.vro.config.hasMultipleParents
+import net.juniper.contrail.vro.config.hasMultipleParentsInModel
 import net.juniper.contrail.vro.config.isRelationEditable
 import net.juniper.contrail.vro.config.isRelationMandatory
 import net.juniper.contrail.vro.generator.model.ForwardRelation
@@ -42,7 +42,7 @@ fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: 
 
     relations.relations.forEach {
         val refs = relations.mandatoryReferencesOf(it.childClass)
-        generateLifecycleWorkflows(info, it.childClass, it.parentClass, it.childClass.hasMultipleParents, refs, schema)
+        generateLifecycleWorkflows(info, it.childClass, it.parentClass, it.childClass.hasMultipleParentsInModel, refs, schema)
     }
 
     relations.forwardRelations.forEach {
@@ -73,7 +73,7 @@ private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, pa
     if (!clazz.hasCustomCreateWorkflow)
         createWorkflow(clazz, parentClazz, multipleParents, refs, schema).save(info, clazz)
     if (!clazz.hasCustomEditWorkflow) {
-        editWorkflow(clazz, schema).save(info, clazz)
+        editWorkflow(clazz, schema)?.save(info, clazz)
         editComplexPropertiesWorkflows(clazz, schema).forEach { it.save(info, clazz) }
     }
     if (!clazz.hasCustomDeleteWorkflow)
