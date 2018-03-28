@@ -19,7 +19,7 @@ constructor(private val connectionRepository: ConnectionRepository) : ObjectRela
         connectionRepository.connections
 }
 
-class NetworkIpamHasSubnet @Autowired
+class NetworkIpamToSubnet @Autowired
 constructor(private val connectionRepository: ConnectionRepository) : ObjectRelater<IpamSubnetType>
 {
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, id: Sid): List<IpamSubnetType>? {

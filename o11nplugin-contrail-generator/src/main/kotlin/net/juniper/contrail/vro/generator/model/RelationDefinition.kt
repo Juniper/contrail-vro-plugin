@@ -5,22 +5,20 @@
 package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.vro.config.ObjectClass
-import net.juniper.contrail.vro.config.PropertyClassFilter
-import net.juniper.contrail.vro.config.rootClassFilter
+import net.juniper.contrail.vro.config.isInventoryProperty
 
 class RelationDefinition(
-    val rootClasses: List<ObjectClass>,
+    val modelClasses: List<ObjectClass>,
     val relations: List<Relation>,
     val forwardRelations: List<ForwardRelation>,
     val propertyRelations: List<PropertyRelation>
 ) : GenericModel()
 
 fun buildRelationDefinition(
-    objectClasses: List<ObjectClass>,
-    inventoryPropertyFilter: PropertyClassFilter
+    objectClasses: List<ObjectClass>
 ) = RelationDefinition(
-    objectClasses.filter(rootClassFilter),
+    objectClasses.toList(),
     objectClasses.generateRelations(),
     objectClasses.generateReferenceRelations(),
-    objectClasses.generatePropertyRelations(inventoryPropertyFilter)
+    objectClasses.generatePropertyRelations { it.isInventoryProperty }
 )
