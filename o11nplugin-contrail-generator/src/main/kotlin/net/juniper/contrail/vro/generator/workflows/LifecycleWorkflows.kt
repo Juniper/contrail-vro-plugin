@@ -10,14 +10,21 @@ import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.allLowerCase
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
+import net.juniper.contrail.vro.config.defaultParentType
+import net.juniper.contrail.vro.config.hasRootParent
 import net.juniper.contrail.vro.config.isApiTypeClass
+import net.juniper.contrail.vro.config.isConfigRoot
+import net.juniper.contrail.vro.config.isDefaultRoot
+import net.juniper.contrail.vro.config.isHiddenRoot
+import net.juniper.contrail.vro.config.isModelClass
 import net.juniper.contrail.vro.config.isStringListWrapper
+import net.juniper.contrail.vro.config.numberOfParentsInModel
+import net.juniper.contrail.vro.config.objectType
 import net.juniper.contrail.vro.config.parameterName
+import net.juniper.contrail.vro.config.parents
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.toPluginMethodName
-import net.juniper.contrail.vro.config.toPluginName
 import net.juniper.contrail.vro.generator.model.Property
-import net.juniper.contrail.vro.generator.model.properties
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
@@ -27,19 +34,29 @@ import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.schema.DefaultValue
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.schema.createWorkflowDescription
 import net.juniper.contrail.vro.schema.propertyDescription
 import net.juniper.contrail.vro.schema.relationDescription
-import net.juniper.contrail.vro.schema.simpleTypeConstraints
 
-fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, multipleParents: Boolean, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
+fun createWorkflows(clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema): List<WorkflowDefinition> {
+    val parentsInModel = clazz.numberOfParentsInModel
+    val rootParents = clazz.hasRootParent && !clazz.isHiddenRoot
 
-    val workflowBaseName = "Create ${clazz.allLowerCase}"
-    val workflowNameSuffix = if (parentClazz != null && multipleParents) " in ${parentClazz.allLowerCase}" else ""
-    val workflowName = workflowBaseName + workflowNameSuffix
-    val parentName = parentClazz?.pluginName ?: Connection
+    return clazz.parents.filter { it.isModelClass || it.isDefaultRoot }
+        .map { createWorkflow(clazz, it, parentsInModel, rootParents, refs, schema) }
+        .toList()
+}
+
+fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass, parentsInModel: Int, rootParents: Boolean, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
+
+    val nonRootParents = parentsInModel > 0
+    val addInParent = rootParents || parentsInModel > 1
+
+    val workflowBaseName = "Create " + if (parentClazz.isDefaultRoot && nonRootParents) "global " else ""
+    val workflowNameSuffix = if (parentClazz.isModelClass && addInParent) " in ${parentClazz.allLowerCase}" else ""
+    val workflowName = workflowBaseName + clazz.allLowerCase + workflowNameSuffix
+    val parentName = if (parentClazz.isModelClass) parentClazz.pluginName else Connection
 
     return workflow(workflowName).withScript(clazz.createScriptBody(parentClazz, refs, schema)) {
         description = schema.createWorkflowDescription(clazz, parentClazz)
@@ -73,7 +90,8 @@ fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, multipleParent
     }
 }
 
-fun editWorkflow(clazz: ObjectClass, schema: Schema): WorkflowDefinition {
+fun editWorkflow(clazz: ObjectClass, schema: Schema): WorkflowDefinition? {
+    if (! clazz.hasAnyEditableProperty(schema)) return null
 
     val workflowName = "Edit ${clazz.allLowerCase}"
 
@@ -137,33 +155,34 @@ ${clazz.allCapitalized}
 ${relationDescription(parentClazz, clazz)}
 """.trim()
 
-private fun setParentCall(parentClazz: ObjectClass?) =
-    if (parentClazz == null)
-        "$item.setParent$Connection($parent);"
+private fun ObjectClass.setParentCall(parentClazz: ObjectClass) =
+    if (parentClazz.isModelClass)
+        setRegularParentCall(parentClazz)
     else
-        "$item.setParent${parentClazz.pluginName}($parent);"
+        setRootParentCall(parentClazz) + "\n" + setParentConnectionCall()
 
-private fun Class<*>.setBooleanDefaults(schema: Schema) =
-    properties.simpleProperties.asSequence()
-        .filter { it.clazz == java.lang.Boolean.TYPE }
-        .filter { it.isTrueByDefault(schema) }
-        .joinToString("\n") { "$item.${it.parameterName} = true;" }
+private fun setParentConnectionCall() =
+    "$item.setParent$Connection($parent);"
 
-private fun Property.isTrueByDefault(schema: Schema) =
-    schema.simpleTypeConstraints(parent, propertyName)
-        .filterIsInstance(DefaultValue::class.java)
-        .filter { it.value == true }
-        .any()
+private fun ObjectClass.setRootParentCall(parentClazz: ObjectClass) = when {
+    // create empty ConfigRoot object just to configure parent type
+    parentClazz.isConfigRoot  -> "$item.setParent${parentClazz.pluginName}(new Contrail${parentClazz.pluginName}());"
+    // default parent will be set by the API
+    defaultParentType == parentClazz.objectType -> ""
+    else -> throw IllegalArgumentException("Unable to create parent ${parentClazz.simpleName} for $simpleName.")
+}
 
-private fun Class<*>.createScriptBody(parentClazz: ObjectClass?, references: List<ObjectClass>, schema: Schema) = """
+private fun setRegularParentCall(parentClazz: ObjectClass) =
+    "$item.setParent${parentClazz.pluginName}($parent);"
+
+private fun ObjectClass.createScriptBody(parentClazz: ObjectClass, references: List<ObjectClass>, schema: Schema) = """
 $item = new Contrail$pluginName();
 $item.setName(name);
 ${references.addAllReferences}
 ${setParentCall(parentClazz)}
-${setBooleanDefaults(schema)}
 ${editPropertiesCode(item, schema, createMode = true)}
 $item.create();
-""".trimIndent()
+""".trimIndent().lineSequence().filter { it.isNotBlank() }.joinToString("\n")
 
 private fun editScriptBody(clazz: Class<*>, schema: Schema) = """
 ${clazz.editPropertiesCode(item, schema, createMode = false)}

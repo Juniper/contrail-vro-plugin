@@ -23,7 +23,15 @@ val modelClasses = setOf(
     the<ServiceTemplate>(),
     the<PortTuple>(),
     the<InstanceIp>(),
-    the<PortTuple>()
+    the<PortTuple>(),
+    the<PolicyManagement>(),
+    the<Tag>(),
+    the<TagType>(),
+    the<ApplicationPolicySet>(),
+    the<FirewallPolicy>(),
+    the<FirewallRule>(),
+    the<ServiceGroup>(),
+    the<AddressGroup>()
 )
 
 val inventoryProperties = setOf(
@@ -42,7 +50,10 @@ val ignoredInWorkflows = setOf(
     the<KeyValuePairs>(),
     the<PermType2>(),
     the<IdPermsType>(),
-    the<SequenceType>()
+    the<SequenceType>(),
+    the<ActionListType>(),
+    the<FirewallServiceType>(),
+    the<FirewallRuleEndpointType>()
 )
 
 val nonEditableProperties = setOf(
@@ -62,7 +73,8 @@ val customCreateWorkflows = setOf(
     the<FloatingIp>(),
     the<ServiceTemplate>(),
     the<ServiceInstance>(),
-    the<PortTuple>()
+    the<PortTuple>(),
+    the<Tag>()
 )
 
 val customEditWorkflows = setOf(
@@ -114,7 +126,15 @@ val hiddenRelations = setOf(
     pair<FloatingIp, Project>(),
     pair<VirtualMachineInterface, PortTuple>(),
     pair<VirtualMachineInterface, VirtualMachine>(),
-    pair<ServiceTemplate, ServiceApplianceSet>()
+    pair<ServiceTemplate, ServiceApplianceSet>(),
+    pair<Tag, TagType>()
+)
+
+val tagRelations = setOf(
+    the<Project>(),
+    the<VirtualNetwork>(),
+    the<VirtualMachineInterface>(),
+    the<ApplicationPolicySet>()
 )
 
 val relationAsProperty = setOf(
@@ -167,16 +187,23 @@ val String.isHiddenRoot get() =
 val String.isCustomPropertyObject get() =
     customPropertyObjects.contains(this)
 
+infix fun String.notAHiddenTagParent(maybeTag: String) =
+    if (maybeTag == "Tag") tagRelations.contains(this) else true
+
 fun ObjectClass.isRelationMandatory(child: ObjectClass) =
     mandatoryReference.containsUnordered(simpleName, child.simpleName)
 
 fun ObjectClass.isRelationEditable(child: ObjectClass) =
     ! isInternal &&
     ! child.isInternal &&
+    this notAHiddenTagParent child &&
     ! nonEditableReference.containsUnordered(simpleName, child.simpleName)
 
 fun Class<*>.isInPropertyRelationTo(child: Class<*>) =
     relationAsProperty.contains(simpleName, child.simpleName)
+
+infix fun ObjectClass.notAHiddenTagParent(maybeTag: ObjectClass) =
+    simpleName notAHiddenTagParent maybeTag.simpleName
 
 private fun <T> Set<Pair<T, T>>.contains(first: T, second: T) =
     contains(Pair(first, second))
@@ -191,13 +218,27 @@ fun ObjectClass.hasCustomRemoveReferenceWorkflow(child: Class<*>) =
     customRemoveReference.containsUnordered(simpleName, child.simpleName)
 
 infix fun String.isDisplayableChildOf(parent: String) =
-    this != parent && ! hiddenRelations.containsUnordered(parent, this)
+    this != parent &&
+    ! hiddenRelations.containsUnordered(parent, this) &&
+    parent notAHiddenTagParent this
 
 fun String.isInReversedRelationTo(child: String) =
     reversedRelations.containsUnordered(this, child)
 
 fun Class<*>.isInReversedRelationTo(child: Class<*>) =
     simpleName.isInReversedRelationTo(child.simpleName)
+
+val Class<*>?.isConfigRoot get() =
+    isA<ConfigRoot>()
+
+val Class<*>?.isDomain get() =
+    isA<Domain>()
+
+val Class<*>?.isDefaultRoot get() =
+    isConfigRoot || isDomain
+
+val Class<*>?.isPluginClass get() =
+    isModelClass || isDefaultRoot
 
 val Class<*>?.isModelClass get() =
     this?.simpleName?.isModelClassName ?: false
@@ -219,6 +260,9 @@ val Class<*>.hasCustomDeleteWorkflow get() =
 
 val Class<*>.isDirectChild get() =
     simpleName.isDirectChild
+
+infix fun Class<*>.isDisplayableChildOf(parent: Class<*>) =
+    simpleName isDisplayableChildOf parent.simpleName
 
 val Class<*>.isHiddenRoot get() =
     simpleName.isHiddenRoot
@@ -244,15 +288,20 @@ val ObjectClass.hasMultipleParents get() =
 val ObjectClass.hasMultipleParentsInModel get() =
     numberOfParentsInModel > 1
 
+val ObjectClass.hasRootParent get() =
+    parents.any { it.isDefaultRoot }
+
 val ObjectClass.numberOfParents get() =
-    setParentMethods.count()
+    parents.count()
 
 val ObjectClass.numberOfParentsInModel get() =
-    setParentMethodsInModel.count()
+    parentsInModel.count()
 
-val Class<*>.setParentMethodsInModel get() =
-    setParentMethods
-        .filter { it.parameters[0].type.isModelClass }
+val Class<*>.parentsInModel get() =
+    parents.filter { it.isModelClass }
+
+val Class<*>.parentsInPlugin get() =
+    parents.filter { it.isPluginClass }
 
 val Class<*>.setParentMethods get() =
     declaredMethods.asSequence()
@@ -260,12 +309,16 @@ val Class<*>.setParentMethods get() =
         .filter { it.parameterCount == 1 }
         .filter { it.parameters[0].type.superclass == ApiObjectBase::class.java }
 
-val ObjectClass.isRootClass: Boolean get() {
-    if (isInternal) return false
-    val parentType = newInstance().defaultParentType ?: return false
+val Class<*>.parents get() =
+    setParentMethods.map { it.parameters[0].type as ObjectClass }
 
-    if (parentType == "config-root") return true
-    if (isHiddenRoot) return false
+val ObjectClass.isRootClass: Boolean get() {
+    if (isInternal || isHiddenRoot || isDefaultRoot) return false
+
+    val childOfRoot = parents.any { it.isDefaultRoot }
+    if (childOfRoot) return true
+
+    val parentType = defaultParentType ?: return false
 
     return ! parentType.typeToClassName.isModelClassName
 }
@@ -287,7 +340,3 @@ val Method.pluginPropertyName get() =
 
 val Class<*>.pluginName get() =
     simpleName.toPluginName
-
-val inventoryPropertyFilter: PropertyClassFilter = { it.isInventoryProperty }
-val modelClassFilter: ObjectClassFilter = { it.isModelClass }
-val rootClassFilter: ObjectClassFilter = { it.isRootClass }

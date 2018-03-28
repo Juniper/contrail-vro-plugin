@@ -9,8 +9,6 @@ import com.vmware.o11n.sdk.modeldrivengen.model.FormalParameter
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedConstructor
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedMethod
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
-import net.juniper.contrail.api.ApiObjectBase
-import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.constants.apiTypesPackageName
 import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.isNodeClass
@@ -18,18 +16,15 @@ import net.juniper.contrail.vro.config.isApiPropertyClass
 import net.juniper.contrail.vro.config.isCustomPropertyObject
 import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.isHiddenProperty
-import net.juniper.contrail.vro.config.isInternal
 import net.juniper.contrail.vro.config.isInventoryProperty
 import net.juniper.contrail.vro.config.isModelClass
 import net.juniper.contrail.vro.config.isPublic
-import net.juniper.contrail.vro.config.isRootClass
-import net.juniper.contrail.vro.config.isSubclassOf
 import net.juniper.contrail.vro.config.modelClasses
 import net.juniper.contrail.vro.config.parameterClass
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.returnsApiPropertyOrList
 import net.juniper.contrail.vro.config.returnsObjectReferences
-import net.juniper.contrail.vro.config.setParentMethodsInModel
+import net.juniper.contrail.vro.config.parentsInPlugin
 import net.juniper.contrail.vro.config.toPluginName
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.Executor
@@ -126,23 +121,11 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
     val isNodeClass get() =
         delegate.modelClass?.isNodeClass ?: false
 
-    val isConnectionChild get() =
-        delegate.modelClass?.let {
-            if (it.isSubclassOf<ApiObjectBase>()) {
-                @Suppress("UNCHECKED_CAST")
-                it as ObjectClass
-                it.isRootClass || it.isInternal
-            } else {
-                false
-            }
-        } ?: false
-
     val pluginName = delegate.modelClass?.pluginName
 
-    val parents = if (isConnectionChild)
-        listOf(Connection::class.java)
-    else
-        delegate.modelClass?.setParentMethodsInModel?.map { it.parameterTypes[0] }?.toList() ?: emptyList()
+    val parents = delegate.modelClass?.parentsInPlugin
+        ?.toList()?.let { it + Connection::class.java }
+        ?: emptyList()
 
     val executorMethods = delegate.createExecutorMethods()
 

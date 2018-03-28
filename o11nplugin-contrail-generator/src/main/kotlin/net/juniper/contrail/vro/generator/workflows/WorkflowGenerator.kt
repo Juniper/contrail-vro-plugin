@@ -12,7 +12,9 @@ import net.juniper.contrail.vro.config.hasCustomCreateWorkflow
 import net.juniper.contrail.vro.config.hasCustomDeleteWorkflow
 import net.juniper.contrail.vro.config.hasCustomEditWorkflow
 import net.juniper.contrail.vro.config.hasCustomRemoveReferenceWorkflow
-import net.juniper.contrail.vro.config.hasMultipleParents
+import net.juniper.contrail.vro.config.hasMultipleParentsInModel
+import net.juniper.contrail.vro.config.hasParents
+import net.juniper.contrail.vro.config.isInternal
 import net.juniper.contrail.vro.config.isRelationEditable
 import net.juniper.contrail.vro.config.isRelationMandatory
 import net.juniper.contrail.vro.generator.model.ForwardRelation
@@ -35,14 +37,9 @@ import javax.xml.bind.Marshaller
 fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: Schema) {
     generateDunesMetaInfo(info)
 
-    relations.rootClasses.forEach {
+    relations.modelClasses.filter { ! it.isInternal }.forEach {
         val refs = relations.mandatoryReferencesOf(it)
         generateLifecycleWorkflows(info, it, refs, schema)
-    }
-
-    relations.relations.forEach {
-        val refs = relations.mandatoryReferencesOf(it.childClass)
-        generateLifecycleWorkflows(info, it.childClass, it.parentClass, it.childClass.hasMultipleParents, refs, schema)
     }
 
     relations.forwardRelations.forEach {
@@ -69,19 +66,16 @@ val ForwardRelation.hasCustomAddWorkflow get() =
 val ForwardRelation.hasCustomRemoveWorkflow get() =
     parentClass.hasCustomRemoveReferenceWorkflow(childClass)
 
-private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, parentClazz: ObjectClass?, multipleParents: Boolean, refs: List<ObjectClass>, schema: Schema) {
+private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema) {
     if (!clazz.hasCustomCreateWorkflow)
-        createWorkflow(clazz, parentClazz, multipleParents, refs, schema).save(info, clazz)
+        createWorkflows(clazz, refs, schema).forEach { it.save(info, clazz) }
     if (!clazz.hasCustomEditWorkflow) {
-        editWorkflow(clazz, schema).save(info, clazz)
+        editWorkflow(clazz, schema)?.save(info, clazz)
         editComplexPropertiesWorkflows(clazz, schema).forEach { it.save(info, clazz) }
     }
     if (!clazz.hasCustomDeleteWorkflow)
         deleteWorkflow(clazz).save(info, clazz)
 }
-
-private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema) =
-    generateLifecycleWorkflows(info, clazz, null, false, refs, schema)
 
 private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation, schema: Schema) {
     if (relation.isEditable) {

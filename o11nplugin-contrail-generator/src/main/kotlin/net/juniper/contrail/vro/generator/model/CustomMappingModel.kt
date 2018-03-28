@@ -43,14 +43,14 @@ fun Class<*>.toClassInfoModel() = ClassInfoModel(
 
 fun generateCustomMappingModel(
     info: ProjectInfo,
-    objectClasses: List<ObjectClass>,
+    pluginClasses: List<ObjectClass>,
     rootClasses: List<ObjectClass>,
     propertyClasses: List<PropertyClass>,
     relations: List<Relation>,
     forwardRelations: List<ForwardRelation>,
     propertyRelations: List<PropertyRelation>
 ) = CustomMappingModel(
-    objectClasses.map { it.toClassInfoModel() },
+    pluginClasses.map { it.toClassInfoModel() },
     rootClasses.map { it.toClassInfoModel() },
     propertyClasses.map { it.toPropertyInfoClass() },
     relations.map { it.toRelationModel() },
