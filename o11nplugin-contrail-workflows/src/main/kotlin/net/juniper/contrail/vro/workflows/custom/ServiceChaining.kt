@@ -21,8 +21,8 @@ import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
-import net.juniper.contrail.vro.workflows.dsl.FromActionVisibility
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
+import net.juniper.contrail.vro.workflows.dsl.asVisibilityCondition
 import net.juniper.contrail.vro.workflows.schema.createWorkflowDescription
 
 internal fun addPortTupleToServiceInstance(schema: Schema): WorkflowDefinition {
@@ -52,9 +52,8 @@ private fun ParameterAggregator.generatePortInput(index: Int) {
     parameter("port$index", reference<VirtualMachineInterface>()) {
         description = "${interfaceName.capitalize()} Interface"
         listedBy = actionCallTo(portsForServiceInterface).parameters(parent).string(interfaceName)
-        visibility = FromActionVisibility(
-            actionCallTo(serviceHasInterfaceWithName).parameter(parent).string(interfaceName)
-        )
+        visibility = actionCallTo(serviceHasInterfaceWithName)
+            .parameter(parent).string(interfaceName).asVisibilityCondition()
         mandatory = true
     }
 }

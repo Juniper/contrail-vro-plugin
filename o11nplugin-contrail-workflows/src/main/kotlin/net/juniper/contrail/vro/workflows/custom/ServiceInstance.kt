@@ -19,8 +19,8 @@ import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
-import net.juniper.contrail.vro.workflows.dsl.FromActionVisibility
 import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
+import net.juniper.contrail.vro.workflows.dsl.asVisibilityCondition
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
@@ -68,9 +68,8 @@ private fun ParameterAggregator.generateServiceInstanceInterface(index: Int) {
     val interfaceName = supportedInterfaceNames[index]
     parameter("interface$index", reference<VirtualNetwork>()) {
         description = interfaceName.capitalize()
-        visibility = FromActionVisibility(
-            actionCallTo(templateHasInterfaceWithName).parameter(serviceTemplate).string(interfaceName)
-        )
+        visibility = actionCallTo(templateHasInterfaceWithName)
+            .parameter(serviceTemplate).string(interfaceName).asVisibilityCondition()
         mandatory = true
         browserRoot = parent.asBrowserRoot()
     }

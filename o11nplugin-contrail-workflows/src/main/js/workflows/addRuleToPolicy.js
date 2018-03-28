@@ -9,7 +9,7 @@ var dstAddr = [ContrailUtils.createAddress(dstAddressType, dstAddressCidr, dstAd
 var application = [];
 
 var mirrorAction = null;
-if (mirror) {
+if (defineMirror) {
     var instanceName = analyzerName;
     if (analyzerInstance != null) {
         instanceName = analyzerInstance.getQualifiedName().join(":");

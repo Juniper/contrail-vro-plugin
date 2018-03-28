@@ -24,19 +24,30 @@ class FromStringParameter(name: String, value: String) : VisibilityCondition() {
     override val stringCondition: String = "#$name == \"$value\""
 }
 
-// Name is not "FromAction" because of conflict with FromAction class used in data binding attributes.
-class FromActionVisibility(actionCallBuilder: ActionCallBuilder) : VisibilityCondition() {
+private class VisibilityFromAction(actionCallBuilder: ActionCallBuilder) : VisibilityCondition() {
     override val stringCondition: String = actionCallBuilder.create().ognl
 }
 
-class ConditionConjunction(vararg conditions: VisibilityCondition) : VisibilityCondition() {
+fun ActionCallBuilder.asVisibilityCondition(): VisibilityCondition =
+    VisibilityFromAction(this)
+
+private class ConditionConjunction(vararg conditions: VisibilityCondition) : VisibilityCondition() {
     override val stringCondition: String = conditions.filter { it != AlwaysVisible }.joinToString(" && ") { "(${it.stringCondition})" }
 }
 
-class ConditionAlternative(vararg conditions: VisibilityCondition) : VisibilityCondition() {
+private class ConditionAlternative(vararg conditions: VisibilityCondition) : VisibilityCondition() {
     override val stringCondition: String = conditions.joinToString(" || ") { "(${it.stringCondition})" }
 }
 
-class ConditionNegation(condition: VisibilityCondition) : VisibilityCondition() {
+private class ConditionNegation(condition: VisibilityCondition) : VisibilityCondition() {
     override val stringCondition: String = "!(${condition.stringCondition})"
 }
+
+infix fun VisibilityCondition.and(other: VisibilityCondition): VisibilityCondition =
+    ConditionConjunction(this, other)
+
+infix fun VisibilityCondition.or(other: VisibilityCondition): VisibilityCondition =
+    ConditionAlternative(this, other)
+
+operator fun VisibilityCondition.not(): VisibilityCondition =
+    ConditionNegation(this)

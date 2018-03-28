@@ -24,7 +24,6 @@ import net.juniper.contrail.vro.workflows.dsl.PresentationParametersBuilder
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
 import net.juniper.contrail.vro.workflows.dsl.AlwaysVisible
-import net.juniper.contrail.vro.workflows.dsl.ConditionConjunction
 import net.juniper.contrail.vro.workflows.dsl.DataBinding
 import net.juniper.contrail.vro.workflows.model.Element
 import net.juniper.contrail.vro.workflows.dsl.FromBooleanParameter
@@ -32,6 +31,7 @@ import net.juniper.contrail.vro.workflows.dsl.FromComplexPropertyValue
 import net.juniper.contrail.vro.workflows.dsl.NullStateOfProperty
 import net.juniper.contrail.vro.workflows.dsl.VisibilityCondition
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
+import net.juniper.contrail.vro.workflows.dsl.and
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.createDunesProperties
@@ -177,7 +177,7 @@ fun PresentationParametersBuilder.addProperties(clazz: Class<*>, schema: Schema,
     val propertyPath = propertyPrefix.preparePrefix()
 
     val basicVisibility = WhenNonNull(item)
-    val stepVisibility = ConditionConjunction(basicVisibility, extraVisibility)
+    val stepVisibility = basicVisibility and extraVisibility
 
     if (!topPrimitives.isEmpty()) {
         step(CustomParameters) {

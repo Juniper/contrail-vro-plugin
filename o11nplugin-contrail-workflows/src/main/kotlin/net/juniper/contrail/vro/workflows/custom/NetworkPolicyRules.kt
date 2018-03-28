@@ -15,12 +15,12 @@ import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.networkPolicyRules
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.dsl.ConditionAlternative
-import net.juniper.contrail.vro.workflows.dsl.ConditionConjunction
 import net.juniper.contrail.vro.workflows.dsl.FromBooleanParameter
 import net.juniper.contrail.vro.workflows.dsl.FromStringParameter
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
+import net.juniper.contrail.vro.workflows.dsl.and
+import net.juniper.contrail.vro.workflows.dsl.or
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.number
@@ -34,7 +34,8 @@ import net.juniper.contrail.vro.workflows.util.extractRelationDescription
 
 private val sourceAddressTypeParameterName = "srcAddressType"
 private val destinationAddressTypeParameterName = "dstAddressType"
-private val mirrorShowParameterName = "mirror"
+private val defineServicesParameterName = "defineServices"
+private val defineMirrorParameterName = "defineMirror"
 private val mirrorTypeParameterName = "mirrorType"
 // There is no information about protocols in the schema
 private val defaultPort = "any"
@@ -169,136 +170,107 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 mandatory = true
                 defaultValue = false
             }
-            parameter("services", boolean) {
+            parameter(defineServicesParameterName, boolean) {
                 description = "Services"
                 mandatory = true
                 defaultValue = false
             }
-            parameter("serviceInstances", array(reference<ServiceInstance>())) {
-                description = "Service instances"
-                mandatory = true
-                visibility = FromBooleanParameter("services")
-            }
 
-            parameter(mirrorShowParameterName, boolean) {
+            parameter(defineMirrorParameterName, boolean) {
                 description = "Mirror"
                 mandatory = true
                 defaultValue = false
             }
+        }
+
+        step("Services") {
+            visibility = FromBooleanParameter(defineServicesParameterName)
+            parameter("serviceInstances", array(reference<ServiceInstance>())) {
+                description = "Service instances"
+                mandatory = true
+            }
+        }
+
+        step("Mirror") {
+            visibility = FromBooleanParameter(defineMirrorParameterName)
+
+            val mirrorIsAnalyzerInstance = FromStringParameter(mirrorTypeParameterName, "Analyzer Instance")
+            val mirrorIsAnalyzerIp = FromStringParameter(mirrorTypeParameterName, "Analyzer IP")
+            val mirrorIsNicAssisted = FromStringParameter(mirrorTypeParameterName, "NIC Assisted")
+            val juniperHeaderIsDisabled = FromStringParameter("juniperHeader", "disabled")
+            val nextHopModeIsStatic = FromStringParameter("nexthopMode", "static")
+
             parameter(mirrorTypeParameterName, string) {
                 description = "Mirror Type"
                 mandatory = true
-                visibility = FromBooleanParameter(mirrorShowParameterName)
                 defaultValue = defaultMirrorType
                 predefinedAnswers = allowedMirrorTypes
             }
             parameter("analyzerInstance", reference<ServiceInstance>()) {
                 description = "Analyzer Instance"
                 mandatory = true
-                visibility = ConditionConjunction(
-                    FromStringParameter(mirrorTypeParameterName, "Analyzer Instance"),
-                    FromBooleanParameter(mirrorShowParameterName)
-                )
+                visibility = mirrorIsAnalyzerInstance
             }
             parameter("analyzerName", string) {
                 description = "Analyzer Name"
                 mandatory = true
-                visibility = ConditionConjunction(
-                    ConditionAlternative(
-                        FromStringParameter(mirrorTypeParameterName, "NIC Assisted"),
-                        FromStringParameter(mirrorTypeParameterName, "Analyzer IP")),
-                    FromBooleanParameter(mirrorShowParameterName)
-                )
+                visibility = mirrorIsNicAssisted or mirrorIsAnalyzerIp
             }
             parameter("nicAssistedVlan", number) {
                 description = "NIC Assisted VLAN"
                 mandatory = true
                 min = 1
                 max = 4094
-                visibility = ConditionConjunction(
-                    FromStringParameter(mirrorTypeParameterName, "NIC Assisted"),
-                    FromBooleanParameter(mirrorShowParameterName)
-                )
+                visibility = mirrorIsNicAssisted
             }
             parameter("analyzerIP", string) {
                 description = "Analyzer IP"
                 mandatory = true
-                visibility = ConditionConjunction(
-                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
-                    FromBooleanParameter(mirrorShowParameterName)
-                )
+                visibility = mirrorIsAnalyzerIp
             }
             parameter("analyzerMac", string) {
                 description = "Analyzer MAC"
                 mandatory = true
-                visibility = ConditionConjunction(
-                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
-                    FromBooleanParameter(mirrorShowParameterName)
-                )
+                visibility = mirrorIsAnalyzerIp
             }
             parameter("udpPort", number) {
                 description = "UDP Port"
                 mandatory = true
-                visibility = ConditionConjunction(
-                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
-                    FromBooleanParameter(mirrorShowParameterName)
-                )
+                visibility = mirrorIsAnalyzerIp
             }
             parameter("juniperHeader", string) {
                 description = "Juniper Header"
                 mandatory = true
                 defaultValue = defaultJuniperHeaderOption
                 predefinedAnswers = allowedJuniperHeaderOptions
-                visibility = ConditionConjunction(
-                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
-                    FromBooleanParameter(mirrorShowParameterName)
-                )
+                visibility = mirrorIsAnalyzerIp
             }
             parameter("routingInstance", reference<VirtualNetwork>()) {
                 description = "Routing Instance"
                 mandatory = true
-                visibility = ConditionConjunction(
-                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
-                    FromBooleanParameter(mirrorShowParameterName),
-                    FromStringParameter("juniperHeader", "disabled")
-                )
+                visibility = mirrorIsAnalyzerIp and juniperHeaderIsDisabled
             }
             parameter("nexthopMode", string) {
                 description = "Nexthop Mode"
                 mandatory = true
                 defaultValue = defaultNexthopMode
                 predefinedAnswers = allowedNexthopModes
-                visibility = ConditionConjunction(
-                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
-                    FromBooleanParameter(mirrorShowParameterName)
-                )
+                visibility = mirrorIsAnalyzerIp
             }
             parameter("vtepDestIp", string) {
                 description = "VTEP Dest IP"
                 mandatory = true
-                visibility = ConditionConjunction(
-                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
-                    FromBooleanParameter(mirrorShowParameterName),
-                    FromStringParameter("nexthopMode", "static")
-                )
+                visibility = mirrorIsAnalyzerIp and nextHopModeIsStatic
             }
             parameter("vtepDestMac", string) {
                 description = "VTEP Dest MAC"
                 mandatory = true
-                visibility = ConditionConjunction(
-                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
-                    FromBooleanParameter(mirrorShowParameterName),
-                    FromStringParameter("nexthopMode", "static")
-                )
+                visibility = mirrorIsAnalyzerIp and nextHopModeIsStatic
             }
             parameter("vni", number) {
                 description = "VxLAN ID"
                 mandatory = true
-                visibility = ConditionConjunction(
-                    FromStringParameter(mirrorTypeParameterName, "Analyzer IP"),
-                    FromBooleanParameter(mirrorShowParameterName),
-                    FromStringParameter("nexthopMode", "static")
-                )
+                visibility = mirrorIsAnalyzerIp and nextHopModeIsStatic
             }
         }
     }
