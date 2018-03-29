@@ -24,9 +24,8 @@ import net.juniper.contrail.vro.workflows.dsl.asVisibilityCondition
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
-import net.juniper.contrail.vro.workflows.schema.relationDescription
-import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
-import net.juniper.contrail.vro.workflows.util.extractRelationDescription
+import net.juniper.contrail.vro.workflows.util.propertyDescription
+import net.juniper.contrail.vro.workflows.util.relationDescription
 
 private val serviceTemplate = "serviceTemplate"
 
@@ -34,7 +33,7 @@ internal fun createServiceInstance(schema: Schema) : WorkflowDefinition {
     val workflowName = "Create service instance"
 
     return customWorkflow<ServiceInstance>(workflowName).withScriptFile("createServiceInstance") {
-        description = schema.relationDescription<Project, ServiceInstance>()
+        description = relationDescription<Project, ServiceInstance>(schema)
         parameter(parent, reference<Project>()) {
             description = "Project this service instance will belong to"
             mandatory = true
@@ -44,11 +43,11 @@ internal fun createServiceInstance(schema: Schema) : WorkflowDefinition {
             mandatory = true
         }
         parameter(serviceTemplate, reference<ServiceTemplate>()) {
-            extractRelationDescription<ServiceInstance, ServiceTemplate>(schema)
+            description = relationDescription<ServiceInstance, ServiceTemplate>(schema)
             mandatory = true
         }
         parameter("virtualRouterId", string) {
-            extractPropertyDescription<ServiceInstanceType>(schema)
+            description = propertyDescription<ServiceInstanceType>(schema)
             mandatory = false
         }
         step("Interfaces") {

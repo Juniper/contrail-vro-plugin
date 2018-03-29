@@ -106,6 +106,7 @@ fun String.toAcronymOrLowercase(): String {
 val String.cleanAcronym get() = when (this) {
     "Uuid", "uuid" -> "UUID"
     "Ip", "ip" -> "IP"
+    "Id", "id" -> "ID"
     "Ipam", "ipam" -> "IPAM"
     "Bgp", "bgp" -> "BGP"
     "Vpn", "vpn" -> "VPN"

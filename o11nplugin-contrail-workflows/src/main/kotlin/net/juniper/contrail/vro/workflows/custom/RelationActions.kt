@@ -19,13 +19,6 @@ import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 
-/**
- * networkPolicyRules
- *
- * Action retrieves string representation o network policy rules
- *
- * @param netpolicy : Any - reference to network policy or security group
- */
 val networkPolicyRulesAction = ActionDefinition(
     name = networkPolicyRules,
     resultType = array(string),

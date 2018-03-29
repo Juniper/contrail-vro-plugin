@@ -16,22 +16,21 @@ import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
-import net.juniper.contrail.vro.workflows.schema.relationDescription
-import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
-import net.juniper.contrail.vro.workflows.util.extractRelationDescription
+import net.juniper.contrail.vro.workflows.util.propertyDescription
+import net.juniper.contrail.vro.workflows.util.relationDescription
 
 internal fun createFloatingIpWorkflow(schema: Schema): WorkflowDefinition {
 
     val workflowName = "Create floating IP"
 
     return customWorkflow<FloatingIp>(workflowName).withScriptFile("createFloatingIp") {
-        description = schema.relationDescription<FloatingIpPool, FloatingIp>()
+        description = relationDescription<FloatingIpPool, FloatingIp>(schema)
         parameter(parent, reference<FloatingIpPool>()) {
             description = "Floating IP pools this IP will belong to"
             mandatory = true
         }
         parameter("projects", reference<Project>().array) {
-            extractRelationDescription<FloatingIp, Project>(schema)
+            description = relationDescription<FloatingIp, Project>(schema)
         }
         parameter("address", string) {
             description = "IP address\n Will be allocated dynamically if this input is left empty."
@@ -55,11 +54,11 @@ internal fun addPortToFloatingIpWorkflow(schema: Schema): WorkflowDefinition {
             mandatory = true
         }
         parameter("port", reference<VirtualMachineInterface>()) {
-            extractRelationDescription<FloatingIp, VirtualMachineInterface>(schema)
+            description = relationDescription<FloatingIp, VirtualMachineInterface>(schema)
             mandatory = true
         }
         parameter("fixedIpAddress", boolean) {
-            extractPropertyDescription<FloatingIp>(schema)
+            description = propertyDescription<FloatingIp>(schema)
             defaultValue = true
             mandatory = true
         }

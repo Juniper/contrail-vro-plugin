@@ -29,8 +29,8 @@ import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
 import net.juniper.contrail.vro.workflows.schema.simpleTypeConstraints
-import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
-import net.juniper.contrail.vro.workflows.util.extractRelationDescription
+import net.juniper.contrail.vro.workflows.util.propertyDescription
+import net.juniper.contrail.vro.workflows.util.relationDescription
 
 private val sourceAddressTypeParameterName = "srcAddressType"
 private val destinationAddressTypeParameterName = "dstAddressType"
@@ -61,18 +61,18 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
     return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("addRuleToPolicy") {
         step("Parent policy") {
             parameter("parent", reference<NetworkPolicy>()) {
-                extractRelationDescription<Project, NetworkPolicy>(schema)
+                description = relationDescription<Project, NetworkPolicy>(schema)
                 mandatory = true
             }
         }
         step("Basic attributes") {
             visibility = WhenNonNull("parent")
             parameter("simpleAction", string) {
-                extractPropertyDescription<ActionListType>(schema)
+                description = propertyDescription<ActionListType>(schema)
                 additionalQualifiers += schema.simpleTypeConstraints<ActionListType>("simpleAction")
             }
             parameter("protocol", string) {
-                extractPropertyDescription<PolicyRuleType>(schema)
+                description = propertyDescription<PolicyRuleType>(schema)
                 mandatory = true
                 defaultValue = defaultProtocol
                 predefinedAnswers = allowedProtocols
@@ -120,7 +120,7 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 visibility = FromStringParameter(sourceAddressTypeParameterName, "Security Group")
             }
             parameter("srcPorts", string) {
-                extractPropertyDescription<PolicyRuleType>(schema)
+                description = propertyDescription<PolicyRuleType>(schema)
                 mandatory = true
                 defaultValue = defaultPort
             }
@@ -158,7 +158,7 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
                 visibility = FromStringParameter(destinationAddressTypeParameterName, "Security Group")
             }
             parameter("dstPorts", string) {
-                extractPropertyDescription<PolicyRuleType>(schema)
+                description = propertyDescription<PolicyRuleType>(schema)
                 mandatory = true
                 defaultValue = defaultPort
             }
@@ -166,7 +166,7 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
         step("Advanced Options") {
             visibility = WhenNonNull("parent")
             parameter("log", boolean) {
-                extractPropertyDescription<ActionListType>(schema)
+                description = propertyDescription<ActionListType>(schema)
                 mandatory = true
                 defaultValue = false
             }
@@ -281,7 +281,7 @@ internal fun removePolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
 
     return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("removeRuleFromPolicy") {
         parameter(parent, reference<NetworkPolicy>()) {
-            extractRelationDescription<Project, NetworkPolicy>(schema)
+            description = relationDescription<Project, NetworkPolicy>(schema)
             mandatory = true
         }
         parameter("rule", string) {

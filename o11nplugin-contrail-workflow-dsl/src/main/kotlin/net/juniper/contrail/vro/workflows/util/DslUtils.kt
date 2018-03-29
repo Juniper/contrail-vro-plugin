@@ -9,6 +9,7 @@ import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.allLowerCase
 import net.juniper.contrail.vro.config.toTitle
 import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
+import net.juniper.contrail.vro.workflows.dsl.BasicBuilder
 import net.juniper.contrail.vro.workflows.dsl.PrimitiveParameterBuilder
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
@@ -16,20 +17,17 @@ import net.juniper.contrail.vro.workflows.schema.relationDescription
 import net.juniper.contrail.vro.workflows.schema.predefinedAnswers
 
 inline fun <reified Parent : Any>
-BasicParameterBuilder<*>.extractPropertyDescription(
+    BasicParameterBuilder<*>.propertyDescription(
     schema: Schema,
     convertParameterNameToXsd: Boolean = true,
-    title: String = parameterName.toTitle()) {
-    description = """
-        $title
-        ${schema.propertyDescription<Parent>(parameterName, convertParameterNameToXsd)}
-        """.trimIndent()
-}
+    title: String = parameterName.toTitle(),
+    schemaName: String = parameterName) = """
+$title
+${schema.propertyDescription<Parent>(schemaName, convertParameterNameToXsd)}
+""".trim()
 
-inline fun <reified Parent : Any, reified Child : Any>
-BasicParameterBuilder<*>.extractRelationDescription(schema: Schema) {
-    description = schema.relationDescription<Parent, Child>()
-}
+inline fun <reified Parent : Any, reified Child : Any> BasicBuilder.relationDescription(schema: Schema) =
+    schema.relationDescription<Parent, Child>()
 
 // Only enumaration existing in schema are of type string
 inline fun <reified Parent : Any> PrimitiveParameterBuilder<String>.extractPredefinedAnswers(

@@ -19,8 +19,8 @@ import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.schema.propertyDescription
 import net.juniper.contrail.vro.workflows.schema.simpleTypeConstraints
-import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
-import net.juniper.contrail.vro.workflows.util.extractRelationDescription
+import net.juniper.contrail.vro.workflows.util.propertyDescription
+import net.juniper.contrail.vro.workflows.util.relationDescription
 
 private val addressTypeParameterName = "addressType"
 private val defaultPort = "any"
@@ -39,7 +39,7 @@ internal fun addRuleToSecurityGroupWorkflow(schema: Schema): WorkflowDefinition 
     return customWorkflow<SecurityGroup>(workflowName).withScriptFile("addRuleToSecurityGroup") {
         step("Parent security group") {
             parameter("parent", reference<SecurityGroup>()) {
-                extractRelationDescription<Project, SecurityGroup>(schema)
+                description = relationDescription<Project, SecurityGroup>(schema)
                 mandatory = true
             }
         }
@@ -74,7 +74,7 @@ internal fun addRuleToSecurityGroupWorkflow(schema: Schema): WorkflowDefinition 
                 visibility = FromStringParameter(addressTypeParameterName, "Security Group")
             }
             parameter("protocol", string) {
-                extractPropertyDescription<PolicyRuleType>(schema)
+                description = propertyDescription<PolicyRuleType>(schema)
                 mandatory = true
                 defaultValue = defaultProtocol
                 predefinedAnswers = allowedProtocols
@@ -93,7 +93,7 @@ internal fun removeSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition
 
     return customWorkflow<SecurityGroup>(workflowName).withScriptFile("removeRuleFromSecurityGroup") {
         parameter(parent, reference<SecurityGroup>()) {
-            extractRelationDescription<Project, SecurityGroup>(schema)
+            description = relationDescription<Project, SecurityGroup>(schema)
             mandatory = true
         }
         parameter("rule", string) {

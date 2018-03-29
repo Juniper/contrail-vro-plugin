@@ -15,12 +15,12 @@ import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.util.extractPredefinedAnswers
-import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.supportedInterfaceNames
-import net.juniper.contrail.vro.workflows.schema.relationDescription
+import net.juniper.contrail.vro.workflows.util.propertyDescription
+import net.juniper.contrail.vro.workflows.util.relationDescription
 
 val supportedVersion : Long = 2
 val supportedVersions = listOf(supportedVersion)
@@ -29,7 +29,7 @@ internal fun createServiceTemplate(schema: Schema) : WorkflowDefinition {
     val workflowName = "Create service template"
 
     return customWorkflow<ServiceTemplate>(workflowName).withScriptFile("createServiceTemplate") {
-        description = schema.relationDescription<Domain, ServiceTemplate>()
+        description = relationDescription<Domain, ServiceTemplate>(schema)
         parameter(parent, Connection.reference) {
             description = "Parent connection"
             mandatory = true
@@ -39,45 +39,45 @@ internal fun createServiceTemplate(schema: Schema) : WorkflowDefinition {
             mandatory = true
         }
         parameter("version", number) {
-            extractPropertyDescription<ServiceTemplateType>(schema)
+            description = propertyDescription<ServiceTemplateType>(schema)
             mandatory = true
             predefinedAnswers = supportedVersions
             min = supportedVersion
             max = supportedVersion
         }
         parameter("serviceMode", string) {
-            extractPropertyDescription<ServiceTemplateType>(schema)
+            description = propertyDescription<ServiceTemplateType>(schema)
             mandatory = true
             extractPredefinedAnswers<ServiceTemplateType>(schema)
         }
         parameter("serviceType", string) {
-            extractPropertyDescription<ServiceTemplateType>(schema)
+            description = propertyDescription<ServiceTemplateType>(schema)
             mandatory = true
             extractPredefinedAnswers<ServiceTemplateType>(schema)
         }
         parameter("serviceVirtualizationType", string) {
-            extractPropertyDescription<ServiceTemplateType>(schema)
+            description = propertyDescription<ServiceTemplateType>(schema)
             mandatory = false
             extractPredefinedAnswers<ServiceTemplateType>(schema)
         }
         parameter("interfaceType", string.array) {
-            extractPropertyDescription<ServiceTemplateType>(schema)
+            description = propertyDescription<ServiceTemplateType>(schema)
             mandatory = true
             predefinedAnswers = supportedInterfaceNames
             sameValues = false
         }
         parameter("vrouterInstanceType", string) {
-            extractPropertyDescription<ServiceTemplateType>(schema)
+            description = propertyDescription<ServiceTemplateType>(schema)
             mandatory = false
             extractPredefinedAnswers<ServiceTemplateType>(schema)
         }
         parameter("availabilityZoneEnable", boolean) {
-            extractPropertyDescription<ServiceTemplateType>(schema)
+            description = propertyDescription<ServiceTemplateType>(schema)
             mandatory = false
             defaultValue = false
         }
         parameter("instanceData", string) {
-            extractPropertyDescription<ServiceTemplateType>(schema)
+            description = propertyDescription<ServiceTemplateType>(schema)
             mandatory = false
             multiline = true
         }

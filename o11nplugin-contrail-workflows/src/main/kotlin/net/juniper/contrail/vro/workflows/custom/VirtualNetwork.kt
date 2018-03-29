@@ -16,12 +16,11 @@ import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
 import net.juniper.contrail.vro.workflows.model.* // ktlint-disable no-wildcard-imports
-import net.juniper.contrail.vro.workflows.util.extractPropertyDescription
 import net.juniper.contrail.vro.workflows.schema.Schema
-import net.juniper.contrail.vro.workflows.schema.propertyDescription
 import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
 import net.juniper.contrail.vro.workflows.util.childDescriptionInCreateRelation
 import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
+import net.juniper.contrail.vro.workflows.util.propertyDescription
 
 private val subnet = "subnet"
 private val allocationPools = "allocationPools"
@@ -60,36 +59,36 @@ internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
         }
         step("Parameters") {
             parameter(subnet, string) {
-                extractPropertyDescription<IpamSubnetType>(schema, title="CIDR")
+                description = propertyDescription<IpamSubnetType>(schema, title = "CIDR")
                 mandatory = true
                 validWhen = isSubnet()
             }
             parameter(allocationPools, string.array) {
-                extractPropertyDescription<IpamSubnetType>(schema)
+                description = propertyDescription<IpamSubnetType>(schema)
                 mandatory = false
                 validWhen = allocationPoolInSubnet(subnet)
             }
             parameter("addrFromStart", boolean) {
                 // addr_from_start is the only parameter in IpamSubnet that has underscore in name
-                description = """
-                                Address from start
-                                ${schema.propertyDescription<IpamSubnetType>("addr_from_start", false)}
-                              """.trimIndent()
+                description = propertyDescription<IpamSubnetType>(schema,
+                    convertParameterNameToXsd = false,
+                    title = "Address from start",
+                    schemaName = "addr_from_start")
                 mandatory = true
                 defaultValue = true
             }
             parameter("dnsServerAddress", string) {
-                extractPropertyDescription<IpamSubnetType>(schema)
+                description = propertyDescription<IpamSubnetType>(schema)
                 validWhen = addressInSubnet(subnet)
                 mandatory = false
             }
             parameter("defaultGateway", string) {
-                extractPropertyDescription<IpamSubnetType>(schema)
+                description = propertyDescription<IpamSubnetType>(schema)
                 validWhen = addressIsFreeInSubnet(subnet, allocationPools, dnsServerAddress)
                 mandatory = true
             }
             parameter("enableDhcp", boolean) {
-                extractPropertyDescription<IpamSubnetType>(schema, title="Enable DHCP")
+                description = propertyDescription<IpamSubnetType>(schema, title = "Enable DHCP")
                 mandatory = true
                 defaultValue = true
             }
