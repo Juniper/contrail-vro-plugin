@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>o11nplugin-contrail-custom</artifactId>
+  <packaging>jar</packaging>
+
+  <parent>
+    <artifactId>contrail-vro</artifactId>
+    <groupId>net.juniper.contrail.vro</groupId>
+    <version>1.0</version>
+  </parent>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.vmware.o11n</groupId>
+      <artifactId>o11n-sdkapi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.juniper.contrail.vro</groupId>
+      <artifactId>o11nplugin-contrail-config</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.juniper.contrail.vro</groupId>
+      <artifactId>o11nplugin-contrail-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vmware.o11n</groupId>
+      <artifactId>o11n-plugin-modeldriven-generator</artifactId>
+      <version>${vco.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.vmware.o11n</groupId>
+      <artifactId>o11n-provided-deps</artifactId>
+      <scope>provided</scope>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <groupId>org.jetbrains.kotlin</groupId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.gmavenplus</groupId>
+        <artifactId>gmavenplus-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>

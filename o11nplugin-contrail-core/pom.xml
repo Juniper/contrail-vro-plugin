@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>o11nplugin-contrail-core</artifactId>
+  <packaging>jar</packaging>
+
+  <parent>
+    <artifactId>contrail-vro</artifactId>
+    <groupId>net.juniper.contrail.vro</groupId>
+    <version>1.0</version>
+  </parent>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.vmware.o11n</groupId>
+      <artifactId>o11n-sdkapi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.vmware.o11n</groupId>
+      <artifactId>o11n-spring-tools</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.vmware.o11n</groupId>
+      <artifactId>o11n-provided-deps</artifactId>
+      <scope>provided</scope>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>com.vmware.o11n</groupId>
+      <artifactId>o11n-plugin-modeldriven-runtime</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>net.juniper.contrail.vro</groupId>
+      <artifactId>o11nplugin-contrail-format</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>net.juniper.contrail.vro</groupId>
+      <artifactId>o11nplugin-contrail-config</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib-jdk8</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>net.juniper.contrail</groupId>
+      <artifactId>juniper-contrail-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.pacesys</groupId>
+      <artifactId>openstack4j</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.spockframework</groupId>
+      <artifactId>spock-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.objenesis</groupId>
+      <artifactId>objenesis</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-validator</groupId>
+      <artifactId>commons-validator</artifactId>
+      <version>1.6</version>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>kotlin-maven-plugin</artifactId>
+        <groupId>org.jetbrains.kotlin</groupId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.gmavenplus</groupId>
+        <artifactId>gmavenplus-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+      </plugin>
+    </plugins>
+
+    <resources>
+      <resource>
+        <directory>${generated.resources.dir}</directory>
+      </resource>
+      <resource>
+        <directory>${project.basedir}/src/main/resources/</directory>
+      </resource>
+    </resources>
+  </build>
+
+</project>
