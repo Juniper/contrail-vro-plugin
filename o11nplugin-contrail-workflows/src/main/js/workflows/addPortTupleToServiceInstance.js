@@ -27,8 +27,8 @@ var interfaceTypes = [
 ];
 
 var oldPortInterfaceTypes = ports.map(function(port){
-    if(port){
-        port.properties.serviceInterfaceType;
+    if(port && port.properties){
+        return port.properties.serviceInterfaceType;
     }
     return null;
 });
@@ -36,6 +36,9 @@ var oldPortInterfaceTypes = ports.map(function(port){
 function addTupleToPort(portTuple, portObject, portIndex) {
     if(portObject){
         portObject.addPortTuple(portTuple);
+        if (!portObject.properties){
+            portObject.properties = new ContrailVirtualMachineInterfacePropertiesType();
+        }
         portObject.properties.setServiceInterfaceType(interfaceTypes[portIndex]);
         portObject.update();
     }
@@ -44,7 +47,9 @@ function addTupleToPort(portTuple, portObject, portIndex) {
 function removeTupleFromPort(portTuple, portObject, portIndex) {
     if(portObject){
         portObject.removePortTuple(portTuple);
-        portObject.properties.setServiceInterfaceType(oldPortInterfaceTypes[portIndex]);
+        if (portObject.properties){
+            portObject.properties.setServiceInterfaceType(oldPortInterfaceTypes[portIndex]);
+        }
         portObject.update();
     }
 }
