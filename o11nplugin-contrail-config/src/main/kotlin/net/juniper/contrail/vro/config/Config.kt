@@ -99,6 +99,7 @@ val hiddenRoots = setOf(
 )
 
 val hiddenRelations = setOf(
+    pair<Project, FloatingIpPool>(),
     pair<FloatingIp, Project>(),
     pair<VirtualNetwork, NetworkIpam>(),
     pair<VirtualMachineInterface, PortTuple>(),
