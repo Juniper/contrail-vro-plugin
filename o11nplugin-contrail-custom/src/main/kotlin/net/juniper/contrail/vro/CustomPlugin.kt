@@ -8,10 +8,10 @@ import com.vmware.o11n.sdk.modeldrivengen.model.Attribute
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedFinder
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
 import com.vmware.o11n.sdk.modeldrivengen.model.Plugin
-import net.juniper.contrail.vro.config.backRefWrapperPropertyDisplayName
+import net.juniper.contrail.vro.config.refWrapperPropertyDisplayName
 import net.juniper.contrail.vro.config.cleanedDisplayedProperty
 import net.juniper.contrail.vro.config.displayedName
-import net.juniper.contrail.vro.config.isBackRefWrapperProperty
+import net.juniper.contrail.vro.config.isRefWrapperProperty
 import net.juniper.contrail.vro.config.isCapitalized
 import net.juniper.contrail.vro.config.isDisplayOnlyProperty
 import net.juniper.contrail.vro.config.isModelClass
@@ -61,8 +61,8 @@ class CustomPlugin : Plugin() {
         if (displayedName != null && !displayedName.isCapitalized) {
             displayName = if (displayedName.isDisplayOnlyProperty)
                 displayedName.cleanedDisplayedProperty.displayedName
-            else if (displayedName.isBackRefWrapperProperty)
-                displayName.backRefWrapperPropertyDisplayName
+            else if (displayedName.isRefWrapperProperty)
+                displayName.refWrapperPropertyDisplayName
             else
                 displayedName.displayedName
         }

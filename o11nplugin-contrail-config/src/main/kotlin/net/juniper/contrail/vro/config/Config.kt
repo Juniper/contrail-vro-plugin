@@ -104,6 +104,10 @@ val hiddenRelations = setOf(
     pair<ServiceTemplate, ServiceApplianceSet>()
 )
 
+val reversedRelations = setOf(
+    pair<FloatingIp, VirtualMachineInterface>()
+)
+
 private inline fun <reified T> the() =
     T::class.java.simpleName
 
@@ -141,24 +145,33 @@ val String.isHiddenRoot get() =
     hiddenRoots.contains(this)
 
 fun ObjectClass.isRelationMandatory(child: ObjectClass) =
-    mandatoryReference.contains(Pair(simpleName, child.simpleName))
+    mandatoryReference.containsUnordered(simpleName, child.simpleName)
 
 fun ObjectClass.isRelationEditable(child: ObjectClass) =
     ! isInternal &&
     ! child.isInternal &&
-    ! nonEditableReference.contains(Pair(simpleName, child.simpleName))
+    ! nonEditableReference.containsUnordered(simpleName, child.simpleName)
+
+private fun <T> Set<Pair<T, T>>.containsUnordered(first: T, second: T) =
+    contains(Pair(first, second)) || contains(Pair(second, first))
 
 fun ObjectClass.hasCustomAddReferenceWorkflow(child: Class<*>) =
-    customAddReference.contains(Pair(simpleName, child.simpleName))
+    customAddReference.containsUnordered(simpleName, child.simpleName)
 
 fun ObjectClass.hasCustomRemoveReferenceWorkflow(child: Class<*>) =
-    customRemoveReference.contains(Pair(simpleName, child.simpleName))
+    customRemoveReference.containsUnordered(simpleName, child.simpleName)
 
 infix fun String.isDisplayableChildOf(parent: String) =
-    this != parent && ! hiddenRelations.contains(Pair(parent, this))
+    this != parent && ! hiddenRelations.containsUnordered(parent, this)
 
-val Class<*>.isModelClass get() =
-    simpleName.isModelClassName
+fun String.isInReversedRelationTo(child: String) =
+    reversedRelations.containsUnordered(this, child)
+
+fun Class<*>.isInReversedRelationTo(child: Class<*>) =
+    simpleName.isInReversedRelationTo(child.simpleName)
+
+val Class<*>?.isModelClass get() =
+    this?.simpleName?.isModelClassName ?: false
 
 val Class<*>.isInventoryProperty get() =
     simpleName.isInventoryPropertyClassName

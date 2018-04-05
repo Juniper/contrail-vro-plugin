@@ -12,20 +12,20 @@ import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.constants.apiTypesPackageName
-import net.juniper.contrail.vro.config.backRefTypeName
 import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.isApiPropertyClass
+import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.isHiddenProperty
 import net.juniper.contrail.vro.config.isInternal
 import net.juniper.contrail.vro.config.isInventoryProperty
 import net.juniper.contrail.vro.config.isModelClass
-import net.juniper.contrail.vro.config.isModelClassName
 import net.juniper.contrail.vro.config.isPublic
 import net.juniper.contrail.vro.config.isRootClass
 import net.juniper.contrail.vro.config.isSubclassOf
 import net.juniper.contrail.vro.config.parameterClass
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.returnsApiPropertyOrList
+import net.juniper.contrail.vro.config.returnsObjectReferences
 import net.juniper.contrail.vro.config.setParentMethodsInModel
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.Executor
@@ -133,24 +133,27 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
     val executorMethods = delegate.createExecutorMethods()
 
     val references: List<CustomReference> = delegate.modelClass?.run {
-        declaredMethods.asSequence()
+        methods.asSequence()
             .map { it.toCustomReference() }.filterNotNull()
             .toList()
     } ?: emptyList()
 
     val referenceProperties: List<CustomReferenceProperty> = delegate.modelClass?.run {
-        declaredFields
-            .asSequence()
-            .filter { it.name.endsWith("back_refs") }
-            .filter { it.backRefTypeName.isModelClassName }
-            .map { CustomReferenceProperty.wrapField(it) }
+        if (isApiObjectClass)
+        methods.asSequence()
+            .filter { it.returnsObjectReferences }
+            .filter { it.isReferenceProperty }
+            .filter { it.referencePropertyClass.isModelClass }
+            .map { it.toCustomReferenceProperty() }
             .toList()
+        else
+            null
     } ?: emptyList()
 
     val propertyViews: List<CustomProperty> = delegate.modelClass?.run {
         if (isApiObjectClass)
         methods.asSequence()
-            .filter { it.name.startsWith("get") }
+            .filter { it.isGetter }
             .filter { it.returnsApiPropertyOrList }
             .filter { ! it.returnType.isInventoryProperty }
             .map { it.toCustomProperty() }

@@ -6,7 +6,6 @@ package net.juniper.contrail.vro.config
 
 import com.google.common.reflect.ClassPath
 import net.juniper.contrail.api.ObjectReference
-import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.lang.reflect.ParameterizedType
@@ -31,12 +30,10 @@ val <T> Class<T>.kotlinClassName: String get() = when (this) {
 }
 
 val BackRefs = "BackRefs"
-val back_refs = "_back_refs"
 val className = "[A-Za-z0-9]+"
 
 val getPrefix = "^get".toRegex()
 val backRefsPostfix = "$BackRefs$".toRegex()
-val fieldBackRefsPostfix = "$back_refs$".toRegex()
 
 val childReferencePattern = "get($className)s".toRegex()
 val forwardReferencePattern = "get($className)".toRegex()
@@ -66,11 +63,38 @@ inline fun <reified T> asBackRef() =
 inline fun <reified T> asChildRef() =
     T::class.java.childRefPropertyName
 
+val Method.childReferenceClass get() =
+    childClassName?.asObjectClass
+
+val Method.referenceClass get() =
+    referenceClassName?.asObjectClass
+
+val Method.backReferenceClass get() =
+    backReferenceClassName?.asObjectClass
+
 val Method.isChildReferenceGetter get() =
-    childReferencePattern.matchEntire(name) != null && returnListGenericClass == ObjectReference::class.java
+    isReference { childReferenceClass }
+
+val Method.isReferenceGetter get() =
+    isReference { referenceClass }
+
+val Method.isBackReferenceGetter get() =
+    isReference { backReferenceClass }
+
+private inline fun Method.isReference(referenceTypeExtractor: Method.() -> ObjectClass?) =
+    referenceTypeExtractor() != null && returnListGenericClass == ObjectReference::class.java
 
 val Method.childClassName get() =
-    childReferencePattern.matchEntire(name)?.groupValues?.get(1)
+    referredClassName(childReferencePattern)
+
+val Method.referenceClassName get() =
+    referredClassName(forwardReferencePattern)
+
+val Method.backReferenceClassName get() =
+    referredClassName(backReferencePattern)
+
+private fun Method.referredClassName(pattern: Regex) =
+    pattern.matchEntire(name)?.groupValues?.get(1)
 
 val Method.nameWithoutGet get() =
     name.replace(getPrefix, "")
@@ -86,12 +110,6 @@ val Method.isGetter get() =
 
 val Method.isBackRef get() =
     isGetter and name.endsWith(BackRefs)
-
-val Field.isBackRef get() =
-    name.endsWith(back_refs)
-
-val Field.backRefTypeName get() =
-    name.replace(fieldBackRefsPostfix, "").fieldToClassName
 
 val Type.parameterClass: Class<*>? get() =
     parameterType?.unwrapped
