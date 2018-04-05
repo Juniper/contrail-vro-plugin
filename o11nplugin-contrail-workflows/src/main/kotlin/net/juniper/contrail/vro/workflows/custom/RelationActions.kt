@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
+import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.api.types.VirtualMachineInterface
@@ -13,6 +14,7 @@ import net.juniper.contrail.vro.config.networkPolicyRules
 import net.juniper.contrail.vro.config.subnetsOfVirtualNetwork
 import net.juniper.contrail.vro.config.routeTableRoutes
 import net.juniper.contrail.vro.config.portsForServiceInterface
+import net.juniper.contrail.vro.config.networkIpamSubnets
 import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.array
@@ -23,6 +25,12 @@ val networkPolicyRulesAction = ActionDefinition(
     name = networkPolicyRules,
     resultType = array(string),
     parameters = listOf("netpolicy" ofType any)
+)
+
+val networkIpamSubnets = ActionDefinition(
+    name = networkIpamSubnets,
+    resultType = array(string),
+    parameters = listOf("parent" ofType reference<NetworkIpam>())
 )
 
 val routeTableRoutesAction = ActionDefinition(
