@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
+import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.ServiceTemplate
 import net.juniper.contrail.vro.config.areValidCommunityAttributes
@@ -11,6 +12,7 @@ import net.juniper.contrail.vro.config.isValidAllocactionPool
 import net.juniper.contrail.vro.config.isValidCidr
 import net.juniper.contrail.vro.config.isFreeInCidr
 import net.juniper.contrail.vro.config.isInCidr
+import net.juniper.contrail.vro.config.isIpamFlat
 import net.juniper.contrail.vro.config.isValidIp
 import net.juniper.contrail.vro.config.isValidMac
 import net.juniper.contrail.vro.config.isSingleAddressNetworkPolicyRule
@@ -100,5 +102,13 @@ val templateHasInterfaceWithNameAction = ActionDefinition(
     parameters = listOf(
         "serviceTemplate" ofType reference<ServiceTemplate>(),
         "name" ofType string
+    )
+)
+
+val isIpamFlatAction = ActionDefinition(
+    name = isIpamFlat,
+    resultType = string,
+    parameters = listOf(
+        "networkIpam" ofType reference<NetworkIpam>()
     )
 )
