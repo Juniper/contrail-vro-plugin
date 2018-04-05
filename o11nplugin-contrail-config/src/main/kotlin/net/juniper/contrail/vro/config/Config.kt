@@ -90,6 +90,7 @@ val customAddReference = setOf(
 )
 
 val customRemoveReference = setOf(
+    pair<FloatingIp, VirtualMachineInterface>(),
     pair<VirtualNetwork, NetworkIpam>()
 )
 
