@@ -1,0 +1,22 @@
+- project:
+    name: Juniper/contrail-vro-plugin
+    check:
+      jobs:
+        - contrail-build-vro-plugin
+    gate:
+      jobs:
+        - contrail-build-vro-plugin
+
+- job:
+    name: contrail-build-vro-plugin
+    description: |
+      Job that builds Juniper/contrail-vro-plugin project.
+    voting: True
+    parent: contrail-vnc-base2
+    required-projects:
+      - Juniper/contrail-vro-plugin
+    run: playbooks/contrail-build-vro-plugin/run.yaml
+    nodeset:
+      nodes:
+        - name: builder
+          label: centos-7-4-builder
