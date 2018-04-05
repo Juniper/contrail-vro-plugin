@@ -43,21 +43,22 @@ private val String.propertyPosition get() = when (this) {
 val String.cleanedDisplayedProperty get() =
     replace(displayedPropertyPattern, "")
 
-val String.cleanedBackRefProperty get() =
-    replace(displayedBackRefsPropertyPattern, "")
+val String.cleanedRefProperty get() =
+    replace(displayedRefsPropertyPattern, "")
 
 val String.isDisplayOnlyProperty get() =
     endsWith(displayedPropertySuffix)
 
-val String.isBackRefWrapperProperty get() =
-    startsWith(backRefsPropertyPrefix)
+val String.isRefWrapperProperty get() =
+    startsWith(refsPropertyPrefix)
 
-val String.backRefWrapperPropertyDisplayName get() =
-    "$displayedBackRefsPropertyPrefix ${cleanedBackRefProperty.folderName()}"
+val String.refWrapperPropertyDisplayName get() =
+    "$displayedRefsPropertyPrefix ${cleanedRefProperty.folderName()}"
 
 const val displayedPropertySuffix = "View"
 val displayedPropertyPattern = "$displayedPropertySuffix$".toRegex()
 
-val backRefsPropertyPrefix = "associated"
-val displayedBackRefsPropertyPrefix = backRefsPropertyPrefix.capitalize()
-val displayedBackRefsPropertyPattern = "^$backRefsPropertyPrefix|s$".toRegex()
+val refsPropertyPrefix = "associated"
+val refsPropertySuffix = "s"
+val displayedRefsPropertyPrefix = refsPropertyPrefix.capitalize()
+val displayedRefsPropertyPattern = "^$refsPropertyPrefix|$refsPropertySuffix$".toRegex()

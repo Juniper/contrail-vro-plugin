@@ -33,9 +33,6 @@ val String.asObjectClass: ObjectClass? get() =
         if (it.isSubclassOf<ApiObjectBase>()) it as ObjectClass else null
     }
 
-val String.typeToObjectClass get() =
-    typeToClassName.asObjectClass
-
 val String.isApiTypeClass get() =
     this.asApiClass != null
 
