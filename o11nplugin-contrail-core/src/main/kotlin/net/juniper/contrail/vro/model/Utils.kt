@@ -16,6 +16,7 @@ import net.juniper.contrail.api.types.SubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.VnSubnetsType
 import net.juniper.contrail.api.types.AllowedAddressPair
+import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.vro.format.PropertyFormatter
 import java.util.UUID
 
@@ -263,6 +264,13 @@ class Utils {
     fun routeStringToIndex(routeString: String): Int {
         return routeString.split(":")[0].toInt()
     }
+
+    fun ipamSubnetToString(ipamSubnet: IpamSubnetType, index: Int): String {
+        return "$index: CIDR ${ipamSubnet.subnet.ipPrefix}/${ipamSubnet.subnet.ipPrefixLen} Gateway ${ipamSubnet.defaultGateway}"
+    }
+
+    fun ipamSubnetStringToIndex(ipamSubnetString: String): Int =
+        ipamSubnetString.split(":")[0].toInt()
 
     fun lowercase(s: String) =
         s.toLowerCase()

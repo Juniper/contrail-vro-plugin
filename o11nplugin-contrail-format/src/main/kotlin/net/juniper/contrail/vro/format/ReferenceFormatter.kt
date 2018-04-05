@@ -49,5 +49,5 @@ class ReferenceFormatter(val factory: IPluginFactory) {
     }
 
     private fun format(virtualNetwork: VirtualNetwork, subnet: IpamSubnetType): String =
-        "$${virtualNetwork.name} (${PropertyFormatter.format(subnet.subnet)})"
+        virtualNetwork.name + (subnet.subnet?.let { " (${PropertyFormatter.format(it)})" } ?: "")
 }
