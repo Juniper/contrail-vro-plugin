@@ -12,6 +12,7 @@ val apiTypesPackageName = "$basePackageName.api.types"
 val Configuration = "Configuration"
 val Connection = "Connection"
 val parent = "parent"
+val child = "child"
 val item = "item"
 val id = "id"
 
