@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.api.ApiPropertyBase
+import net.juniper.contrail.vro.config.BackRefs
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.PropertyClass
 import net.juniper.contrail.vro.config.PropertyClassFilter
@@ -17,6 +18,7 @@ import net.juniper.contrail.vro.config.isBackRef
 import net.juniper.contrail.vro.config.isChildReferenceGetter
 import net.juniper.contrail.vro.config.isDisplayableChildOf
 import net.juniper.contrail.vro.config.isGetter
+import net.juniper.contrail.vro.config.isInReversedRelationTo
 import net.juniper.contrail.vro.config.isModelClassName
 import net.juniper.contrail.vro.config.isPropertyListWrapper
 import net.juniper.contrail.vro.config.listWrapperGetter
@@ -26,7 +28,7 @@ import net.juniper.contrail.vro.config.nameWithoutGetAndBackRefs
 import net.juniper.contrail.vro.config.objectReferenceAttributeClass
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.pluralize
-import net.juniper.contrail.vro.config.propertyName
+import net.juniper.contrail.vro.config.refPropertyName
 import net.juniper.contrail.vro.config.returnListGenericClass
 import net.juniper.contrail.vro.config.returnsApiPropertyOrList
 import net.juniper.contrail.vro.config.returnsObjectReferences
@@ -44,23 +46,27 @@ open class Relation (
 }
 
 class ForwardRelation (
-    val parentClass: ObjectClass,
+    val declaredParentClass: ObjectClass,
     method: Method
 ) {
+    val declaredChildClass = method.nameWithoutGetAndBackRefs.asObjectClass!!
+    val isReversed: Boolean = declaredParentClass.isInReversedRelationTo(declaredChildClass)
+    val parentClass: ObjectClass = if (isReversed) declaredChildClass else declaredParentClass
+    val childClass: ObjectClass = if (isReversed) declaredParentClass else declaredChildClass
     val parentName: String = parentClass.simpleName
-    val childName: String = method.nameWithoutGetAndBackRefs
+    val childName: String = childClass.simpleName
     val parentPluginName: String = parentName.toPluginName
     val childPluginName: String = childName.toPluginName
-    val childClass: ObjectClass = childName.asObjectClass!!
     val childNamePluralized = childPluginName.pluralize()
-    val getter: String = method.propertyName
-    val folderName = method.nameWithoutGetAndBackRefs.folderName()
+    val pluginGetter = declaredChildClass.refPropertyName
+    val getter: String = childName.decapitalize() + if (isReversed) BackRefs else ""
+    val folderName = childName.folderName()
     val attribute = method.objectReferenceAttributeClassOrDefault
     val attributeSimpleName = attribute.simpleName
     val simpleReference = attribute.isSimpleReference
 }
 
-class NestedRelation(
+class NestedRelation (
     val parent: Class<*>,
     val child: PropertyClass,
     val simpleProperties: List<Property>,
@@ -81,8 +87,6 @@ class NestedRelation(
 }
 
 class Getter(val name: String, val toMany: Boolean)
-
-typealias RelationGraphNode = Pair<ObjectClass, List<ObjectClass>>
 
 fun List<ObjectClass>.generateRelations() = asSequence()
     .map { it.relations() }

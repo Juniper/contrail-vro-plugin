@@ -4,14 +4,10 @@
 
 package net.juniper.contrail.vro.generator.workflows
 
-import net.juniper.contrail.vro.config.allCapitalized
-import net.juniper.contrail.vro.config.allLowerCase
+import net.juniper.contrail.vro.config.constants.child
 import net.juniper.contrail.vro.config.constants.item
-import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.parentConnection
-import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.propertyValue
-import net.juniper.contrail.vro.config.refPropertyName
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withScript
@@ -23,25 +19,27 @@ import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.schema.Schema
 import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
 import net.juniper.contrail.vro.workflows.util.childDescriptionInCreateRelation
+import net.juniper.contrail.vro.workflows.util.childDescriptionInRemoveRelation
 import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
+import net.juniper.contrail.vro.workflows.util.parentDescriptionInRemoveRelation
+import net.juniper.contrail.vro.workflows.util.removeRelationWorkflowName
 
 fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDefinition {
 
-    val parent = relation.parentClass
-    val child = relation.childClass
-    val childReferenceName = relation.child
-    val workflowName = schema.addRelationWorkflowName(parent, child)
+    val parentClass = relation.declaredParentClass
+    val childClass = relation.declaredChildClass
+    val workflowName = schema.addRelationWorkflowName(parentClass, childClass)
     val scriptBody = relation.addReferenceRelationScriptBody()
 
     return workflow(workflowName).withScript(scriptBody) {
-        parameter(item, parent.reference) {
-            description = schema.parentDescriptionInCreateRelation(parent, child)
+        parameter(item, parentClass.reference) {
+            description = schema.parentDescriptionInCreateRelation(parentClass, childClass)
             mandatory = true
-            browserRoot = actionCallTo(parentConnection).parameter(childReferenceName).asBrowserRoot()
+            browserRoot = actionCallTo(parentConnection).parameter(child).asBrowserRoot()
         }
 
-        parameter(childReferenceName, child.reference) {
-            description = schema.childDescriptionInCreateRelation(parent, child, ignoreMissing = true)
+        parameter(child, childClass.reference) {
+            description = schema.childDescriptionInCreateRelation(parentClass, childClass, ignoreMissing = true)
             mandatory = true
             browserRoot = actionCallTo(parentConnection).parameter(item).asBrowserRoot()
         }
@@ -50,50 +48,32 @@ fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDef
 
 fun removeReferenceWorkflow(relation: ForwardRelation): WorkflowDefinition {
 
-    val parentName = relation.parentPluginName
-    val childName = relation.childPluginName
-    val workflowName = "Remove ${childName.allLowerCase} from ${parentName.allLowerCase}"
+    val parentClass = relation.declaredParentClass
+    val childClass = relation.declaredChildClass
+    val workflowName = removeRelationWorkflowName(parentClass, childClass)
     val scriptBody = relation.removeReferenceRelationScriptBody()
 
     return workflow(workflowName).withScript(scriptBody) {
-        parameter(item, parentName.reference) {
-            description = "${parentName.allCapitalized} to remove ${childName.allCapitalized} from"
+        parameter(item, parentClass.reference) {
+            description = parentDescriptionInRemoveRelation(parentClass, childClass)
             mandatory = true
         }
-        parameter(relation.child, childName.reference) {
-            description = "${childName.allCapitalized} to be removed"
+        parameter(child, childClass.reference) {
+            description = childDescriptionInRemoveRelation(parentClass, childClass)
             mandatory = true
             visibility = WhenNonNull(item)
             browserRoot = item.asBrowserRoot()
-            listedBy = actionCallTo(propertyValue).parameter(item).string(relation.childClass.refPropertyName)
+            listedBy = actionCallTo(propertyValue).parameter(item).string(relation.pluginGetter)
         }
     }
 }
 
-private fun ForwardRelation.addReferenceRelationScriptBody() =
-    if (simpleReference)
-        addSimpleReferenceRelationScriptBody()
-    else
-        addRelationWithAttributeScriptBody()
-
-private fun ForwardRelation.addRelationWithAttributeScriptBody() = """
-$item.add$childPluginName($child, null);
+private fun ForwardRelation.addReferenceRelationScriptBody() = """
+$item.add${if (isReversed) parentPluginName else childPluginName}($child);
 $item.update();
 """.trim()
-
-private fun ForwardRelation.addSimpleReferenceRelationScriptBody() = """
-$item.add$childPluginName($child);
-$item.update();
-""".trim()
-
-private val ForwardRelation.child get() =
-    childClass.pluginName.parameterName
 
 private fun ForwardRelation.removeReferenceRelationScriptBody() = """
-${if (simpleReference)
-    "$item.remove$childPluginName($child);"
-else
-    "$item.remove$childName($child, null);"
-}
+$item.remove${if (isReversed) parentPluginName else childPluginName}($child);
 $item.update();
-""".trimIndent()
+""".trim()
