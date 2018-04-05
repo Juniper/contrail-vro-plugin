@@ -47,7 +47,7 @@ val Class<*>.allLowerCase get() =
     pluginName.allLowerCase
 
 val String.allCapitalized get() =
-    removeTypeSuffix().camelChunks.joinToString(" ") { it.capitalize() }
+    removeTypeSuffix().camelChunks.joinToString(" ") { it.cleanAcronym.capitalize() }
 
 val Class<*>.allCapitalized get() =
     pluginName.allCapitalized

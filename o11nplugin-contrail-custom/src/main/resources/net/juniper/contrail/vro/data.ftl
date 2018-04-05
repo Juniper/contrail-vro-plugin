@@ -230,7 +230,7 @@ public class ${className}
     </#list>
     <#list referenceProperties as prop>
     public String ${prop.wrapperMethodName}() {
-        return formatter.format(this, __getTarget().get${prop.methodName}(), "${prop.refObjectPluginType}");
+        return formatter.format(this, __getTarget().${prop.methodName}(), "${prop.refObjectPluginType}");
     }
     </#list>
     </#if>
