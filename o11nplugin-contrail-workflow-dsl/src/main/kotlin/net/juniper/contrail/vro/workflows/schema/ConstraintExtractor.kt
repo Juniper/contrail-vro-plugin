@@ -23,6 +23,14 @@ fun Schema.simpleTypeConstraints(clazz: Class<*>, propertyName: String, ignoreMi
     else -> propertyFieldConstraints(clazz, propertyName.xsdName, ignoreMissing)
 }.toList()
 
+inline fun <reified T : Any> Schema.crudStatus(propertyName: String) =
+    crudStatus(T::class.java, propertyName)
+
+fun Schema.crudStatus(clazz: Class<*>, propertyName: String): CRUD = when {
+    clazz.isApiObjectClass -> propertyDefinitionComment(clazz.xsdName, propertyName.xsdName).crud
+    else -> defaultCrud
+}
+
 inline fun <reified T : Any> Schema.predefinedAnswers(propertyName: String, mandatory: Boolean, convertToXsd: Boolean = true)
         : List<String> =
     predefinedAnswers(T::class.java, propertyName.maybeToXsd(convertToXsd), mandatory)
