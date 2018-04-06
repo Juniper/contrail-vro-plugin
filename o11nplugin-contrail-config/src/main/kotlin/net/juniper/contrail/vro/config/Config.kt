@@ -80,7 +80,6 @@ val mandatoryReference = setOf(
 
 val nonEditableReference = setOf(
     pair<VirtualMachineInterface, VirtualNetwork>(),
-    pair<Project, FloatingIpPool>(),
     pair<ServiceInstance, ServiceTemplate>()
 )
 
