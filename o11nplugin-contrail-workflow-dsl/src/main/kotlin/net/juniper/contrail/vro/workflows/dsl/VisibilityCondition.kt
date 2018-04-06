@@ -32,7 +32,7 @@ fun ActionCallBuilder.asVisibilityCondition(): VisibilityCondition =
     VisibilityFromAction(this)
 
 private class ConditionConjunction(vararg conditions: VisibilityCondition) : VisibilityCondition() {
-    override val stringCondition: String = conditions.filter { it != AlwaysVisible }.joinToString(" && ") { "(${it.stringCondition})" }
+    override val stringCondition: String = conditions.joinToString(" && ") { "(${it.stringCondition})" }
 }
 
 private class ConditionAlternative(vararg conditions: VisibilityCondition) : VisibilityCondition() {
@@ -43,11 +43,17 @@ private class ConditionNegation(condition: VisibilityCondition) : VisibilityCond
     override val stringCondition: String = "!(${condition.stringCondition})"
 }
 
-infix fun VisibilityCondition.and(other: VisibilityCondition): VisibilityCondition =
-    ConditionConjunction(this, other)
+infix fun VisibilityCondition.and(other: VisibilityCondition): VisibilityCondition = when {
+    this == AlwaysVisible -> other
+    other == AlwaysVisible -> this
+    else -> ConditionConjunction(this, other)
+}
 
-infix fun VisibilityCondition.or(other: VisibilityCondition): VisibilityCondition =
-    ConditionAlternative(this, other)
+infix fun VisibilityCondition.or(other: VisibilityCondition): VisibilityCondition = when {
+    this == AlwaysVisible -> this
+    other == AlwaysVisible -> other
+    else -> ConditionAlternative(this, other)
+}
 
 operator fun VisibilityCondition.not(): VisibilityCondition =
     ConditionNegation(this)
