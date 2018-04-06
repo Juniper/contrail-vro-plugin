@@ -9,6 +9,7 @@ sealed class IdlComment {
     abstract val parentClassName: String
     abstract val elementName: String
     abstract val description: String?
+    abstract val crud: CRUD
     abstract val isRequired: Boolean
 }
 
@@ -17,6 +18,7 @@ class Link(comment: String) : IdlComment() {
     override val parentClassName: String
     override val elementName: String
     override val description: String?
+    override val crud: CRUD
     override val isRequired: Boolean
     val propertyClassName: String
 
@@ -28,6 +30,7 @@ class Link(comment: String) : IdlComment() {
         parentClassName = properties[1]
         propertyClassName = properties[2]
         isRequired = properties.getOrNull(4).isRequired
+        crud = properties.getOrNull(5).toCrud()
         description = properties.getOrNull(6).cleanDescription
     }
 }
@@ -37,6 +40,7 @@ class Property(comment: String) : IdlComment() {
     override val parentClassName: String
     override val elementName: String
     override val description: String?
+    override val crud: CRUD
     override val isRequired: Boolean
 
     init {
@@ -46,6 +50,7 @@ class Property(comment: String) : IdlComment() {
         elementName = properties[0]
         parentClassName = properties[1]
         isRequired = properties.getOrNull(2).isRequired
+        crud = properties.getOrNull(3).toCrud()
         description = properties.getOrNull(4).cleanDescription
     }
 }
@@ -55,6 +60,7 @@ class ListProperty(comment: String) : IdlComment() {
     override val parentClassName: String
     override val elementName: String
     override val description: String?
+    override val crud: CRUD
     override val isRequired: Boolean
 
     init {
@@ -64,6 +70,7 @@ class ListProperty(comment: String) : IdlComment() {
         elementName = properties[0]
         parentClassName = properties[1]
         isRequired = properties.getOrNull(2).isRequired
+        crud = properties.getOrNull(3).toCrud()
         description = properties.getOrNull(4).cleanDescription
     }
 }
