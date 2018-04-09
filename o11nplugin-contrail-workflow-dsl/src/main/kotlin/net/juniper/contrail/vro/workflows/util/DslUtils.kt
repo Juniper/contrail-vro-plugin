@@ -54,16 +54,22 @@ inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> Schem
 fun Schema.parentDescriptionInCreateRelation(parentClazz: Class<*>, clazz: Class<*>) =
     "${parentClazz.allCapitalized} to add ${clazz.allCapitalized} to"
 
+inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> parentDescriptionInRemoveRelation() =
+    parentDescriptionInRemoveRelation(Parent::class.java, Child::class.java)
+
 fun parentDescriptionInRemoveRelation(parentClazz: Class<*>, clazz: Class<*>) =
     "${parentClazz.allCapitalized} to remove ${clazz.allCapitalized} from"
 
-inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> Schema.childDescriptionInCreateRelation() =
-    childDescriptionInCreateRelation(Parent::class.java, Child::class.java)
+inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> Schema.childDescriptionInCreateRelation(ignoreMissing: Boolean = false) =
+    childDescriptionInCreateRelation(Parent::class.java, Child::class.java, ignoreMissing)
 
 fun Schema.childDescriptionInCreateRelation(parentClazz: Class<*>, clazz: Class<*>, ignoreMissing: Boolean = false) = """
 ${clazz.allCapitalized} to be added
 ${relationDescription(parentClazz, clazz, ignoreMissing) ?: ""}
 """.trim()
+
+inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> childDescriptionInRemoveRelation() =
+    childDescriptionInRemoveRelation(Parent::class.java, Child::class.java)
 
 fun childDescriptionInRemoveRelation(parentClazz: Class<*>, clazz: Class<*>) =
     "${clazz.allCapitalized} to be removed"
