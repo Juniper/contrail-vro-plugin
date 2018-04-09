@@ -20,3 +20,7 @@
         creates: "{{ ansible_env.HOME }}/{{ packaging.target_dir }}/vro-plugin/dist/o11nplugin-contrail.vmoapp"
       become: yes
       become_user: root
+
+    - copy:
+        src: "{{ ansible_env.HOME }}/{{ packaging.target_dir }}/vro-plugin/dist/o11nplugin-contrail.vmoapp"
+        dest: "{{ zuul.executor.log_root }}/o11nplugin-contrail.vmoapp"
