@@ -13,6 +13,7 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += areValidCommunityAttributesAction(version, packageName)
     this += macValidationAction(version, packageName)
     this += subnetValidationAction(version, packageName)
+    this += readSubnetAction(version, packageName)
     this += listPropertyAction(version, packageName)
     this += networkOfServiceInterfaceAction(version, packageName)
     this += networkPolicyRulesAction(version, packageName)

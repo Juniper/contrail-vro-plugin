@@ -124,7 +124,7 @@ class IPv6(val highBits: Long, val lowBits: Long) : IP<IPv6> {
 
 class IpRange<T : IP<T>>(val start: T, val end: T) {
     operator fun contains(ip: T): Boolean =
-        ip <= end && ip >= start
+        ip in (start..end)
 
     operator fun contains(range: IpRange<T>): Boolean =
         range.start <= range.end && range.end <= end && range.start >= start
@@ -187,7 +187,7 @@ fun <T : IP<T>> poolToRange(pool: String, ipFactory: (String) -> T) : IpRange<T>
 fun <T : IP<T>> poolsToRanges(pools: List<String>, ipFactory: (String) -> T) : List<IpRange<T>> =
     pools.map { poolToRange(it, ipFactory) ?: return emptyList() }
 
-fun <T : IP<T>> getSubnetRange(cidr: String, ipFactory: (String) -> T) : IpRange<T> {
+fun <T : IP<T>> subnetRange(cidr: String, ipFactory: (String) -> T) : IpRange<T> {
     val parts = cidr.trim().split('/')
     val prefixLen = parts[1].toInt()
     val ip = ipFactory(parts[0])
@@ -198,7 +198,7 @@ fun <T : IP<T>> getSubnetRange(cidr: String, ipFactory: (String) -> T) : IpRange
 
 fun <T : IP<T>> parsePools(cidr: String, pools: List<String>, ipFactory: (String) -> T) : Boolean {
     if (pools.isBlankList()) return false
-    val subnet = getSubnetRange(cidr.trim(), ipFactory)
+    val subnet = subnetRange(cidr.trim(), ipFactory)
     val ranges = poolsToRanges(pools.trimList(), ipFactory)
     if (ranges.isEmpty()) return false
     return ranges.all { it.isValidInSubnet(subnet, ranges) }

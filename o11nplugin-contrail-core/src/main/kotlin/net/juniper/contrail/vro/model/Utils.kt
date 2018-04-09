@@ -78,9 +78,9 @@ class Utils {
 
     fun isInCidr(cidr: String, address: String): Boolean {
         if (isValidIpv4Address(address) && isValidIpv4Subnet(cidr)) {
-            return IPv4(address) in getSubnetRange(cidr, ::IPv4)
+            return IPv4(address) in subnetRange(cidr, ::IPv4)
         } else if (isValidIpv6Address(address) && isValidIpv6Subnet(cidr)) {
-            return IPv6(address) in getSubnetRange(cidr, ::IPv6)
+            return IPv6(address) in subnetRange(cidr, ::IPv6)
         }
         return false
     }
@@ -90,13 +90,13 @@ class Utils {
             if (pools != null && !pools.isBlankList() && !isValidIpv4Pool(pools)) return false
             if (dnsAddr != null && dnsAddr.isNotBlank() && !isValidIpv4Address(dnsAddr)) return false
             val ip = IPv4(address)
-            return (ip in getSubnetRange(cidr, ::IPv4)) && ip.notInPools(pools, ::IPv4)
+            return (ip in subnetRange(cidr, ::IPv4)) && ip.notInPools(pools, ::IPv4)
                     && !dnsAddr.equalsIp(ip, ::IPv4)
         } else if (isValidIpv6Subnet(cidr) && isValidIpv6Address(address)) {
             if (pools != null && !pools.isBlankList() && !isValidIpv6Pool(pools)) return false
             if (dnsAddr != null && dnsAddr.isNotBlank() && !isValidIpv6Address(dnsAddr)) return false
             val ip = IPv6(address)
-            return (ip in getSubnetRange(cidr, ::IPv6)) && ip.notInPools(pools, ::IPv6)
+            return (ip in subnetRange(cidr, ::IPv6)) && ip.notInPools(pools, ::IPv6)
                     && !dnsAddr.equalsIp(ip, ::IPv6)
         }
         return false
@@ -181,7 +181,14 @@ class Utils {
         return portNumber
     }
 
-    fun parseSubnet(def: String): SubnetType {
+    fun formatSubnet(subnet: SubnetType?): String? {
+        if (subnet == null) return null
+        if (subnet.ipPrefix == null || subnet.ipPrefixLen == null) return null
+        return subnet.run { "$ipPrefix/$ipPrefixLen" }
+    }
+
+    fun parseSubnet(def: String?): SubnetType? {
+        if (def == null || def.isBlank()) return null
         val cleaned = def.trim()
         val parts = cleaned.split(":")
         val (virtualNetworkName, virtualNetworkAddress) = when (parts.size) {

@@ -97,15 +97,18 @@ ${schema.propertyDescription(parent, propertyName) ?: ""}
 val Property.actualListProperty get() =
     clazz.properties.properties[0]
 
-private fun Property.toParameter(builder: ParameterAggregator, schema: Schema, createMode: Boolean, propertyPath: () -> String) =
-    if (clazz.isStringListWrapper)
-        toStringListWrapperParameter(builder, schema, createMode, {
-            FromComplexPropertyValue(item, "${propertyPath().preparePrefix()}$propertyName.${actualListProperty.propertyName}", string.array)
-        })
-    else
-        toPrimitiveParameter(builder, schema, createMode, {
-            FromComplexPropertyValue(item, "${propertyPath().preparePrefix()}$propertyName", clazz.parameterType)
-        })
+private fun List<Property>.buildParameters(builder: ParameterAggregator, schema: Schema, createMode: Boolean, propertyPath: () -> String) =
+    forEach { it.toParameter(builder, schema, createMode, propertyPath) }
+
+private fun Property.toParameter(builder: ParameterAggregator, schema: Schema, createMode: Boolean, propertyPath: () -> String) = when {
+    clazz.hasCustomInput -> customProperties[clazz]!!.run { this@toParameter.setup(builder, schema, createMode, propertyPath) }
+    clazz.isStringListWrapper -> toStringListWrapperParameter(builder, schema, createMode, {
+        FromComplexPropertyValue(item, "${propertyPath().preparePrefix()}$propertyName.${actualListProperty.propertyName}", string.array)
+    })
+    else -> toPrimitiveParameter(builder, schema, createMode, {
+        FromComplexPropertyValue(item, "${propertyPath().preparePrefix()}$propertyName", clazz.parameterType)
+    })
+}
 
 private fun Property.toPrimitiveParameter(builder: ParameterAggregator, schema: Schema, createMode: Boolean, binding: () -> DataBinding<Any>) {
     builder.parameter(propertyName, clazz) {
@@ -154,7 +157,10 @@ fun Sequence<Property>.workflowProperties(schema: Schema, createMode: Boolean) =
     .filter { schema.propertyEditableInMode(it, createMode) }
 
 val Property.isPrimitiveProperty get() =
-    clazz.hasOnlyListOfStrings || ! clazz.isApiTypeClass
+    clazz.hasCustomInput || clazz.hasOnlyListOfStrings || ! clazz.isApiTypeClass
+
+val Property.isComplexProperty get() =
+    ! isPrimitiveProperty
 
 fun Sequence<Property>.onlyPrimitives(schema: Schema, createMode: Boolean) =
     workflowProperties(schema, createMode)
@@ -162,9 +168,6 @@ fun Sequence<Property>.onlyPrimitives(schema: Schema, createMode: Boolean) =
 
 fun ClassProperties.onlyPrimitives(schema: Schema, createMode: Boolean) =
     simpleProperties.asSequence().onlyPrimitives(schema, createMode).toList()
-
-val Property.isComplexProperty get() =
-    clazz.isApiTypeClass && ! clazz.hasOnlyListOfStrings
 
 fun Sequence<Property>.onlyComplex(schema: Schema, createMode: Boolean) =
     workflowProperties(schema, createMode)
@@ -215,7 +218,7 @@ fun PresentationParametersBuilder.addProperties(
     if (!topPrimitives.isEmpty()) {
         step(CustomParameters) {
             visibility = stepVisibility
-            topPrimitives.forEach { it.toParameter(this@step, schema, createMode) { propertyPath } }
+            topPrimitives.buildParameters(this@step, schema, createMode) { propertyPath }
         }
     }
 
@@ -244,29 +247,26 @@ fun PresentationParametersBuilder.addProperties(
                     group(propProp.title) {
                         description = schema.propertyDescription(propProp.parent, propProp.propertyName)
                         visibility = FromBooleanParameter(propProp.propertyName.condition)
-                        propProp.clazz.properties.simpleProperties.forEach {
-                            it.toParameter(this@group, schema, createMode) {
+                        propProp.clazz.properties.onlyPrimitives(schema, createMode)
+                            .buildParameters(this@group, schema, createMode) {
                                 "$propertyPath${prop.propertyName}.${propProp.propertyName}"
                             }
-                        }
                     }
                 }
             }
             complex.isEmpty() && ! primitives.isEmpty() -> step(prop.title) {
                 description = schema.propertyDescription(clazz, prop.propertyName)
                 visibility = FromBooleanParameter(prop.propertyName.condition)
-                primitives.forEach { it.toParameter(this@step, schema, createMode) {
-                        "$propertyPath${prop.propertyName}"
-                    }
+                primitives.buildParameters(this@step, schema, createMode) {
+                    "$propertyPath${prop.propertyName}"
                 }
             }
             else -> groups(prop.title) {
                 description = schema.propertyDescription(clazz, prop.propertyName)
                 visibility = FromBooleanParameter(prop.propertyName.condition)
                 group(CustomParameters) {
-                    primitives.forEach { it.toParameter(this@group, schema, createMode) {
-                            "$propertyPath${prop.propertyName}"
-                        }
+                    primitives.buildParameters(this@group, schema, createMode) {
+                        "$propertyPath${prop.propertyName}"
                     }
                 }
                 group(AdvancedParameters) {
@@ -276,11 +276,10 @@ fun PresentationParametersBuilder.addProperties(
                     group(propProp.title) {
                         visibility = FromBooleanParameter(propProp.propertyName.condition)
                         description = schema.propertyDescription(propProp.parent, propProp.propertyName)
-                        propProp.clazz.properties.onlyPrimitives(schema, createMode).forEach {
-                            it.toParameter(this@group, schema, createMode) {
+                        propProp.clazz.properties.onlyPrimitives(schema, createMode)
+                            .buildParameters(this@group, schema, createMode) {
                                 "$propertyPath${prop.propertyName}.${propProp.propertyName}"
                             }
-                        }
                     }
                 }
             }
@@ -298,39 +297,9 @@ if($parameterName) {
 }
 """
 
-private fun Property.setCode(ref: String) =
-    "$ref.set${propertyName.capitalize()}($propertyName);"
-
 val String.condition get() =
     "define_$this"
-
-fun Property.propertyCode(prefix: String): String =
-    if (clazz.isApiTypeClass) clazz.attributeCode(propertyName, prefix, true) else ""
-
-fun Class<*>.attributeCode(ref: String, prefix: String = "", init: Boolean = false) =
-    workflowEditableProperties.run {
-if (init)
-"""
-${prepare(prefix)}
-var $ref = null;
-if (${ref.condition}) {
-    $ref = new Contrail$pluginName();
-    ${assign(ref, prefix+tab)}
-}
-"""
-else
-"""
-${prepare(prefix)}
-${assign(ref, prefix)}
-"""
-}.trimStart().prependIndent(prefix)
 
 val Class<*>.workflowEditableProperties get() =
     properties.simpleProperties
         .filter(workflowPropertiesFilter)
-
-fun List<Property>.assign(ref: String, prefix: String = tab) =
-    joinToString(separator = "\n$prefix") { it.setCode(ref) }
-
-fun List<Property>.prepare(prefix: String) =
-    joinToString(separator = "") { it.propertyCode(prefix) }

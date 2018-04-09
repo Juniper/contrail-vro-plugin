@@ -62,7 +62,10 @@ class FromListPropertyValue<Type: Any>(
         )
 }
 
-class FromAction<Type : Any>(val actionName: String, val type: ParameterType<Type>, vararg val parameters: String) : DataBinding<Type>() {
+class FromAction<Type : Any>(val actionCall: ActionCall, val type: ParameterType<Type>) : DataBinding<Type>() {
     override val qualifier: ParameterQualifier? get() =
-        bindValueToAction(actionName, type, *parameters)
+        bindValueToAction(actionCall, type)
 }
+
+fun <Type : Any> fromAction(actionName: String, type: ParameterType<Type>, setup: ActionCallBuilder.() -> Unit): DataBinding<Type> =
+    FromAction(actionCallTo(actionName).apply(setup).create(), type)
