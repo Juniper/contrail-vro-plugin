@@ -16,6 +16,7 @@ import net.juniper.contrail.api.types.SubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.VnSubnetsType
 import net.juniper.contrail.api.types.AllowedAddressPair
+import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.vro.format.PropertyFormatter
 import java.util.UUID
 
@@ -112,6 +113,9 @@ class Utils {
         if (firstPartNumericValue < minPort || firstPartNumericValue > maxPort) return false
         return parts[1].matches(integerPattern)
     }
+
+    fun isIpamFlat(ipam: NetworkIpam): Boolean =
+        ipam.ipamSubnetMethod == "flat-subnet"
 
     fun getVnSubnet(network: VirtualNetwork, ipam: NetworkIpam): VnSubnetsType =
         network.networkIpam?.find { it.uuid == ipam.uuid }?.attr ?: VnSubnetsType()
@@ -263,6 +267,13 @@ class Utils {
     fun routeStringToIndex(routeString: String): Int {
         return routeString.split(":")[0].toInt()
     }
+
+    fun ipamSubnetToString(ipamSubnet: IpamSubnetType, index: Int): String = ipamSubnet.run {
+        "$index: CIDR ${subnet.ipPrefix}/${subnet.ipPrefixLen} Gateway $defaultGateway"
+    }
+
+    fun ipamSubnetStringToIndex(ipamSubnetString: String): Int =
+        ipamSubnetString.split(":")[0].toInt()
 
     fun lowercase(s: String) =
         s.toLowerCase()

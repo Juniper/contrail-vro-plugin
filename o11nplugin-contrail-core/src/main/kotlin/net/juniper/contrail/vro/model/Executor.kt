@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.model
 
 import net.juniper.contrail.api.types.InstanceIp
+import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.ServiceTemplate
 import net.juniper.contrail.api.types.Subnet
@@ -15,8 +16,12 @@ class Executor(private val connection: Connection) {
     fun VirtualNetwork.subnets(): List<Subnet> {
         val ipams = networkIpam ?: return emptyList()
         return ipams.asSequence().map {
-            it.attr.ipamSubnets.asSequence().map { connection.findById<Subnet>(it.subnetUuid) }.filterNotNull()
+            it.attr.ipamSubnets.asSequence().map { it.subnet() }.filterNotNull()
         }.flatten().toList()
+    }
+
+    fun IpamSubnetType.subnet(): Subnet? {
+        return connection.findById(subnetUuid)
     }
 
     // InstanceIp should be in 1-1 relation to VMI, so only first element is chosen if it exists
