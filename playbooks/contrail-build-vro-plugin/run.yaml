@@ -20,3 +20,10 @@
         creates: "{{ ansible_env.HOME }}/{{ packaging.target_dir }}/vro-plugin/dist/o11nplugin-contrail.vmoapp"
       become: yes
       become_user: root
+
+    - name: copy vro plugin to log server
+      synchronize:
+        mode: pull
+        src: "{{ ansible_env.HOME }}/{{ packaging.target_dir }}/vro-plugin/dist/o11nplugin-contrail.vmoapp"
+        dest: "{{ zuul.executor.log_root }}/"
+      become: true
