@@ -96,8 +96,8 @@ fun <T : Any> bindValueToListProperty(parentItem: String, childItem: String, lis
         parameters = *arrayOf("#$parentItem", "#$childItem", "\"$listAccessor\"", "\"$propertyPath\"")
     ))
 
-fun <T : Any> bindValueToAction(actionName: String, type: ParameterType<T>, vararg parameters: String) =
-    ognlQualifier(QualifierName.dataBinding, type, actionOgnl(actionPackage, actionName, *parameters))
+fun <T : Any> bindValueToAction(action: ActionCall, type: ParameterType<T>) =
+    ognlQualifier(QualifierName.dataBinding, type, action.ognl)
 
 private fun actionOgnl(packageName: String, name: String, vararg parameters: String) =
     """GetAction("$packageName","$name").call(${ parameters.joinToString { it } })"""

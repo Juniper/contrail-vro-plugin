@@ -204,14 +204,17 @@ fun Class<*>.editPropertiesCode(item: String, schema: Schema, createMode: Boolea
 
 fun Property.editCode(item: String, schema: Schema, createMode: Boolean, level: Int) = when {
     ! schema.propertyEditableInMode(this, createMode) -> ""
-    ! clazz.isApiTypeClass && level <= maxPrimitiveLevel -> primitiveEditCode(item)
+    (clazz.hasCustomInput || ! clazz.isApiTypeClass) && level <= maxPrimitiveLevel -> primitiveEditCode(item)
     clazz.isStringListWrapper && level <= maxPrimitiveLevel -> listEditCode(item)
-    clazz.isApiTypeClass && (level + clazz.maxDepth(schema, createMode) <= maxComplexLevel || level == 0) -> complexEditCode(item, schema, createMode, level)
+    clazz.isApiTypeClass && !clazz.hasCustomInput && (level + clazz.maxDepth(schema, createMode) <= maxComplexLevel || level == 0) -> complexEditCode(item, schema, createMode, level)
     else -> ""
 }
 
+private val Property.propertyValue get() =
+    customProperties[clazz]?.code(propertyName) ?: propertyName
+
 fun Property.primitiveEditCode(item: String) =
-    "$item.set${propertyName.capitalize()}($propertyName);"
+    "$item.set${propertyName.capitalize()}($propertyValue);"
 
 fun Property.listEditCode(item: String) =
     "$item.set${propertyName.capitalize()}(new Contrail${clazz.pluginName}($propertyName));"

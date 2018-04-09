@@ -108,6 +108,8 @@ val String.cleanAcronym get() = when (this) {
     "Ip", "ip" -> "IP"
     "Id", "id" -> "ID"
     "Ipam", "ipam" -> "IPAM"
+    "Cidr", "cidr" -> "CIDR"
+    "Dns", "dns" -> "DNS"
     "Bgp", "bgp" -> "BGP"
     "Vpn", "vpn" -> "VPN"
     "Pbb", "pbb" -> "PBB"

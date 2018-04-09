@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.vro.config.listPropertyValue
 import net.juniper.contrail.vro.config.propertyNotNull
 import net.juniper.contrail.vro.config.propertyValue
+import net.juniper.contrail.vro.config.readSubnet
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.dsl.ofType
@@ -50,5 +51,14 @@ val listPropertyAction = ActionDefinition (
         "childItem" ofType string,
         "listAccessor" ofType string,
         "propertyPath" ofType string)
+)
+
+val readSubnetAction = ActionDefinition (
+    name = readSubnet,
+    resultType = string,
+    parameters = listOf(
+        item ofType any,
+        parameterPath ofType string
+    )
 )
 
