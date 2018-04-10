@@ -11,7 +11,6 @@ import net.juniper.contrail.api.types.PolicyRuleType
 import net.juniper.contrail.api.types.PortType
 import net.juniper.contrail.api.types.RouteType
 import net.juniper.contrail.api.types.SecurityGroup
-import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.api.types.SubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.VnSubnetsType
@@ -114,20 +113,19 @@ class Utils {
         return parts[1].matches(integerPattern)
     }
 
-    fun isIpamFlat(ipam: NetworkIpam): Boolean =
-        ipam.ipamSubnetMethod == "flat-subnet"
-
     fun getVnSubnet(network: VirtualNetwork, ipam: NetworkIpam): VnSubnetsType =
         network.networkIpam?.find { it.uuid == ipam.uuid }?.attr ?: VnSubnetsType()
 
     fun isNetworRelatedToIpam(network: VirtualNetwork, ipam: NetworkIpam): Boolean =
         network.networkIpam?.any { it.uuid == ipam.uuid } ?: false
 
-    fun removeSubnetFromVirtualNetwork(network: VirtualNetwork, subnet: Subnet) {
+    fun removeSubnetFromVirtualNetwork(network: VirtualNetwork, subnet: String) {
         val ipams = network.networkIpam ?: return
+        val index = subnet.split(":")[0].toInt()
+        val ipamSubnet = ipams.flatMap { it.attr.ipamSubnets.filterNotNull() } [index]
         //first remove subnet from attributes
         ipams.forEach {
-            it.attr.ipamSubnets.removeIf { it.subnetUuid == subnet.uuid }
+            it.attr.ipamSubnets.removeIf { it == ipamSubnet }
         }
         //then remove IPAMs if have not subnets
         ipams.removeIf {

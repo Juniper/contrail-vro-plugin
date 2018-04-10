@@ -4,7 +4,6 @@
 
 package net.juniper.contrail.vro
 
-import net.juniper.contrail.vro.config.isDisplayableChildOf
 import net.juniper.contrail.vro.config.isModelClassName
 import net.juniper.contrail.vro.config.referencePatterns
 import net.juniper.contrail.vro.config.returnsObjectReferences
@@ -22,7 +21,6 @@ fun Method.toCustomReference(): CustomReference? {
         .map { it.matchEntire(name) }.filterNotNull()
         .map { it.groupValues[1] }
         .filter { it.isModelClassName }
-        .filter { it.isDisplayableChildOf(declaringClass.simpleName) }
         .firstOrNull() ?: return null
 
     return CustomReference(className, name)
