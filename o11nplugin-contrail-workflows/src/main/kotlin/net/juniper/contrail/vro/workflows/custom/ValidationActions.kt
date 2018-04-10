@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.ServiceTemplate
+import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.areValidCommunityAttributes
 import net.juniper.contrail.vro.config.isValidAllocactionPool
 import net.juniper.contrail.vro.config.isValidCidr
@@ -20,6 +21,9 @@ import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRule
 import net.juniper.contrail.vro.config.isValidSubnet
 import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
 import net.juniper.contrail.vro.config.templateHasInterfaceWithName
+import net.juniper.contrail.vro.config.isNetworkNotFlat
+import net.juniper.contrail.vro.config.isNetworkNotUserDefined
+import net.juniper.contrail.vro.config.isIpamUserDefined
 import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.array
@@ -111,4 +115,22 @@ val isIpamFlatAction = ActionDefinition(
     parameters = listOf(
         "networkIpam" ofType reference<NetworkIpam>()
     )
+)
+
+val isNetworkNotFlatAction = ActionDefinition(
+    name = isNetworkNotFlat,
+    resultType = string,
+    parameters = listOf("virtualNetwork" ofType reference<VirtualNetwork>())
+)
+
+val isNetworkNotUserDefinedAction = ActionDefinition(
+    name = isNetworkNotUserDefined,
+    resultType = string,
+    parameters = listOf("virtualNetwork" ofType reference<VirtualNetwork>())
+)
+
+val isIpamUserDefinedAction = ActionDefinition(
+    name = isIpamUserDefined,
+    resultType = string,
+    parameters = listOf("networkIpam" ofType reference<NetworkIpam>())
 )

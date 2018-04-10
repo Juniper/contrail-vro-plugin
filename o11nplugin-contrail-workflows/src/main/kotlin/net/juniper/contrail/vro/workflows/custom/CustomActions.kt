@@ -32,4 +32,8 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += templateHasInterfaceWithNameAction(version, packageName)
     this += networkIpamSubnets(version, packageName)
     this += isIpamFlatAction(version, packageName)
+    this += isNetworkNotFlatAction(version, packageName)
+    this += isNetworkNotUserDefinedAction(version, packageName)
+    this += isIpamUserDefinedAction(version, packageName)
+    this += ipamsOfVirtualNetworkAction(version, packageName)
 }

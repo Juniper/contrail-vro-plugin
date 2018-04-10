@@ -4,20 +4,25 @@
 
 package net.juniper.contrail.vro.model
 
-import net.juniper.contrail.api.types.InstanceIp
 import net.juniper.contrail.api.types.IpamSubnetType
-import net.juniper.contrail.api.types.ServiceInstance
-import net.juniper.contrail.api.types.ServiceTemplate
+import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.Subnet
-import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.api.types.VirtualNetwork
+import net.juniper.contrail.api.types.InstanceIp
+import net.juniper.contrail.api.types.VirtualMachineInterface
+import net.juniper.contrail.api.types.ServiceTemplate
+import net.juniper.contrail.api.types.ServiceInstance
 
 class Executor(private val connection: Connection) {
-    fun VirtualNetwork.subnets(): List<Subnet> {
+    fun VirtualNetwork.networkIpams(): List<NetworkIpam> {
         val ipams = networkIpam ?: return emptyList()
-        return ipams.asSequence().map {
-            it.attr.ipamSubnets.asSequence().map { it.subnet() }.filterNotNull()
-        }.flatten().toList()
+        return ipams.map {
+            connection.findByFQN<NetworkIpam>(it.referredName.joinToString(":" )) }.filterNotNull().toList()
+    }
+
+    fun VirtualNetwork.subnets(): List<IpamSubnetType> {
+        val ipams = networkIpam ?: return emptyList()
+        return ipams.asSequence().map { it.attr.ipamSubnets.asSequence().filterNotNull() }.flatten().toList()
     }
 
     fun IpamSubnetType.subnet(): Subnet? {

@@ -14,10 +14,27 @@ import net.juniper.contrail.vro.config.isValidIp
 import net.juniper.contrail.vro.config.isSingleAddressNetworkPolicyRule
 import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRule
 import net.juniper.contrail.vro.config.areValidCommunityAttributes
+import net.juniper.contrail.vro.config.isNetworkNotFlat
+import net.juniper.contrail.vro.config.isNetworkNotUserDefined
+import net.juniper.contrail.vro.config.isIpamUserDefined
+import net.juniper.contrail.vro.config.isIpamFlat
 import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
+import net.juniper.contrail.vro.workflows.dsl.ReferenceParameterBuilder
 
 fun BasicParameterBuilder<String>.isSubnet() =
     validationActionCallTo(isValidSubnet)
+
+fun ReferenceParameterBuilder.isNotFlat() =
+    validationActionCallTo(isNetworkNotFlat)
+
+fun ReferenceParameterBuilder.isNotUserDefined() =
+    validationActionCallTo(isNetworkNotUserDefined)
+
+fun ReferenceParameterBuilder.isUserDefined() =
+    validationActionCallTo(isIpamUserDefined)
+
+fun ReferenceParameterBuilder.isFlat() =
+    validationActionCallTo(isIpamFlat)
 
 fun BasicParameterBuilder<String>.isCidr() =
     validationActionCallTo(isValidCidr)

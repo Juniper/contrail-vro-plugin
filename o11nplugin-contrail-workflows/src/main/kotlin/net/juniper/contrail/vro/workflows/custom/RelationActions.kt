@@ -6,15 +6,16 @@ package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.ServiceInstance
-import net.juniper.contrail.api.types.Subnet
 import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.serviceInstanceInterfaceNames
+import net.juniper.contrail.vro.config.networkOfServiceInterface
 import net.juniper.contrail.vro.config.networkPolicyRules
 import net.juniper.contrail.vro.config.subnetsOfVirtualNetwork
 import net.juniper.contrail.vro.config.routeTableRoutes
 import net.juniper.contrail.vro.config.portsForServiceInterface
 import net.juniper.contrail.vro.config.networkIpamSubnets
+import net.juniper.contrail.vro.config.ipamsOfVirtualNetwork
 import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.array
@@ -40,7 +41,7 @@ val routeTableRoutesAction = ActionDefinition(
 )
 
 val networkOfServiceInterfaceAction = ActionDefinition(
-    name = net.juniper.contrail.vro.config.networkOfServiceInterface,
+    name = networkOfServiceInterface,
     resultType = reference<VirtualNetwork>(),
     parameters = listOf(
         "serviceInstance" ofType reference<ServiceInstance>(),
@@ -50,7 +51,7 @@ val networkOfServiceInterfaceAction = ActionDefinition(
 
 val subnetsOfVirtualNetworkAction = ActionDefinition (
     name = subnetsOfVirtualNetwork,
-    resultType = array(reference<Subnet>()),
+    resultType = array(string),
     parameters = listOf("parent" ofType reference<VirtualNetwork>())
 )
 
@@ -67,4 +68,10 @@ val serviceInstanceInterfaceNamesAction = ActionDefinition (
     name = serviceInstanceInterfaceNames,
     resultType = array(string),
     parameters = listOf("serviceInstance" ofType reference<ServiceInstance>())
+)
+
+val ipamsOfVirtualNetworkAction = ActionDefinition (
+    name = ipamsOfVirtualNetwork,
+    resultType = array(reference<NetworkIpam>()),
+    parameters = listOf("parent" ofType reference<VirtualNetwork>())
 )
