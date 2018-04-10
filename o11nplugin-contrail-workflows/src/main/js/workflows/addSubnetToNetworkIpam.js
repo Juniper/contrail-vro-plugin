@@ -24,11 +24,11 @@ if (!ContrailUtils.isBlankList(allocationPools)) {
     });
 }
 
-var vnSubnet = ContrailUtils.getVnSubnet(parent, ipam);
-
-vnSubnet.addIpamSubnets(ipamSubnet);
-if (!ContrailUtils.isNetworRelatedToIpam(parent, ipam)){
-	parent.addNetworkIpam(ipam, vnSubnet);
+var ipamSubnets = parent.getIpamSubnets();
+if (!ipamSubnets){
+    ipamSubnets = new ContrailIpamSubnets();
 }
+
+ipamSubnets.addSubnets(ipamSubnet);
 
 parent.update();
