@@ -43,6 +43,7 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <groupId>com.vmware.o11n.mojo.pkg</groupId>
         <artifactId>maven-o11n-package-plugin</artifactId>
@@ -57,11 +58,17 @@
             <include>**/Workflow/Library/**/*.element_info.xml</include>
             <include>**/ScriptModule/**/*.element_info.xml</include>
           </includes>
-          <packageFileName>o11nplugin-contrail-package-${project.version}</packageFileName>
+          <packageFileName>o11nplugin-contrail-package-${dist.version}</packageFileName>
           <allowedMask>vef</allowedMask>
           <exportVersionHistory>false</exportVersionHistory>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.gmaven</groupId>
+        <artifactId>gmaven-plugin</artifactId>
+      </plugin>
+
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
         <configuration>

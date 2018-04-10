@@ -8,6 +8,8 @@ import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.vmware.o11n.sdk.modeldrivengen.mapping.AbstractMapping
 import com.vmware.o11n.sdk.modeldrivengen.model.Plugin
+import net.juniper.contrail.vro.config.constants.Contrail
+import net.juniper.contrail.vro.config.globalProjectInfo
 import net.juniper.contrail.vro.generated.CustomMapping
 
 class CustomModule : AbstractModule() {
@@ -28,12 +30,14 @@ class CustomModule : AbstractModule() {
     init {
         this.plugin = CustomPlugin()
 
-        plugin.apiPrefix = "Contrail"
-        plugin.description = "Contrail plug-in for vRealize Orchestrator"
-        plugin.displayName = "Contrail"
-        plugin.name = "Contrail"
+        plugin.apiPrefix = Contrail
+        plugin.description = "$Contrail plug-in for vRealize Orchestrator"
+        plugin.displayName = Contrail
+        plugin.name = Contrail
+        plugin.version = globalProjectInfo.version
+        plugin.build = globalProjectInfo.buildNumber
         plugin.icon = "opencontrail.png"
-        plugin.packages = listOf("o11nplugin-contrail-package-\${project.version}.package")
+        plugin.packages = listOf("o11nplugin-contrail-package-${globalProjectInfo.version}.package")
         plugin.setAdaptorClassName(ContrailPluginAdaptor::class.java)
     }
 }
