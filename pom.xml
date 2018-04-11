@@ -16,7 +16,10 @@
     <installation.mode>version</installation.mode>
     <kotlin.version>1.2.31</kotlin.version>
     <workflow.package>net.juniper.contrail</workflow.package>
-    <schema.file>${project.basedir}/../../src/contrail-api-client/schema/all_cfg.xsd</schema.file>
+    <!-- Sandbox root is defined relative to submodules -->
+    <sandbox.root>${project.basedir}/../..</sandbox.root>
+    <version.file>${sandbox.root}/controller/src/base/version.info</version.file>
+    <schema.file>${sandbox.root}/src/contrail-api-client/schema/all_cfg.xsd</schema.file>
   </properties>
 
   <repositories>
@@ -301,6 +304,7 @@
   </dependencyManagement>
 
   <build>
+
     <pluginManagement>
       <plugins>
         <plugin>
@@ -421,6 +425,26 @@
         </plugin>
 
         <plugin>
+          <groupId>org.codehaus.gmaven</groupId>
+          <artifactId>gmaven-plugin</artifactId>
+          <version>1.5</version>
+          <executions>
+            <execution>
+              <phase>generate-resources</phase>
+              <goals>
+                <goal>execute</goal>
+              </goals>
+              <configuration>
+                <source>
+                  def file = new File(project.properties['version.file'])
+                  project.properties['dist.version'] = file.getText().trim()
+                </source>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
           <groupId>org.codehaus.gmavenplus</groupId>
           <artifactId>gmavenplus-plugin</artifactId>
           <version>1.5</version>
@@ -439,6 +463,7 @@
             </execution>
           </executions>
         </plugin>
+
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
