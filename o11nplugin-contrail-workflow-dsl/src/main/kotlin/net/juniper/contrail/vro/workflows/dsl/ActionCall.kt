@@ -26,6 +26,10 @@ class ActionCall private constructor(val name: String, vararg val arguments: Str
             arguments.add("\"$string\"")
         }
 
+        fun boolean(bool: Boolean) = apply {
+            arguments.add("$bool")
+        }
+
         fun create() =
             ActionCall(name, *arguments.toTypedArray())
 

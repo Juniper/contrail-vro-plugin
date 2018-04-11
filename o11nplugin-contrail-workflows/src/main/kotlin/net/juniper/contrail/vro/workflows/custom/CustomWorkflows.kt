@@ -25,4 +25,7 @@ fun loadCustomWorkflows(schema: Schema): List<WorkflowDefinition> = mutableListO
     this += removePortTupleFromServiceInstance()
     this += createServiceInstance(schema)
     this += removeNetworkIpamSubnetWorkflow(schema)
+    this += createNetworkIpamSubnetWorkflow(schema)
+    this += addFlatIpamWorkflow(schema)
+    this += removeFlatIpamWorkflow()
 }
