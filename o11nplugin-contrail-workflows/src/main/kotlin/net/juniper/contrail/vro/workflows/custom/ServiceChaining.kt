@@ -10,6 +10,7 @@ import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.vro.config.asChildRef
 import net.juniper.contrail.vro.config.constants.maxInterfacesSupported
 import net.juniper.contrail.vro.config.constants.parent
+import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.descriptionOf
 import net.juniper.contrail.vro.config.portsForServiceInterface
 import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
@@ -66,7 +67,7 @@ internal fun removePortTupleFromServiceInstance(): WorkflowDefinition {
             description = descriptionOf<ServiceInstance>()
             mandatory = true
         }
-        parameter("portTuple", reference<PortTuple>()) {
+        parameter(item, reference<PortTuple>()) {
             description = descriptionOf<PortTuple>()
             visibility = WhenNonNull(parent)
             listedBy = actionCallTo(propertyValue).parameter(parent).string(asChildRef<PortTuple>())
