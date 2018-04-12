@@ -9,11 +9,12 @@ import net.juniper.contrail.vro.config.PropertyClass
 import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.ProjectInfo
+import net.juniper.contrail.vro.config.isApiPropertyAsObject
 
 data class CustomMappingModel (
     val findableClasses: List<ClassInfoModel>,
     val rootClasses: List<ClassInfoModel>,
-    val propertyClassNames: List<String>,
+    val propertyClasses: List<PropertyInfo>,
     val relations: List<RelationModel>,
     val forwardRelations: List<ForwardRelation>,
     val nestedRelations: List<NestedRelationModel>,
@@ -25,6 +26,13 @@ data class ClassInfoModel(
     val pluginName: String,
     val folderName: String
 )
+
+data class PropertyInfo(val simpleName: String) {
+    val isPropertyAsAObject : Boolean get() =
+        simpleName.isApiPropertyAsObject
+}
+
+fun Class<*>.toPropertyInfoClass() = PropertyInfo(simpleName)
 
 fun Class<*>.toClassInfoModel() = ClassInfoModel(
     simpleName,
@@ -43,7 +51,7 @@ fun generateCustomMappingModel(
 ) = CustomMappingModel(
     objectClasses.map { it.toClassInfoModel() },
     rootClasses.map { it.toClassInfoModel() },
-    propertyClasses.map { it.simpleName },
+    propertyClasses.map { it.toPropertyInfoClass() },
     relations.map { it.toRelationModel() },
     forwardRelations,
     nestedRelations.map { it.toNestedRelationModel() },

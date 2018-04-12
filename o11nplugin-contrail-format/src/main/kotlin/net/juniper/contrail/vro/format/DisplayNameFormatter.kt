@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.format
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.types.FloatingIp
+import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.Subnet
 
 /**
@@ -21,4 +22,7 @@ object DisplayNameFormatter {
 
     fun format(obj: ApiObjectBase):String? =
         obj.name
+
+    fun format(obj: IpamSubnetType): String? =
+        obj.subnet?.let { PropertyFormatter.format(it) }
 }

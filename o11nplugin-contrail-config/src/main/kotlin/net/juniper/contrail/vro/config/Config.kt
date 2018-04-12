@@ -10,7 +10,6 @@ import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 val modelClasses = setOf(
     the<Project>(),
     the<VirtualNetwork>(),
-    the<Subnet>(),
     the<NetworkIpam>(),
     the<FloatingIp>(),
     the<FloatingIpPool>(),
@@ -80,6 +79,7 @@ val mandatoryReference = setOf(
 
 val nonEditableReference = setOf(
     pair<VirtualMachineInterface, VirtualNetwork>(),
+    pair<VirtualNetwork, NetworkIpam>(),
     pair<ServiceInstance, ServiceTemplate>()
 )
 
@@ -100,13 +100,16 @@ val hiddenRoots = setOf(
 
 val hiddenRelations = setOf(
     pair<FloatingIp, Project>(),
-    pair<VirtualNetwork, NetworkIpam>(),
     pair<VirtualMachineInterface, PortTuple>(),
     pair<ServiceTemplate, ServiceApplianceSet>()
 )
 
 val reversedRelations = setOf(
     pair<FloatingIp, VirtualMachineInterface>()
+)
+
+val propertiesAsObjects = setOf(
+    the<IpamSubnetType>()
 )
 
 private inline fun <reified T> the() =
@@ -144,6 +147,9 @@ val String.isDirectChild get() =
 
 val String.isHiddenRoot get() =
     hiddenRoots.contains(this)
+
+val String.isApiPropertyAsObject get() =
+    propertiesAsObjects.contains(this)
 
 fun ObjectClass.isRelationMandatory(child: ObjectClass) =
     mandatoryReference.containsUnordered(simpleName, child.simpleName)
@@ -194,6 +200,12 @@ val Class<*>.isDirectChild get() =
 
 val Class<*>.isHiddenRoot get() =
     simpleName.isHiddenRoot
+
+val Class<*>.isNodeClass get() =
+    isApiObjectClass || isApiPropertyAsObject
+
+val Class<*>.isApiPropertyAsObject get() =
+    simpleName.isApiPropertyAsObject
 
 val ObjectClass.isInternal get() =
     !hasParents

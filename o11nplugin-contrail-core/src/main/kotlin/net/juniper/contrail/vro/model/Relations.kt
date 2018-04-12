@@ -7,8 +7,8 @@ package net.juniper.contrail.vro.model
 import com.vmware.o11n.sdk.modeldriven.ObjectRelater
 import com.vmware.o11n.sdk.modeldriven.PluginContext
 import com.vmware.o11n.sdk.modeldriven.Sid
-import net.juniper.contrail.api.types.Subnet
-import net.juniper.contrail.api.types.VirtualNetwork
+import net.juniper.contrail.api.types.IpamSubnetType
+import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.vro.base.ConnectionRepository
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -19,14 +19,15 @@ constructor(private val connectionRepository: ConnectionRepository) : ObjectRela
         connectionRepository.connections
 }
 
-class VirtualNetworkHasSubnet @Autowired
-constructor(private val connectionRepository: ConnectionRepository) : ObjectRelater<Subnet>
+class NetworkIpamHasSubnet @Autowired
+constructor(private val connectionRepository: ConnectionRepository) : ObjectRelater<IpamSubnetType>
 {
-    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, id: Sid): List<Subnet>? {
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, id: Sid): List<IpamSubnetType>? {
+        val vnId = id.getString("VirtualNetwork") ?: return null
         val connection = connectionRepository.getConnection(id) ?: return null
-        val ipams = connection.find<VirtualNetwork>(id)?.networkIpam ?: return null
-        return ipams.asSequence().map {
-            it.attr.ipamSubnets.asSequence().map { connection.findById<Subnet>(it.subnetUuid) }.filterNotNull()
-        }.flatten().toList()
+        val ipam = connection.find<NetworkIpam>(id) ?: return null
+        if (ipam.ipamSubnetMethod == "flat-subnet") return null
+        return ipam.virtualNetworkBackRefs.asSequence().filter { it.uuid == vnId }
+                .flatMap { it.attr.ipamSubnets.asSequence() }.toList()
     }
 }

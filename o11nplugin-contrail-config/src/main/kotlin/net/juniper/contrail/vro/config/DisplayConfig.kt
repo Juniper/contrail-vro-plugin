@@ -8,7 +8,6 @@ val hiddenProperties = setOf(
     "parentUuid",
     "parentType",
     "idPerms",
-    "ipamSubnets",
     "annotations"
 )
 
@@ -25,6 +24,7 @@ val String.isHiddenProperty get() =
 
 val String.displayedName get() = when (this) {
     "ipamSubnetMethod" -> "Subnet Method"
+    "ipamSubnets" -> "Subnets"
     else -> camelChunks.joinToString(" ") { it.cleanOrRename.capitalize() }
 }
 

@@ -72,8 +72,14 @@ class CustomMapping: AbstractMapping() {
           .withIcon(findItemIcon<${klass.simpleName}>())
         </#list>
 
-        <#list propertyClassNames as klass>
-        wrap(${klass}::class.java)
+        <#list propertyClasses as klass>
+        wrap(${klass.simpleName}::class.java)
+        <#if klass.propertyAsAObject>
+          .rename(renamePolicy)
+          .andFind()
+          .using(${klass.simpleName}Finder::class.java)
+          .withIcon(findItemIcon<${klass.simpleName}>())
+        </#if>
         </#list>
 
         <#list nestedRelations as relation>
@@ -92,11 +98,10 @@ class CustomMapping: AbstractMapping() {
             .using(RootHasConnections::class.java)
             .`as`("RootHasConnections")
 
-        relate(VirtualNetwork::class.java)
-            .to(Subnet::class.java)
-            .using(VirtualNetworkHasSubnet::class.java)
-            .`as`("VirtualNetworkToSubnet")
-            .`in`(FolderDef(folderName("Subnets", "VirtualNetwork", "Subnet"), findFolderIcon<Subnet>()))
+        relate(NetworkIpam::class.java)
+            .to(IpamSubnetType::class.java)
+            .using(NetworkIpamHasSubnet::class.java)
+            .`as`("NetworkIpamHasSubnet")
 
         <#list rootClasses as rootClass>
         relate(Connection::class.java)
