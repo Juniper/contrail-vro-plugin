@@ -271,6 +271,7 @@ class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterB
         set(value) {
             field = value?.snapshot()
         }
+    var selector: ReferenceSelector = ReferenceSelector.tree
     var browserRoot: InventoryBrowserRoot = DefaultBrowserRoot
 
     override val customQualifiers get() = super.customQualifiers.apply {
@@ -278,6 +279,7 @@ class ReferenceParameterBuilder(name: String, type: Reference) : BasicParameterB
         listedBy?.let {
             add(listFromAction(it.create(), type))
         }
+        add(selectWith(selector))
         browserRoot.ognl?.let { add(displayParentFrom(it)) }
     }
 }

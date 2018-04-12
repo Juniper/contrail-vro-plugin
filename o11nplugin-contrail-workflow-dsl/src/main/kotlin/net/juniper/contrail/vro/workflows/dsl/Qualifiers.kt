@@ -13,6 +13,7 @@ import net.juniper.contrail.vro.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.workflows.model.ParameterType
 import net.juniper.contrail.vro.workflows.model.QualifierKind
 import net.juniper.contrail.vro.workflows.model.QualifierName
+import net.juniper.contrail.vro.workflows.model.ReferenceSelector
 import net.juniper.contrail.vro.workflows.model.Regexp
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.array
@@ -73,6 +74,9 @@ fun <T : Any> listFromAction(action: ActionCall, type: ParameterType<T>) =
 
 fun validationQualifier(action: ActionCall) =
     ognlQualifier(QualifierName.ognlValidator, any, action.ognl)
+
+fun selectWith(selector: ReferenceSelector) =
+    staticQualifier(QualifierName.showSelectAs, string, selector.toString())
 
 fun displayParentFrom(ognl: String) =
     ognlQualifier(QualifierName.sdkRootObject, any, ognl)
