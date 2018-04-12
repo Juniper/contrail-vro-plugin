@@ -121,11 +121,12 @@ class Utils {
 
     fun removeSubnetFromVirtualNetwork(network: VirtualNetwork, subnet: String) {
         val ipams = network.networkIpam ?: return
-        val index = subnet.split(":")[0].toInt()
-        val ipamSubnet = ipams.flatMap { it.attr.ipamSubnets.filterNotNull() } [index]
+        val ipPrefix = parseSubnetIP(subnet)
+        val ipPrefixLen = parseSubnetPrefix(subnet).toInt()
+
         //first remove subnet from attributes
         ipams.forEach {
-            it.attr.ipamSubnets.removeIf { it == ipamSubnet }
+            it.attr.ipamSubnets.removeIf { it.subnet.ipPrefix == ipPrefix && it.subnet.ipPrefixLen == ipPrefixLen }
         }
         //then remove IPAMs if have not subnets
         ipams.removeIf {
@@ -273,12 +274,14 @@ class Utils {
         return routeString.split(":")[0].toInt()
     }
 
-    fun ipamSubnetToString(ipamSubnet: IpamSubnetType, index: Int): String = ipamSubnet.run {
-        "$index: CIDR ${subnet.ipPrefix}/${subnet.ipPrefixLen} Gateway $defaultGateway"
-    }
+    fun ipamSubnetToString(ipamSubnet: IpamSubnetType?): String? =
+        ipamSubnet?.run { "${subnet.ipPrefix}/${subnet.ipPrefixLen}" }
 
-    fun ipamSubnetStringToIndex(ipamSubnetString: String): Int =
-        ipamSubnetString.split(":")[0].toInt()
+    fun removeSubnetFromIpam(cidr: String, ipam : NetworkIpam) {
+        val ipPrefix = parseSubnetIP(cidr)
+        val ipPrefixLen = parseSubnetPrefix(cidr).toInt()
+        ipam.ipamSubnets.subnets.removeIf { it.subnet.ipPrefix == ipPrefix && it.subnet.ipPrefixLen == ipPrefixLen }
+    }
 
     fun lowercase(s: String) =
         s.toLowerCase()

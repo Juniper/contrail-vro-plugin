@@ -13,6 +13,8 @@ import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.constants.apiTypesPackageName
 import net.juniper.contrail.vro.config.isApiObjectClass
+import net.juniper.contrail.vro.config.isNodeClass
+import net.juniper.contrail.vro.config.isApiPropertyAsObject
 import net.juniper.contrail.vro.config.isApiPropertyClass
 import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.isHiddenProperty
@@ -112,6 +114,9 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
     val isObjectClass get() =
         delegate.modelClass?.isApiObjectClass ?: false
 
+    val isNodeClass get() =
+        delegate.modelClass?.isNodeClass ?: false
+
     val isConnectionChild get() =
         delegate.modelClass?.let {
             if (it.isSubclassOf<ApiObjectBase>()) {
@@ -150,6 +155,16 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
             null
     } ?: emptyList()
 
+    val customProperties: List<CustomProperty> = delegate.modelClass?.run {
+        if (isApiPropertyAsObject)
+        methods.asSequence()
+
+            .map { it.toCustomProperty() }
+            .toList()
+        else
+            null
+    } ?: emptyList()
+
     val propertyViews: List<CustomProperty> = delegate.modelClass?.run {
         if (isApiObjectClass)
         methods.asSequence()
@@ -168,6 +183,7 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         generateReferenceMethods()
         generatePropertyMethods()
         generateReferencePropertiesMethods()
+        generateCustomProperties()
     }
 
     private fun removeDuplicateMethods() {
@@ -196,6 +212,9 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
 
     private fun generateReferenceMethods() =
         references.forEach { methods.add(it.toManagedMethod()) }
+
+    private fun generateCustomProperties() =
+        customProperties.forEach { methods.add(it.toManagedMethod()) }
 
     private fun generateReferencePropertiesMethods() =
         referenceProperties.forEach { methods.add(it.toManagedMethod()) }

@@ -19,10 +19,12 @@ import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.schema.Schema
+import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
 import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
 import net.juniper.contrail.vro.workflows.util.childDescriptionInCreateRelation
-import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
-import net.juniper.contrail.vro.workflows.util.relationDescription
+import net.juniper.contrail.vro.workflows.util.removeRelationWorkflowName
+import net.juniper.contrail.vro.workflows.util.parentDescriptionInRemoveRelation
+import net.juniper.contrail.vro.workflows.util.childDescriptionInRemoveRelation
 
 val flatOnly = "flat-subnet-only"
 val userDefinedOnly = "user-defined-subnet-only"
@@ -67,17 +69,17 @@ internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
 
 internal fun addFlatIpamWorkflow(schema: Schema): WorkflowDefinition {
 
-    val workflowName = "Add network IPAM to virtual network"
+    val workflowName = schema.addRelationWorkflowName<VirtualNetwork, NetworkIpam>()
 
     return customWorkflow<VirtualNetwork>(workflowName).withScriptFile("addFlatIpamToNetwork") {
         step("References") {
             parameter(parent, reference<VirtualNetwork>()) {
-                description = "Virtual network to which network IPAM should be added to."
+                description = schema.parentDescriptionInCreateRelation<VirtualNetwork, NetworkIpam>()
                 mandatory = true
                 validWhen = networkHasNotAllocationMode(userDefinedOnly)
             }
             parameter("ipam", reference<NetworkIpam>()) {
-                description = relationDescription<VirtualNetwork, NetworkIpam>(schema)
+                description = schema.childDescriptionInCreateRelation<VirtualNetwork, NetworkIpam>()
                 mandatory = true
                 validWhen = ipamHasAllocationMode(flat, true)
             }
@@ -87,17 +89,17 @@ internal fun addFlatIpamWorkflow(schema: Schema): WorkflowDefinition {
 
 internal fun removeFlatIpamWorkflow(): WorkflowDefinition {
 
-    val workflowName = "Remove network IPAM from virtual network"
+    val workflowName = removeRelationWorkflowName<VirtualNetwork, NetworkIpam>()
 
     return customWorkflow<VirtualNetwork>(workflowName).withScriptFile("removeFlatIpamFromNetwork") {
         step("References") {
             parameter(parent, reference<VirtualNetwork>()) {
-                description = "Virtual network which network IPAM should be removed from."
+                description = parentDescriptionInRemoveRelation<VirtualNetwork, NetworkIpam>()
                 mandatory = true
                 validWhen = networkHasNotAllocationMode(userDefinedOnly)
             }
             parameter("ipam", reference<NetworkIpam>()) {
-                description = "Network IPAM to be removed"
+                description = childDescriptionInRemoveRelation<VirtualNetwork, NetworkIpam>()
                 visibility = WhenNonNull(parent)
                 browserRoot = parent.asBrowserRoot()
                 mandatory = true

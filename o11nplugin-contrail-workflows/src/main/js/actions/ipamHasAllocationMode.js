@@ -1,4 +1,4 @@
-if (!networkIpam || !mode || !expected || ((networkIpam.ipamSubnetMethod == mode) == expected)){
+if (!networkIpam || !mode || ((networkIpam.ipamSubnetMethod == mode) == expected)){
     return null;
 }
 var not = ""
