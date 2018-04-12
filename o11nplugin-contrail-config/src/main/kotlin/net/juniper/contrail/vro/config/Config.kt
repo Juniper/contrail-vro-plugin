@@ -10,7 +10,6 @@ import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 val modelClasses = setOf(
     the<Project>(),
     the<VirtualNetwork>(),
-    the<Subnet>(),
     the<NetworkIpam>(),
     the<FloatingIp>(),
     the<FloatingIpPool>(),
@@ -80,6 +79,7 @@ val mandatoryReference = setOf(
 
 val nonEditableReference = setOf(
     pair<VirtualMachineInterface, VirtualNetwork>(),
+    pair<VirtualNetwork, NetworkIpam>(),
     pair<ServiceInstance, ServiceTemplate>()
 )
 
@@ -100,7 +100,6 @@ val hiddenRoots = setOf(
 
 val hiddenRelations = setOf(
     pair<FloatingIp, Project>(),
-    pair<VirtualNetwork, NetworkIpam>(),
     pair<VirtualMachineInterface, PortTuple>(),
     pair<ServiceTemplate, ServiceApplianceSet>()
 )

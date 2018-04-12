@@ -92,29 +92,19 @@ val areValidCommunityAttributesAction = ActionDefinition (
 val serviceHasInterfaceWithNameAction = ActionDefinition(
     name = serviceHasInterfaceWithName,
     resultType = boolean,
-    parameters = listOf(
-        "serviceInstance" ofType reference<ServiceInstance>(),
-        "name" ofType string
-    )
+    parameters = listOf("serviceInstance" ofType reference<ServiceInstance>(), "name" ofType string)
 )
 
 val templateHasInterfaceWithNameAction = ActionDefinition(
     name = templateHasInterfaceWithName,
     resultType = boolean,
-    parameters = listOf(
-        "serviceTemplate" ofType reference<ServiceTemplate>(),
-        "name" ofType string
-    )
+    parameters = listOf("serviceTemplate" ofType reference<ServiceTemplate>(), "name" ofType string)
 )
 
 val ipamHasAllcationModeAction = ActionDefinition(
     name = ipamHasAllcationMode,
     resultType = string,
-    parameters = listOf(
-        "networkIpam" ofType reference<NetworkIpam>(),
-        "mode" ofType string,
-        "expected" ofType boolean
-    )
+    parameters = listOf("networkIpam" ofType reference<NetworkIpam>(), "mode" ofType string, "expected" ofType boolean)
 )
 
 val networkHasNotAllcationModeAction = ActionDefinition(
