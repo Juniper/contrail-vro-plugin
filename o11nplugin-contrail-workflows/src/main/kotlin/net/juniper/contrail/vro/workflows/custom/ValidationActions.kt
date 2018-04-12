@@ -21,7 +21,8 @@ import net.juniper.contrail.vro.config.isValidSubnet
 import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
 import net.juniper.contrail.vro.config.templateHasInterfaceWithName
 import net.juniper.contrail.vro.config.networkHasNotAllcationMode
-import net.juniper.contrail.vro.config.ipamHasAllcationMode
+import net.juniper.contrail.vro.config.ipamHasAllocationMode
+import net.juniper.contrail.vro.config.ipamHasNotAllocationMode
 import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.array
@@ -92,29 +93,25 @@ val areValidCommunityAttributesAction = ActionDefinition (
 val serviceHasInterfaceWithNameAction = ActionDefinition(
     name = serviceHasInterfaceWithName,
     resultType = boolean,
-    parameters = listOf(
-        "serviceInstance" ofType reference<ServiceInstance>(),
-        "name" ofType string
-    )
+    parameters = listOf("serviceInstance" ofType reference<ServiceInstance>(), "name" ofType string)
 )
 
 val templateHasInterfaceWithNameAction = ActionDefinition(
     name = templateHasInterfaceWithName,
     resultType = boolean,
-    parameters = listOf(
-        "serviceTemplate" ofType reference<ServiceTemplate>(),
-        "name" ofType string
-    )
+    parameters = listOf("serviceTemplate" ofType reference<ServiceTemplate>(), "name" ofType string)
 )
 
-val ipamHasAllcationModeAction = ActionDefinition(
-    name = ipamHasAllcationMode,
+val ipamHasAllocationModeAction = ActionDefinition(
+    name = ipamHasAllocationMode,
     resultType = string,
-    parameters = listOf(
-        "networkIpam" ofType reference<NetworkIpam>(),
-        "mode" ofType string,
-        "expected" ofType boolean
-    )
+    parameters = listOf("networkIpam" ofType reference<NetworkIpam>(), "mode" ofType string)
+)
+
+val ipamHasNotAllocationModeAction = ActionDefinition(
+    name = ipamHasNotAllocationMode,
+    resultType = string,
+    parameters = listOf("networkIpam" ofType reference<NetworkIpam>(), "mode" ofType string)
 )
 
 val networkHasNotAllcationModeAction = ActionDefinition(

@@ -31,6 +31,7 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += serviceHasInterfaceWithNameAction(version, packageName)
     this += templateHasInterfaceWithNameAction(version, packageName)
     this += networkIpamSubnets(version, packageName)
-    this += ipamHasAllcationModeAction(version, packageName)
+    this += ipamHasAllocationModeAction(version, packageName)
+    this += ipamHasNotAllocationModeAction(version, packageName)
     this += networkHasNotAllcationModeAction(version, packageName)
 }

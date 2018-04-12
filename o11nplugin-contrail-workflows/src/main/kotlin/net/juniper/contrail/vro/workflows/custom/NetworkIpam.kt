@@ -28,7 +28,7 @@ internal fun createNetworkIpamSubnetWorkflow(schema: Schema): WorkflowDefinition
             parameter(parent, reference<NetworkIpam>()) {
                 description = "IPAM this subnet belongs to."
                 mandatory = true
-                validWhen = ipamHasAllocationMode(flat, true)
+                validWhen = ipamHasAllocationMode(flat)
             }
         }
         ipamSubnetParameters(schema)
@@ -42,7 +42,7 @@ internal fun removeNetworkIpamSubnetWorkflow(schema: Schema): WorkflowDefinition
         parameter(item, reference<NetworkIpam>()) {
             description = relationDescription<Project, NetworkIpam>(schema)
             mandatory = true
-            validWhen = ipamHasAllocationMode(flat, true)
+            validWhen = ipamHasAllocationMode(flat)
         }
         parameter("ipamSubnet", string) {
             visibility = WhenNonNull(item)
