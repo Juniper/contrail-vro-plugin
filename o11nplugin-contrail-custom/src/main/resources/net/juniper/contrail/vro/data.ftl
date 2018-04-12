@@ -217,10 +217,6 @@ public class ${className}
 
     </#list>
 
-    public String getDisplayName() {
-        return DisplayNameFormatter.INSTANCE.format(__getTarget());
-    }
-
     <#list references as ref>
     //List returned by this method is read-only. Changes to the list will not be reflected in the state of the object.
     public java.util.List<${ref.className}_Wrapper> ${ref.pluginMethodName}() {
@@ -234,6 +230,13 @@ public class ${className}
     }
     </#list>
     </#if>
+
+    <#if nodeClass >
+    public String getDisplayName() {
+        return DisplayNameFormatter.INSTANCE.format(__getTarget());
+    }
+    </#if>
+
 
     <#list propertyViews as property>
     public String ${property.viewMethodName}() {

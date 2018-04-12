@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.config
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
+import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.vro.config.constants.apiPackageName
 import net.juniper.contrail.vro.config.constants.apiTypesPackageName
@@ -17,6 +18,12 @@ fun objectClasses() =
 
 val Class<*>.isApiObjectClass get() =
     isSubclassOf<ApiObjectBase>()
+
+val Class<*>.isNodeClass get() =
+    isApiObjectClass || isApiPropertyAsObject
+
+val Class<*>.isApiPropertyAsObject get() =
+    isA<IpamSubnetType>()
 
 val Class<*>.isApiPropertyClass get() =
     isSubclassOf<ApiPropertyBase>()
