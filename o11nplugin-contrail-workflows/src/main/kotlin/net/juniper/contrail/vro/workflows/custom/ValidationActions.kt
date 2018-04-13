@@ -7,12 +7,12 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.ServiceTemplate
+import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.areValidCommunityAttributes
 import net.juniper.contrail.vro.config.isValidAllocactionPool
 import net.juniper.contrail.vro.config.isValidCidr
 import net.juniper.contrail.vro.config.isFreeInCidr
 import net.juniper.contrail.vro.config.isInCidr
-import net.juniper.contrail.vro.config.isIpamFlat
 import net.juniper.contrail.vro.config.isValidIp
 import net.juniper.contrail.vro.config.isValidMac
 import net.juniper.contrail.vro.config.isSingleAddressNetworkPolicyRule
@@ -20,6 +20,8 @@ import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRule
 import net.juniper.contrail.vro.config.isValidSubnet
 import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
 import net.juniper.contrail.vro.config.templateHasInterfaceWithName
+import net.juniper.contrail.vro.config.networkHasNotAllcationMode
+import net.juniper.contrail.vro.config.ipamHasAllcationMode
 import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.array
@@ -105,10 +107,18 @@ val templateHasInterfaceWithNameAction = ActionDefinition(
     )
 )
 
-val isIpamFlatAction = ActionDefinition(
-    name = isIpamFlat,
+val ipamHasAllcationModeAction = ActionDefinition(
+    name = ipamHasAllcationMode,
     resultType = string,
     parameters = listOf(
-        "networkIpam" ofType reference<NetworkIpam>()
+        "networkIpam" ofType reference<NetworkIpam>(),
+        "mode" ofType string,
+        "expected" ofType boolean
     )
+)
+
+val networkHasNotAllcationModeAction = ActionDefinition(
+    name = networkHasNotAllcationMode,
+    resultType = string,
+    parameters = listOf("virtualNetwork" ofType reference<VirtualNetwork>(), "mode" ofType string)
 )
