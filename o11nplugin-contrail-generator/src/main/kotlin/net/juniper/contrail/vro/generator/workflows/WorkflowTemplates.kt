@@ -19,6 +19,7 @@ import net.juniper.contrail.vro.config.isStringListWrapper
 import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.constants.Contrail
+import net.juniper.contrail.vro.config.customValidationAction
 import net.juniper.contrail.vro.generator.model.ClassProperties
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.workflows.dsl.PresentationParametersBuilder
@@ -115,7 +116,11 @@ private fun Property.toPrimitiveParameter(builder: ParameterAggregator, schema: 
         description = description(schema)
         if (!createMode)
             dataBinding = binding()
-        additionalQualifiers += schema.simpleTypeConstraints(parent, propertyName, ignoreMissing = true)
+        val customValidationAction = propertyName.customValidationAction
+        if (customValidationAction == null)
+            additionalQualifiers += schema.simpleTypeConstraints(parent, propertyName, ignoreMissing = true)
+        else
+            validWhen = validationActionCallTo(customValidationAction)
     }
 }
 
