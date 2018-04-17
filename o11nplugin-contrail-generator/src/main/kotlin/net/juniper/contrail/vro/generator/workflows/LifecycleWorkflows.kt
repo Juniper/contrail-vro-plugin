@@ -91,13 +91,13 @@ fun editWorkflow(clazz: ObjectClass, schema: Schema): WorkflowDefinition {
 }
 
 fun editComplexPropertiesWorkflows(clazz: ObjectClass, schema: Schema) =
-    clazz.complexPropertiesInRange(2..3, schema, false)
-        .map { it.complexEditWorkflows(schema) }
+    clazz.complexPropertiesInRange(2..3, schema, false, 0)
+        .map { it.complexEditWorkflows(schema, 0) }
         .flatten()
         .toList()
 
-private fun Property.complexEditWorkflows(schema: Schema) =
-    clazz.complexPropertiesInRange(1..2, schema, false)
+private fun Property.complexEditWorkflows(schema: Schema, level: Int) =
+    clazz.complexPropertiesInRange(1..2, schema, false, level)
         .map { editComplexPropertyWorkflows(this, it, schema) }
 
 private fun editComplexPropertyWorkflows(rootProperty: Property, thisProperty: Property, schema: Schema): WorkflowDefinition {
@@ -200,13 +200,16 @@ $item.delete();
 """.trimIndent()
 
 fun Class<*>.editPropertiesCode(item: String, schema: Schema, createMode: Boolean, level: Int = 0) =
-    workflowEditableProperties.joinToString("\n") { it.editCode(item, schema, createMode, level) }
+    workflowEditableProperties.asSequence().map { it.editCode(item, schema, createMode, level) }
+        .filter { !it.isBlank() }.joinToString("\n")
 
 fun Property.editCode(item: String, schema: Schema, createMode: Boolean, level: Int) = when {
-    ! schema.propertyEditableInMode(this, createMode) -> ""
+    ! schema.propertyEditableInMode(this, createMode, level) -> ""
     (clazz.hasCustomInput || ! clazz.isApiTypeClass) && level <= maxPrimitiveLevel -> primitiveEditCode(item)
     clazz.isStringListWrapper && level <= maxPrimitiveLevel -> listEditCode(item)
-    clazz.isApiTypeClass && !clazz.hasCustomInput && (level + clazz.maxDepth(schema, createMode) <= maxComplexLevel || level == 0) -> complexEditCode(item, schema, createMode, level)
+    clazz.isApiTypeClass && !clazz.hasCustomInput &&
+        (level + clazz.maxDepth(schema, createMode, level) <= maxComplexLevel || level == 0) &&
+        ! createMode -> complexEditCode(item, schema, createMode, level)
     else -> ""
 }
 
