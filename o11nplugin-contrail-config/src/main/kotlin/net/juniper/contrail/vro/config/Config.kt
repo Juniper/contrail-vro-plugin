@@ -46,6 +46,10 @@ val nonEditableProperties = setOf(
     "networkId"
 )
 
+val customPropertyValidation = mapOf(
+    "vxlanNetworkIdentifier" to isValidVxLANId
+)
+
 val customCreateWorkflows = setOf(
     the<VirtualMachineInterface>(),
     the<FloatingIp>(),
@@ -123,6 +127,9 @@ val String.isModelClassName get() =
 
 val String.isInventoryPropertyClassName get() =
     inventoryProperties.contains(this)
+
+val String?.customValidationAction get() =
+    customPropertyValidation[this]
 
 val String.isRequiredAttribute get() =
     ! nonEssentialAttributes.contains(this)
