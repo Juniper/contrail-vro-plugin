@@ -4,13 +4,13 @@
     - name: install maven
       yum:
         name: maven
-        state: latest
+        state: present
       become: yes
 
     - name: install Java 8 JDK
       yum:
         name: java-1.8.0-openjdk-devel
-        state: latest
+        state: present
       become: yes
 
     - name: build vro plugin
@@ -18,12 +18,14 @@
       args:
         chdir: "{{ ansible_env.HOME }}/{{ packaging.target_dir }}/vro-plugin"
         creates: "{{ ansible_env.HOME }}/{{ packaging.target_dir }}/vro-plugin/dist/o11nplugin-contrail.vmoapp"
-      become: yes
-      become_user: root
+    
+    - name: Create artifacts dir
+      file:
+        path: "{{ ansible_env.HOME }}/artifacts"
+        state: directory
 
-    - name: copy vro plugin to log server
-      synchronize:
-        mode: pull
+    - name: Copy vro plugin to exported artifacts dir
+      copy:
         src: "{{ ansible_env.HOME }}/{{ packaging.target_dir }}/vro-plugin/dist/o11nplugin-contrail.vmoapp"
-        dest: "{{ zuul.executor.log_root }}/"
-      become: true
+        dest: "{{ ansible_env.HOME }}/artifacts/"
+        remote_src: true
