@@ -22,6 +22,7 @@ import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
 import net.juniper.contrail.vro.config.templateHasInterfaceWithName
 import net.juniper.contrail.vro.config.networkHasNotAllcationMode
 import net.juniper.contrail.vro.config.ipamHasAllcationMode
+import net.juniper.contrail.vro.config.isValidVxLANId
 import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.array
@@ -51,6 +52,12 @@ val subnetValidationAction = ActionDefinition(
     name = isValidSubnet,
     resultType = string,
     parameters = listOf("cidr" ofType string)
+)
+
+val vxlanIdValidationAction = ActionDefinition(
+    name = isValidVxLANId,
+    resultType = string,
+    parameters = listOf("input" ofType string)
 )
 
 val allocValidationAction = ActionDefinition (
