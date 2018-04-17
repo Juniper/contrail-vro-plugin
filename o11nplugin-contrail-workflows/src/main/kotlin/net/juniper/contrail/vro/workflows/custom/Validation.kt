@@ -15,7 +15,8 @@ import net.juniper.contrail.vro.config.isSingleAddressNetworkPolicyRule
 import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRule
 import net.juniper.contrail.vro.config.areValidCommunityAttributes
 import net.juniper.contrail.vro.config.networkHasNotAllcationMode
-import net.juniper.contrail.vro.config.ipamHasAllcationMode
+import net.juniper.contrail.vro.config.ipamHasAllocationMode
+import net.juniper.contrail.vro.config.ipamHasNotAllocationMode
 import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
 import net.juniper.contrail.vro.workflows.dsl.ReferenceParameterBuilder
 
@@ -25,8 +26,11 @@ fun BasicParameterBuilder<String>.isSubnet() =
 fun ReferenceParameterBuilder.networkHasNotAllocationMode(mode: String) =
     validationActionCallTo(networkHasNotAllcationMode).string(mode)
 
-fun ReferenceParameterBuilder.ipamHasAllocationMode(mode: String, expected: Boolean) =
-    validationActionCallTo(ipamHasAllcationMode).string(mode).boolean(expected)
+fun ReferenceParameterBuilder.ipamHasAllocationMode(mode: String) =
+    validationActionCallTo(ipamHasAllocationMode).string(mode)
+
+fun ReferenceParameterBuilder.ipamHasNotAllocationMode(mode: String) =
+    validationActionCallTo(ipamHasNotAllocationMode).string(mode)
 
 fun BasicParameterBuilder<String>.isCidr() =
     validationActionCallTo(isValidCidr)

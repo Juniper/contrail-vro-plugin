@@ -1,8 +1,4 @@
-if (!networkIpam || !mode || !expected || ((networkIpam.ipamSubnetMethod == mode) == expected)){
+if (!networkIpam || !mode || (networkIpam.ipamSubnetMethod == mode)){
     return null;
 }
-var not = ""
-if (!expected){
-    not = "not "
-}
-return "Select a network IPAM with " + not + mode + " allocation mode";
+return "Select a network IPAM with " + mode + " allocation mode";

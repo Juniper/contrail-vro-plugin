@@ -8,14 +8,14 @@ import com.vmware.o11n.sdk.modeldrivengen.model.Attribute
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedFinder
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
 import com.vmware.o11n.sdk.modeldrivengen.model.Plugin
-import net.juniper.contrail.vro.config.refWrapperPropertyDisplayName
-import net.juniper.contrail.vro.config.cleanedDisplayedProperty
-import net.juniper.contrail.vro.config.displayedName
-import net.juniper.contrail.vro.config.isRefWrapperProperty
+import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isCapitalized
 import net.juniper.contrail.vro.config.isDisplayOnlyProperty
-import net.juniper.contrail.vro.config.isModelClass
 import net.juniper.contrail.vro.config.position
+import net.juniper.contrail.vro.config.cleanedDisplayedProperty
+import net.juniper.contrail.vro.config.isRefWrapperProperty
+import net.juniper.contrail.vro.config.refWrapperPropertyDisplayName
+import net.juniper.contrail.vro.config.displayedName
 
 class CustomPlugin : Plugin() {
 
@@ -47,7 +47,7 @@ class CustomPlugin : Plugin() {
 
     private fun cleanFinders(finders: MutableList<ManagedFinder>) {
         finders.asSequence()
-            .filter { it.managedType?.modelClass?.isModelClass ?: false }
+            .filter { it.managedType?.modelClass?.isApiTypeClass ?: false }
             .forEach { it.clean() }
     }
 
