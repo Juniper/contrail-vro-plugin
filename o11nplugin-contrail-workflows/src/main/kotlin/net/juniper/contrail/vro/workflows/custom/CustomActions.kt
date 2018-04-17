@@ -22,6 +22,7 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += subnetsOfVirtualNetworkAction(version, packageName)
     this += inCidrValidationAction(version, packageName)
     this += ipValidationAction(version, packageName)
+    this += vxlanIdValidationAction(version, packageName)
     this += isFreeValidationAction(version, packageName)
     this += isSingleAddressNetworkPolicyRuleAction(version, packageName)
     this += isSingleAddressSecurityGroupRuleAction(version, packageName)
