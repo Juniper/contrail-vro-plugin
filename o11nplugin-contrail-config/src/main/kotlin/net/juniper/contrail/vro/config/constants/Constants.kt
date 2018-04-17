@@ -24,3 +24,5 @@ val supportedInterfaceNames = listOf(
     "management"
 ) + supportedOtherInterfaces
 val maxInterfacesSupported = supportedInterfaceNames.size
+
+val VxLANMaxID = 16777215

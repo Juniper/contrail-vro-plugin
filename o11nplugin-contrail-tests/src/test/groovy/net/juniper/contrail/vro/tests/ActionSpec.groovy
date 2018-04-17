@@ -18,3 +18,17 @@ abstract class ActionSpec extends Specification {
         engine.addToContext(utilsName)
     }
 }
+
+trait ValidationAsserts {
+    def validationSuccess(String result) {
+        return result == null
+    }
+
+    def validationFailure(String result) {
+        return result != null
+    }
+
+    def validationFailureWith(String result, String expected) {
+        return result == expected
+    }
+}
