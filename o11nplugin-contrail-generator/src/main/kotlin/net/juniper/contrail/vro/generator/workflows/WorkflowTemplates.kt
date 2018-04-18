@@ -152,14 +152,14 @@ private val workflowPropertiesFilter: (Property) -> Boolean =
         ! it.clazz.ignoredInWorkflow &&
         it.propertyName.isEditableProperty }
 
-fun Class<*>.maxDepth(schema: Schema, createMode: Boolean): Int =
-    properties.onlyComplex(schema, createMode)
-        .map { it.clazz.maxDepth(schema, createMode) + 1 }
+fun Class<*>.maxDepth(schema: Schema, createMode: Boolean, level: Int): Int =
+    properties.onlyComplex(schema, createMode, level)
+        .map { it.clazz.maxDepth(schema, createMode, level + 1) + 1 }
         .max() ?: 0
 
-fun Sequence<Property>.workflowProperties(schema: Schema, createMode: Boolean) =
+fun Sequence<Property>.workflowProperties(schema: Schema, createMode: Boolean, level: Int) =
     filter(workflowPropertiesFilter)
-    .filter { schema.propertyEditableInMode(it, createMode) }
+    .filter { schema.propertyEditableInMode(it, createMode, level) }
 
 val Property.isPrimitiveProperty get() =
     clazz.hasCustomInput || clazz.hasOnlyListOfStrings || ! clazz.isApiTypeClass
@@ -167,36 +167,36 @@ val Property.isPrimitiveProperty get() =
 val Property.isComplexProperty get() =
     ! isPrimitiveProperty
 
-fun Sequence<Property>.onlyPrimitives(schema: Schema, createMode: Boolean) =
-    workflowProperties(schema, createMode)
+fun Sequence<Property>.onlyPrimitives(schema: Schema, createMode: Boolean, level: Int) =
+    workflowProperties(schema, createMode, level)
     .filter { it.isPrimitiveProperty }
 
-fun ClassProperties.onlyPrimitives(schema: Schema, createMode: Boolean) =
-    simpleProperties.asSequence().onlyPrimitives(schema, createMode).toList()
+fun ClassProperties.onlyPrimitives(schema: Schema, createMode: Boolean, level: Int) =
+    simpleProperties.asSequence().onlyPrimitives(schema, createMode, level).toList()
 
-fun Sequence<Property>.onlyComplex(schema: Schema, createMode: Boolean) =
-    workflowProperties(schema, createMode)
+fun Sequence<Property>.onlyComplex(schema: Schema, createMode: Boolean, level: Int) =
+    workflowProperties(schema, createMode, level)
     .filter { it.isComplexProperty }
-    .filter { it.isNonEmptyComplexProperty(schema, createMode) }
+    .filter { it.isNonEmptyComplexProperty(schema, createMode, level) }
 
-fun Property.isNonEmptyComplexProperty(schema: Schema, createMode: Boolean): Boolean =
+fun Property.isNonEmptyComplexProperty(schema: Schema, createMode: Boolean, level: Int): Boolean =
     isComplexProperty && clazz.properties.run {
-        onlyPrimitives(schema, createMode).isNotEmpty() ||
-        onlyComplex(schema, createMode).any { it.isNonEmptyComplexProperty(schema, createMode) }
+        onlyPrimitives(schema, createMode, level + 1).isNotEmpty() ||
+        onlyComplex(schema, createMode, level + 1).any { it.isNonEmptyComplexProperty(schema, createMode, level + 1) }
     }
 
-fun ClassProperties.onlyComplex(schema: Schema, createMode: Boolean) =
-    simpleProperties.asSequence().onlyComplex(schema, createMode).toList()
+fun ClassProperties.onlyComplex(schema: Schema, createMode: Boolean, level: Int) =
+    simpleProperties.asSequence().onlyComplex(schema, createMode, level).toList()
 
-fun Class<*>.complexPropertiesInRange(range: IntRange, schema: Schema, createMode: Boolean) =
+fun Class<*>.complexPropertiesInRange(range: IntRange, schema: Schema, createMode: Boolean, level: Int) =
     properties.properties.asSequence()
         .filter(workflowPropertiesFilter)
         .filter { ! it.isList }
-        .filter { it.clazz.maxDepth(schema, createMode) in range }
+        .filter { it.clazz.maxDepth(schema, createMode, level + 1) in range }
 
-fun Schema.propertyEditableInMode(property: Property, createMode: Boolean) =
+fun Schema.propertyEditableInMode(property: Property, createMode: Boolean, level: Int) =
     crudStatus(property.declaringClass, property.propertyName).run {
-        if (createMode) isCreateOnly else isUpdate
+        if (createMode) isCreateOnly || level > 0 else isUpdate
     }
 
 fun String.preparePrefix(): String = when {
@@ -212,8 +212,8 @@ fun PresentationParametersBuilder.addProperties(
     propertyPrefix: String = "",
     extraVisibility: VisibilityCondition = AlwaysVisible) {
     val properties = clazz.properties
-    val topPrimitives = properties.onlyPrimitives(schema, createMode)
-    val topComplex = properties.onlyComplex(schema, createMode)
+    val topPrimitives = properties.onlyPrimitives(schema, createMode, 0)
+    val topComplex = properties.onlyComplex(schema, createMode, 0)
 
     val propertyPath = propertyPrefix.preparePrefix()
 
@@ -236,10 +236,10 @@ fun PresentationParametersBuilder.addProperties(
 
     for (prop in topComplex) {
         val propProperties = prop.clazz.properties
-        val primitives = propProperties.onlyPrimitives(schema, createMode)
-        val complex = propProperties.onlyComplex(schema, createMode)
-            .filter { it.clazz.maxDepth(schema, createMode) < 1 }
-            .filter { it.clazz.properties.onlyPrimitives(schema, createMode).isNotEmpty() }
+        val primitives = propProperties.onlyPrimitives(schema, createMode, 1)
+        val complex = propProperties.onlyComplex(schema, createMode, 1)
+            .filter { it.clazz.maxDepth(schema, createMode, 1) < 1 }
+            .filter { it.clazz.properties.onlyPrimitives(schema, createMode, 1).isNotEmpty() }
 
         when {
             primitives.isEmpty() && !complex.isEmpty() -> groups(prop.title) {
@@ -252,7 +252,7 @@ fun PresentationParametersBuilder.addProperties(
                     group(propProp.title) {
                         description = schema.propertyDescription(propProp.parent, propProp.propertyName)
                         visibility = FromBooleanParameter(propProp.propertyName.condition)
-                        propProp.clazz.properties.onlyPrimitives(schema, createMode)
+                        propProp.clazz.properties.onlyPrimitives(schema, createMode, 2)
                             .buildParameters(this@group, schema, createMode) {
                                 "$propertyPath${prop.propertyName}.${propProp.propertyName}"
                             }
@@ -281,7 +281,7 @@ fun PresentationParametersBuilder.addProperties(
                     group(propProp.title) {
                         visibility = FromBooleanParameter(propProp.propertyName.condition)
                         description = schema.propertyDescription(propProp.parent, propProp.propertyName)
-                        propProp.clazz.properties.onlyPrimitives(schema, createMode)
+                        propProp.clazz.properties.onlyPrimitives(schema, createMode, 2)
                             .buildParameters(this@group, schema, createMode) {
                                 "$propertyPath${prop.propertyName}.${propProp.propertyName}"
                             }
