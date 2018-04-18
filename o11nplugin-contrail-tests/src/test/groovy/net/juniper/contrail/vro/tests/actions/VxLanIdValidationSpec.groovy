@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.tests
+package net.juniper.contrail.vro.tests.actions
 
 import static net.juniper.contrail.vro.config.ActionsKt.isValidVxLANId
 import static net.juniper.contrail.vro.config.constants.ConstantsKt.getVxLANMaxID

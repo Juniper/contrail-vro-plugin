@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.tests
 
 import net.juniper.contrail.vro.model.Utils
+import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.model.Action
 import javax.script.Invocable
 import javax.script.ScriptContext
@@ -59,14 +60,27 @@ class ScriptTestEngine {
         evalFunction(actions.getActionByName(name).provisionActionFunction(varName))
         return varName
     }
+
+    fun getFunctionFromWorkflowScript(workflows: List<WorkflowDefinition>, name: String) : String {
+        val varName = nextVarName()
+        evalFunction(workflows.getWorkflowByName(name).provisionWorkflowFunction(varName))
+        return varName
+    }
 }
 
 fun List<Action>.getActionByName(name: String) : Action =
     find { it.name == name } ?: throw IllegalArgumentException()
 
+fun List<WorkflowDefinition>.getWorkflowByName(name: String) : WorkflowDefinition =
+    find { it.displayName == name } ?: throw IllegalArgumentException()
+
 fun Action.provisionActionFunction(name : String) : String =
     """ var $name = function(${parameters.joinToString ( ", " ) { it.name }}) {
         ${script.rawString}};"""
+
+fun WorkflowDefinition.provisionWorkflowFunction(name: String) : String =
+    """ var $name = function(${input.parameters.joinToString ( ", " ) { it.name }}) {
+        $scriptString};"""
 
 fun String.getValue() : Any? =
     when (this) {
