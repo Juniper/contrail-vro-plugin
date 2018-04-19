@@ -35,4 +35,5 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += ipamHasAllocationModeAction(version, packageName)
     this += ipamHasNotAllocationModeAction(version, packageName)
     this += networkHasNotAllcationModeAction(version, packageName)
+    this += propertyOfObjectRule(version, packageName)
 }

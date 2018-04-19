@@ -14,21 +14,25 @@ import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.networkPolicyRules
-import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.schema.propertyDescription
+import net.juniper.contrail.vro.schema.simpleTypeConstraints
+import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
 import net.juniper.contrail.vro.workflows.dsl.FromBooleanParameter
+import net.juniper.contrail.vro.workflows.dsl.FromListPropertyValue
 import net.juniper.contrail.vro.workflows.dsl.FromStringParameter
+import net.juniper.contrail.vro.workflows.dsl.PresentationParametersBuilder
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
+import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.dsl.and
+import net.juniper.contrail.vro.workflows.dsl.fromRuleProperty
 import net.juniper.contrail.vro.workflows.dsl.or
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.number
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.schema.Schema
-import net.juniper.contrail.vro.schema.propertyDescription
-import net.juniper.contrail.vro.schema.simpleTypeConstraints
 import net.juniper.contrail.vro.workflows.util.propertyDescription
 import net.juniper.contrail.vro.workflows.util.relationDescription
 
@@ -43,8 +47,6 @@ private val defaultProtocol = "any"
 private val allowedProtocols = listOf("any", "tcp", "udp", "icmp", "icmp6")
 private val defaultAddressType = "Network"
 private val allowedAddressTypes = listOf("CIDR", "Network", "Policy", "Security Group")
-private val defaultDirection = "<>"
-private val allowedDirections = listOf("<>", ">")
 private val defaultMirrorType = "Analyzer Instance"
 private val allowedMirrorTypes = listOf("Analyzer Instance", "NIC Assisted", "Analyzer IP")
 private val defaultJuniperHeaderOption = "enabled"
@@ -60,224 +62,306 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
 
     return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("addRuleToPolicy") {
         step("Parent policy") {
-            parameter("parent", reference<NetworkPolicy>()) {
+            parameter(parent, reference<NetworkPolicy>()) {
                 description = relationDescription<Project, NetworkPolicy>(schema)
                 mandatory = true
             }
         }
-        step("Basic attributes") {
-            visibility = WhenNonNull("parent")
-            parameter("simpleAction", string) {
-                description = propertyDescription<ActionListType>(schema)
-                additionalQualifiers += schema.simpleTypeConstraints<ActionListType>("simpleAction")
-            }
-            parameter("protocol", string) {
-                description = propertyDescription<PolicyRuleType>(schema)
+        policyRuleParameters(schema, "parent", false)
+    }
+}
+
+internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
+    val workflowName = "Edit rule of network policy"
+
+    return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("editPolicyRule") {
+        step("Rule") {
+            parameter(parent, reference<NetworkPolicy>()) {
+                description = relationDescription<Project, NetworkPolicy>(schema)
                 mandatory = true
-                defaultValue = defaultProtocol
-                predefinedAnswers = allowedProtocols
             }
-            parameter("direction", string) {
-                // direction has no description in the schema
-                description = "Direction"
-                mandatory = true
-                additionalQualifiers += schema.simpleTypeConstraints<PolicyRuleType>("direction")
+            parameter("rule", string) {
+                visibility = WhenNonNull(parent)
+                description = "Rule to edit"
+                predefinedAnswersFrom = actionCallTo(networkPolicyRules).parameter(parent)
+                validWhen = isSingleAddressNetworkPolicyRuleOf(parent)
             }
         }
-        step("Addresses") {
-            visibility = WhenNonNull("parent")
-            parameter(sourceAddressTypeParameterName, string) {
-                description = "Traffic Source"
-                mandatory = true
-                defaultValue = defaultAddressType
-                predefinedAnswers = allowedAddressTypes
-            }
-            parameter("srcAddressCidr", string) {
-                description = schema.propertyDescription<AddressType>("subnet")
-                mandatory = true
-                visibility = FromStringParameter(sourceAddressTypeParameterName, "CIDR")
-            }
-            parameter("srcAddressNetworkType", string) {
-                description = "Type of source network address"
-                mandatory = true
-                visibility = FromStringParameter(sourceAddressTypeParameterName, "Network")
-                defaultValue = defaultNetworkType
-                predefinedAnswers = allowedNetworkTypes
-            }
-            parameter("srcAddressNetwork", reference<VirtualNetwork>()) {
-                description = schema.propertyDescription<AddressType>("virtual_network")
-                mandatory = true
-                visibility = FromStringParameter("srcAddressNetworkType", "reference")
-            }
-            parameter("srcAddressPolicy", reference<NetworkPolicy>()) {
-                description = schema.propertyDescription<AddressType>("network-policy")
-                mandatory = true
-                visibility = FromStringParameter(sourceAddressTypeParameterName, "Policy")
-            }
-            parameter("srcAddressSecurityGroup", reference<SecurityGroup>()) {
-                description = schema.propertyDescription<AddressType>("security-group")
-                mandatory = true
-                visibility = FromStringParameter(sourceAddressTypeParameterName, "Security Group")
-            }
-            parameter("srcPorts", string) {
-                description = propertyDescription<PolicyRuleType>(schema)
-                mandatory = true
-                defaultValue = defaultPort
-            }
-            parameter(destinationAddressTypeParameterName, string) {
-                description = "Traffic Destination"
-                mandatory = true
-                defaultValue = defaultAddressType
-                predefinedAnswers = allowedAddressTypes
-            }
-            parameter("dstAddressCidr", string) {
-                description = schema.propertyDescription<AddressType>("subnet")
-                mandatory = true
-                visibility = FromStringParameter(destinationAddressTypeParameterName, "CIDR")
-            }
-            parameter("dstAddressNetworkType", string) {
-                description = "Type of destination network address"
-                mandatory = true
-                visibility = FromStringParameter(destinationAddressTypeParameterName, "Network")
-                defaultValue = defaultNetworkType
-                predefinedAnswers = allowedNetworkTypes
-            }
-            parameter("dstAddressNetwork", reference<VirtualNetwork>()) {
-                description = schema.propertyDescription<AddressType>("virtual_network")
-                mandatory = true
-                visibility = FromStringParameter("dstAddressNetworkType", "reference")
-            }
-            parameter("dstAddressPolicy", reference<NetworkPolicy>()) {
-                description = schema.propertyDescription<AddressType>("network-policy")
-                mandatory = true
-                visibility = FromStringParameter(destinationAddressTypeParameterName, "Policy")
-            }
-            parameter("dstAddressSecurityGroup", reference<SecurityGroup>()) {
-                description = schema.propertyDescription<AddressType>("security-group")
-                mandatory = true
-                visibility = FromStringParameter(destinationAddressTypeParameterName, "Security Group")
-            }
-            parameter("dstPorts", string) {
-                description = propertyDescription<PolicyRuleType>(schema)
-                mandatory = true
-                defaultValue = defaultPort
-            }
+        policyRuleParameters(schema, "rule", true)
+    }
+}
+
+private fun PresentationParametersBuilder.policyRuleParameters(schema: Schema, visibilityDependencyField: String, loadCurrentValues: Boolean) {
+    val policyRuleListGetter = "getEntries().getPolicyRule()"
+
+    step("Basic attributes") {
+        visibility = WhenNonNull(visibilityDependencyField)
+        parameter("simpleAction", string) {
+            description = propertyDescription<ActionListType>(schema)
+            additionalQualifiers += schema.simpleTypeConstraints<ActionListType>("simpleAction")
+            if (loadCurrentValues) dataBinding = FromListPropertyValue(
+                parent,
+                "rule",
+                policyRuleListGetter,
+                "getActionList().getSimpleAction()",
+                string)
         }
-        step("Advanced Options") {
-            visibility = WhenNonNull("parent")
-            parameter("log", boolean) {
-                description = propertyDescription<ActionListType>(schema)
-                mandatory = true
-                defaultValue = false
-            }
-            parameter(defineServicesParameterName, boolean) {
-                description = "Services"
-                mandatory = true
-                defaultValue = false
-            }
+        parameter("protocol", string) {
+            description = propertyDescription<PolicyRuleType>(schema)
+            mandatory = true
+            defaultValue = defaultProtocol
+            predefinedAnswers = allowedProtocols
+            if (loadCurrentValues) dataBinding = FromListPropertyValue(
+                parent,
+                "rule",
+                policyRuleListGetter,
+                "protocol",
+                string)
+        }
+        parameter("direction", string) {
+            // direction has no description in the schema
+            description = "Direction"
+            mandatory = true
+            additionalQualifiers += schema.simpleTypeConstraints<PolicyRuleType>("direction")
+            if (loadCurrentValues) dataBinding = FromListPropertyValue(
+                parent,
+                "rule",
+                policyRuleListGetter,
+                "direction",
+                string)
+        }
+    }
 
-            parameter(defineMirrorParameterName, boolean) {
-                description = "Mirror"
-                mandatory = true
-                defaultValue = false
-            }
+    step("Addresses") {
+        visibility = WhenNonNull(visibilityDependencyField)
+        parameter(sourceAddressTypeParameterName, string) {
+            description = "Traffic Source"
+            mandatory = true
+            defaultValue = defaultAddressType
+            predefinedAnswers = allowedAddressTypes
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("srcSubnet", string) {
+            description = schema.propertyDescription<AddressType>("subnet")
+            mandatory = true
+            visibility = FromStringParameter(sourceAddressTypeParameterName, "CIDR")
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("srcVirtualNetworkType", string) {
+            description = "Type of source network address"
+            mandatory = true
+            visibility = FromStringParameter(sourceAddressTypeParameterName, "Network")
+            defaultValue = defaultNetworkType
+            predefinedAnswers = allowedNetworkTypes
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("srcVirtualNetwork", reference<VirtualNetwork>()) {
+            description = schema.propertyDescription<AddressType>("virtual_network")
+            mandatory = true
+            visibility = FromStringParameter("srcAddressNetworkType", "reference")
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("srcNetworkPolicy", reference<NetworkPolicy>()) {
+            description = schema.propertyDescription<AddressType>("network-policy")
+            mandatory = true
+            visibility = FromStringParameter(sourceAddressTypeParameterName, "Policy")
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("srcSecurityGroup", reference<SecurityGroup>()) {
+            description = schema.propertyDescription<AddressType>("security-group")
+            mandatory = true
+            visibility = FromStringParameter(sourceAddressTypeParameterName, "Security Group")
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("srcPorts", string) {
+            description = propertyDescription<PolicyRuleType>(schema)
+            mandatory = true
+            defaultValue = defaultPort
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter(destinationAddressTypeParameterName, string) {
+            description = "Traffic Destination"
+            mandatory = true
+            defaultValue = defaultAddressType
+            predefinedAnswers = allowedAddressTypes
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("dstSubnet", string) {
+            description = schema.propertyDescription<AddressType>("subnet")
+            mandatory = true
+            visibility = FromStringParameter(destinationAddressTypeParameterName, "CIDR")
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("dstVirtualNetworkType", string) {
+            description = "Type of destination network address"
+            mandatory = true
+            visibility = FromStringParameter(destinationAddressTypeParameterName, "Network")
+            defaultValue = defaultNetworkType
+            predefinedAnswers = allowedNetworkTypes
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("dstVirtualNetwork", reference<VirtualNetwork>()) {
+            description = schema.propertyDescription<AddressType>("virtual_network")
+            mandatory = true
+            visibility = FromStringParameter("dstAddressNetworkType", "reference")
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("dstNetworkPolicy", reference<NetworkPolicy>()) {
+            description = schema.propertyDescription<AddressType>("network-policy")
+            mandatory = true
+            visibility = FromStringParameter(destinationAddressTypeParameterName, "Policy")
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("dstSecurityGroup", reference<SecurityGroup>()) {
+            description = schema.propertyDescription<AddressType>("security-group")
+            mandatory = true
+            visibility = FromStringParameter(destinationAddressTypeParameterName, "Security Group")
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("dstPorts", string) {
+            description = propertyDescription<PolicyRuleType>(schema)
+            mandatory = true
+            defaultValue = defaultPort
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+    }
+
+    step("Advanced Options") {
+        visibility = WhenNonNull(visibilityDependencyField)
+        parameter("log", boolean) {
+            description = propertyDescription<ActionListType>(schema)
+            mandatory = true
+            defaultValue = false
+            if (loadCurrentValues) dataBinding = FromListPropertyValue(
+                parent,
+                "rule",
+                policyRuleListGetter,
+                "getActionList().log",
+                boolean)
+        }
+        parameter(defineServicesParameterName, boolean) {
+            description = "Services"
+            mandatory = true
+            defaultValue = false
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
         }
 
-        step("Services") {
-            visibility = FromBooleanParameter(defineServicesParameterName)
-            parameter("serviceInstances", array(reference<ServiceInstance>())) {
-                description = "Service instances"
-                mandatory = true
-            }
+        parameter(defineMirrorParameterName, boolean) {
+            description = "Mirror"
+            mandatory = true
+            defaultValue = false
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
         }
+    }
 
-        step("Mirror") {
-            visibility = FromBooleanParameter(defineMirrorParameterName)
+    step("Services") {
+        visibility = FromBooleanParameter(defineServicesParameterName)
+        parameter("services", array(reference<ServiceInstance>())) {
+            description = "Service instances"
+            mandatory = true
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+    }
 
-            val mirrorIsAnalyzerInstance = FromStringParameter(mirrorTypeParameterName, "Analyzer Instance")
-            val mirrorIsAnalyzerIp = FromStringParameter(mirrorTypeParameterName, "Analyzer IP")
-            val mirrorIsNicAssisted = FromStringParameter(mirrorTypeParameterName, "NIC Assisted")
-            val juniperHeaderIsDisabled = FromStringParameter("juniperHeader", "disabled")
-            val nextHopModeIsStatic = FromStringParameter("nexthopMode", "static")
+    step("Mirror") {
+        visibility = FromBooleanParameter(defineMirrorParameterName)
 
-            parameter(mirrorTypeParameterName, string) {
-                description = "Mirror Type"
-                mandatory = true
-                defaultValue = defaultMirrorType
-                predefinedAnswers = allowedMirrorTypes
-            }
-            parameter("analyzerInstance", reference<ServiceInstance>()) {
-                description = "Analyzer Instance"
-                mandatory = true
-                visibility = mirrorIsAnalyzerInstance
-            }
-            parameter("analyzerName", string) {
-                description = "Analyzer Name"
-                mandatory = true
-                visibility = mirrorIsNicAssisted or mirrorIsAnalyzerIp
-            }
-            parameter("nicAssistedVlan", number) {
-                description = "NIC Assisted VLAN"
-                mandatory = true
-                min = 1
-                max = 4094
-                visibility = mirrorIsNicAssisted
-            }
-            parameter("analyzerIP", string) {
-                description = "Analyzer IP"
-                mandatory = true
-                visibility = mirrorIsAnalyzerIp
-            }
-            parameter("analyzerMac", string) {
-                description = "Analyzer MAC"
-                mandatory = true
-                visibility = mirrorIsAnalyzerIp
-            }
-            parameter("udpPort", number) {
-                description = "UDP Port"
-                mandatory = true
-                visibility = mirrorIsAnalyzerIp
-            }
-            parameter("juniperHeader", string) {
-                description = "Juniper Header"
-                mandatory = true
-                defaultValue = defaultJuniperHeaderOption
-                predefinedAnswers = allowedJuniperHeaderOptions
-                visibility = mirrorIsAnalyzerIp
-            }
-            parameter("routingInstance", reference<VirtualNetwork>()) {
-                description = "Routing Instance"
-                mandatory = true
-                visibility = mirrorIsAnalyzerIp and juniperHeaderIsDisabled
-            }
-            parameter("nexthopMode", string) {
-                description = "Nexthop Mode"
-                mandatory = true
-                defaultValue = defaultNexthopMode
-                predefinedAnswers = allowedNexthopModes
-                visibility = mirrorIsAnalyzerIp
-            }
-            parameter("vtepDestIp", string) {
-                description = "VTEP Dest IP"
-                mandatory = true
-                visibility = mirrorIsAnalyzerIp and nextHopModeIsStatic
-            }
-            parameter("vtepDestMac", string) {
-                description = "VTEP Dest MAC"
-                mandatory = true
-                visibility = mirrorIsAnalyzerIp and nextHopModeIsStatic
-            }
-            parameter("vni", number) {
-                description = "VxLAN ID"
-                mandatory = true
-                visibility = mirrorIsAnalyzerIp and nextHopModeIsStatic
-            }
+        val mirrorIsAnalyzerInstance = FromStringParameter(mirrorTypeParameterName, "Analyzer Instance")
+        val mirrorIsAnalyzerIp = FromStringParameter(mirrorTypeParameterName, "Analyzer IP")
+        val mirrorIsNicAssisted = FromStringParameter(mirrorTypeParameterName, "NIC Assisted")
+        val juniperHeaderIsDisabled = FromStringParameter("juniperHeader", "disabled")
+        val nextHopModeIsStatic = FromStringParameter("nexthopMode", "static")
+
+        parameter(mirrorTypeParameterName, string) {
+            description = "Mirror Type"
+            mandatory = true
+            defaultValue = defaultMirrorType
+            predefinedAnswers = allowedMirrorTypes
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("mirrorAnalyzerInstance", reference<ServiceInstance>()) {
+            description = "Analyzer Instance"
+            mandatory = true
+            visibility = mirrorIsAnalyzerInstance
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("mirrorAnalyzerName", string) {
+            description = "Analyzer Name"
+            mandatory = true
+            visibility = mirrorIsNicAssisted or mirrorIsAnalyzerIp
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("mirrorNicAssistedVlan", number) {
+            description = "NIC Assisted VLAN"
+            mandatory = true
+            min = 1
+            max = 4094
+            visibility = mirrorIsNicAssisted
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("mirrorAnalyzerIP", string) {
+            description = "Analyzer IP"
+            mandatory = true
+            visibility = mirrorIsAnalyzerIp
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("mirrorAnalyzerMac", string) {
+            description = "Analyzer MAC"
+            mandatory = true
+            visibility = mirrorIsAnalyzerIp
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("mirrorUdpPort", number) {
+            description = "UDP Port"
+            mandatory = true
+            visibility = mirrorIsAnalyzerIp
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("mirrorJuniperHeader", string) {
+            description = "Juniper Header"
+            mandatory = true
+            defaultValue = defaultJuniperHeaderOption
+            predefinedAnswers = allowedJuniperHeaderOptions
+            visibility = mirrorIsAnalyzerIp
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("mirrorRoutingInstance", reference<VirtualNetwork>()) {
+            description = "Routing Instance"
+            mandatory = true
+            visibility = mirrorIsAnalyzerIp and juniperHeaderIsDisabled
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("mirrorNexthopMode", string) {
+            description = "Nexthop Mode"
+            mandatory = true
+            defaultValue = defaultNexthopMode
+            predefinedAnswers = allowedNexthopModes
+            visibility = mirrorIsAnalyzerIp
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("mirrorVtepDestIp", string) {
+            description = "VTEP Dest IP"
+            mandatory = true
+            visibility = mirrorIsAnalyzerIp and nextHopModeIsStatic
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("mirrorVtepDestMac", string) {
+            description = "VTEP Dest MAC"
+            mandatory = true
+            visibility = mirrorIsAnalyzerIp and nextHopModeIsStatic
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
+        }
+        parameter("mirrorVni", number) {
+            description = "VxLAN ID"
+            mandatory = true
+            visibility = mirrorIsAnalyzerIp and nextHopModeIsStatic
+            if (loadCurrentValues) dataBinding = networkPolicyRulePropertyDataBinding()
         }
     }
 }
 
 internal fun removePolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Remove network policy rule"
+    val workflowName = "Remove rule from network policy"
 
     return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("removeRuleFromPolicy") {
         parameter(parent, reference<NetworkPolicy>()) {
@@ -292,3 +376,8 @@ internal fun removePolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
         }
     }
 }
+
+// default is capitalized to fit the camelCase function name
+// e.g. srcPorts -> rulePropertySrcPorts
+private fun<T: Any> BasicParameterBuilder<T>.networkPolicyRulePropertyDataBinding() =
+    fromRuleProperty(parent, "rule", parameterName.capitalize(), type)
