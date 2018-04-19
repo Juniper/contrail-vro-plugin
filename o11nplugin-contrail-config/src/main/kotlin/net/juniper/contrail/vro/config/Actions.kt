@@ -10,7 +10,6 @@ val String.vCenterRelatedPackage get() =
     "$this.vc"
 
 val areValidCommunityAttributes = "areValidCommunityAttributes"
-val listPropertyValue = "listPropertyValue"
 val isValidAllocactionPool = "isValidAllocationPool"
 val isValidCidr = "isValidCidr"
 val isFreeInCidr = "isFreeInCidr"
@@ -37,5 +36,6 @@ val serviceInstanceInterfaceNames = "serviceInstanceInterfaceNames"
 val ipamHasAllocationMode = "ipamHasAllocationMode"
 val ipamHasNotAllocationMode = "ipamHasNotAllocationMode"
 val networkHasNotAllcationMode = "networkHasNotAllocationMode"
+val propertyOfObjectRule = "propertyOfObjectRule"
 
 val portOfVCVirtualMachine = "portOfVCVirtualMachine"

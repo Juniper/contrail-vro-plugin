@@ -15,7 +15,6 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += macValidationAction(version, packageName)
     this += subnetValidationAction(version, packageName)
     this += readSubnetAction(version, packageName)
-    this += listPropertyAction(version, packageName)
     this += networkOfServiceInterfaceAction(version, packageName)
     this += networkPolicyRulesAction(version, packageName)
     this += portsForServiceInterfaceAction(version, packageName)
@@ -36,6 +35,7 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += ipamHasAllocationModeAction(version, packageName)
     this += ipamHasNotAllocationModeAction(version, packageName)
     this += networkHasNotAllcationModeAction(version, packageName)
+    this += propertyOfObjectRule(version, packageName)
 
     this += portOfVCVirtualMachineAction(version, packageName.vCenterRelatedPackage)
 }

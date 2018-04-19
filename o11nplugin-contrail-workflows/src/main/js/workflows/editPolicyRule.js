@@ -1,12 +1,24 @@
-var ruleUuid = ContrailUtils.randomUUID();
+var index = ContrailUtils.ruleStringToIndex(rule);
+var theRule = parent.entries.policyRule[index];
 
-var parsedSrcPorts = ContrailUtils.parsePortsOfNetworkPolicyRule(srcPorts);
-var parsedDstPorts = ContrailUtils.parsePortsOfNetworkPolicyRule(dstPorts);
+theRule.protocol = protocol;
+theRule.direction = direction;
 
-var srcAddr = [ContrailUtils.createAddress(srcAddressType, srcSubnet, srcVirtualNetworkType, srcVirtualNetwork, srcNetworkPolicy, srcSecurityGroup)];
-var dstAddr = [ContrailUtils.createAddress(dstAddressType, dstSubnet, dstVirtualNetworkType, dstVirtualNetwork, dstNetworkPolicy, dstSecurityGroup)];
+theRule.clearSrcPorts();
+theRule.clearDstPorts();
+ContrailUtils.parsePortsOfNetworkPolicyRule(srcPorts).forEach(function(port) {
+   theRule.addSrcPorts(port);
+});
+ContrailUtils.parsePortsOfNetworkPolicyRule(dstPorts).forEach(function(port) {
+   theRule.addDstPorts(port);
+});
 
-var application = [];
+theRule.clearSrcAddresses();
+theRule.clearDstAddresses();
+var srcAddress = ContrailUtils.createAddress(srcAddressType, srcSubnet, srcVirtualNetworkType, srcVirtualNetwork, srcNetworkPolicy, srcSecurityGroup);
+var dstAddress = ContrailUtils.createAddress(dstAddressType, dstSubnet, dstVirtualNetworkType, dstVirtualNetwork, dstNetworkPolicy, dstSecurityGroup);
+theRule.addSrcAddresses(srcAddress);
+theRule.addDstAddresses(dstAddress);
 
 var mirrorAction = null;
 if (defineMirror) {
@@ -47,12 +59,6 @@ if (services != null) {
 }
 actions.setMirrorTo(mirrorAction);
 
-var rule = new ContrailPolicyRuleType(null, ruleUuid, direction, protocol, srcAddr, parsedSrcPorts, application, dstAddr, parsedDstPorts, actions);
-var rules = parent.getEntries();
-if (!rules) {
-    rules = new ContrailPolicyEntriesType();
-    parent.setEntries(rules);
-}
-rules.addPolicyRule(rule);
+theRule.setActionList(actions);
 
 parent.update();

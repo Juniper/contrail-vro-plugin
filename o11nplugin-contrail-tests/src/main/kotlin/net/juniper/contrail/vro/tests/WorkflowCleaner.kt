@@ -81,7 +81,7 @@ fun JsonObject.getCategoryId(): String? {
 
 fun main(args: Array<String>) {
     if (args.isEmpty()) {
-        throw IllegalArgumentException("Orchestrator hostname must be passes as the first argument.")
+        throw IllegalArgumentException("Orchestrator hostname must be passed as the first argument.")
     }
     disableCertificateValidation()
     val url = "https://${args[0]}:8281"

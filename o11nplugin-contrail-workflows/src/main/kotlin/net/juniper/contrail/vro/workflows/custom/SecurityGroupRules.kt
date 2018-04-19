@@ -8,17 +8,22 @@ import net.juniper.contrail.api.types.AddressType
 import net.juniper.contrail.api.types.PolicyRuleType
 import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.SecurityGroup
+import net.juniper.contrail.vro.config.constants.egress
+import net.juniper.contrail.vro.config.constants.ingress
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.networkPolicyRules
-import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.dsl.FromStringParameter
-import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
-import net.juniper.contrail.vro.workflows.dsl.actionCallTo
-import net.juniper.contrail.vro.workflows.model.reference
-import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.schema.propertyDescription
 import net.juniper.contrail.vro.schema.simpleTypeConstraints
+import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
+import net.juniper.contrail.vro.workflows.dsl.FromStringParameter
+import net.juniper.contrail.vro.workflows.dsl.PresentationParametersBuilder
+import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
+import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.actionCallTo
+import net.juniper.contrail.vro.workflows.dsl.fromRuleProperty
+import net.juniper.contrail.vro.workflows.model.reference
+import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.util.propertyDescription
 import net.juniper.contrail.vro.workflows.util.relationDescription
 
@@ -29,68 +34,98 @@ private val defaultProtocol = "any"
 private val allowedProtocols = listOf("any", "tcp", "udp", "icmp", "icmp6")
 private val defaultAddressType = "CIDR"
 private val allowedAddressTypes = listOf("CIDR", "Security Group")
-private val defaultDirection = "ingress"
-private val allowedDirections = listOf("ingress", "egress")
+private val defaultDirection = ingress
+private val allowedDirections = listOf(ingress, egress)
 
 internal fun addRuleToSecurityGroupWorkflow(schema: Schema): WorkflowDefinition {
-
     val workflowName = "Add rule to security group"
 
     return customWorkflow<SecurityGroup>(workflowName).withScriptFile("addRuleToSecurityGroup") {
         step("Parent security group") {
-            parameter("parent", reference<SecurityGroup>()) {
+            parameter(parent, reference<SecurityGroup>()) {
                 description = relationDescription<Project, SecurityGroup>(schema)
                 mandatory = true
             }
         }
-        step("Rule attributes") {
-            visibility = WhenNonNull("parent")
-            parameter("direction", string) {
-                // direction has no description in the schema
-                description = "Direction"
+        securityGroupRuleParameters(schema, parent, false)
+    }
+}
+
+internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
+    val workflowName = "Edit rule of security group"
+
+    return customWorkflow<SecurityGroup>(workflowName).withScriptFile("editSecurityGroupRule") {
+        step("Rule") {
+            parameter(parent, reference<SecurityGroup>()) {
+                description = relationDescription<Project, SecurityGroup>(schema)
                 mandatory = true
-                defaultValue = defaultDirection
-                predefinedAnswers = allowedDirections
             }
-            parameter("ethertype", string) {
-                // etherType has no description in the schema
-                description = "Ether Type"
-                additionalQualifiers += schema.simpleTypeConstraints<PolicyRuleType>("ethertype")
+            parameter("rule", string) {
+                visibility = WhenNonNull(parent)
+                description = "Rule to edit"
+                predefinedAnswersFrom = actionCallTo(networkPolicyRules).parameter(parent)
+                validWhen = isSingleAddressSecurityGroupRuleOf(parent)
             }
-            parameter(addressTypeParameterName, string) {
-                description = "Address Type"
-                mandatory = true
-                defaultValue = defaultAddressType
-                predefinedAnswers = allowedAddressTypes
-            }
-            parameter("addressCidr", string) {
-                description = schema.propertyDescription<AddressType>("subnet")
-                mandatory = true
-                visibility = FromStringParameter(addressTypeParameterName, "CIDR")
-                validWhen = isCidr()
-            }
-            parameter("addressSecurityGroup", reference<SecurityGroup>()) {
-                description = schema.propertyDescription<AddressType>("security-group")
-                mandatory = true
-                visibility = FromStringParameter(addressTypeParameterName, "Security Group")
-            }
-            parameter("protocol", string) {
-                description = propertyDescription<PolicyRuleType>(schema)
-                mandatory = true
-                defaultValue = defaultProtocol
-                predefinedAnswers = allowedProtocols
-            }
-            parameter("ports", string) {
-                description = "Port Range"
-                mandatory = true
-                defaultValue = defaultPort
-            }
+        }
+        securityGroupRuleParameters(schema, "rule", true)
+    }
+}
+
+private fun PresentationParametersBuilder.securityGroupRuleParameters(schema: Schema, visibilityDependencyField: String, loadCurrentValues: Boolean) {
+    step("Rule attributes") {
+        visibility = WhenNonNull(visibilityDependencyField)
+        parameter("direction", string) {
+            // direction has no description in the schema
+            description = "Direction"
+            mandatory = true
+            defaultValue = defaultDirection
+            predefinedAnswers = allowedDirections
+            if (loadCurrentValues) dataBinding = securityGroupRulePropertyDataBinding()
+        }
+        parameter("ethertype", string) {
+            // etherType has no description in the schema
+            description = "Ether Type"
+            additionalQualifiers += schema.simpleTypeConstraints<PolicyRuleType>("ethertype")
+            if (loadCurrentValues) dataBinding = securityGroupRulePropertyDataBinding()
+        }
+        parameter(addressTypeParameterName, string) {
+            description = "Address Type"
+            mandatory = true
+            defaultValue = defaultAddressType
+            predefinedAnswers = allowedAddressTypes
+            if (loadCurrentValues) dataBinding = securityGroupRulePropertyDataBinding()
+        }
+        parameter("addressCidr", string) {
+            description = schema.propertyDescription<AddressType>("subnet")
+            mandatory = true
+            visibility = FromStringParameter(addressTypeParameterName, "CIDR")
+            validWhen = isCidr()
+            if (loadCurrentValues) dataBinding = securityGroupRulePropertyDataBinding()
+        }
+        parameter("addressSecurityGroup", reference<SecurityGroup>()) {
+            description = schema.propertyDescription<AddressType>("security-group")
+            mandatory = true
+            visibility = FromStringParameter(addressTypeParameterName, "Security Group")
+            if (loadCurrentValues) dataBinding = securityGroupRulePropertyDataBinding()
+        }
+        parameter("protocol", string) {
+            description = propertyDescription<PolicyRuleType>(schema)
+            mandatory = true
+            defaultValue = defaultProtocol
+            predefinedAnswers = allowedProtocols
+            if (loadCurrentValues) dataBinding = securityGroupRulePropertyDataBinding()
+        }
+        parameter("ports", string) {
+            description = "Port Range"
+            mandatory = true
+            defaultValue = defaultPort
+            if (loadCurrentValues) dataBinding = securityGroupRulePropertyDataBinding()
         }
     }
 }
 
 internal fun removeSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Remove security group rule"
+    val workflowName = "Remove rule from security group"
 
     return customWorkflow<SecurityGroup>(workflowName).withScriptFile("removeRuleFromSecurityGroup") {
         parameter(parent, reference<SecurityGroup>()) {
@@ -105,3 +140,8 @@ internal fun removeSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition
         }
     }
 }
+
+// default is capitalized to fit the camelCase function name
+// e.g. ports -> rulePropertyPorts
+private fun<T: Any> BasicParameterBuilder<T>.securityGroupRulePropertyDataBinding() =
+    fromRuleProperty(parent, "rule", parameterName.capitalize(), type)
