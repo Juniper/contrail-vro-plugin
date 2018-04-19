@@ -10,8 +10,12 @@ import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.networkPolicyRules
+import net.juniper.contrail.vro.config.propertyOfRuleOfSecurityGroup
+import net.juniper.contrail.vro.workflows.dsl.FromAction
+import net.juniper.contrail.vro.workflows.dsl.FromListPropertyValue
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.FromStringParameter
+import net.juniper.contrail.vro.workflows.dsl.PresentationParametersBuilder
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
@@ -38,52 +42,116 @@ internal fun addRuleToSecurityGroupWorkflow(schema: Schema): WorkflowDefinition 
 
     return customWorkflow<SecurityGroup>(workflowName).withScriptFile("addRuleToSecurityGroup") {
         step("Parent security group") {
-            parameter("parent", reference<SecurityGroup>()) {
+            parameter(parent, reference<SecurityGroup>()) {
                 description = relationDescription<Project, SecurityGroup>(schema)
                 mandatory = true
             }
         }
-        step("Rule attributes") {
-            visibility = WhenNonNull("parent")
-            parameter("direction", string) {
-                // direction has no description in the schema
-                description = "Direction"
+        securityGroupRuleParameters(schema, parent, false)
+    }
+}
+
+internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
+    val workflowName = "Edit security group rule"
+
+    return customWorkflow<SecurityGroup>(workflowName).withScriptFile("editSecurityGroupRule") {
+        step("Rule") {
+            parameter(parent, reference<SecurityGroup>()) {
+                description = relationDescription<Project, SecurityGroup>(schema)
                 mandatory = true
-                defaultValue = defaultDirection
-                predefinedAnswers = allowedDirections
             }
-            parameter("ethertype", string) {
-                // etherType has no description in the schema
-                description = "Ether Type"
-                additionalQualifiers += schema.simpleTypeConstraints<PolicyRuleType>("ethertype")
+            parameter("rule", string) {
+                visibility = WhenNonNull(parent)
+                description = "Rule to edit"
+                predefinedAnswersFrom = actionCallTo(networkPolicyRules).parameter(parent)
+                validWhen = isSingleAddressSecurityGroupRuleOf(parent)
             }
-            parameter(addressTypeParameterName, string) {
-                description = "Address Type"
-                mandatory = true
-                defaultValue = defaultAddressType
-                predefinedAnswers = allowedAddressTypes
-            }
-            parameter("addressCidr", string) {
-                description = schema.propertyDescription<AddressType>("subnet")
-                mandatory = true
-                visibility = FromStringParameter(addressTypeParameterName, "CIDR")
-            }
-            parameter("addressSecurityGroup", reference<SecurityGroup>()) {
-                description = schema.propertyDescription<AddressType>("security-group")
-                mandatory = true
-                visibility = FromStringParameter(addressTypeParameterName, "Security Group")
-            }
-            parameter("protocol", string) {
-                description = propertyDescription<PolicyRuleType>(schema)
-                mandatory = true
-                defaultValue = defaultProtocol
-                predefinedAnswers = allowedProtocols
-            }
-            parameter("ports", string) {
-                description = "Port Range"
-                mandatory = true
-                defaultValue = defaultPort
-            }
+        }
+        securityGroupRuleParameters(schema, "rule", true)
+    }
+}
+
+// TODO: Add data bindings
+internal fun PresentationParametersBuilder.securityGroupRuleParameters(schema: Schema, visibilityDependencyField: String, loadCurrentValues: Boolean) {
+    val securityGroupRuleListGetter = "getEntries().getPolicyRule()"
+
+    step("Rule attributes") {
+        visibility = WhenNonNull(visibilityDependencyField)
+        parameter("direction", string) {
+            // direction has no description in the schema
+            description = "Direction"
+            mandatory = true
+            defaultValue = defaultDirection
+            predefinedAnswers = allowedDirections
+            if (loadCurrentValues) dataBinding = FromAction(actionCallTo(propertyOfRuleOfSecurityGroup)
+                .parameter(parent)
+                .parameter("rule")
+                .string("direction")
+                .create(), string)
+        }
+        parameter("ethertype", string) {
+            // etherType has no description in the schema
+            description = "Ether Type"
+            additionalQualifiers += schema.simpleTypeConstraints<PolicyRuleType>("ethertype")
+            if (loadCurrentValues) dataBinding = FromListPropertyValue(
+                parent,
+                "rule",
+                securityGroupRuleListGetter,
+                "ethertype",
+                string)
+        }
+        parameter(addressTypeParameterName, string) {
+            description = "Address Type"
+            mandatory = true
+            defaultValue = defaultAddressType
+            predefinedAnswers = allowedAddressTypes
+            if (loadCurrentValues) dataBinding = FromAction(actionCallTo(propertyOfRuleOfSecurityGroup)
+                .parameter(parent)
+                .parameter("rule")
+                .string(addressTypeParameterName)
+                .create(), string)
+        }
+        parameter("addressCidr", string) {
+            description = schema.propertyDescription<AddressType>("subnet")
+            mandatory = true
+            visibility = FromStringParameter(addressTypeParameterName, "CIDR")
+            if (loadCurrentValues) dataBinding = FromAction(actionCallTo(propertyOfRuleOfSecurityGroup)
+                .parameter(parent)
+                .parameter("rule")
+                .string("addressCidr")
+                .create(), string)
+        }
+        parameter("addressSecurityGroup", reference<SecurityGroup>()) {
+            description = schema.propertyDescription<AddressType>("security-group")
+            mandatory = true
+            visibility = FromStringParameter(addressTypeParameterName, "Security Group")
+            if (loadCurrentValues) dataBinding = FromAction(actionCallTo(propertyOfRuleOfSecurityGroup)
+                .parameter(parent)
+                .parameter("rule")
+                .string("addressSecurityGroup")
+                .create(), reference<SecurityGroup>())
+        }
+        parameter("protocol", string) {
+            description = propertyDescription<PolicyRuleType>(schema)
+            mandatory = true
+            defaultValue = defaultProtocol
+            predefinedAnswers = allowedProtocols
+            if (loadCurrentValues) dataBinding = FromListPropertyValue(
+                parent,
+                "rule",
+                securityGroupRuleListGetter,
+                "protocol",
+                string)
+        }
+        parameter("ports", string) {
+            description = "Port Range"
+            mandatory = true
+            defaultValue = defaultPort
+            if (loadCurrentValues) dataBinding = FromAction(actionCallTo(propertyOfRuleOfSecurityGroup)
+                .parameter(parent)
+                .parameter("rule")
+                .string("ports")
+                .create(), string)
         }
     }
 }
