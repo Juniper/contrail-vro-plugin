@@ -67,6 +67,7 @@ internal fun addRuleToSecurityGroupWorkflow(schema: Schema): WorkflowDefinition 
                 description = schema.propertyDescription<AddressType>("subnet")
                 mandatory = true
                 visibility = FromStringParameter(addressTypeParameterName, "CIDR")
+                validWhen = isCidr()
             }
             parameter("addressSecurityGroup", reference<SecurityGroup>()) {
                 description = schema.propertyDescription<AddressType>("security-group")

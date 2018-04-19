@@ -1,4 +1,4 @@
-if (!input || ContrailUtils.isValidCidr(input)){
+if (!cidr || ContrailUtils.isValidCidr(cidr)){
     return null;
 }
 return "Enter valid CIDR address";
