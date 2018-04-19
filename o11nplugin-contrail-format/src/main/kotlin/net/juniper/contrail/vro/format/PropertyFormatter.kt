@@ -28,8 +28,8 @@ object PropertyFormatter {
         "${prop.ipPrefix}/${prop.ipPrefixLen}"
 
     fun format(prop: PortType) =
-        if(prop.startPort == prop.endPort)
-            "${prop.startPort}"
+        if (prop.startPort == prop.endPort)
+            if (prop.startPort == -1) "any" else "${prop.startPort}"
         else
             "${prop.startPort}-${prop.endPort}"
 
