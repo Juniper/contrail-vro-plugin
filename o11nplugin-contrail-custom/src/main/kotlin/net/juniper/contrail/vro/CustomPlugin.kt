@@ -8,7 +8,6 @@ import com.vmware.o11n.sdk.modeldrivengen.model.Attribute
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedFinder
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
 import com.vmware.o11n.sdk.modeldrivengen.model.Plugin
-import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isCapitalized
 import net.juniper.contrail.vro.config.isDisplayOnlyProperty
 import net.juniper.contrail.vro.config.position
@@ -23,15 +22,11 @@ class CustomPlugin : Plugin() {
         // Generator adds default managed types, which we want wrapped in our extended class.
         // Method is used to add to and view the list of ManagedTypes
         // It gives us more info while generating the wrappers.
-        val list = super.getTypes()
-        maybeWrap(list)
-        return list
+        return super.getTypes().also { maybeWrap(it) }
     }
 
     override fun getFinders(): MutableList<ManagedFinder> {
-        val finders = super.getFinders()
-        cleanFinders(finders)
-        return finders
+        return super.getFinders().also { customize(it) }
     }
 
     private fun maybeWrap(types: MutableList<ManagedType>) {
@@ -39,24 +34,25 @@ class CustomPlugin : Plugin() {
         while (iterator.hasNext()) {
             val type = iterator.next()
             if (type !is CustomManagedType) {
-                val cmt = CustomManagedType.wrap(type)
+                val cmt = CustomManagedType(type)
                 iterator.set(cmt)
             }
         }
     }
 
-    private fun cleanFinders(finders: MutableList<ManagedFinder>) {
+    private fun customize(finders: MutableList<ManagedFinder>) {
         finders.asSequence()
-            .filter { it.managedType?.modelClass?.isApiTypeClass ?: false }
-            .forEach { it.clean() }
+            .forEach { it.customize() }
     }
 
-    private fun ManagedFinder.clean() {
-        attributes.forEach { it.clean() }
+    private fun ManagedFinder.customize() {
+        if (doc == null)
+            doc = managedType?.modelClass?.description
+        attributes.forEach { it.customize() }
         attributes.sortBy { it.accessor.position }
     }
 
-    private fun Attribute.clean() {
+    private fun Attribute.customize() {
         val displayedName = displayName
         if (displayedName != null && !displayedName.isCapitalized) {
             displayName = if (displayedName.isDisplayOnlyProperty)
