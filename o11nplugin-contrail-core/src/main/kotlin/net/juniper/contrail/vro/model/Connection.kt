@@ -84,6 +84,9 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
     fun findByName(clazz: Class<out ApiObjectBase>, parent: ApiObjectBase, name: String): String? =
         safe { connector.findByName(clazz, parent, name) }
 
+    inline fun <reified T : ApiObjectBase> findByName(parent: ApiObjectBase, name: String): String? =
+        findByName(T::class.java, parent, name)
+
     fun findByName(clazz: Class<out ApiObjectBase>, ancestorNames: List<String>): String? =
         safe { connector.findByName(clazz, ancestorNames) }
 

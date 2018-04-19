@@ -4,9 +4,13 @@
 
 package net.juniper.contrail.vro.model
 
+import net.juniper.contrail.api.types.AddressType
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.InstanceIp
+import net.juniper.contrail.api.types.NetworkPolicy
+import net.juniper.contrail.api.types.PolicyRuleType
+import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.api.types.ServiceTemplate
 import net.juniper.contrail.api.types.ServiceInstance
@@ -39,5 +43,99 @@ class Executor(private val connection: Connection) {
         val index = interfaceNames.indexOf(name)
         if (properties.interfaceList.size <= index || index < 0) return null
         return connection.findByFQN(properties.interfaceList[index].virtualNetwork)
+    }
+
+    fun SecurityGroup.ruleAddressProperty(
+        ruleString: String,
+        getDstAddressType: Boolean,
+        propertyName: String
+    ): Any? {
+        val ruleIndex = Utils().ruleStringToIndex(ruleString)
+        val rule = entries.policyRule[ruleIndex]
+        return ruleAddressProperty(
+            rule,
+            getDstAddressType,
+            propertyName
+        )
+    }
+
+    private fun ruleAddressProperty(
+        rule: PolicyRuleType,
+        getDstAddressType: Boolean,
+        propertyName: String
+    ): Any? {
+        val address = if (getDstAddressType) {
+            rule.dstAddresses[0]
+        } else {
+            rule.srcAddresses[0]
+        }
+        return when (propertyName) {
+            "virtualNetwork" ->
+                connection.findByFQN<VirtualNetwork>(address.virtualNetwork)
+            "securityGroup" ->
+                connection.findByFQN<SecurityGroup>(address.securityGroup)
+            "networkPolicy" ->
+                connection.findByFQN<NetworkPolicy>(address.networkPolicy)
+            "subnet" ->
+                "${address.subnet.ipPrefix}/${address.subnet.ipPrefixLen}"
+            else -> null
+        }
+    }
+
+    fun NetworkPolicy.ruleAddressPropertyNetwork(
+        ruleString: String,
+        getDstAddressType: Boolean
+    ): VirtualNetwork? {
+        val address = extractAddressType(ruleString, getDstAddressType)
+        return connection.findByFQN(address.virtualNetwork)
+    }
+
+    fun NetworkPolicy.ruleAddressPropertyPolicy(
+        ruleString: String,
+        getDstAddressType: Boolean
+    ): NetworkPolicy? {
+        val address = extractAddressType(ruleString, getDstAddressType)
+        return connection.findByFQN(address.networkPolicy)
+    }
+
+    fun NetworkPolicy.ruleAddressPropertySG(
+        ruleString: String,
+        getDstAddressType: Boolean
+    ): SecurityGroup? {
+        val address = extractAddressType(ruleString, getDstAddressType)
+        return connection.findByFQN(address.securityGroup)
+    }
+
+    fun NetworkPolicy.ruleAddressPropertySubnet(
+        ruleString: String,
+        getDstAddressType: Boolean
+    ): String? {
+        val address = extractAddressType(ruleString, getDstAddressType)
+        return "${address.subnet.ipPrefix}/${address.subnet.ipPrefixLen}"
+    }
+
+    fun NetworkPolicy.ruleAddressPropertyNetworkType(
+        ruleString: String,
+        getDstAddressType: Boolean
+    ): String? {
+        val address = extractAddressType(ruleString, getDstAddressType)
+        return when (address.virtualNetwork) {
+            null -> null
+            "any", "local" -> address.virtualNetwork
+            else -> "reference"
+        }
+    }
+
+    private fun NetworkPolicy.extractAddressType(
+        ruleString: String,
+        getDstAddressType: Boolean
+    ): AddressType {
+        val ruleIndex = Utils().ruleStringToIndex(ruleString)
+        val rule = entries.policyRule[ruleIndex]
+        return if (getDstAddressType) {
+            rule.dstAddresses[0]
+        } else {
+            rule.srcAddresses[0]
+        }
     }
 }
