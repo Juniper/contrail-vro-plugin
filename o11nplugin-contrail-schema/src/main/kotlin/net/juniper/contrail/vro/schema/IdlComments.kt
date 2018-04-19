@@ -2,7 +2,9 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.workflows.schema
+package net.juniper.contrail.vro.schema
+
+import net.juniper.contrail.vro.config.blankToNull
 
 sealed class IdlComment {
     abstract val type: String
@@ -102,3 +104,9 @@ private val String?.cleanDescription get() =
 
 val String.commentType get() =
     idlTypePattern.find(this)?.groupValues?.get(1)
+
+fun <T : IdlComment> Sequence<T>.withElementName(name: String) =
+    filter { it.elementName == name }
+
+fun <T : IdlComment> Sequence<T>.formatDescription() =
+    map { it.description }.filterNotNull().joinToString("\n\n").blankToNull()

@@ -5,8 +5,8 @@
 package net.juniper.contrail.vro.workflows.dsl
 
 import net.juniper.contrail.vro.workflows.model.* // ktlint-disable no-wildcard-imports
-import net.juniper.contrail.vro.workflows.schema.* // ktlint-disable no-wildcard-imports
-import net.juniper.contrail.vro.workflows.schema.Regexp
+import net.juniper.contrail.vro.schema.* // ktlint-disable no-wildcard-imports
+import net.juniper.contrail.vro.schema.Regexp
 
 fun Constraint.toQualifier(): ParameterQualifier = when (this) {
 
