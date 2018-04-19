@@ -1,0 +1,1 @@
+return securityGroup.ruleAddressProperty(rule, dst, propertyName);

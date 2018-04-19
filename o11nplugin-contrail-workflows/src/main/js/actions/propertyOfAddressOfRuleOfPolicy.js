@@ -1,0 +1,1 @@
+return networkPolicy.ruleAddressProperty(rule, dst, propertyName);
