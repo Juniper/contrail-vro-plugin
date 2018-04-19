@@ -4,7 +4,7 @@
 
 package net.juniper.contrail.vro.tests
 
-import net.juniper.contrail.vro.model.Utils
+import net.juniper.contrail.vro.model.utils
 import net.juniper.contrail.vro.workflows.model.Action
 import javax.script.Invocable
 import javax.script.ScriptContext
@@ -70,6 +70,6 @@ fun Action.provisionActionFunction(name : String) : String =
 
 fun String.getValue() : Any? =
     when (this) {
-        utilsName -> Utils()
+        utilsName -> utils
         else -> null
     }
