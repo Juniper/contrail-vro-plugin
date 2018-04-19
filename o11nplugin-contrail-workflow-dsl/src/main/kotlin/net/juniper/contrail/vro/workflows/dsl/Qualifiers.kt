@@ -5,7 +5,6 @@
 package net.juniper.contrail.vro.workflows.dsl
 
 import net.juniper.contrail.vro.config.actionPackage
-import net.juniper.contrail.vro.config.listPropertyValue
 import net.juniper.contrail.vro.config.propertyNotNull
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.config.removeWhitespaces
@@ -92,13 +91,6 @@ fun <T : Any> bindValueToSimpleProperty(item: String, property: String, type: Pa
 
 fun <T : Any> bindValueToComplexProperty(item: String, propertyPath: String, type: ParameterType<T>) =
     ognlQualifier(QualifierName.dataBinding, type, actionOgnl(actionPackage, propertyValue, "#$item", "\"$propertyPath\""))
-
-fun <T : Any> bindValueToListProperty(parentItem: String, childItem: String, listAccessor: String, propertyPath: String, type: ParameterType<T>) =
-    ognlQualifier(QualifierName.dataBinding, type, actionOgnl(
-        packageName = actionPackage,
-        name = listPropertyValue,
-        parameters = *arrayOf("#$parentItem", "#$childItem", "\"$listAccessor\"", "\"$propertyPath\"")
-    ))
 
 fun <T : Any> bindValueToAction(action: ActionCall, type: ParameterType<T>) =
     ognlQualifier(QualifierName.dataBinding, type, action.ognl)
