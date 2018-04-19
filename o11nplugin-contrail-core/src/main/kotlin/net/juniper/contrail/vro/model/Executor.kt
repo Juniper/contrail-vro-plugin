@@ -11,7 +11,9 @@ import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.api.types.ServiceTemplate
 import net.juniper.contrail.api.types.ServiceInstance
 
-class Executor(private val connection: Connection) {
+class Executor(private val connection: Connection) :
+SecurityGroupRuleProperties by SecurityGroupRulePropertyExecutor(connection),
+NetworkPolicyRuleProperties by NetworkPolicyRulePropertyExecutor(connection) {
     fun VirtualNetwork.subnets(): List<IpamSubnetType> {
         val ipams = networkIpam ?: return emptyList()
         return ipams.asSequence().map { it.attr.ipamSubnets.asSequence().filterNotNull() }.flatten().toList()

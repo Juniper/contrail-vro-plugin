@@ -4,13 +4,18 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
+import net.juniper.contrail.api.types.NetworkPolicy
+import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.vro.config.listPropertyValue
 import net.juniper.contrail.vro.config.propertyNotNull
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.config.readSubnet
+import net.juniper.contrail.vro.config.propertyOfRuleOfPolicy
+import net.juniper.contrail.vro.config.propertyOfRuleOfSecurityGroup
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.dsl.ofType
+import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 
 private val item = "item"
@@ -62,3 +67,22 @@ val readSubnetAction = ActionDefinition (
     )
 )
 
+val propertyOfRuleOfPolicy = ActionDefinition(
+    name = propertyOfRuleOfPolicy,
+    resultType = any,
+    parameters = listOf(
+        "networkPolicy" ofType reference<NetworkPolicy>(),
+        "rule" ofType string,
+        "propertyName" ofType string
+    )
+)
+
+val propertyOfRuleOfSecurityGroup = ActionDefinition(
+    name = propertyOfRuleOfSecurityGroup,
+    resultType = any,
+    parameters = listOf(
+        "securityGroup" ofType reference<SecurityGroup>(),
+        "rule" ofType string,
+        "propertyName" ofType string
+    )
+)
