@@ -195,7 +195,7 @@ class Utils {
             2 -> Pair(parts[0], parts[1])
             else -> throw IllegalArgumentException("Wrong subnet format. use CIDR or VN:CIDR")
         }
-        if (!isValidSubnet(virtualNetworkAddress)) throw IllegalArgumentException("Wrong CIDR format.")
+        if (!isValidCidr(virtualNetworkAddress)) throw IllegalArgumentException("Wrong CIDR format.")
         val (subnetIP, subnetPrefix) = virtualNetworkAddress.split('/')
         val fullNetworkName = if (virtualNetworkName != null) {
             "$virtualNetworkName:$subnetIP"
