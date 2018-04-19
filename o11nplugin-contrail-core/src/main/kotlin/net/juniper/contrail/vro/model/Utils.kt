@@ -150,6 +150,15 @@ class Utils {
         return ranges.map { parsePortRange(it, anyAsFullRange = true) }
     }
 
+    fun formatPort(port: PortType): String =
+        if (port.startPort == port.endPort)
+            if (port.startPort == -1) "any" else "${port.startPort}"
+        else
+            "${port.startPort}-${port.endPort}"
+
+    fun formatPorts(ports: List<PortType>): String =
+        ports.joinToString(",") { formatPort(it) }
+
     private fun parsePortRange(def: String, anyAsFullRange: Boolean): PortType {
         val ends = def.split("-")
         return when (ends.size) {
@@ -293,4 +302,18 @@ class Utils {
 
     fun isBlankList(s: List<String>?) : Boolean =
         s.isBlankList()
+
+    fun addressType(
+        address: AddressType
+    ): String? = when {
+        address.subnet != null ||
+        address.subnetList != null -> "CIDR"
+        address.networkPolicy != null -> "Policy"
+        address.virtualNetwork != null -> "Network"
+        address.securityGroup != null -> "Security Group"
+        else -> null
+    }
 }
+
+// utils is not an object due to model-driven archetype constraints
+val utils = Utils()
