@@ -7,10 +7,15 @@ package net.juniper.contrail.vro.schema
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.allCapitalized
+import net.juniper.contrail.vro.config.blankToNull
 import net.juniper.contrail.vro.config.bold
 import net.juniper.contrail.vro.config.isApiObjectClass
+import net.juniper.contrail.vro.config.isApiPropertyClass
+import net.juniper.contrail.vro.config.isModelClass
+import net.juniper.contrail.vro.config.isModelClassName
 import net.juniper.contrail.vro.config.parentType
 import net.juniper.contrail.vro.config.pluginName
+import net.juniper.contrail.vro.config.typeToClassName
 import org.w3c.dom.Node
 
 val emptyAnswer = ""
@@ -51,6 +56,14 @@ fun Schema.propertyDescription(clazz: Class<*>, propertyName: String, convertToX
 private fun Schema.propertyDescriptionImpl(clazz: Class<*>, xsdFieldName: String): String? = when {
     clazz.isApiObjectClass -> propertyDefinitionComment(clazz.xsdName, xsdFieldName).description
     else -> definitionNode(clazz, xsdFieldName).descriptionAttribute
+}
+
+fun Schema.classDescription(clazz: Class<*>): String? = when {
+    clazz.isApiObjectClass -> objectClassDefinitionComments(clazz).formatDescription()
+    clazz.isApiPropertyClass -> propertyClassDefinitionComments(clazz).formatDescription()
+    // wrapper over property class
+    clazz.simpleName.contains('_') -> wrapperPropertyDefinitionComment(clazz)?.description
+    else -> null
 }
 
 fun Schema.objectDescription(clazz: ObjectClass, parent: ObjectClass? = null): String? {
@@ -95,18 +108,39 @@ private fun Schema.definitionNode(clazz: Class<*>): Node =
 private fun Schema.definitionNode(clazz: Class<*>, xsdFieldName: String): Node =
     definitionNode(clazz).nestedElements.theOneNamed(xsdFieldName)
 
-private fun Schema.relationDefinitionComment(from: Class<*>, to: Class<*>): IdlComment =
+private fun Schema.relationDefinitionComment(from: Class<*>, to: Class<*>): Link =
     relationDefinitionComment(from.xsdName, to .xsdName)
 
-private fun Schema.relationDefinitionCommentIfPresent(from: Class<*>, to: Class<*>): IdlComment? =
-    relationDefinitionCommentIfPresent(from.xsdName, to .xsdName)
+private fun Schema.relationDefinitionCommentIfPresent(from: Class<*>, to: Class<*>): Link? =
+    relationDefinitionCommentIfPresent(from.xsdName, to.xsdName)
 
-private fun Schema.relationDefinitionCommentIfPresent(from: String, to: String): IdlComment? =
-    comments.asSequence().mapNotNull { it as? Link }.find { it.parentClassName == from && it.propertyClassName == to }
+private fun Schema.relationDefinitionCommentIfPresent(from: String, to: String): Link? =
+    linkComments.find { it.parentClassName == from && it.propertyClassName == to }
 
-private fun Schema.relationDefinitionComment(from: String, to: String): IdlComment =
+private fun Schema.relationDefinitionComment(from: String, to: String): Link =
     relationDefinitionCommentIfPresent(from, to) ?:
         throw IllegalArgumentException("Relation $from-$to was not found in the schema.")
+
+private fun Schema.objectClassDefinitionComments(clazz: Class<*>): Sequence<Link> =
+    clazz.methods.asSequence()
+        .filter { it.name == "setParent" }
+        .filter { it.parameterCount == 1 }
+        .map { it.parameters[0].type }
+        .filter { it.superclass == ApiObjectBase::class.java }
+        .filter { it.isModelClass }
+        .map { relationDefinitionCommentIfPresent(it, clazz) }.filterNotNull()
+
+private fun Schema.propertyClassDefinitionComments(clazz: Class<*>): Sequence<Property> =
+    elements.asSequence().filter { it.typeAttribute == clazz.simpleName }.map { it.nameAttribute }.filterNotNull()
+        .flatMap { propertyComments.withElementName(it) }
+        .filter { it.parentClassName.typeToClassName.run { isApiPropertyClass || isModelClassName } }
+
+private fun Schema.wrapperPropertyDefinitionComment(clazz: Class<*>): Property? {
+    val parts = clazz.simpleName.split('_')
+    val propertyName = parts.last().xsdName
+    return propertyComments.withElementName(propertyName).firstOrNull()
+}
+
 
 private fun Schema.propertyDefinitionComment(parent: String, propertyName: String): IdlComment =
     comments.firstOrNull { it.parentClassName == parent && (it.elementName == propertyName || it.elementName == "$parent-$propertyName") } ?:

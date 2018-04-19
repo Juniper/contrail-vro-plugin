@@ -176,11 +176,16 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
     } ?: emptyList()
 
     init {
+        generateDescription()
         removeDuplicateMethods()
         generateReferenceMethods()
         generatePropertyMethods()
         generateReferencePropertiesMethods()
         generateCustomProperties()
+    }
+
+    private fun generateDescription() {
+        delegate.doc = delegate.modelClass?.description
     }
 
     private fun removeDuplicateMethods() {
@@ -276,13 +281,6 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         setIsInheritedWrapperMethod(true)
         isPropertyReadOnly = true
         returns = stringReturnFormalParameter()
-    }
-
-    companion object {
-
-        fun wrap(type: ManagedType): CustomManagedType {
-            return CustomManagedType(type)
-        }
     }
 
     override fun isGenerate(): Boolean =

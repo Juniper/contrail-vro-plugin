@@ -16,9 +16,11 @@ import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.VnSubnetsType
 import net.juniper.contrail.api.types.AllowedAddressPair
 import net.juniper.contrail.api.types.IpamSubnetType
+import net.juniper.contrail.vro.base.Description
 import net.juniper.contrail.vro.format.PropertyFormatter
 import java.util.UUID
 
+@Description("Object containing miscellaneous utility functions used by workflows and actions, e.g. IP address validation.")
 class Utils {
     private val minPort = 0
     private val maxPort = 65535
