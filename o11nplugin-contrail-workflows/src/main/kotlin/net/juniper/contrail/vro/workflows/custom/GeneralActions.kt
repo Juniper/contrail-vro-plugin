@@ -4,13 +4,20 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
+import net.juniper.contrail.api.types.NetworkPolicy
+import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.vro.config.listPropertyValue
 import net.juniper.contrail.vro.config.propertyNotNull
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.config.readSubnet
+import net.juniper.contrail.vro.config.networkPolicyRuleAddressType
+import net.juniper.contrail.vro.config.securityGroupRuleAddressType
+import net.juniper.contrail.vro.config.propertyOfAddressOfRuleOfPolicy
+import net.juniper.contrail.vro.config.propertyOfAddressOfRuleOfSecurityGroup
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.dsl.ofType
+import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 
 private val item = "item"
@@ -62,3 +69,44 @@ val readSubnetAction = ActionDefinition (
     )
 )
 
+val networkPolicyRuleAddressType = ActionDefinition(
+    name = networkPolicyRuleAddressType,
+    resultType = string,
+    parameters = listOf(
+        "networkPolicy" ofType reference<NetworkPolicy>(),
+        "rule" ofType string,
+        "dstMode" ofType boolean
+    )
+)
+
+val securityGroupRuleAddressType = ActionDefinition(
+    name = securityGroupRuleAddressType,
+    resultType = string,
+    parameters = listOf(
+        "securityGroup" ofType reference<SecurityGroup>(),
+        "rule" ofType string,
+        "dstMode" ofType boolean
+    )
+)
+
+val propertyOfAddressOfRuleOfPolicy = ActionDefinition(
+    name = propertyOfAddressOfRuleOfPolicy,
+    resultType = any,
+    parameters = listOf(
+        "networkPolicy" ofType reference<NetworkPolicy>(),
+        "rule" ofType string,
+        "dstMode" ofType boolean,
+        "propertyName" ofType string
+    )
+)
+
+val propertyOfAddressOfRuleOfSecurityGroup = ActionDefinition(
+    name = propertyOfAddressOfRuleOfSecurityGroup,
+    resultType = any,
+    parameters = listOf(
+        "securityGroup" ofType reference<SecurityGroup>(),
+        "rule" ofType string,
+        "dstMode" ofType boolean,
+        "propertyName" ofType string
+    )
+)
