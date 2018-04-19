@@ -150,6 +150,19 @@ class Utils {
         return ranges.map { parsePortRange(it, anyAsFullRange = true) }
     }
 
+    fun formatPort(port: PortType): String =
+        if (port.startPort == port.endPort)
+            if (port.startPort == -1)
+                "any"
+            else
+                "${port.startPort}"
+        else
+            "${port.startPort}-${port.endPort}"
+
+    fun formatPorts(ports: List<PortType>): String {
+        return ports.joinToString(",") { formatPort(it) }
+    }
+
     private fun parsePortRange(def: String, anyAsFullRange: Boolean): PortType {
         val ends = def.split("-")
         return when (ends.size) {
@@ -293,4 +306,57 @@ class Utils {
 
     fun isBlankList(s: List<String>?) : Boolean =
         s.isBlankList()
+
+    fun networkPolicyRuleAddressType(
+        policy: NetworkPolicy,
+        ruleString: String,
+        getDstAddressType: Boolean = false
+    ): String? {
+        val ruleIndex = ruleStringToIndex(ruleString)
+        val rule = policy.entries.policyRule[ruleIndex]
+        val address = if (getDstAddressType) {
+            rule.dstAddresses[0]
+        } else {
+            rule.srcAddresses[0]
+        }
+        return addressType(address)
+    }
+
+    fun securityGroupRuleAddressType(
+        securityGroup: SecurityGroup,
+        ruleString: String,
+        direction: String
+    ): String? {
+        val ruleIndex = ruleStringToIndex(ruleString)
+        val rule = securityGroup.entries.policyRule[ruleIndex]
+        val address = if (direction == "egress") {
+            rule.dstAddresses[0]
+        } else {
+            // direction == "ingress"
+            rule.srcAddresses[0]
+        }
+        return addressType(address)
+    }
+
+    private fun addressType(
+        address: AddressType
+    ): String? {
+        if (address.subnet != null) {
+            return "CIDR"
+        }
+        if (address.networkPolicy != null) {
+            return "Policy"
+        }
+        if (address.virtualNetwork != null) {
+            return "Network"
+        }
+        if (address.securityGroup != null) {
+            return "Security Group"
+        }
+        if (address.subnetList != null) {
+            // Currently unused
+            return "CIDR"
+        }
+        return null
+    }
 }
