@@ -35,4 +35,9 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += ipamHasAllocationModeAction(version, packageName)
     this += ipamHasNotAllocationModeAction(version, packageName)
     this += networkHasNotAllcationModeAction(version, packageName)
+    this += networkPolicyRuleAddressType(version, packageName)
+    this += securityGroupRuleAddressType(version, packageName)
+    this += propertyOfAddressOfRuleOfPolicy(version, packageName)
+    this += propertyOfRuleOfSecurityGroup(version, packageName)
+    this += propertyOfRuleOfPolicy(version, packageName)
 }
