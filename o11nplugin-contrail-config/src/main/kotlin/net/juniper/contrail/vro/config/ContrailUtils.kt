@@ -33,8 +33,20 @@ val String.asObjectClass: ObjectClass? get() =
         if (it.isSubclassOf<ApiObjectBase>()) it as ObjectClass else null
     }
 
+val String.asPropertyClass: PropertyClass? get() =
+    asApiClass?.let {
+        @Suppress("UNCHECKED_CAST")
+        if (it.isSubclassOf<ApiPropertyBase>()) it as PropertyClass else null
+    }
+
 val String.isApiTypeClass get() =
-    this.asApiClass != null
+    asApiClass != null
+
+val String.isApiObjectClass get() =
+    asObjectClass != null
+
+val String.isApiPropertyClass get() =
+    asPropertyClass != null
 
 val ObjectClass.defaultParentType: String? get() =
     newInstance().defaultParentType
