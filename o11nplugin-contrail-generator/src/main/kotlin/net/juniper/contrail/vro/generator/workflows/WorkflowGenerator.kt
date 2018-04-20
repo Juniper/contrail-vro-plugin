@@ -26,7 +26,7 @@ import net.juniper.contrail.vro.workflows.model.Action
 import net.juniper.contrail.vro.workflows.model.Element
 import net.juniper.contrail.vro.workflows.model.Workflow
 import net.juniper.contrail.vro.workflows.model.Properties
-import net.juniper.contrail.vro.workflows.schema.Schema
+import net.juniper.contrail.vro.schema.Schema
 import java.io.File
 import java.io.Writer
 import javax.xml.bind.JAXBContext

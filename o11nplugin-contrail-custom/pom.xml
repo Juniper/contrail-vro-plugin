@@ -20,18 +20,20 @@
     <dependency>
       <groupId>net.juniper.contrail.vro</groupId>
       <artifactId>o11nplugin-contrail-config</artifactId>
-      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.juniper.contrail.vro</groupId>
+      <artifactId>o11nplugin-contrail-schema</artifactId>
     </dependency>
     <dependency>
       <groupId>net.juniper.contrail.vro</groupId>
       <artifactId>o11nplugin-contrail-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>com.vmware.o11n</groupId>
       <artifactId>o11n-plugin-modeldriven-generator</artifactId>
-      <version>${vco.version}</version>
     </dependency>
+
     <dependency>
       <groupId>com.vmware.o11n</groupId>
       <artifactId>o11n-provided-deps</artifactId>

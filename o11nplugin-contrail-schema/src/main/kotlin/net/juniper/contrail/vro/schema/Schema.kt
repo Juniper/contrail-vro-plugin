@@ -2,8 +2,9 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.workflows.schema
+package net.juniper.contrail.vro.schema
 
+import net.juniper.contrail.vro.config.globalProjectInfo
 import org.w3c.dom.Node
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -61,6 +62,12 @@ class Schema(
     val elements: Set<Node>,
     val comments: Set<IdlComment>
 ) {
+    val propertyComments: Sequence<Property> get() =
+        comments.asSequence().map { it as? Property }.filterNotNull()
+
+    val linkComments: Sequence<Link> get() =
+        comments.asSequence().map { it as? Link }.filterNotNull()
+
     operator fun plus(other: Schema) = Schema(
         complexTypes + other.complexTypes,
         simpleTypes + other.simpleTypes,
@@ -68,3 +75,5 @@ class Schema(
         comments + other.comments
     )
 }
+
+val defaultSchema = buildSchema(Paths.get(globalProjectInfo.schemaFile))
