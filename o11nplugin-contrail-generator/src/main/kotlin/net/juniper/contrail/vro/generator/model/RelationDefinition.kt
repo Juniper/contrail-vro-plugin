@@ -12,7 +12,7 @@ class RelationDefinition(
     val rootClasses: List<ObjectClass>,
     val relations: List<Relation>,
     val forwardRelations: List<ForwardRelation>,
-    val nestedRelations: List<NestedRelation>
+    val propertyRelations: List<PropertyRelation>
 ) : GenericModel()
 
 fun buildRelationDefinition(
@@ -22,5 +22,5 @@ fun buildRelationDefinition(
     objectClasses.filter(rootClassFilter),
     objectClasses.generateRelations(),
     objectClasses.generateReferenceRelations(),
-    objectClasses.generateNestedRelations(inventoryPropertyFilter)
+    objectClasses.generatePropertyRelations(inventoryPropertyFilter)
 )

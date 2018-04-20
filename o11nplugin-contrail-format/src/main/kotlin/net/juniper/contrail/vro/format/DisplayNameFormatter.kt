@@ -4,9 +4,11 @@
 
 package net.juniper.contrail.vro.format
 
+import com.sun.org.apache.xpath.internal.operations.Quo
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.types.FloatingIp
 import net.juniper.contrail.api.types.IpamSubnetType
+import net.juniper.contrail.api.types.QuotaType
 import net.juniper.contrail.api.types.Subnet
 
 /**
@@ -25,4 +27,7 @@ object DisplayNameFormatter {
 
     fun format(obj: IpamSubnetType): String? =
         obj.subnet?.let { PropertyFormatter.format(it) }
+
+    fun format(obj: QuotaType): String? =
+        "Quotas"
 }
