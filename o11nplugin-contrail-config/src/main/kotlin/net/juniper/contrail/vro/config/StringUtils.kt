@@ -151,6 +151,9 @@ fun String.pluralize(): String = when {
     else -> this + "s"
 }
 
+fun String.blankToNull() =
+    if (isBlank()) null else this
+
 fun String.packageToPath() =
     replace('.', '/')
 

@@ -12,6 +12,7 @@ import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
 import net.juniper.contrail.api.Status
+import net.juniper.contrail.vro.base.Description
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -34,6 +35,7 @@ private fun ObjectCache.remove(clazz: Class<out ApiObjectBase>, id: String?) =
     id?.let { invalidate(Key(clazz, it)) }
 
 @Suppress("UNCHECKED_CAST")
+@Description("Object representing an instance of Contrail controller.")
 class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
     private val log: Logger = LoggerFactory.getLogger(Connection::class.java)
 
