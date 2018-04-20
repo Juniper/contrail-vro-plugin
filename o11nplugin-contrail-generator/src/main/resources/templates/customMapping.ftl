@@ -74,20 +74,12 @@ class CustomMapping: AbstractMapping() {
 
         <#list propertyClasses as klass>
         wrap(${klass.simpleName}::class.java)
-        <#if klass.propertyAsObject>
           .rename(renamePolicy)
+        <#if klass.propertyAsObject>
           .andFind()
           .using(${klass.simpleName}Finder::class.java)
           .withIcon(findItemIcon<${klass.simpleName}>())
         </#if>
-        </#list>
-
-        <#list nestedRelations as relation>
-        wrap(${relation.childWrapperName}::class.java)
-          .andFind()
-          .using(${relation.childWrapperName}Finder::class.java)
-          .hiding("listIdx")
-          .withIcon(<#if relation.toMany>findItemIcon<#else>findFolderIcon</#if><${relation.childName}>())
         </#list>
     }
 
@@ -125,16 +117,15 @@ class CustomMapping: AbstractMapping() {
         relate(${relation.parentName}::class.java)
             .to(${relation.childName}::class.java)
             .using(${relation.parentName}To${relation.childName}::class.java)
-            .`as`("${relation.parentName}To${relation.childName}")
+            .`as`("${relation.parentPluginName}To${relation.childPluginName}")
             .`in`(FolderDef(folderName("${relation.folderName}", "${relation.parentName}", "${relation.getter}"), findFolderIcon<${relation.childName}>()))
         </#list>
 
-        <#list nestedRelations as relation>
-        relate(${relation.parentWrapperName}::class.java)
-            .to(${relation.childWrapperName}::class.java)
-            .using(${relation.parentWrapperName}Has${relation.childWrapperName}::class.java)
-            .`as`("${relation.name}")
-            <#if relation.toMany>.`in`(FolderDef(folderName("${relation.folderName}", "${relation.parentWrapperName}", "${relation.getter}"), findFolderIcon<${relation.childName}>()))</#if>
+        <#list propertyRelations as relation>
+        relate(${relation.parentName}::class.java)
+            .to(${relation.childName}::class.java)
+            .using(${relation.parentName}Has${relation.childName}::class.java)
+            .`as`("${relation.parentPluginName}Has${relation.childPluginName}")
         </#list>
     }
 }
