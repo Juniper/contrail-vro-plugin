@@ -66,21 +66,6 @@ internal fun createServiceTemplate(schema: Schema) : WorkflowDefinition {
             predefinedAnswers = supportedInterfaceNames
             sameValues = false
         }
-        parameter("vrouterInstanceType", string) {
-            description = propertyDescription<ServiceTemplateType>(schema)
-            mandatory = false
-            extractPredefinedAnswers<ServiceTemplateType>(schema)
-        }
-        parameter("availabilityZoneEnable", boolean) {
-            description = propertyDescription<ServiceTemplateType>(schema)
-            mandatory = false
-            defaultValue = false
-        }
-        parameter("instanceData", string) {
-            description = propertyDescription<ServiceTemplateType>(schema)
-            mandatory = false
-            multiline = true
-        }
         output(item, reference<ServiceTemplate>()) {
             description = "Service template created in this workflow"
         }
