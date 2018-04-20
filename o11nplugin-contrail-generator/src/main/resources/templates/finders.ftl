@@ -11,19 +11,6 @@ import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.api.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
 
-<#macro getterChain relation>
-  <@compress single_line=true>
-    parent
-    <#list relation.getterChain as nextGetter>
-      ?.${nextGetter.nameDecapitalized}
-      <#if nextGetter.toMany == true>
-        ?.get(sid.getString("${nextGetter.name}").toInt())
-      </#if>
-    </#list>
-    ?.${relation.childWrapperName}(index)
-  </@compress>
-</#macro>
-
 private fun <T : ApiObjectBase> ConnectionRepository.query(clazz: Class<T>, query: String, key: String): List<FoundObject<T>> =
     connections.asSequence().map { it.query(clazz, query, key) }.filterNotNull().flatten().toList()
 
@@ -51,28 +38,20 @@ class ${klass.simpleName}Finder
 
 </#list>
 
-fun getIndex(sid: Sid, key: String): Int? {
-    val potentialIndexStr: String? = sid.getString(key)
-    return potentialIndexStr?.toIntOrNull()
-}
+<#list propertyRelations as relation>
+class ${relation.childName}Finder
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${relation.childName}> {
 
-<#list nestedRelations as relation>
-class ${relation.childWrapperName}Finder
-@Autowired constructor(private val connections: ConnectionRepository) : ObjectFinder<${relation.childWrapperName}> {
+    override fun assignId(obj: ${relation.childName}, sid: Sid) =
+        sid
 
-    override fun assignId(obj: ${relation.childWrapperName}, sid: Sid): Sid {
-        val sidKeyName = "${relation.getter}"
-        val listIdx = obj.listIdx?.toString() ?: ""
-        return sid.with(sidKeyName, listIdx)
-    }
-    override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${relation.childWrapperName}? {
+    override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${relation.childName}? {
         val connection = connections.getConnection(sid)
-        val parent = connection?.findById(${relation.rootClassSimpleName}::class.java, sid.getString("${relation.rootClassSimpleName}"))
-        val index = getIndex(sid, "${relation.getter}")
-        return <@getterChain relation/>
+        val parent = connection?.findById(${relation.parentName}::class.java, sid.getString("${relation.parentPluginName}"))
+        return parent?.${relation.propertyName}
     }
 
-    override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${relation.childWrapperName}>>? =
+    override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${relation.childName}>>? =
         null
 }
 

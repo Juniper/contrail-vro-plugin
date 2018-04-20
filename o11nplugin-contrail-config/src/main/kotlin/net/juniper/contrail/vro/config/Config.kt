@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.config
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
+import java.lang.reflect.Method
 
 val modelClasses = setOf(
     the<Project>(),
@@ -25,6 +26,10 @@ val modelClasses = setOf(
 
 val inventoryProperties = setOf(
     the<QuotaType>()
+)
+
+val customPropertyObjects = setOf(
+    the<IpamSubnetType>()
 )
 
 val nonEssentialAttributes = setOf(
@@ -112,10 +117,6 @@ val reversedRelations = setOf(
     pair<FloatingIp, VirtualMachineInterface>()
 )
 
-val propertiesAsObjects = setOf(
-    the<IpamSubnetType>()
-)
-
 private inline fun <reified T> the() =
     T::class.java.simpleName
 
@@ -155,8 +156,8 @@ val String.isDirectChild get() =
 val String.isHiddenRoot get() =
     hiddenRoots.contains(this)
 
-val String.isApiPropertyAsObject get() =
-    propertiesAsObjects.contains(this)
+val String.isCustomPropertyObject get() =
+    customPropertyObjects.contains(this)
 
 fun ObjectClass.isRelationMandatory(child: ObjectClass) =
     mandatoryReference.containsUnordered(simpleName, child.simpleName)
@@ -209,10 +210,10 @@ val Class<*>.isHiddenRoot get() =
     simpleName.isHiddenRoot
 
 val Class<*>.isNodeClass get() =
-    isApiObjectClass || isApiPropertyAsObject
+    isApiObjectClass || isInventoryProperty || isCustomPropertyObject
 
-val Class<*>.isApiPropertyAsObject get() =
-    simpleName.isApiPropertyAsObject
+val Class<*>.isCustomPropertyObject get() =
+    simpleName.isCustomPropertyObject
 
 val ObjectClass.isInternal get() =
     !hasParents
@@ -266,6 +267,9 @@ val String.toPluginName get() = when (this) {
 
 val String.toPluginMethodName get() =
     replace(VirtualMachineInterfaceName, PortName)
+
+val Method.pluginPropertyName get() =
+    nameWithoutGet.toPluginMethodName.decapitalize()
 
 val Class<*>.pluginName get() =
     simpleName.toPluginName

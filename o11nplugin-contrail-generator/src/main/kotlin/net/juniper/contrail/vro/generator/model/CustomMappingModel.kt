@@ -9,7 +9,8 @@ import net.juniper.contrail.vro.config.PropertyClass
 import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.ProjectInfo
-import net.juniper.contrail.vro.config.isApiPropertyAsObject
+import net.juniper.contrail.vro.config.isCustomPropertyObject
+import net.juniper.contrail.vro.config.isInventoryPropertyClassName
 
 data class CustomMappingModel (
     val findableClasses: List<ClassInfoModel>,
@@ -17,7 +18,7 @@ data class CustomMappingModel (
     val propertyClasses: List<PropertyInfo>,
     val relations: List<RelationModel>,
     val forwardRelations: List<ForwardRelation>,
-    val nestedRelations: List<NestedRelationModel>,
+    val propertyRelations: List<PropertyRelation>,
     val iconRootDir: String
 ) : GenericModel()
 
@@ -29,7 +30,7 @@ data class ClassInfoModel(
 
 data class PropertyInfo(val simpleName: String) {
     val isPropertyAsObject : Boolean get() =
-        simpleName.isApiPropertyAsObject
+        simpleName.isCustomPropertyObject || simpleName.isInventoryPropertyClassName
 }
 
 fun Class<*>.toPropertyInfoClass() = PropertyInfo(simpleName)
@@ -47,13 +48,13 @@ fun generateCustomMappingModel(
     propertyClasses: List<PropertyClass>,
     relations: List<Relation>,
     forwardRelations: List<ForwardRelation>,
-    nestedRelations: List<NestedRelation>
+    propertyRelations: List<PropertyRelation>
 ) = CustomMappingModel(
     objectClasses.map { it.toClassInfoModel() },
     rootClasses.map { it.toClassInfoModel() },
     propertyClasses.map { it.toPropertyInfoClass() },
     relations.map { it.toRelationModel() },
     forwardRelations,
-    nestedRelations.map { it.toNestedRelationModel() },
+    propertyRelations,
     info.finalProjectRoot
 )
