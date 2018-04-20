@@ -21,10 +21,10 @@ import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.workflows.schema.Schema
+import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.asVisibilityCondition
-import net.juniper.contrail.vro.workflows.schema.createWorkflowDescription
+import net.juniper.contrail.vro.schema.createWorkflowDescription
 
 internal fun addPortTupleToServiceInstance(schema: Schema): WorkflowDefinition {
     val workflowName = "Add port tuple to service instance"

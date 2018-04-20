@@ -14,8 +14,8 @@ import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.workflows.schema.Schema
-import net.juniper.contrail.vro.workflows.schema.simpleTypeConstraints
+import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.schema.simpleTypeConstraints
 
 val Class<*>.hasCustomInput get() =
     customProperties.containsKey(this)

@@ -26,9 +26,9 @@ import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.number
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.workflows.schema.Schema
-import net.juniper.contrail.vro.workflows.schema.propertyDescription
-import net.juniper.contrail.vro.workflows.schema.simpleTypeConstraints
+import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.schema.propertyDescription
+import net.juniper.contrail.vro.schema.simpleTypeConstraints
 import net.juniper.contrail.vro.workflows.util.propertyDescription
 import net.juniper.contrail.vro.workflows.util.relationDescription
 
