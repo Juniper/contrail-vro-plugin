@@ -41,10 +41,10 @@ import net.juniper.contrail.vro.workflows.model.createElementInfoProperties
 import net.juniper.contrail.vro.workflows.model.parameterType
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.workflows.schema.Schema
-import net.juniper.contrail.vro.workflows.schema.crudStatus
-import net.juniper.contrail.vro.workflows.schema.propertyDescription
-import net.juniper.contrail.vro.workflows.schema.simpleTypeConstraints
+import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.schema.crudStatus
+import net.juniper.contrail.vro.schema.propertyDescription
+import net.juniper.contrail.vro.schema.simpleTypeConstraints
 
 fun Element.elementInfoPropertiesFor(categoryPath: String) = createElementInfoProperties(
     categoryPath = categoryPath,
