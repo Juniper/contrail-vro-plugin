@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component
 import java.io.IOException
 
 @Component
+@Description("Object responsible for creating and deleting connections to Contrail controller.")
 class ConnectionManager
 @Autowired constructor(
     private val repository: ConnectionRepository,
