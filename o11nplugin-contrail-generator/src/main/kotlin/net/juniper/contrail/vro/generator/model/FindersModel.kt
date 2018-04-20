@@ -8,13 +8,13 @@ import net.juniper.contrail.vro.config.ObjectClass
 
 data class FindersModel(
     val classes: List<ClassInfoModel>,
-    val nestedRelations: List<NestedRelationModel>
+    val propertyRelations: List<PropertyRelation>
 ) : GenericModel()
 
 fun generateFindersModel(
     objectClasses: List<ObjectClass>,
-    nestedRelations: List<NestedRelation>
+    propertyRelations: List<PropertyRelation>
 ) = FindersModel(
     objectClasses.map { it.toClassInfoModel() },
-    nestedRelations.map { it.toNestedRelationModel() }
+    propertyRelations
 )

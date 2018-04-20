@@ -14,6 +14,8 @@ import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isStringListWrapper
 import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.config.pluginName
+import net.juniper.contrail.vro.config.toPluginMethodName
+import net.juniper.contrail.vro.config.toPluginName
 import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.generator.model.properties
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
@@ -106,23 +108,23 @@ private fun editComplexPropertyWorkflows(rootProperty: Property, thisProperty: P
     val workflowName = "Edit ${thisProperty.clazz.allLowerCase} of ${rootClass.allLowerCase}"
 
     return workflow(workflowName).withScript(editComplexPropertyScriptBody(schema, rootProperty, thisProperty)) {
-        description = schema.propertyDescription(rootProperty.clazz, thisProperty.propertyName)
+        description = schema.propertyDescription(rootProperty.clazz, thisProperty.parameterName)
         parameter(item, rootClass.reference) {
             description = "${rootClass.allCapitalized} to edit"
             mandatory = true
             showInInventory = true
         }
-        parameter(thisProperty.propertyName.condition, boolean) {
+        parameter(thisProperty.parameterName.condition, boolean) {
             description = "Define ${thisProperty.title}"
-            dataBinding = NullStateOfProperty(item, "${rootProperty.propertyName}.${thisProperty.propertyName}")
+            dataBinding = NullStateOfProperty(item, "${rootProperty.parameterName}.${thisProperty.parameterName}")
             visibility = WhenNonNull(item)
         }
 
         addProperties (
             clazz = thisProperty.clazz,
             schema = schema,
-            propertyPrefix = "${rootProperty.propertyName}.${thisProperty.propertyName}",
-            extraVisibility = FromBooleanParameter(thisProperty.propertyName.condition)
+            propertyPrefix = "${rootProperty.parameterName}.${thisProperty.parameterName}",
+            extraVisibility = FromBooleanParameter(thisProperty.parameterName.condition)
         )
     }
 }
@@ -145,7 +147,7 @@ private fun Class<*>.setBooleanDefaults(schema: Schema) =
     properties.simpleProperties.asSequence()
         .filter { it.clazz == java.lang.Boolean.TYPE }
         .filter { it.isTrueByDefault(schema) }
-        .joinToString("\n") { "$item.${it.propertyName} = true;" }
+        .joinToString("\n") { "$item.${it.parameterName} = true;" }
 
 private fun Property.isTrueByDefault(schema: Schema) =
     schema.simpleTypeConstraints(parent, propertyName)
@@ -169,7 +171,7 @@ $item.update();
 """.trimIndent()
 
 private fun editComplexPropertyScriptBody(schema: Schema, rootProperty: Property, thisProperty: Property) = """
-${initComplexPropertyEdit(schema, rootProperty.propertyName, rootProperty.clazz, thisProperty.propertyName, thisProperty.clazz)}
+${initComplexPropertyEdit(schema, rootProperty.parameterName, rootProperty.clazz, thisProperty.parameterName, thisProperty.clazz)}
 $item.update();
 """.trimIndent()
 
@@ -213,21 +215,27 @@ fun Property.editCode(item: String, schema: Schema, createMode: Boolean, level: 
 }
 
 private val Property.propertyValue get() =
-    customProperties[clazz]?.code(propertyName) ?: propertyName
+    customProperties[clazz]?.code(parameterName) ?: parameterName
+
+private val String.pluginMethodName get() =
+    capitalize().toPluginMethodName
+
+private val Property.pluginMethodName get() =
+    pluginPropertyName.capitalize()
 
 fun Property.primitiveEditCode(item: String) =
-    "$item.set${propertyName.capitalize()}($propertyValue);"
+    "$item.set$pluginMethodName($propertyValue);"
 
 fun Property.listEditCode(item: String) =
-    "$item.set${propertyName.capitalize()}(new Contrail${clazz.pluginName}($propertyName));"
+    "$item.set$pluginMethodName(new Contrail${clazz.pluginName}($parameterName));"
 
 fun Property.complexEditCode(item: String, schema: Schema, createMode: Boolean, level: Int): String = """
-var $propertyName = $item.get${propertyName.capitalize()}();
-if (${propertyName.condition}) {
-    if (!$propertyName) $propertyName = new Contrail${clazz.pluginName}();
-${clazz.editPropertiesCode(propertyName, schema, createMode, level + 1).prependIndent(tab)}
+var $parameterName = $item.get$pluginMethodName();
+if (${parameterName.condition}) {
+    if (!$parameterName) $parameterName = new Contrail${clazz.pluginName}();
+${clazz.editPropertiesCode(parameterName, schema, createMode, level + 1).prependIndent(tab)}
 } else {
-    $propertyName = null;
+    $parameterName = null;
 }
-$item.set${propertyName.capitalize()}($propertyName);
+$item.set$pluginMethodName($parameterName);
 """.trim()

@@ -27,6 +27,10 @@ val inventoryProperties = setOf(
     the<QuotaType>()
 )
 
+val customPropertyObjects = setOf(
+    the<IpamSubnetType>()
+)
+
 val nonEssentialAttributes = setOf(
     the<VirtualNetworkPolicyType>()
 )
@@ -112,10 +116,6 @@ val reversedRelations = setOf(
     pair<FloatingIp, VirtualMachineInterface>()
 )
 
-val propertiesAsObjects = setOf(
-    the<IpamSubnetType>()
-)
-
 private inline fun <reified T> the() =
     T::class.java.simpleName
 
@@ -155,8 +155,8 @@ val String.isDirectChild get() =
 val String.isHiddenRoot get() =
     hiddenRoots.contains(this)
 
-val String.isApiPropertyAsObject get() =
-    propertiesAsObjects.contains(this)
+val String.isCustomPropertyObject get() =
+    customPropertyObjects.contains(this)
 
 fun ObjectClass.isRelationMandatory(child: ObjectClass) =
     mandatoryReference.containsUnordered(simpleName, child.simpleName)
@@ -209,10 +209,10 @@ val Class<*>.isHiddenRoot get() =
     simpleName.isHiddenRoot
 
 val Class<*>.isNodeClass get() =
-    isApiObjectClass || isApiPropertyAsObject
+    isApiObjectClass || isInventoryProperty || isCustomPropertyObject
 
-val Class<*>.isApiPropertyAsObject get() =
-    simpleName.isApiPropertyAsObject
+val Class<*>.isCustomPropertyObject get() =
+    simpleName.isCustomPropertyObject
 
 val ObjectClass.isInternal get() =
     !hasParents

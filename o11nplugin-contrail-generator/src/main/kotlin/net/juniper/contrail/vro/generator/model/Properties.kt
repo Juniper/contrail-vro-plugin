@@ -9,20 +9,21 @@ import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.kotlinClassName
 import net.juniper.contrail.vro.config.propertyName
 import net.juniper.contrail.vro.config.returnListGenericClass
+import net.juniper.contrail.vro.config.toPluginMethodName
 import net.juniper.contrail.vro.config.underscoredNestedName
 import net.juniper.contrail.vro.config.underscoredPropertyToCamelCase
 import net.juniper.contrail.vro.config.wrapperName
 import java.lang.reflect.Method
 
 class Property(
-    val fieldName: String,
+    val propertyName: String,
     val clazz: Class<*>,
     val parent: Class<*>,
     val declaringClass: Class<*>,
     val isList: Boolean,
     val wrapname: String? = null)
 {
-    val propertyName = fieldName.underscoredPropertyToCamelCase()
+    val pluginPropertyName = propertyName.capitalize().toPluginMethodName.decapitalize()
     val componentName get() = propertyName.replace("List$".toRegex(), "").capitalize()
     val classLabel get() = if (clazz.isApiTypeClass) clazz.underscoredNestedName else clazz.kotlinClassName
     val wrapperName get() = wrapname ?: if (clazz.isApiTypeClass) parent.wrapperName(propertyName) else clazz.kotlinClassName
