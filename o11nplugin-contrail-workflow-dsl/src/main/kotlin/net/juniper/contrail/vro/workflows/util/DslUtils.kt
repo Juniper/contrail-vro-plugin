@@ -11,10 +11,10 @@ import net.juniper.contrail.vro.config.toTitle
 import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
 import net.juniper.contrail.vro.workflows.dsl.BasicBuilder
 import net.juniper.contrail.vro.workflows.dsl.PrimitiveParameterBuilder
-import net.juniper.contrail.vro.workflows.schema.Schema
-import net.juniper.contrail.vro.workflows.schema.propertyDescription
-import net.juniper.contrail.vro.workflows.schema.relationDescription
-import net.juniper.contrail.vro.workflows.schema.predefinedAnswers
+import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.schema.propertyDescription
+import net.juniper.contrail.vro.schema.relationDescription
+import net.juniper.contrail.vro.schema.predefinedAnswers
 
 inline fun <reified Parent : Any>
     BasicParameterBuilder<*>.propertyDescription(

@@ -5,7 +5,7 @@
 package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.schema.Schema
+import net.juniper.contrail.vro.schema.Schema
 
 fun loadCustomWorkflows(schema: Schema): List<WorkflowDefinition> = mutableListOf<WorkflowDefinition>().apply {
     this += createConnectionWorkflow()

@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.workflows.schema
+package net.juniper.contrail.vro.schema
 
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.config.ObjectClass
@@ -195,7 +195,7 @@ private fun Node.pattern() =
 
 private fun Node.enumeration(mandatory: Boolean = true) : Enumeration? {
     val list = children.filter { it.nodeName == xsdEnumeration }
-            .mapNotNull { it.attributesMap[value] }.toMutableList()
+        .mapNotNull { it.attributesMap[value] }.toMutableList()
     if (!mandatory && !list.isEmpty()) list.add(0, emptyAnswer)
     return list.let { if (it.isEmpty()) null else Enumeration(it) }
 }
