@@ -24,6 +24,7 @@ import net.juniper.contrail.vro.workflows.util.relationDescription
 
 val supportedVersion : Long = 2
 val supportedVersions = listOf(supportedVersion)
+val serviceVirtualizationTypes = listOf("virtual-machine", "physical-device")
 
 internal fun createServiceTemplate(schema: Schema) : WorkflowDefinition {
     val workflowName = "Create service template"
@@ -58,7 +59,7 @@ internal fun createServiceTemplate(schema: Schema) : WorkflowDefinition {
         parameter("serviceVirtualizationType", string) {
             description = propertyDescription<ServiceTemplateType>(schema)
             mandatory = false
-            extractPredefinedAnswers<ServiceTemplateType>(schema)
+            predefinedAnswers = serviceVirtualizationTypes
         }
         parameter("interfaceType", string.array) {
             description = propertyDescription<ServiceTemplateType>(schema)
