@@ -25,12 +25,12 @@ import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.workflows.schema.DefaultValue
-import net.juniper.contrail.vro.workflows.schema.Schema
-import net.juniper.contrail.vro.workflows.schema.createWorkflowDescription
-import net.juniper.contrail.vro.workflows.schema.propertyDescription
-import net.juniper.contrail.vro.workflows.schema.relationDescription
-import net.juniper.contrail.vro.workflows.schema.simpleTypeConstraints
+import net.juniper.contrail.vro.schema.DefaultValue
+import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.schema.createWorkflowDescription
+import net.juniper.contrail.vro.schema.propertyDescription
+import net.juniper.contrail.vro.schema.relationDescription
+import net.juniper.contrail.vro.schema.simpleTypeConstraints
 
 fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass?, multipleParents: Boolean, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
 
