@@ -11,7 +11,7 @@ import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.number
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.util.propertyDescription
-import net.juniper.contrail.vro.workflows.schema.Schema
+import net.juniper.contrail.vro.schema.Schema
 
 internal fun PresentationParametersBuilder.ipamSubnetParameters(schema: Schema) {
     val subnet = "subnet"
