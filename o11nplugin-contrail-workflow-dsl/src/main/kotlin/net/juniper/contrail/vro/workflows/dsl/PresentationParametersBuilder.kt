@@ -5,7 +5,7 @@
 package net.juniper.contrail.vro.workflows.dsl
 
 import net.juniper.contrail.vro.workflows.model.* // ktlint-disable no-wildcard-imports
-import net.juniper.contrail.vro.workflows.schema.Constraint
+import net.juniper.contrail.vro.schema.Constraint
 import java.util.Date
 
 @WorkflowBuilder
