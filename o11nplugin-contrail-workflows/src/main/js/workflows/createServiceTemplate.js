@@ -5,15 +5,10 @@ item.setParentConnection(parent);
 var properties = new ContrailServiceTemplateType();
 properties.setServiceMode(serviceMode);
 properties.setServiceType(serviceType);
-properties.setAvailabilityZoneEnable(availabilityZoneEnable);
-properties.setInstanceData(instanceData);
 properties.setVersion(version);
 
 if (serviceVirtualizationType){
     properties.setServiceVirtualizationType(serviceVirtualizationType);
-}
-if (vrouterInstanceType){
-    properties.setVrouterInstanceType(vrouterInstanceType);
 }
 
 if (interfaceType){
