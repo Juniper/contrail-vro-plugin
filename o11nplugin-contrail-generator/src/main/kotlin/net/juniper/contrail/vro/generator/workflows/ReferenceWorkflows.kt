@@ -6,7 +6,6 @@ package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.vro.config.constants.child
 import net.juniper.contrail.vro.config.constants.item
-import net.juniper.contrail.vro.config.parentConnection
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
@@ -17,6 +16,7 @@ import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.workflows.dsl.parentConnection
 import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
 import net.juniper.contrail.vro.workflows.util.childDescriptionInCreateRelation
 import net.juniper.contrail.vro.workflows.util.childDescriptionInRemoveRelation
@@ -35,13 +35,13 @@ fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDef
         parameter(item, parentClass.reference) {
             description = schema.parentDescriptionInCreateRelation(parentClass, childClass)
             mandatory = true
-            browserRoot = actionCallTo(parentConnection).parameter(child).asBrowserRoot()
+            browserRoot = child.parentConnection
         }
 
         parameter(child, childClass.reference) {
             description = schema.childDescriptionInCreateRelation(parentClass, childClass, ignoreMissing = true)
             mandatory = true
-            browserRoot = actionCallTo(parentConnection).parameter(item).asBrowserRoot()
+            browserRoot = item.parentConnection
         }
     }
 }
