@@ -17,6 +17,7 @@ val modelClasses = setOf(
     the<NetworkPolicy>(),
     the<SecurityGroup>(),
     the<VirtualMachineInterface>(),
+    the<VirtualMachine>(),
     the<ServiceInstance>(),
     the<ServiceTemplate>(),
     the<PortTuple>(),
@@ -110,7 +111,12 @@ val hiddenRoots = setOf(
 val hiddenRelations = setOf(
     pair<FloatingIp, Project>(),
     pair<VirtualMachineInterface, PortTuple>(),
+    pair<VirtualMachineInterface, VirtualMachine>(),
     pair<ServiceTemplate, ServiceApplianceSet>()
+)
+
+val relationAsProperty = setOf(
+    pair<VirtualMachineInterface, VirtualMachine>()
 )
 
 val reversedRelations = setOf(
@@ -166,6 +172,12 @@ fun ObjectClass.isRelationEditable(child: ObjectClass) =
     ! isInternal &&
     ! child.isInternal &&
     ! nonEditableReference.containsUnordered(simpleName, child.simpleName)
+
+fun Class<*>.isInPropertyRelationTo(child: Class<*>) =
+    relationAsProperty.contains(simpleName, child.simpleName)
+
+private fun <T> Set<Pair<T, T>>.contains(first: T, second: T) =
+    contains(Pair(first, second))
 
 private fun <T> Set<Pair<T, T>>.containsUnordered(first: T, second: T) =
     contains(Pair(first, second)) || contains(Pair(second, first))
