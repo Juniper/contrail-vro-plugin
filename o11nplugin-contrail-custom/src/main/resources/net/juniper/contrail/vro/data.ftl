@@ -25,7 +25,7 @@ public class ${className}
 </@compress>
 
     private static final long serialVersionUID = 1L;
-    <#if objectClass >
+    <#if objectClass || connectionClass >
     private ReferenceFormatter formatter;
     private WrapperUtil util;
     </#if>
@@ -37,7 +37,7 @@ public class ${className}
         <#else>
         _ctx = new WrapperContext(ctx, null);
         </#if>
-        <#if objectClass >
+        <#if objectClass || connectionClass >
         BeanFactory beanFactory = _ctx.getPluginContext().getApplicationContext().getAutowireCapableBeanFactory();
         ContrailPluginFactory factory = beanFactory.getBean(ContrailPluginFactory.class);
         formatter = new ReferenceFormatter(factory);
@@ -192,6 +192,10 @@ public class ${className}
         util.delete(getInternalId(), __getTarget());
     }
 
+    public Connection_Wrapper getConnection() {
+        return (Connection_Wrapper) util.findConnectionWrapper(getInternalId());
+    }
+
     <#list executorMethods as m>
     <@compress single_line=true>public ${m.returns.typeName} ${m.name}(<@params m />)<@thrown m /> {</@compress>
         <@locals m />
@@ -230,6 +234,13 @@ public class ${className}
     }
     </#list>
     </#if>
+
+    <#list connectionFindClasses as clazz>
+    public ${clazz.simpleName}_Wrapper find${clazz.pluginName}(String id) {
+        return util.find(__getTarget(), ${clazz.simpleName}.class, id);
+    }
+
+    </#list>
 
     <#if nodeClass >
     public String getDisplayName() {

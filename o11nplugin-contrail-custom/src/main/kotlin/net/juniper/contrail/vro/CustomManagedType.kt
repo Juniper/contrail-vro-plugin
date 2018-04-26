@@ -24,11 +24,13 @@ import net.juniper.contrail.vro.config.isModelClass
 import net.juniper.contrail.vro.config.isPublic
 import net.juniper.contrail.vro.config.isRootClass
 import net.juniper.contrail.vro.config.isSubclassOf
+import net.juniper.contrail.vro.config.modelClasses
 import net.juniper.contrail.vro.config.parameterClass
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.returnsApiPropertyOrList
 import net.juniper.contrail.vro.config.returnsObjectReferences
 import net.juniper.contrail.vro.config.setParentMethodsInModel
+import net.juniper.contrail.vro.config.toPluginName
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.Executor
 import java.lang.reflect.Method
@@ -109,10 +111,17 @@ private fun Class<*>.simpleParamConfig(parameter: FormalParameter) = parameter.a
     typeName = canonicalName
 }
 
+class ClassInfo(val simpleName: String) {
+    val pluginName = simpleName.toPluginName
+}
+
 class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
 
     val isObjectClass get() =
         delegate.modelClass?.isApiObjectClass ?: false
+
+    val isConnectionClass get() =
+        delegate.modelClass == Connection::class.java
 
     val isNodeClass get() =
         delegate.modelClass?.isNodeClass ?: false
@@ -154,6 +163,12 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         else
             null
     } ?: emptyList()
+
+    val connectionFindClasses: List<ClassInfo> = if (isConnectionClass) {
+        modelClasses.map { ClassInfo(it) }
+    } else {
+        emptyList()
+    }
 
     val customProperties: List<AdditionalProperty> = delegate.modelClass?.run {
         if (isApiPropertyAsObject)

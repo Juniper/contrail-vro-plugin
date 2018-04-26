@@ -3,6 +3,7 @@
  */
 
 package net.juniper.contrail.vro.workflows.dsl
+import net.juniper.contrail.vro.config.parentConnection as parentConnectionAction
 
 abstract class InventoryBrowserRoot {
     abstract val ognl: String?
@@ -31,3 +32,6 @@ fun ActionCall.asBrowserRoot(): InventoryBrowserRoot =
 
 fun ActionCallBuilder.asBrowserRoot() =
     create().asBrowserRoot()
+
+val String.parentConnection get() =
+    actionCallTo(parentConnectionAction).parameter(this).asBrowserRoot()
