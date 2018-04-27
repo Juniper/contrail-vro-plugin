@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.workflows.model
 
 import net.juniper.contrail.vro.config.CDATA
+import net.juniper.contrail.vro.config.constants.Contrail
 import net.juniper.contrail.vro.config.pluginName
 import java.util.Date
 import javax.xml.bind.annotation.XmlAccessType
@@ -110,11 +111,11 @@ data class array<out Type : Any>(val type: ParameterType<Type>) : ParameterType<
         name
 }
 
-data class Reference(val simpleName: String) : ParameterType<Reference>() {
+data class Reference(val simpleName: String, val plugin: String = Contrail) : ParameterType<Reference>() {
     constructor(clazz: Class<*>): this(clazz.pluginName)
 
     override val name: String get() =
-        "Contrail:$simpleName"
+        "$plugin:$simpleName"
 
     //just to avoid the auto-generated data class version of toString()
     override fun toString() =
