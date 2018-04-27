@@ -6,6 +6,9 @@ package net.juniper.contrail.vro.config
 
 val actionPackage = globalProjectInfo.workflowPackage
 
+val String.vCenterRelatedPackage get() =
+    "$this.vc"
+
 val areValidCommunityAttributes = "areValidCommunityAttributes"
 val listPropertyValue = "listPropertyValue"
 val isValidAllocactionPool = "isValidAllocationPool"
@@ -34,3 +37,5 @@ val serviceInstanceInterfaceNames = "serviceInstanceInterfaceNames"
 val ipamHasAllocationMode = "ipamHasAllocationMode"
 val ipamHasNotAllocationMode = "ipamHasNotAllocationMode"
 val networkHasNotAllcationMode = "networkHasNotAllocationMode"
+
+val portOfVCVirtualMachine = "portOfVCVirtualMachine"
