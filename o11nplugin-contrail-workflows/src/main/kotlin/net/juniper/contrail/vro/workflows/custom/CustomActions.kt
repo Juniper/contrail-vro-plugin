@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
+import net.juniper.contrail.vro.config.vCenterRelatedPackage
 import net.juniper.contrail.vro.workflows.model.Action
 
 fun loadCustomActions(version: String, packageName: String): List<Action> = mutableListOf<Action>().apply {
@@ -35,4 +36,6 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += ipamHasAllocationModeAction(version, packageName)
     this += ipamHasNotAllocationModeAction(version, packageName)
     this += networkHasNotAllcationModeAction(version, packageName)
+
+    this += portOfVCVirtualMachineAction(version, packageName.vCenterRelatedPackage)
 }
