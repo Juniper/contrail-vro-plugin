@@ -14,8 +14,8 @@ import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.constants.apiTypesPackageName
 import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.isNodeClass
-import net.juniper.contrail.vro.config.isApiPropertyAsObject
 import net.juniper.contrail.vro.config.isApiPropertyClass
+import net.juniper.contrail.vro.config.isCustomPropertyObject
 import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.isHiddenProperty
 import net.juniper.contrail.vro.config.isInternal
@@ -171,7 +171,7 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
     }
 
     val customProperties: List<AdditionalProperty> = delegate.modelClass?.run {
-        if (isApiPropertyAsObject)
+        if (isCustomPropertyObject || isInventoryProperty)
             propertyAsObjectNewProperties
         else
             null
@@ -240,7 +240,7 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         propertyViews.forEach { methods.add(it.toManagedMethod()) }
 
     private fun CustomReference.toManagedMethod() = ManagedMethod().apply {
-        setName(methodName, methodName)
+        setName(pluginMethodName, pluginMethodName)
         params = emptyList()
         // trick to avoid generating standard wrapper method
         setIsInheritedWrapperMethod(true)
