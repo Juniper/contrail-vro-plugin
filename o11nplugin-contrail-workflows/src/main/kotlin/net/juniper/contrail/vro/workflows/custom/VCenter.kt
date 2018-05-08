@@ -5,9 +5,12 @@
 package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.VirtualMachineInterface
+import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.constants.Connection
+import net.juniper.contrail.vro.config.constants.DistributedVirtualPortgroup
 import net.juniper.contrail.vro.config.constants.VC
 import net.juniper.contrail.vro.config.constants.VirtualMachine
+import net.juniper.contrail.vro.config.networkOfVCPortGroup
 import net.juniper.contrail.vro.config.portOfVCVirtualMachine
 import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.Reference
@@ -19,5 +22,13 @@ val portOfVCVirtualMachineAction = ActionDefinition(
     resultType = reference<VirtualMachineInterface>(),
     parameters = listOf("connection" ofType Reference(Connection),
         "vcvm" ofType Reference(VirtualMachine, VC),
+        "timeout" ofType number)
+)
+
+val networkOfVCPortGroupAction = ActionDefinition(
+    name = networkOfVCPortGroup,
+    resultType = reference<VirtualNetwork>(),
+    parameters = listOf("connection" ofType Reference(Connection),
+        "portGroup" ofType Reference(DistributedVirtualPortgroup, VC),
         "timeout" ofType number)
 )

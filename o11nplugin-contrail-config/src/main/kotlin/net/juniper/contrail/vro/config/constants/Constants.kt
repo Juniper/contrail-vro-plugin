@@ -11,6 +11,7 @@ val apiTypesPackageName = "$basePackageName.api.types"
 
 val VC = "VC"
 val VirtualMachine = "VirtualMachine"
+val DistributedVirtualPortgroup = "DistributedVirtualPortgroup"
 
 val Configuration = "Configuration"
 val Connection = "Connection"
