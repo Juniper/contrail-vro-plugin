@@ -9,9 +9,11 @@ import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.NetworkPolicy
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.config.asForwardRef
+import net.juniper.contrail.vro.config.constants.child
 import net.juniper.contrail.vro.config.subnetsOfVirtualNetwork
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
+import net.juniper.contrail.vro.config.parentConnection
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
@@ -19,6 +21,7 @@ import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.workflows.dsl.parentConnection
 import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
 import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
 import net.juniper.contrail.vro.workflows.util.childDescriptionInCreateRelation
@@ -36,10 +39,12 @@ internal fun addPolicyToVirtualNetwork(schema: Schema): WorkflowDefinition {
         parameter(item, reference<VirtualNetwork>()) {
             description = schema.parentDescriptionInCreateRelation<VirtualNetwork, NetworkPolicy>()
             mandatory = true
+            browserRoot = child.parentConnection
         }
-        parameter("networkPolicy", reference<NetworkPolicy>()) {
+        parameter(child, reference<NetworkPolicy>()) {
             description = schema.childDescriptionInCreateRelation<VirtualNetwork, NetworkPolicy>()
             mandatory = true
+            browserRoot = item.parentConnection
         }
     }
 }

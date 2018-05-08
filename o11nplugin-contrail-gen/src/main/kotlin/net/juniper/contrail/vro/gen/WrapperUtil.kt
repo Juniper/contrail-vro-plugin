@@ -22,10 +22,11 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
     private fun <M> defaultList(): List<M> =
         mutableListOf()
 
-    private fun maybeFindConnection(sid: Sid): Connection? {
-        val connectionWrapper = factory.find(ConnectionName, sid.toString()) as ModelWrapper?
-        return connectionWrapper?.__getTarget() as Connection?
-    }
+    fun findConnectionWrapper(id: Sid): ModelWrapper? =
+        factory.find(ConnectionName, id.toString()) as ModelWrapper?
+
+    private fun maybeFindConnection(sid: Sid): Connection? =
+        findConnectionWrapper(sid)?.__getTarget() as Connection?
 
     private fun findConnection(sid: Sid): Connection =
         maybeFindConnection(sid) ?: raiseNoConnection(sid)
@@ -57,6 +58,9 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
         return maybeFindConnection(sid)?.getObjects(clazz, references)?.map { it.toWrapper<T, M>(sid, clazz) }
             ?: defaultList()
     }
+
+    fun <T : ApiObjectBase, M: Findable> find(connection: Connection, clazz: Class<T>, id: String): M? =
+        connection.findById(clazz, id)?.also { connection.read(it) }?.toWrapper(connection.id, clazz)
 
     private fun <T : ApiObjectBase, M : Findable> T.toWrapper(sid: Sid, clazz: Class<T>): M {
         val wrapper: M = ctx.createPluginObject(this, clazz)

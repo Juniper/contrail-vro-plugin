@@ -17,6 +17,7 @@ import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.workflows.dsl.parentConnection
 import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
 import net.juniper.contrail.vro.workflows.util.removeRelationWorkflowName
 import net.juniper.contrail.vro.workflows.util.propertyDescription
@@ -32,10 +33,12 @@ internal fun addFloatingIpToPort(schema: Schema): WorkflowDefinition {
         parameter(item, reference<VirtualMachineInterface>()) {
             description = schema.parentDescriptionInCreateRelation<VirtualMachineInterface, FloatingIp>()
             mandatory = true
+            browserRoot = child.parentConnection
         }
         parameter(child, reference<FloatingIp>()) {
             description = schema.childDescriptionInCreateRelation<VirtualMachineInterface, FloatingIp>(ignoreMissing = true)
             mandatory = true
+            browserRoot = item.parentConnection
         }
         parameter("fixedIpAddress", boolean) {
             description = propertyDescription<FloatingIp>(schema)
