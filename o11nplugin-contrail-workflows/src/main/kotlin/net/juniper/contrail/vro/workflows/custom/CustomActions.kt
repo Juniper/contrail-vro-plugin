@@ -38,4 +38,5 @@ fun loadCustomActions(version: String, packageName: String): List<Action> = muta
     this += networkHasNotAllcationModeAction(version, packageName)
 
     this += portOfVCVirtualMachineAction(version, packageName.vCenterRelatedPackage)
+    this += networkOfVCPortGroupAction(version, packageName.vCenterRelatedPackage)
 }

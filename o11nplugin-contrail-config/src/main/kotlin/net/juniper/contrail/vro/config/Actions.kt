@@ -39,3 +39,4 @@ val ipamHasNotAllocationMode = "ipamHasNotAllocationMode"
 val networkHasNotAllcationMode = "networkHasNotAllocationMode"
 
 val portOfVCVirtualMachine = "portOfVCVirtualMachine"
+val networkOfVCPortGroup = "networkOfVCPortGroup"
