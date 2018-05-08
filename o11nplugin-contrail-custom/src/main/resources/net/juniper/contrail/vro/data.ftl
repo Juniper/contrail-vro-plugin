@@ -240,6 +240,10 @@ public class ${className}
         return util.find(__getTarget(), ${clazz.simpleName}.class, id);
     }
 
+    public ${clazz.simpleName}_Wrapper find${clazz.pluginName}ByFQName(String fqName) {
+        return util.findByFQName(__getTarget(), ${clazz.simpleName}.class, fqName);
+    }
+
     </#list>
 
     <#if nodeClass >
