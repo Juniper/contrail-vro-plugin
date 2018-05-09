@@ -12,7 +12,6 @@ import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.model.number
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.reference
-import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.util.extractPredefinedAnswers
 import net.juniper.contrail.vro.config.constants.item
@@ -67,21 +66,6 @@ internal fun createServiceTemplate(schema: Schema) : WorkflowDefinition {
             mandatory = true
             predefinedAnswers = supportedInterfaceNames
             sameValues = false
-        }
-        parameter("vrouterInstanceType", string) {
-            description = propertyDescription<ServiceTemplateType>(schema)
-            mandatory = false
-            extractPredefinedAnswers<ServiceTemplateType>(schema)
-        }
-        parameter("availabilityZoneEnable", boolean) {
-            description = propertyDescription<ServiceTemplateType>(schema)
-            mandatory = false
-            defaultValue = false
-        }
-        parameter("instanceData", string) {
-            description = propertyDescription<ServiceTemplateType>(schema)
-            mandatory = false
-            multiline = true
         }
         output(item, reference<ServiceTemplate>()) {
             description = "Service template created in this workflow"
