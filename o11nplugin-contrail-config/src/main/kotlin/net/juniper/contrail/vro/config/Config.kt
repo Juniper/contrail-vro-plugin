@@ -17,6 +17,7 @@ val modelClasses = setOf(
     the<NetworkPolicy>(),
     the<SecurityGroup>(),
     the<VirtualMachineInterface>(),
+    the<ServiceHealthCheck>(),
     the<VirtualMachine>(),
     the<ServiceInstance>(),
     the<ServiceTemplate>(),
@@ -96,6 +97,7 @@ val nonEditableReference = setOf(
 val customAddReference = setOf(
     pair<FloatingIp, VirtualMachineInterface>(),
     pair<VirtualNetwork, NetworkPolicy>(),
+    pair<ServiceHealthCheck, ServiceInstance>(),
     pair<VirtualNetwork, NetworkIpam>()
 )
 
