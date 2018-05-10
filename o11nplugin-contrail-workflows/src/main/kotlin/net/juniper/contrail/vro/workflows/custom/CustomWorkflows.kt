@@ -28,4 +28,5 @@ fun loadCustomWorkflows(schema: Schema): List<WorkflowDefinition> = mutableListO
     this += createNetworkIpamSubnetWorkflow(schema)
     this += addFlatIpamWorkflow(schema)
     this += removeFlatIpamWorkflow()
+    this += addServiceInstanceToHealthCheck(schema)
 }
