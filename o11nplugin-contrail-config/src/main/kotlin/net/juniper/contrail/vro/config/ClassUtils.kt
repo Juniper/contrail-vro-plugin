@@ -135,6 +135,9 @@ val Method.objectReferenceAttributeClass: Class<*>? get() =
 val Method.isPublic get() =
     Modifier.isPublic(modifiers)
 
+val Method.isStatic get() =
+    Modifier.isStatic(modifiers)
+
 val <T> Class<T>.isAbstract: Boolean get() =
     Modifier.isAbstract(modifiers)
 
@@ -176,7 +179,7 @@ private fun <T> Class<T>.subclassesIn(packageName: String): List<Class<*>> =
         .filter { it.isSubclassOf(this) }
         .toList()
 
-private fun classesIn(packageName: String): Sequence<Class<*>> =
+fun classesIn(packageName: String): Sequence<Class<*>> =
     ClassPath.from(loader).getTopLevelClassesRecursive(packageName).asSequence()
         .map { classForName(it.name) }
         .filterNotNull()
