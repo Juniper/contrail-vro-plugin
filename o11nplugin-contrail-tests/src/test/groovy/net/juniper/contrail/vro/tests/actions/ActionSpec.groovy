@@ -6,7 +6,7 @@ package net.juniper.contrail.vro.tests.actions
 
 import net.juniper.contrail.vro.tests.ScriptTestEngine
 import spock.lang.Specification
-import static net.juniper.contrail.vro.workflows.custom.CustomActionsKt.loadCustomActions
+import static net.juniper.contrail.vro.workflows.custom.CustomKt.loadCustomActions
 import static net.juniper.contrail.vro.tests.JsTesterKt.utilsName
 
 abstract class ActionSpec extends Specification {

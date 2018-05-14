@@ -22,7 +22,7 @@ import java.nio.file.Paths
 import static net.juniper.contrail.vro.config.ProjectInfoKt.globalProjectInfo
 import static net.juniper.contrail.vro.schema.SchemaKt.buildSchema
 import static net.juniper.contrail.vro.tests.JsTesterKt.utilsName
-import static net.juniper.contrail.vro.workflows.custom.CustomWorkflowsKt.loadCustomWorkflows
+import static net.juniper.contrail.vro.workflows.custom.Custom.loadCustomWorkflows
 
 abstract class WorkflowSpec extends Specification {
     Dependencies dependencies
