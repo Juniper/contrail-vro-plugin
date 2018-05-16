@@ -32,6 +32,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>net.juniper.contrail.vro</groupId>
+            <artifactId>o11nplugin-contrail-generator</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>net.juniper.contrail</groupId>
             <artifactId>juniper-contrail-api</artifactId>
             <scope>compile</scope>
@@ -89,6 +94,11 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.juniper.contrail.vro</groupId>
+            <artifactId>o11nplugin-contrail-gen</artifactId>
+            <version>1.0</version>
         </dependency>
     </dependencies>
 
