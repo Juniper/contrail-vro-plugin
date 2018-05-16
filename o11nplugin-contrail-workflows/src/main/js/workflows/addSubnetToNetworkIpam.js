@@ -27,6 +27,7 @@ if (!ContrailUtils.isBlankList(allocationPools)) {
 var ipamSubnets = parent.getIpamSubnets();
 if (!ipamSubnets){
     ipamSubnets = new ContrailIpamSubnets();
+    parent.setIpamSubnets(ipamSubnets);
 }
 
 ipamSubnets.addSubnets(ipamSubnet);
