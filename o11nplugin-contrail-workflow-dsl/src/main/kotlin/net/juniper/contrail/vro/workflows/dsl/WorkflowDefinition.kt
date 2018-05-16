@@ -5,7 +5,6 @@
 package net.juniper.contrail.vro.workflows.dsl
 
 import net.juniper.contrail.vro.workflows.model.Attribute
-import net.juniper.contrail.vro.workflows.util.generateID
 import net.juniper.contrail.vro.workflows.model.Binding
 import net.juniper.contrail.vro.workflows.model.ParameterSet
 import net.juniper.contrail.vro.workflows.model.Position
@@ -15,6 +14,7 @@ import net.juniper.contrail.vro.workflows.model.Reference
 import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.Workflow
 import net.juniper.contrail.vro.workflows.model.WorkflowItem
+import net.juniper.contrail.vro.workflows.util.generateID
 
 data class WorkflowDefinition(
     val displayName: String,
