@@ -21,6 +21,7 @@ import java.nio.file.Paths
 
 import static net.juniper.contrail.vro.config.ProjectInfoKt.globalProjectInfo
 import static net.juniper.contrail.vro.schema.SchemaKt.buildSchema
+import static net.juniper.contrail.vro.tests.JsTesterKt.constantsName
 import static net.juniper.contrail.vro.tests.JsTesterKt.utilsName
 import static net.juniper.contrail.vro.workflows.custom.CustomWorkflowsKt.loadCustomWorkflows
 
@@ -30,6 +31,7 @@ abstract class WorkflowSpec extends Specification {
 
     def setup() {
         engine.addToContext(utilsName)
+        engine.addToContext(constantsName)
         createContext()
         loadWrapperTypes()
         mockUtil.attachMock(connectorMock, this)
@@ -44,7 +46,7 @@ abstract class WorkflowSpec extends Specification {
         engine.invokeFunction(name, args)
     }
 
-    def loadWrapperTypes() {
+    private static def loadWrapperTypes() {
         loadWrapperType("ActionListType")
         loadWrapperType("AllocationPoolType")
         loadWrapperType("FloatingIp")

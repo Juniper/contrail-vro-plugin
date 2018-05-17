@@ -11,7 +11,9 @@ import net.juniper.contrail.vro.gen.NetworkIpam_Wrapper
 import net.juniper.contrail.vro.gen.NetworkPolicy_Wrapper
 import net.juniper.contrail.vro.gen.Project_Wrapper
 import net.juniper.contrail.vro.gen.SecurityGroup_Wrapper
+import net.juniper.contrail.vro.gen.ServiceHealthCheck_Wrapper
 import net.juniper.contrail.vro.gen.ServiceInstance_Wrapper
+import net.juniper.contrail.vro.gen.ServiceTemplate_Wrapper
 import net.juniper.contrail.vro.gen.VirtualMachineInterfacePropertiesType_Wrapper
 import net.juniper.contrail.vro.gen.VirtualMachineInterface_Wrapper
 import net.juniper.contrail.vro.gen.VirtualNetwork_Wrapper
@@ -76,10 +78,23 @@ class Dependencies(private val connection: Connection_Wrapper) {
     }
 
     @JvmOverloads
+    fun someServiceHealthCheck(parent: Project_Wrapper = someProject()) = ServiceHealthCheck_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someServiceHealthCheck$uuid"
+        setParentProject(parent)
+    }
+
+    @JvmOverloads
     fun someSecurityGroup(parent: Project_Wrapper = someProject()) = SecurityGroup_Wrapper().apply {
         uuid = randomStringUuid()
         name = "someSecurityGroup$uuid"
         setParentProject(parent)
+    }
+
+    fun someServiceTemplate() = ServiceTemplate_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someServiceTemplate$uuid"
+        setParentConnection(this@Dependencies.connection)
     }
 
     fun somePortProperties() = VirtualMachineInterfacePropertiesType_Wrapper()
