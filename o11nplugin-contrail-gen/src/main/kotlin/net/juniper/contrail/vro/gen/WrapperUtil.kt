@@ -62,6 +62,9 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
     fun <T : ApiObjectBase, M: Findable> find(connection: Connection, clazz: Class<T>, id: String): M? =
         connection.findById(clazz, id)?.also { connection.read(it) }?.toWrapper(connection.id, clazz)
 
+    fun <T : ApiObjectBase, M: Findable> findByFQName(connection: Connection, clazz: Class<T>, fqName: String): M? =
+        connection.findByFQN(clazz, fqName)?.also { connection.read(it) }?.toWrapper(connection.id, clazz)
+
     private fun <T : ApiObjectBase, M : Findable> T.toWrapper(sid: Sid, clazz: Class<T>): M {
         val wrapper: M = ctx.createPluginObject(this, clazz)
         wrapper.internalId = sid.with(clazz.pluginName, uuid)

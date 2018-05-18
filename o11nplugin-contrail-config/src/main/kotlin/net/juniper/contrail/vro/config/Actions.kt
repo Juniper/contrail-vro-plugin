@@ -39,3 +39,4 @@ val networkHasNotAllcationMode = "networkHasNotAllocationMode"
 val propertyOfObjectRule = "propertyOfObjectRule"
 
 val portOfVCVirtualMachine = "portOfVCVirtualMachine"
+val networkOfVCPortGroup = "networkOfVCPortGroup"
