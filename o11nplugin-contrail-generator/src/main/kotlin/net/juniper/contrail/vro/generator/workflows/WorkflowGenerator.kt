@@ -143,9 +143,8 @@ private fun WorkflowDefinition.createWorkflow(info: ProjectInfo) =
     createWorkflow(info.workflowPackage, info.workflowVersion)
 
 private fun Action.save(info: ProjectInfo) {
-    val categoryPackage = info.workflowPackage
-    generateDefinition(info, categoryPackage)
-    generateElementInfo(info, categoryPackage)
+    generateDefinition(info, packageName)
+    generateElementInfo(info, packageName)
 }
 
 private class DefaultCharacterEscapeHandler : CharacterEscapeHandler {
