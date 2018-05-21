@@ -10,30 +10,43 @@ import com.vmware.o11n.sdk.modeldriven.Sid
 import com.vmware.o11n.sdk.modeldriven.impl.PluginContextImpl
 import com.vmware.o11n.sdk.modeldriven.impl.RuntimeBeanRegisterer
 import net.juniper.contrail.vro.gen.Connection_Wrapper
+import net.juniper.contrail.vro.gen.Constants_Wrapper
+import net.juniper.contrail.vro.gen.Utils_Wrapper
+import net.juniper.contrail.vro.model.Constants
+import net.juniper.contrail.vro.model.Utils
 import net.juniper.contrail.vro.tests.ScriptTestEngine
 import org.spockframework.mock.MockUtil
 import org.springframework.beans.factory.support.DefaultListableBeanFactory
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
+import spock.lang.Shared
 import spock.lang.Specification
 
 import java.nio.file.Paths
 
 import static net.juniper.contrail.vro.config.ProjectInfoKt.globalProjectInfo
 import static net.juniper.contrail.vro.schema.SchemaKt.buildSchema
+import static net.juniper.contrail.vro.tests.JsTesterKt.constantsName
 import static net.juniper.contrail.vro.tests.JsTesterKt.utilsName
 import static net.juniper.contrail.vro.workflows.custom.CustomWorkflowsKt.loadCustomWorkflows
 
 abstract class WorkflowSpec extends Specification {
-    Dependencies dependencies
+    @Shared Dependencies dependencies
     def connectorMock = DetachedMocksKt.apiConnectorMock
 
-    def setup() {
-        engine.addToContext(utilsName)
+    def setupSpec() {
         createContext()
         loadWrapperTypes()
+        def ctx = AnonymousPluginContext.get()
+        def utils = createUtils(ctx)
+        def constants = createConstants(ctx)
+        engine.addToContext(utilsName, utils)
+        engine.addToContext(constantsName, constants)
+        dependencies = createDependencies(utils)
+    }
+
+    def setup() {
         mockUtil.attachMock(connectorMock, this)
-        dependencies = createDependencies()
     }
 
     def getWorkflowScript(String scriptName) {
@@ -44,7 +57,7 @@ abstract class WorkflowSpec extends Specification {
         engine.invokeFunction(name, args)
     }
 
-    def loadWrapperTypes() {
+    private static def loadWrapperTypes() {
         loadWrapperType("ActionListType")
         loadWrapperType("AllocationPoolType")
         loadWrapperType("FloatingIp")
@@ -90,17 +103,33 @@ abstract class WorkflowSpec extends Specification {
         m.invoke(null, pluginContext)
     }
 
+    private static def createUtils(ctx) {
+        def utils = new Utils_Wrapper()
+        def innerUtils = new Utils()
+        utils.setContext(ctx)
+        utils.__setTarget(innerUtils)
+        return utils
+    }
+
+    private static def createConstants(ctx) {
+        def constants = new Constants_Wrapper()
+        def innerConstants = new Constants()
+        constants.setContext(ctx)
+        constants.__setTarget(innerConstants)
+        return constants
+    }
+
     private static def schema = buildSchema(Paths.get(globalProjectInfo.schemaFile))
     private static def workflows = loadCustomWorkflows(schema)
 
     private static def engine = new ScriptTestEngine()
 
-    private static def createDependencies() {
+    private static def createDependencies(Utils_Wrapper utils) {
         def connection = new WorkflowTestConfig().connection()
         def conn_wrap = new Connection_Wrapper()
         conn_wrap.__setTarget(connection)
         conn_wrap.setInternalId(Sid.empty().with("Connection", "theConnection"))
-        return new Dependencies(conn_wrap)
+        return new Dependencies(conn_wrap, utils)
     }
 
     private static def loadWrapperType(typeName) {

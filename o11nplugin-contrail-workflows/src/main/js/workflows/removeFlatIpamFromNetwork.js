@@ -1,2 +1,2 @@
-parent.removeNetworkIpam(ipam);
+parent.removeNetworkIpam(ipam, null);
 parent.update();
