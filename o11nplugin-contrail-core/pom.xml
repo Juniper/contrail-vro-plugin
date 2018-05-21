@@ -36,11 +36,14 @@
       <groupId>net.juniper.contrail.vro</groupId>
       <artifactId>o11nplugin-contrail-format</artifactId>
     </dependency>
-
     <dependency>
       <groupId>net.juniper.contrail.vro</groupId>
       <artifactId>o11nplugin-contrail-config</artifactId>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.juniper.contrail.vro</groupId>
+      <artifactId>o11nplugin-contrail-generator</artifactId>
     </dependency>
 
     <dependency>

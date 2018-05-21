@@ -14,9 +14,9 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 
-data class GeneratorConfig(val outputDir: Path, val verbose: Boolean = true) {
-    constructor(baseDir: Path, packageName: String, verbose: Boolean = true) :
-        this(baseDir.append(packageName.packageToPath()), verbose)
+data class GeneratorConfig(val outputDir: Path, val templateDir: Path, val verbose: Boolean = true, val force: Boolean = false) {
+    constructor(baseDir: Path, templateDir: Path, packageName: String, verbose: Boolean = true) :
+        this(baseDir.append(packageName.packageToPath()), templateDir, verbose)
 }
 
 class GeneratorEngine(private val config: GeneratorConfig, private val freemarker: Configuration) {
@@ -28,9 +28,14 @@ class GeneratorEngine(private val config: GeneratorConfig, private val freemarke
         if (config.verbose)
             println("[INFO] Generating code for $fileName using template $templateName")
         createPackageStructure()
+        val templatePath = config.templateDir.append(templateName)
+        val outputPath = config.outputDir.append(fileName)
+        if (Files.exists(outputPath) && ! config.force && canSkipGeneration(templatePath, outputPath)) {
+            println("[INFO] ---- File up-to-date, skipping generating code.")
+            return
+        }
         val template = freemarker.getTemplate(templateName)
-        val filePath = config.outputDir.append(fileName)
-        FileWriter(filePath.toFile()). use { template.process(model, it) }
+        FileWriter(outputPath.toFile()). use { template.process(model, it) }
     }
 
     @Throws(IOException::class)
@@ -39,6 +44,12 @@ class GeneratorEngine(private val config: GeneratorConfig, private val freemarke
 
     private fun String.toTemplateName(): String =
         decapitalize().replace("\\..+?$".toRegex(), ".ftl")
+
+    private fun canSkipGeneration(templatePath: Path, outputPath: Path): Boolean {
+        val templateTime = Files.getLastModifiedTime(templatePath)
+        val outputTime = Files.getLastModifiedTime(outputPath)
+        return outputTime > templateTime
+    }
 
     private fun createPackageStructure() =
         Files.createDirectories(config.outputDir)
