@@ -6,9 +6,12 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.NetworkIpam
+import org.spockframework.mock.MockUtil
 
-class AddSubnetToNetworkIpamSpec extends WorkflowSpec {
+class RemoveSubnetFromNetworkIpamSpec extends WorkflowSpec {
+
     def addSubnetToNetworkIpam = getWorkflowScript("Add subnet to network IPAM")
+    def removeSubnetFromNetworkIpam = getWorkflowScript("Remove network IPAM subnet")
 
     def someSubnet = "1.2.3.4/16"
     def someAllocationPools = null
@@ -18,12 +21,12 @@ class AddSubnetToNetworkIpamSpec extends WorkflowSpec {
     def someDefaultGateway = "1.2.3.4"
     def someEnableDhcp = true
 
-    def "Adding a subnet to network IPAM"() {
+    def "Removing a subnet from IPAM subnet"() {
         given: "A correct set of attributes"
         def networkIpam = dependencies.someNetworkIpam()
         connectorMock.read(_) >> Status.success()
 
-        when: "Running the script"
+        when: "Running the scripts"
         invokeFunction(
             addSubnetToNetworkIpam,
             networkIpam,
@@ -35,12 +38,26 @@ class AddSubnetToNetworkIpamSpec extends WorkflowSpec {
             someDefaultGateway,
             someEnableDhcp
         )
+        invokeFunction(
+            removeSubnetFromNetworkIpam,
+            networkIpam,
+            someSubnet
+        )
 
-        then: "The parent Network IPAM should be updated."
+        then: "The parent Network IPAM should be updated with a new subnet."
         1 * connectorMock.update({
             def _it = it as NetworkIpam
             _it.uuid == networkIpam.uuid &&
             _it.ipamSubnets.subnets.any{
+                it.subnet.ipPrefix + "/" + it.subnet.ipPrefixLen == someSubnet &&
+                it.defaultGateway == someDefaultGateway
+            }}) >> Status.success()
+
+        then: "The parent Network IPAM should be updated without the new subnet."
+        1 * connectorMock.update({
+            def _it = it as NetworkIpam
+            _it.uuid == networkIpam.uuid &&
+            !_it.ipamSubnets.subnets.any{
                 it.subnet.ipPrefix + "/" + it.subnet.ipPrefixLen == someSubnet &&
                 it.defaultGateway == someDefaultGateway
             }}) >> Status.success()
