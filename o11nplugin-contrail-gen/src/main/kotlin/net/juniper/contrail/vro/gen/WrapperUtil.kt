@@ -54,8 +54,15 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
 
     fun <T : ApiObjectBase, U : ApiPropertyBase, M: Findable>
         references(sid: Sid?, clazz: Class<T>, references: List<ObjectReference<U>>?): List<M> {
+        println("Starting shieet")
+        println(clazz)
         if (sid == null || references == null) return defaultList()
-        return maybeFindConnection(sid)?.getObjects(clazz, references)?.map { it.toWrapper<T, M>(sid, clazz) }
+        println("startof: dupa")
+        println(references)
+        val x = maybeFindConnection(sid)?.getObjects(clazz, references)
+        println(x)
+        println("endof  : dupa")
+        return x?.map { it.toWrapper<T, M>(sid, clazz) }
             ?: defaultList()
     }
 
@@ -66,6 +73,10 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
         connection.findByFQN(clazz, fqName)?.also { connection.read(it) }?.toWrapper(connection.id, clazz)
 
     private fun <T : ApiObjectBase, M : Findable> T.toWrapper(sid: Sid, clazz: Class<T>): M {
+        println(ctx)
+        println(sid)
+        println(clazz)
+        println(this)
         val wrapper: M = ctx.createPluginObject(this, clazz)
         wrapper.internalId = sid.with(clazz.pluginName, uuid)
         return wrapper
