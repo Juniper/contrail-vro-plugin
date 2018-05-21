@@ -6,7 +6,12 @@ package net.juniper.contrail.vro
 
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
+import javax.inject.Singleton
+import com.vmware.o11n.sdk.modeldrivengen.code.PluginCodeGenerator
+import com.vmware.o11n.sdk.modeldrivengen.code.RuntimeConfigurationGenerator
+import com.vmware.o11n.sdk.modeldrivengen.code.VsoXmlGenerator
 import com.vmware.o11n.sdk.modeldrivengen.mapping.AbstractMapping
+import com.vmware.o11n.sdk.modeldrivengen.model.ModelMerger
 import com.vmware.o11n.sdk.modeldrivengen.model.Plugin
 import net.juniper.contrail.vro.config.constants.Contrail
 import net.juniper.contrail.vro.config.globalProjectInfo
@@ -22,6 +27,18 @@ class CustomModule : AbstractModule() {
     override fun configure() {
         bind(AbstractMapping::class.java).toInstance(CustomMapping())
         bind(Plugin::class.java).toInstance(plugin)
+        bind(VsoXmlGenerator::class.java)
+            .to(CustomCodeGenerator::class.java)
+            .`in`(Singleton::class.java)
+        bind(PluginCodeGenerator::class.java)
+            .to(CustomCodeGenerator::class.java)
+            .`in`(Singleton::class.java)
+        bind(RuntimeConfigurationGenerator::class.java)
+            .to(CustomCodeGenerator::class.java)
+            .`in`(Singleton::class.java)
+        bind(ModelMerger::class.java)
+            .to(CustomCodeGenerator::class.java)
+            .`in`(Singleton::class.java)
         bind(String::class.java)
             .annotatedWith(Names.named("codegen.templatePath"))
             .toInstance("/net/juniper/contrail/vro")
