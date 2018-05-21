@@ -27,15 +27,10 @@
       <artifactId>o11nplugin-contrail-package</artifactId>
       <type>package</type>
     </dependency>
-    <dependency>
-      <groupId>org.spockframework</groupId>
-      <artifactId>spock-core</artifactId>
-    </dependency>
   </dependencies>
 
   <build>
     <finalName>o11nplugin-contrail</finalName>
-    <testSourceDirectory>src/test</testSourceDirectory>
     <plugins>
       <!-- dar file generation -->
       <plugin>
@@ -112,7 +107,6 @@
       <!-- copy deliverable to dist folder -->
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.0.1</version>
         <executions>
           <execution>
             <id>copy-vmoapp-file</id>
@@ -145,17 +139,11 @@
                 <include>vso.xml</include>
               </includes>
             </fileset>
+            <fileset>
+              <directory>${basedir}/../dist</directory>
+            </fileset>
           </filesets>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.gmavenplus</groupId>
-        <artifactId>gmavenplus-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
