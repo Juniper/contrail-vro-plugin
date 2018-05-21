@@ -14,7 +14,8 @@
     <repo.url>http://${repo.host}:8280/vco-repo</repo.url>
     <spring.version>4.3.7.RELEASE</spring.version>
     <installation.mode>version</installation.mode>
-    <kotlin.version>1.2.31</kotlin.version>
+    <kotlin.version>1.2.41</kotlin.version>
+    <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <workflow.package>net.juniper.contrail</workflow.package>
     <!-- Sandbox root is defined relative to submodules -->
     <sandbox.root>${project.basedir}/../..</sandbox.root>
@@ -26,6 +27,12 @@
     <repository>
       <id>vro-repo</id>
       <url>${repo.url}</url>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
     </repository>
   </repositories>
 
@@ -33,6 +40,12 @@
     <pluginRepository>
       <id>vro-repo</id>
       <url>${repo.url}</url>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
     </pluginRepository>
   </pluginRepositories>
 
@@ -315,6 +328,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.7.0</version>
           <configuration>
             <source>1.8</source>
             <target>1.8</target>
@@ -333,12 +347,16 @@
             <execution>
               <id>java-compile</id>
               <phase>compile</phase>
-              <goals> <goal>compile</goal> </goals>
+              <goals>
+                <goal>compile</goal>
+              </goals>
             </execution>
             <execution>
               <id>java-test-compile</id>
               <phase>test-compile</phase>
-              <goals> <goal>testCompile</goal> </goals>
+              <goals>
+                <goal>testCompile</goal>
+              </goals>
             </execution>
           </executions>
         </plugin>
@@ -427,6 +445,10 @@
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.0.0</version>
+        </plugin>
+        <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.0.2</version>
         </plugin>
 
         <plugin>

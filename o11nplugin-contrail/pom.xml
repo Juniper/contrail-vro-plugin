@@ -112,7 +112,6 @@
       <!-- copy deliverable to dist folder -->
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.0.1</version>
         <executions>
           <execution>
             <id>copy-vmoapp-file</id>
