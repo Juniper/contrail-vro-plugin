@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.tests
 
+import net.juniper.contrail.vro.model.constants
 import net.juniper.contrail.vro.model.utils
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.model.Action
@@ -14,6 +15,7 @@ import javax.script.ScriptEngineManager
 
 const val dummyVarName = "dummy"
 const val utilsName = "ContrailUtils"
+const val constantsName = "ContrailConstants"
 
 object EngineManager {
 
@@ -90,5 +92,6 @@ val WorkflowDefinition.scriptString: String? get() =
 fun String.getValue() : Any? =
     when (this) {
         utilsName -> utils
+        constantsName -> constants
         else -> null
     }

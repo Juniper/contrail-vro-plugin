@@ -1,8 +1,7 @@
 var index = ContrailUtils.ruleStringToIndex(rule);
 
 var list = parent.getEntries().getPolicyRule();
-list.splice(index, 1);
-
+list.remove(list[index]);
 parent.setEntries(new ContrailPolicyEntriesType(list));
 
 parent.update();
