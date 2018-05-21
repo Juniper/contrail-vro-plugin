@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.tests
 
 import net.juniper.contrail.vro.model.utils
+import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.model.Action
 import javax.script.Invocable
 import javax.script.ScriptContext
@@ -59,14 +60,32 @@ class ScriptTestEngine {
         evalFunction(actions.getActionByName(name).provisionActionFunction(varName))
         return varName
     }
+
+    fun getFunctionFromWorkflowScript(workflows: List<WorkflowDefinition>, name: String) : String {
+        val varName = nextVarName()
+        evalFunction(workflows.getWorkflowByName(name).provisionWorkflowFunction(varName))
+        return varName
+    }
 }
 
 fun List<Action>.getActionByName(name: String) : Action =
     find { it.name == name } ?: throw IllegalArgumentException()
 
+fun List<WorkflowDefinition>.getWorkflowByName(name: String) : WorkflowDefinition =
+    find { it.displayName == name } ?: throw IllegalArgumentException()
+
 fun Action.provisionActionFunction(name : String) : String =
     """ var $name = function(${parameters.joinToString ( ", " ) { it.name }}) {
         ${script.rawString}};"""
+
+fun WorkflowDefinition.provisionWorkflowFunction(name: String) : String =
+    """ var $name = function(${input.parameters.joinToString ( ", " ) { it.name }}) {
+        $scriptString};"""
+
+// workflowItem containing the script should be at index 1
+val WorkflowDefinition.scriptString: String? get() =
+    workflowItems.getOrNull(1)?.script?.rawString ?:
+    throw IllegalStateException("No script found in workflow! $displayName")
 
 fun String.getValue() : Any? =
     when (this) {
