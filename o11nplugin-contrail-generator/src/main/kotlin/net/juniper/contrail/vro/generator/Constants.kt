@@ -8,7 +8,9 @@ val generatedPackageName = "net.juniper.contrail.vro.generated"
 
 val generatedSourcesRoot = "/target/generated-sources"
 val generatedTestsRoot = "/target/generated-tests"
-val templatePath = "/templates"
+val templatesDirName = "templates"
+val templatesInClassPath = "/$templatesDirName"
+val templatesInResourcesPath = "src/main/resources/$templatesDirName"
 
 val editWarningMessage: String =
 """

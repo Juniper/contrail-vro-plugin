@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.spring
+package net.juniper.contrail.vro.tests.spring
 
 import ch.dunes.vso.sdk.IServiceRegistry
 import ch.dunes.vso.sdk.api.IPluginPublisher

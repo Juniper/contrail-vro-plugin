@@ -7,7 +7,7 @@ JAVA_API_DIR = $(SB_ROOT)/java-api
 
 OUTPUT_FILE = o11nplugin-contrail.vmoapp
 
-MVN = mvn -Drepo.host=$(REPO_HOST) -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
+MVN = mvn -Drepo.host=$(REPO_HOST)
 
 .PHONY: repo init sync vmoapp build test clean
 .ONESHELL:
