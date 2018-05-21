@@ -36,7 +36,7 @@ internal fun createNetworkIpamSubnetWorkflow(schema: Schema): WorkflowDefinition
 }
 
 internal fun removeNetworkIpamSubnetWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Remove network IPAM subnet"
+    val workflowName = "Remove subnet from network IPAM"
 
     return customWorkflow<NetworkIpam>(workflowName).withScriptFile("removeSubnetFromNetworkIpam") {
         parameter(item, reference<NetworkIpam>()) {

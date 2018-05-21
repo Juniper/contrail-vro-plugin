@@ -5,14 +5,17 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
-import net.juniper.contrail.api.types.NetworkIpam
+import net.juniper.contrail.api.types.VirtualNetwork
+import org.spockframework.mock.MockUtil
 
-class AddSubnetToNetworkIpamSpec extends WorkflowSpec {
-    def addSubnetToNetworkIpam = getWorkflowScript("Add subnet to network IPAM")
+class CreateSubnetSpec extends WorkflowSpec {
+
+    def createSubnet = getWorkflowScript("Add subnet to virtual network")
 
     def somePrefix = "1.2.3.4"
     def somePrefixLen = 16
     def someSubnet = "$somePrefix/$somePrefixLen".toString()
+
     def someAllocationPools = null
     def someAllocUnit = null
     def someAddrFromStart = false
@@ -20,14 +23,17 @@ class AddSubnetToNetworkIpamSpec extends WorkflowSpec {
     def someDefaultGateway = "1.2.3.4"
     def someEnableDhcp = true
 
-    def "Adding a subnet to network IPAM"() {
+    def "Creating a subnet"() {
         given: "A correct set of attributes"
+        def virtualNetwork = dependencies.someVirtualNetwork()
         def networkIpam = dependencies.someNetworkIpam()
+
         connectorMock.read(_) >> Status.success()
 
         when: "Running the script"
         invokeFunction(
-            addSubnetToNetworkIpam,
+            createSubnet,
+            virtualNetwork,
             networkIpam,
             someSubnet,
             someAllocationPools,
@@ -38,14 +44,13 @@ class AddSubnetToNetworkIpamSpec extends WorkflowSpec {
             someEnableDhcp
         )
 
-        then: "The parent Network IPAM should be updated."
+        then: "The parent virtual network is updated with the new subnet"
         1 * connectorMock.update({
-            def _it = it as NetworkIpam
-            _it.uuid == networkIpam.uuid &&
-            _it.ipamSubnets.subnets.any{
+            def _it = it as VirtualNetwork
+            _it.uuid == virtualNetwork.uuid &&
+            _it.networkIpam.collect { it.attr.ipamSubnets.findAll {it != null} }.flatten().any {
                 it.subnet.ipPrefix == somePrefix &&
-                it.subnet.ipPrefixLen == somePrefixLen &&
-                it.defaultGateway == someDefaultGateway
+                it.subnet.ipPrefixLen == somePrefixLen
             }}) >> Status.success()
     }
 }
