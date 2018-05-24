@@ -6,11 +6,10 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.ServiceHealthCheck
-import org.spockframework.mock.MockUtil
 
 class AddServiceInstanceToHealthCheckSpec extends WorkflowSpec {
 
-    def addServiceInstanceToHealthCheck = getWorkflowScript("Add service instance to service health check")
+    def addServiceInstanceToHealthCheck = workflowFromScript("Add service instance to service health check")
 
     def someInterfaceName = "left"
 

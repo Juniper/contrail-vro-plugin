@@ -6,12 +6,11 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.NetworkIpam
-import org.spockframework.mock.MockUtil
 
 class RemoveSubnetFromNetworkIpamSpec extends WorkflowSpec {
 
-    def addSubnetToNetworkIpam = getWorkflowScript("Add subnet to network IPAM")
-    def removeSubnetFromNetworkIpam = getWorkflowScript("Remove subnet from network IPAM")
+    def addSubnetToNetworkIpam = workflowFromScript("Add subnet to network IPAM")
+    def removeSubnetFromNetworkIpam = workflowFromScript("Remove subnet from network IPAM")
 
     def somePrefix = "1.2.3.4"
     def somePrefixLen = 16
