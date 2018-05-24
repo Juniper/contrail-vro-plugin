@@ -6,12 +6,11 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.SecurityGroup
-import org.spockframework.mock.MockUtil
 
 class RemoveRuleFromSecurityGroupSpec extends WorkflowSpec {
 
-    def addRuleToSecurityGroup = getWorkflowScript("Add rule to security group")
-    def removeRuleFromSecurityGroup = getWorkflowScript("Remove rule from security group")
+    def addRuleToSecurityGroup = workflowFromScript("Add rule to security group")
+    def removeRuleFromSecurityGroup = workflowFromScript("Remove rule from security group")
 
     def someDirection = "ingress"
     def someEthertype = "IPv4"

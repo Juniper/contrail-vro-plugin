@@ -5,11 +5,10 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
-import org.spockframework.mock.MockUtil
 
 class CreateServiceTemplateSpec extends WorkflowSpec {
 
-    def createServiceTemplate = getWorkflowScript("Create service template")
+    def createServiceTemplate = workflowFromScript("Create service template")
 
     def someName = "someName"
     def someVersion = 2

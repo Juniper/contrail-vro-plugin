@@ -6,11 +6,10 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.VirtualNetwork
-import org.spockframework.mock.MockUtil
 
 class CreateSubnetSpec extends WorkflowSpec {
 
-    def createSubnet = getWorkflowScript("Add subnet to virtual network")
+    def createSubnet = workflowFromScript("Add subnet to virtual network")
 
     def somePrefix = "1.2.3.4"
     def somePrefixLen = 16

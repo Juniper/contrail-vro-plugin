@@ -2,6 +2,8 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
+@file:JvmName("Actions")
+
 package net.juniper.contrail.vro.config
 
 val actionPackage = globalProjectInfo.workflowPackage
@@ -20,7 +22,9 @@ val isSingleAddressNetworkPolicyRule = "isSingleAddressNetworkPolicyRule"
 val isSingleAddressSecurityGroupRule = "isSingleAddressSecurityGroupRule"
 val networkOfServiceInterface = "networkOfServiceInterface"
 val networkPolicyRules = "networkPolicyRules"
+val virtualNetworkSubnets = "virtualNetworkSubnets"
 val networkIpamSubnets = "networkIpamSubnets"
+val addressGroupSubnets = "addressGroupSubnets"
 val parentConnection = "parentConnection"
 val portsForServiceInterface = "portsForServiceInterface"
 val isValidMac = "isValidMac"
@@ -30,7 +34,6 @@ val propertyNotNull = "propertyNotNull"
 val propertyValue = "propertyValue"
 val routeTableRoutes = "routeTableRoutes"
 val serviceHasInterfaceWithName = "serviceHasInterfaceWithName"
-val subnetsOfVirtualNetwork = "subnetsOfVirtualNetwork"
 val templateHasInterfaceWithName = "templateHasInterfaceWithName"
 val serviceInstanceInterfaceNames = "serviceInstanceInterfaceNames"
 val ipamHasAllocationMode = "ipamHasAllocationMode"

@@ -6,13 +6,11 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.FloatingIp
-import net.juniper.contrail.api.types.VirtualNetwork
-import org.spockframework.mock.MockUtil
 
 class RemoveFloatingIpFromPortSpec extends WorkflowSpec {
 
-    def addFloatingIpToPort = getWorkflowScript("Add floating IP to port")
-    def removeFloatingIpFromPort = getWorkflowScript("Remove floating IP from port")
+    def addFloatingIpToPort = workflowFromScript("Add floating IP to port")
+    def removeFloatingIpFromPort = workflowFromScript("Remove floating IP from port")
 
     def "Removing a floating IP from a port"() {
         given: "A correct set of attributes"

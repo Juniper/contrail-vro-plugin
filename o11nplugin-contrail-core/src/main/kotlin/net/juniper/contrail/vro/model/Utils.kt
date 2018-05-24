@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.model
 
+import net.juniper.contrail.api.types.AddressGroup
 import net.juniper.contrail.api.types.AddressType
 import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.NetworkPolicy
@@ -191,12 +192,6 @@ class Utils {
         return portNumber
     }
 
-    fun formatSubnet(subnet: SubnetType?): String? {
-        if (subnet == null) return null
-        if (subnet.ipPrefix == null || subnet.ipPrefixLen == null) return null
-        return subnet.run { "$ipPrefix/$ipPrefixLen" }
-    }
-
     fun parseSubnet(def: String?): SubnetType? {
         if (def == null || def.isBlank()) return null
         val cleaned = def.trim()
@@ -285,13 +280,25 @@ class Utils {
         return routeString.split(":")[0].toInt()
     }
 
+    fun subnetToString(subnet: SubnetType?): String? {
+        if (subnet == null) return null
+        if (subnet.ipPrefix == null || subnet.ipPrefixLen == null) return null
+        return subnet.run { "$ipPrefix/$ipPrefixLen" }
+    }
+
     fun ipamSubnetToString(ipamSubnet: IpamSubnetType?): String? =
-        ipamSubnet?.run { "${subnet.ipPrefix}/${subnet.ipPrefixLen}" }
+        subnetToString(ipamSubnet?.subnet)
 
     fun removeSubnetFromIpam(cidr: String, ipam : NetworkIpam) {
         val ipPrefix = parseSubnetIP(cidr)
         val ipPrefixLen = parseSubnetPrefix(cidr).toInt()
         ipam.ipamSubnets.subnets.removeIf { it.subnet.ipPrefix == ipPrefix && it.subnet.ipPrefixLen == ipPrefixLen }
+    }
+
+    fun removeSubnetFromAddressGroup(cidr: String, addressGroup : AddressGroup) {
+        val ipPrefix = parseSubnetIP(cidr)
+        val ipPrefixLen = parseSubnetPrefix(cidr).toInt()
+        addressGroup.prefix.subnet.removeIf { it.ipPrefix == ipPrefix && it.ipPrefixLen == ipPrefixLen }
     }
 
     fun lowercase(s: String) =

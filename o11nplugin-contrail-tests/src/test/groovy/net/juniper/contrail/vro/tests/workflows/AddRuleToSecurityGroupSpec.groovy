@@ -9,7 +9,7 @@ import net.juniper.contrail.api.types.SecurityGroup
 
 class AddRuleToSecurityGroupSpec extends WorkflowSpec {
 
-    def addRuleToSecurityGroup = getWorkflowScript("Add rule to security group")
+    def addRuleToSecurityGroup = workflowFromScript("Add rule to security group")
 
     def someDirection = "ingress"
     def someEthertype = "IPv4"

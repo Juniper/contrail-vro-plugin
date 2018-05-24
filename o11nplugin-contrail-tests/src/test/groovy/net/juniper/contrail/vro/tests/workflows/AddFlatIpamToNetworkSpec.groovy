@@ -9,7 +9,7 @@ import net.juniper.contrail.api.types.VirtualNetwork
 
 class AddFlatIpamToNetworkSpec extends WorkflowSpec {
 
-    def addFlatIpamToNetwork = getWorkflowScript("Add network IPAM to virtual network")
+    def addFlatIpamToNetwork = workflowFromScript("Add network IPAM to virtual network")
 
     def "Adding a network IPAM to a virtual network"() {
         given: "A correct set of attributes"

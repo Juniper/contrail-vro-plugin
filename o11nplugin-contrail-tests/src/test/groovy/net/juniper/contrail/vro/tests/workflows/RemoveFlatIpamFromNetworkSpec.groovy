@@ -6,12 +6,11 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.VirtualNetwork
-import org.spockframework.mock.MockUtil
 
 class RemoveFlatIpamFromNetworkSpec extends WorkflowSpec {
 
-    def addFlatIpamToNetwork = getWorkflowScript("Add network IPAM to virtual network")
-    def removeFlatIpamFromNetwork = getWorkflowScript("Remove network IPAM from virtual network")
+    def addFlatIpamToNetwork = workflowFromScript("Add network IPAM to virtual network")
+    def removeFlatIpamFromNetwork = workflowFromScript("Remove network IPAM from virtual network")
 
     def "Removing a flat IPAM from a network"() {
         given: "A correct set of attributes"
