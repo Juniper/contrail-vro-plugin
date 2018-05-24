@@ -31,4 +31,6 @@ fun loadCustomWorkflows(schema: Schema): List<WorkflowDefinition> = mutableListO
     this += addFlatIpamWorkflow(schema)
     this += removeFlatIpamWorkflow()
     this += addServiceInstanceToHealthCheck(schema)
+    this += createProjectFirewallRule(schema)
+    this += createPolicyManagementFirewallRule(schema)
 }
