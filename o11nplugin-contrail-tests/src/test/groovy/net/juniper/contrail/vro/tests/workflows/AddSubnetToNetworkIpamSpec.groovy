@@ -8,7 +8,7 @@ import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.NetworkIpam
 
 class AddSubnetToNetworkIpamSpec extends WorkflowSpec {
-    def addSubnetToNetworkIpam = getWorkflowScript("Add subnet to network IPAM")
+    def addSubnetToNetworkIpam = workflowFromScript("Add subnet to network IPAM")
 
     def somePrefix = "1.2.3.4"
     def somePrefixLen = 16

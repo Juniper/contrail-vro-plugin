@@ -10,7 +10,7 @@ import net.juniper.contrail.api.types.VirtualMachineInterface
 
 class AddPortTupleToServiceInstanceSpec extends WorkflowSpec {
 
-    def addPortTupleToServiceInstance = getWorkflowScript("Add port tuple to service instance")
+    def addPortTupleToServiceInstance = workflowFromScript("Add port tuple to service instance")
 
     def somePortTupleName = "somePortTupleName"
 

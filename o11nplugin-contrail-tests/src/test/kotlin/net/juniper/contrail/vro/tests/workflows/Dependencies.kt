@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.tests.workflows
 
+import net.juniper.contrail.vro.gen.AddressGroup_Wrapper
 import net.juniper.contrail.vro.gen.Connection_Wrapper
 import net.juniper.contrail.vro.gen.FloatingIpPool_Wrapper
 import net.juniper.contrail.vro.gen.FloatingIp_Wrapper
@@ -90,6 +91,13 @@ class Dependencies(private val connection: Connection_Wrapper, private val utils
 
     @JvmOverloads
     fun someSecurityGroup(parent: Project_Wrapper = someProject()) = SecurityGroup_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someSecurityGroup$uuid"
+        setParentProject(parent)
+    }
+
+    @JvmOverloads
+    fun someAddressGroup(parent: Project_Wrapper = someProject()) = AddressGroup_Wrapper().apply {
         uuid = randomStringUuid()
         name = "someSecurityGroup$uuid"
         setParentProject(parent)

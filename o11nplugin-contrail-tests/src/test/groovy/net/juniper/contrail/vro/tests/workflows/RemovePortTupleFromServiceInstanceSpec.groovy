@@ -11,8 +11,8 @@ import net.juniper.contrail.vro.tests.TestUtilsKt
 
 class RemovePortTupleFromServiceInstanceSpec extends WorkflowSpec {
 
-    def addPortTupleToServiceInstance = getWorkflowScript("Add port tuple to service instance")
-    def removePortTupleFromServiceInstance = getWorkflowScript("Remove port tuple from service instance")
+    def addPortTupleToServiceInstance = workflowFromScript("Add port tuple to service instance")
+    def removePortTupleFromServiceInstance = workflowFromScript("Remove port tuple from service instance")
 
     def somePortTupleName = "somePortTupleName"
 

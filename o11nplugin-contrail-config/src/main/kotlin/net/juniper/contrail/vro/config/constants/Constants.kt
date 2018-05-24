@@ -2,6 +2,8 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
+@file:JvmName("Constants")
+
 package net.juniper.contrail.vro.config.constants
 
 val Contrail = "Contrail"
@@ -20,6 +22,7 @@ val item = "item"
 val id = "id"
 val ingress = "ingress"
 val egress = "egress"
+val subnet = "subnet"
 
 val maxOtherInterfacesSupported = 8
 val supportedOtherInterfaces = (0 until maxOtherInterfacesSupported).map { "other$it" }

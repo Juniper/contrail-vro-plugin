@@ -377,7 +377,7 @@ open class NetworkPolicyRulePropertyExecutor(private val connection: Connection)
         useDstAddressType: Boolean
     ): String? {
         val address = extractAddressType(ruleString, useDstAddressType)
-        return utils.formatSubnet(address.subnet)
+        return utils.subnetToString(address.subnet)
     }
 
     private fun NetworkPolicy.ruleAddressPropertyNetworkType(

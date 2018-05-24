@@ -9,8 +9,8 @@ import net.juniper.contrail.api.types.VirtualNetwork
 
 class DeleteSubnetSpec extends WorkflowSpec {
 
-    def createSubnet = getWorkflowScript("Add subnet to virtual network")
-    def deleteSubnet = getWorkflowScript("Remove subnet from virtual network")
+    def createSubnet = workflowFromScript("Add subnet to virtual network")
+    def deleteSubnet = workflowFromScript("Remove subnet from virtual network")
 
     def somePrefix = "1.2.3.4"
     def somePrefixLen = 16

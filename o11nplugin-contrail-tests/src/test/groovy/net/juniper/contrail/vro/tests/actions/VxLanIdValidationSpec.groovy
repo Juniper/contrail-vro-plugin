@@ -4,11 +4,11 @@
 
 package net.juniper.contrail.vro.tests.actions
 
-import static net.juniper.contrail.vro.config.ActionsKt.isValidVxLANId
-import static net.juniper.contrail.vro.config.constants.ConstantsKt.getVxLANMaxID
+import static net.juniper.contrail.vro.config.Actions.isValidVxLANId
+import static net.juniper.contrail.vro.config.constants.Constants.VxLANMaxID
 
 class VxLanIdValidationSpec extends ActionSpec implements ValidationAsserts {
-    def validateVxLANId = engine.getFunctionFromActionScript(actions, isValidVxLANId)
+    def validateVxLANId = actionFromScript(isValidVxLANId)
 
     def "null passes validation" () {
         given:
