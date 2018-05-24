@@ -11,3 +11,5 @@ import net.juniper.contrail.vro.config.constants.supportedInterfaceNames
 class Constants {
     val serviceInterfaceNames get() = supportedInterfaceNames.toList()
 }
+
+val constants = Constants()
