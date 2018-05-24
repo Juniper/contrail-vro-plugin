@@ -4,10 +4,10 @@
 
 package net.juniper.contrail.vro.tests.actions
 
-import static net.juniper.contrail.vro.config.ActionsKt.isValidIp
+import static net.juniper.contrail.vro.config.Actions.isValidIp
 
 class IpValidationSpec extends ActionSpec {
-    def validateIp = engine.getFunctionFromActionScript(actions, isValidIp)
+    def validateIp = actionFromScript(isValidIp)
     def ipValidationMessage = "Enter valid IPv4 or IPv6 Address"
 
     def "validating ip not defined should pass" () {

@@ -9,7 +9,7 @@ import net.juniper.contrail.api.types.FloatingIp
 
 class AddFloatingIpToPortSpec extends WorkflowSpec {
 
-    def addFloatingIpToPort = getWorkflowScript("Add floating IP to port")
+    def addFloatingIpToPort = workflowFromScript("Add floating IP to port")
 
     def someIsFixedIpAddress = true
 

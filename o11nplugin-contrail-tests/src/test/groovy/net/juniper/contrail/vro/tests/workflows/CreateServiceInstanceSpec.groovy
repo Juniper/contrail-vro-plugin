@@ -5,11 +5,10 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
-import org.spockframework.mock.MockUtil
 
 class CreateServiceInstanceSpec extends WorkflowSpec {
 
-    def createServiceInstance = getWorkflowScript("Create service instance")
+    def createServiceInstance = workflowFromScript("Create service instance")
 
     def someInstanceName = "someInstanceName"
     def someVirtualRouterId = null

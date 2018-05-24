@@ -1,5 +1,5 @@
 var actionResult = new Array();
-var routes = parent.getRoutes().getRoute()
+var routes = item.getRoutes().getRoute()
 
 routes.forEach(function (value, index) {
     actionResult.push(ContrailUtils.routeToString(value, index));

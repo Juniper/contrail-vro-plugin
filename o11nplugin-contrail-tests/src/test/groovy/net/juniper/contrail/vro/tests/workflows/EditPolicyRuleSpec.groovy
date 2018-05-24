@@ -6,12 +6,11 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.NetworkPolicy
-import org.spockframework.mock.MockUtil
 
 class EditPolicyRuleSpec extends WorkflowSpec {
 
-    def addPolicyRule = getWorkflowScript("Add rule to network policy")
-    def editPolicyRule = getWorkflowScript("Edit rule of network policy")
+    def addPolicyRule = workflowFromScript("Add rule to network policy")
+    def editPolicyRule = workflowFromScript("Edit rule of network policy")
 
     def someSimpleAction = "pass"
     def someDifferentSimpleAction = "deny"

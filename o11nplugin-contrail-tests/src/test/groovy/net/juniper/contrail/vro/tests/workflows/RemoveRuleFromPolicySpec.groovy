@@ -6,13 +6,11 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.NetworkPolicy
-import net.juniper.contrail.vro.gen.PolicyRuleType_Wrapper
-import org.spockframework.mock.MockUtil
 
 class RemoveRuleFromPolicySpec extends WorkflowSpec {
 
-    def addPolicyRule = getWorkflowScript("Add rule to network policy")
-    def removeRuleFromPolicy = getWorkflowScript("Remove rule from network policy")
+    def addPolicyRule = workflowFromScript("Add rule to network policy")
+    def removeRuleFromPolicy = workflowFromScript("Remove rule from network policy")
 
     def someSimpleAction = "pass"
     def someProtocol = "tcp"

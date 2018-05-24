@@ -9,7 +9,7 @@ import net.juniper.contrail.api.types.VirtualNetwork
 
 class AddPolicyToVirtualNetwork extends WorkflowSpec {
 
-    def addNetworkPolicyToVirtualNetwork = getWorkflowScript("Add network policy to virtual network")
+    def addNetworkPolicyToVirtualNetwork = workflowFromScript("Add network policy to virtual network")
 
     def "Adding a network policy to a virtual network"() {
         given: "A correct set of attributes"

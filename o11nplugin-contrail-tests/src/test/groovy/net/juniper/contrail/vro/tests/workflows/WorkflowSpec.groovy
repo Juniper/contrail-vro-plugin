@@ -15,6 +15,7 @@ import net.juniper.contrail.vro.gen.Utils_Wrapper
 import net.juniper.contrail.vro.model.Constants
 import net.juniper.contrail.vro.model.Utils
 import net.juniper.contrail.vro.tests.ScriptTestEngine
+import net.juniper.contrail.vro.tests.scripts.ScriptSpec
 import org.spockframework.mock.MockUtil
 import org.springframework.beans.factory.support.DefaultListableBeanFactory
 import org.springframework.context.annotation.AnnotationConfigApplicationContext
@@ -30,9 +31,10 @@ import static net.juniper.contrail.vro.tests.JsTesterKt.constantsName
 import static net.juniper.contrail.vro.tests.JsTesterKt.utilsName
 import static net.juniper.contrail.vro.workflows.custom.Custom.loadCustomWorkflows
 
-abstract class WorkflowSpec extends Specification {
+abstract class WorkflowSpec extends ScriptSpec {
     @Shared Dependencies dependencies
     def connectorMock = DetachedMocksKt.apiConnectorMock
+    def mockUtil = new MockUtil()
 
     def setupSpec() {
         createContext()
@@ -49,15 +51,7 @@ abstract class WorkflowSpec extends Specification {
         mockUtil.attachMock(connectorMock, this)
     }
 
-    def getWorkflowScript(String scriptName) {
-        return engine.getFunctionFromWorkflowScript(workflows, scriptName)
-    }
-
-    def invokeFunction(String name, Object... args) {
-        engine.invokeFunction(name, args)
-    }
-
-    private static def loadWrapperTypes() {
+    private def loadWrapperTypes() {
         loadWrapperType("ActionListType")
         loadWrapperType("AllocationPoolType")
         loadWrapperType("FloatingIp")
@@ -79,11 +73,11 @@ abstract class WorkflowSpec extends Specification {
         loadWrapperType("VirtualMachineInterfacePropertiesType")
         loadWrapperType("VirtualNetworkPolicyType")
         loadWrapperType("VnSubnetsType")
+        loadWrapperType("SubnetListType")
     }
 
-    private def mockUtil = new MockUtil()
     // We need the Spring Context to automatically load the converters for model- and plugin-objects
-    private def createContext() {
+    private static def createContext() {
         def baseContext = new AnnotationConfigApplicationContext(WorkflowTestConfig.class)
 
         def configLocations = ["classpath:net/juniper/contrail/vro/test-plugin.xml"] as String[]
@@ -91,7 +85,7 @@ abstract class WorkflowSpec extends Specification {
         def context = new ClassPathXmlApplicationContext(configLocations, false, baseContext) {
             protected void customizeBeanFactory(DefaultListableBeanFactory beanFactory) {
                 super.customizeBeanFactory(beanFactory)
-                this.addBeanFactoryPostProcessor(new RuntimeBeanRegisterer(runtimeConfigPath))
+                addBeanFactoryPostProcessor(new RuntimeBeanRegisterer(runtimeConfigPath))
             }
         }
         context.refresh()
@@ -120,11 +114,6 @@ abstract class WorkflowSpec extends Specification {
         return constants
     }
 
-    private static def schema = buildSchema(Paths.get(globalProjectInfo.schemaFile))
-    private static def workflows = loadCustomWorkflows(schema)
-
-    private static def engine = new ScriptTestEngine()
-
     private static def createDependencies(Utils_Wrapper utils) {
         def connection = new WorkflowTestConfig().connection()
         def conn_wrap = new Connection_Wrapper()
@@ -133,7 +122,7 @@ abstract class WorkflowSpec extends Specification {
         return new Dependencies(conn_wrap, utils)
     }
 
-    private static def loadWrapperType(typeName) {
+    private def loadWrapperType(typeName) {
         engine.engine.eval("var Contrail$typeName = Java.type('net.juniper.contrail.vro.gen.${typeName}_Wrapper');")
     }
 }

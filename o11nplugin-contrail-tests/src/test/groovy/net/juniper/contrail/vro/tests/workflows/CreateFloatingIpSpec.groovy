@@ -5,11 +5,10 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
-import org.spockframework.mock.MockUtil
 
 class CreateFloatingIpSpec extends WorkflowSpec {
 
-    def createFloatingIp = getWorkflowScript("Create floating IP")
+    def createFloatingIp = workflowFromScript("Create floating IP")
 
     def "Creating floating IP"() {
         given: "A correct set of attributes"
