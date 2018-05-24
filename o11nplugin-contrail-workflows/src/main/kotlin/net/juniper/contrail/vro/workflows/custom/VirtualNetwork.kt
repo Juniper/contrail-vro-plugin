@@ -10,10 +10,9 @@ import net.juniper.contrail.api.types.NetworkPolicy
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.config.asForwardRef
 import net.juniper.contrail.vro.config.constants.child
-import net.juniper.contrail.vro.config.subnetsOfVirtualNetwork
+import net.juniper.contrail.vro.config.virtualNetworkSubnets
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
-import net.juniper.contrail.vro.config.parentConnection
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
@@ -129,7 +128,7 @@ internal fun deleteSubnetWorkflow(): WorkflowDefinition {
             description = "Subnet to be removed"
             mandatory = true
             visibility = WhenNonNull(item)
-            predefinedAnswersFrom = actionCallTo(subnetsOfVirtualNetwork).parameter(item)
+            predefinedAnswersFrom = actionCallTo(virtualNetworkSubnets).parameter(item)
         }
     }
 }

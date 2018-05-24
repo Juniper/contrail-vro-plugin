@@ -74,7 +74,7 @@ class SecurityGroupRulePropertyExecutor(private val connection: Connection) : Se
         ruleString: String
     ): String? {
         val address = extractAddress(ruleString)
-        return utils.formatSubnet(address.subnet)
+        return utils.subnetToString(address.subnet)
     }
 
     override fun SecurityGroup.rulePropertyAddressSecurityGroup(

@@ -4,19 +4,16 @@
 
 package net.juniper.contrail.vro.tests.actions
 
-import net.juniper.contrail.vro.tests.ScriptTestEngine
-import spock.lang.Specification
-import static net.juniper.contrail.vro.workflows.custom.Custom.loadCustomActions
+import net.juniper.contrail.vro.tests.scripts.ScriptSpec
+
+import static net.juniper.contrail.vro.tests.JsTesterKt.constantsName
 import static net.juniper.contrail.vro.tests.JsTesterKt.utilsName
 
-abstract class ActionSpec extends Specification {
-    static def dummyVersion = "1.0"
-    static def dummyPackage = "contrail"
-    static def actions = loadCustomActions(dummyVersion, dummyPackage)
-    def engine = new ScriptTestEngine()
+abstract class ActionSpec extends ScriptSpec {
 
     def setup() {
         engine.addToContext(utilsName)
+        engine.addToContext(constantsName)
     }
 }
 
