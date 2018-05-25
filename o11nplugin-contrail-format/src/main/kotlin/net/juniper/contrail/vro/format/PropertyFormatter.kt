@@ -49,6 +49,21 @@ object PropertyFormatter {
         }
     }
 
+    fun format(prop: FirewallRuleEndpointType): String = prop.run {
+        when {
+            subnet != null -> format(subnet)
+            virtualNetwork != null -> "VN:$virtualNetwork"
+            addressGroup != null -> "AG:$addressGroup"
+            any == true -> "ANY"
+            tags != null && tags.isNotEmpty() -> "Tags:${tags.joinToString(",")}"
+            else -> "-"
+        }
+    }
+
+    fun format(prop: FirewallServiceType): String = prop.run {
+        "$protocol:${format(srcPorts)}:${format(dstPorts)}"
+    }
+
     fun format(prop: ShareType) =
         "${prop.tenant}: ${prop.tenantAccess.formatAccess()}"
 
@@ -73,10 +88,6 @@ object PropertyFormatter {
 
     fun format(prop: PolicyRuleType): String = prop.run {
         "${actionList.safeSimpleAction}$protocol  ${srcAddresses.inline} ${srcPorts.inline} $direction ${dstAddresses.inline} ${dstPorts.inline}"
-    }
-
-    fun format(prop: FirewallServiceType) = prop.run {
-        "$protocol:${format(srcPorts)}:${format(dstPorts)}"
     }
 
     private val ActionListType?.safeSimpleAction get() =
