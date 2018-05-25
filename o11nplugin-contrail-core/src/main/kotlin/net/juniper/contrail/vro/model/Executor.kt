@@ -15,7 +15,8 @@ import net.juniper.contrail.api.types.ServiceInstance
 // They are combined using inheritance so that their functions become Executor's methods.
 class Executor(private val connection: Connection) :
 SecurityGroupRuleProperties by SecurityGroupRulePropertyExecutor(connection),
-NetworkPolicyRuleProperties by NetworkPolicyRulePropertyExecutor(connection) {
+NetworkPolicyRuleProperties by NetworkPolicyRulePropertyExecutor(connection),
+FirewallRuleComplexProperties by FirewallRuleComplexPropertyExecutor(connection) {
     fun VirtualNetwork.subnets(): List<IpamSubnetType> {
         val ipams = networkIpam ?: return emptyList()
         return ipams.asSequence().map { it.attr.ipamSubnets.asSequence().filterNotNull() }.flatten().toList()
