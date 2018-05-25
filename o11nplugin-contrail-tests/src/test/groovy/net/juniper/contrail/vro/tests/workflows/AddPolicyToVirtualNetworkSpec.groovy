@@ -7,7 +7,7 @@ package net.juniper.contrail.vro.tests.workflows
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.VirtualNetwork
 
-class AddPolicyToVirtualNetwork extends WorkflowSpec {
+class AddPolicyToVirtualNetworkSpec extends WorkflowSpec {
 
     def addNetworkPolicyToVirtualNetwork = workflowFromScript("Add network policy to virtual network")
 
