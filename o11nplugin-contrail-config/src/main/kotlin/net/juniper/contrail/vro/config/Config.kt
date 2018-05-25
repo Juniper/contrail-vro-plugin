@@ -76,7 +76,8 @@ val customCreateWorkflows = setOf(
     the<PortTuple>(),
     the<PolicyManagement>(),
     the<Tag>(),
-    the<TagType>()
+    the<TagType>(),
+    the<FirewallRule>()
 )
 
 val customEditWorkflows = setOf(
@@ -86,7 +87,8 @@ val customEditWorkflows = setOf(
     the<ServiceTemplate>(),
     the<ServiceInstance>(),
     the<PortTuple>(),
-    the<PolicyManagement>()
+    the<PolicyManagement>(),
+    the<FirewallRule>()
 )
 
 val customDeleteWorkflows = setOf(
@@ -133,7 +135,10 @@ val hiddenRelations = setOf(
     pair<VirtualMachineInterface, VirtualMachine>(),
     pair<ServiceTemplate, ServiceApplianceSet>(),
     pair<Project, PolicyManagement>(),
-    pair<Tag, TagType>()
+    pair<Tag, TagType>(),
+    pair<FirewallRule, AddressGroup>(),
+    pair<FirewallRule, ServiceGroup>(),
+    pair<FirewallRule, VirtualNetwork>()
 )
 
 val tagRelations = setOf(
@@ -150,6 +155,10 @@ val relationAsProperty = setOf(
 
 val reversedRelations = setOf(
     pair<FloatingIp, VirtualMachineInterface>()
+)
+
+val readUponQuery = setOf(
+    the<FirewallRule>()
 )
 
 private inline fun <reified T> the() =
