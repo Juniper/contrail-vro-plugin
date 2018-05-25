@@ -5,7 +5,41 @@
 package net.juniper.contrail.vro.config
 
 import net.juniper.contrail.api.ApiObjectBase
-import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
+import net.juniper.contrail.api.types.ActionListType
+import net.juniper.contrail.api.types.AddressGroup
+import net.juniper.contrail.api.types.ApplicationPolicySet
+import net.juniper.contrail.api.types.ConfigRoot
+import net.juniper.contrail.api.types.Domain
+import net.juniper.contrail.api.types.FirewallPolicy
+import net.juniper.contrail.api.types.FirewallRule
+import net.juniper.contrail.api.types.FirewallRuleEndpointType
+import net.juniper.contrail.api.types.FirewallServiceType
+import net.juniper.contrail.api.types.FloatingIp
+import net.juniper.contrail.api.types.FloatingIpPool
+import net.juniper.contrail.api.types.IdPermsType
+import net.juniper.contrail.api.types.InstanceIp
+import net.juniper.contrail.api.types.IpamSubnetType
+import net.juniper.contrail.api.types.KeyValuePairs
+import net.juniper.contrail.api.types.NetworkIpam
+import net.juniper.contrail.api.types.NetworkPolicy
+import net.juniper.contrail.api.types.PermType2
+import net.juniper.contrail.api.types.PolicyManagement
+import net.juniper.contrail.api.types.PortTuple
+import net.juniper.contrail.api.types.Project
+import net.juniper.contrail.api.types.QuotaType
+import net.juniper.contrail.api.types.SecurityGroup
+import net.juniper.contrail.api.types.SequenceType
+import net.juniper.contrail.api.types.ServiceApplianceSet
+import net.juniper.contrail.api.types.ServiceGroup
+import net.juniper.contrail.api.types.ServiceHealthCheck
+import net.juniper.contrail.api.types.ServiceInstance
+import net.juniper.contrail.api.types.ServiceTemplate
+import net.juniper.contrail.api.types.Tag
+import net.juniper.contrail.api.types.TagType
+import net.juniper.contrail.api.types.VirtualMachine
+import net.juniper.contrail.api.types.VirtualMachineInterface
+import net.juniper.contrail.api.types.VirtualNetwork
+import net.juniper.contrail.api.types.VirtualNetworkPolicyType
 import java.lang.reflect.Method
 
 val modelClasses = setOf(
@@ -74,7 +108,8 @@ val customCreateWorkflows = setOf(
     the<ServiceTemplate>(),
     the<ServiceInstance>(),
     the<PortTuple>(),
-    the<Tag>()
+    the<Tag>(),
+    the<FirewallRule>()
 )
 
 val customEditWorkflows = setOf(
@@ -83,7 +118,8 @@ val customEditWorkflows = setOf(
     the<FloatingIp>(),
     the<ServiceTemplate>(),
     the<ServiceInstance>(),
-    the<PortTuple>()
+    the<PortTuple>(),
+    the<FirewallRule>()
 )
 
 val customDeleteWorkflows = setOf(
@@ -127,7 +163,10 @@ val hiddenRelations = setOf(
     pair<VirtualMachineInterface, PortTuple>(),
     pair<VirtualMachineInterface, VirtualMachine>(),
     pair<ServiceTemplate, ServiceApplianceSet>(),
-    pair<Tag, TagType>()
+    pair<Tag, TagType>(),
+    pair<FirewallRule, AddressGroup>(),
+    pair<FirewallRule, ServiceGroup>(),
+    pair<FirewallRule, VirtualNetwork>()
 )
 
 val tagRelations = setOf(
