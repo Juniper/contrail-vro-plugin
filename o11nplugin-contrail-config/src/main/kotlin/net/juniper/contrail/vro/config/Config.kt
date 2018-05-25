@@ -74,7 +74,8 @@ val customCreateWorkflows = setOf(
     the<ServiceTemplate>(),
     the<ServiceInstance>(),
     the<PortTuple>(),
-    the<Tag>()
+    the<Tag>(),
+    the<FirewallRule>()
 )
 
 val customEditWorkflows = setOf(
@@ -83,7 +84,8 @@ val customEditWorkflows = setOf(
     the<FloatingIp>(),
     the<ServiceTemplate>(),
     the<ServiceInstance>(),
-    the<PortTuple>()
+    the<PortTuple>(),
+    the<FirewallRule>()
 )
 
 val customDeleteWorkflows = setOf(
@@ -127,7 +129,10 @@ val hiddenRelations = setOf(
     pair<VirtualMachineInterface, PortTuple>(),
     pair<VirtualMachineInterface, VirtualMachine>(),
     pair<ServiceTemplate, ServiceApplianceSet>(),
-    pair<Tag, TagType>()
+    pair<Tag, TagType>(),
+    pair<FirewallRule, AddressGroup>(),
+    pair<FirewallRule, ServiceGroup>(),
+    pair<FirewallRule, VirtualNetwork>()
 )
 
 val tagRelations = setOf(
