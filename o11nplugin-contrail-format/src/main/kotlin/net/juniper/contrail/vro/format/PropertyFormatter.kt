@@ -79,10 +79,10 @@ object PropertyFormatter {
     private fun String.withValueWrap(value: String?) =
         (this.withValue(value)) + "\n"
 
-    private fun Int?.formatAccess():String =
+    private fun Int?.formatAccess(): String =
         AccessType.format(this)
 
-    private fun <T : ApiPropertyBase> List<T>?.format(empty:String = "", transform: (T) -> CharSequence) =
+    private fun <T : ApiPropertyBase> List<T>?.format(empty: String = "", transform: (T) -> CharSequence) =
         this?.joinToString(separator = ", ", transform = transform).run {
             if (isNullOrBlank()) empty else this!!
         }
@@ -99,7 +99,7 @@ object PropertyFormatter {
     private inline val List<ShareType>?.inline @JvmName("getShareTypes") get() =
         format("-") { format(it) }
 
-    fun format(prop: ApiPropertyBase):String =
+    fun format(prop: ApiPropertyBase): String =
         DefaultFormat.format(prop)
 
     fun <T : ApiPropertyBase> format(props: List<T>) =
@@ -115,7 +115,6 @@ object DefaultFormat {
         .filter { it.isCustomFormatter }
         .associateBy({ it.parameters[0].type }, { it.toFormatter() })
 
-
     fun format(obj: Any?, indent: String = ""): String {
         if (obj == null) return ""
         val fields = obj.javaClass.propertyFields
@@ -124,7 +123,7 @@ object DefaultFormat {
             val field = fields[0]
             if (field.isPropertyListWrapper || field.isStringListWrapper) {
                 formatList(obj, fields[0], indent)
-            }else {
+            } else {
                 formatFields(obj, fields, indent)
             }
         } else {
@@ -138,8 +137,7 @@ object DefaultFormat {
             val listType = field.genericType.parameterClass!!
             val formatter: Formatter = if (listType == String::class.java) {
                 { it.toString() }
-            }
-            else {
+            } else {
                 formatters[listType] ?: { format(it, indent) }
             }
 
