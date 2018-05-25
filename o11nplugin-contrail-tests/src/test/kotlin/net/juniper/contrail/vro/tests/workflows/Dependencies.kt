@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.vro.gen.Connection_Wrapper
+import net.juniper.contrail.vro.gen.FirewallRule_Wrapper
 import net.juniper.contrail.vro.gen.FloatingIpPool_Wrapper
 import net.juniper.contrail.vro.gen.FloatingIp_Wrapper
 import net.juniper.contrail.vro.gen.IpamSubnetType_Wrapper
@@ -100,6 +101,13 @@ class Dependencies(private val connection: Connection_Wrapper, private val utils
         uuid = randomStringUuid()
         name = "someSecurityGroup$uuid"
         setParentServiceInstance(parent)
+    }
+
+    @JvmOverloads
+    fun someFirewallRule(parent: Project_Wrapper = someProject()) = FirewallRule_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someFirewallRule$uuid"
+        setParentProject(parent)
     }
 
     fun someServiceTemplate() = ServiceTemplate_Wrapper().apply {
