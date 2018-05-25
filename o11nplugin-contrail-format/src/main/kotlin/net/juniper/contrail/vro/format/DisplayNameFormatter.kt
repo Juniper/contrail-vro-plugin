@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.format
 
 import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.api.types.FirewallRule
 import net.juniper.contrail.api.types.FloatingIp
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.QuotaType
@@ -15,13 +16,13 @@ import net.juniper.contrail.api.types.Subnet
  */
 object DisplayNameFormatter {
 
-    fun format(obj: FloatingIp):String? =
+    fun format(obj: FloatingIp): String? =
         obj.address
 
-    fun format(obj: Subnet):String? =
+    fun format(obj: Subnet): String? =
         obj.ipPrefix?.let { PropertyFormatter.format(it) }
 
-    fun format(obj: ApiObjectBase):String? =
+    fun format(obj: ApiObjectBase): String? =
         obj.name
 
     fun format(obj: IpamSubnetType): String? =
@@ -29,4 +30,9 @@ object DisplayNameFormatter {
 
     fun format(obj: QuotaType): String? =
         "Quotas"
+
+    // `obj.parent?.name` returns null, so we use `obj.qualifiedName.dropLast(1).last()` to get the parent name.
+    // TODO: Add endpoints to the string representation
+    fun format(obj: FirewallRule): String? =
+        "${obj.qualifiedName.dropLast(1).last()}: ${obj.actionList?.simpleAction} ${obj.direction} ${if (obj.service != null) PropertyFormatter.format(obj.service) else obj.serviceGroup[0]}"
 }
