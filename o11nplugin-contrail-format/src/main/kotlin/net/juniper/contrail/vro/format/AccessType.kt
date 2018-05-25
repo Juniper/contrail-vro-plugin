@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
  */
 
-package net.juniper.contrail.vro.format;
+package net.juniper.contrail.vro.format
 
 enum class AccessType(private val mask: Int) {
     Read(4),

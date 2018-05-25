@@ -33,7 +33,7 @@ class ReferenceFormatter(val factory: IPluginFactory) {
         return format(obj, ref.attr)
     }
 
-    private fun <T : ApiPropertyBase> format(obj: ApiObjectBase, attr: T?): String? = when(attr) {
+    private fun <T : ApiPropertyBase> format(obj: ApiObjectBase, attr: T?): String? = when (attr) {
         is VnSubnetsType -> format(obj as VirtualNetwork, attr)
         else -> format(obj)
     }

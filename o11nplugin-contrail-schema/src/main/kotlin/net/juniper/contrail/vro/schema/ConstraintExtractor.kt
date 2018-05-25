@@ -7,7 +7,6 @@ package net.juniper.contrail.vro.schema
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.allCapitalized
-import net.juniper.contrail.vro.config.blankToNull
 import net.juniper.contrail.vro.config.bold
 import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.isApiPropertyClass
@@ -140,7 +139,6 @@ private fun Schema.wrapperPropertyDefinitionComment(clazz: Class<*>): Property? 
     val propertyName = parts.last().xsdName
     return propertyComments.withElementName(propertyName).firstOrNull()
 }
-
 
 private fun Schema.propertyDefinitionComment(parent: String, propertyName: String): IdlComment =
     comments.firstOrNull { it.parentClassName == parent && (it.elementName == propertyName || it.elementName == "$parent-$propertyName") } ?:
