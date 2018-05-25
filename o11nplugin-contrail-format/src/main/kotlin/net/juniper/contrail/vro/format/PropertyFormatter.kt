@@ -44,6 +44,17 @@ object PropertyFormatter {
         }
     }
 
+    fun format(prop: FirewallRuleEndpointType): String = prop.run {
+        when {
+            subnet != null -> format(subnet)
+            virtualNetwork != null -> "VN:$virtualNetwork"
+            addressGroup != null -> "AG:$addressGroup"
+            tags.isNotEmpty() || tags != null -> "Tags:${tags.joinToString(",")}"
+            any -> "ANY"
+            else -> "-"
+        }
+    }
+
     fun format(prop: ShareType) =
         "${prop.tenant}: ${prop.tenantAccess.formatAccess()}"
 
