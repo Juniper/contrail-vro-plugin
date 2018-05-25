@@ -12,6 +12,10 @@ object AlwaysVisible : VisibilityCondition() {
     override val stringCondition: String = "true"
 }
 
+object AlwaysHidden : VisibilityCondition() {
+    override val stringCondition: String = "false"
+}
+
 class WhenNonNull(name: String) : VisibilityCondition() {
     override val stringCondition: String = "#$name != null"
 }

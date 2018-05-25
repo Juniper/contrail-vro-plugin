@@ -31,3 +31,17 @@ val supportedInterfaceNames = listOf(
 val maxInterfacesSupported = supportedInterfaceNames.size
 
 val VxLANMaxID = 16777215
+
+enum class EndpointType(val value: String) {
+    None("none"),
+    Tag("tag"),
+    AddressGroup("addressGroup"),
+    VirtualNetwork("virtualNetwork"),
+    AnyWorkload("anyWorkload")
+}
+
+enum class ServiceType(val value: String) {
+    None("none"),
+    Manual("manual"),
+    Reference("reference")
+}

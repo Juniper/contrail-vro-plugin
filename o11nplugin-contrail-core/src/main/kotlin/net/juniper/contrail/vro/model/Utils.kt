@@ -4,7 +4,11 @@
 
 package net.juniper.contrail.vro.model
 
+import net.juniper.contrail.api.types.AddressGroup
 import net.juniper.contrail.api.types.AddressType
+import net.juniper.contrail.api.types.AllowedAddressPair
+import net.juniper.contrail.api.types.FirewallRuleEndpointType
+import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.NetworkPolicy
 import net.juniper.contrail.api.types.PolicyRuleType
@@ -12,11 +16,11 @@ import net.juniper.contrail.api.types.PortType
 import net.juniper.contrail.api.types.RouteType
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.api.types.SubnetType
+import net.juniper.contrail.api.types.Tag
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.VnSubnetsType
-import net.juniper.contrail.api.types.AllowedAddressPair
-import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.vro.base.Description
+import net.juniper.contrail.vro.config.constants.EndpointType
 import net.juniper.contrail.vro.format.PropertyFormatter
 import java.util.UUID
 
@@ -150,6 +154,9 @@ class Utils {
         return ranges.map { parsePortRange(it, anyAsFullRange = true) }
     }
 
+    fun parsePortsOfFirewallRule(ports: String): PortType =
+        parsePortRange(ports, true)
+
     fun formatPort(port: PortType): String =
         if (port.startPort == port.endPort)
             if (port.startPort == -1) "any" else "${port.startPort}"
@@ -244,6 +251,29 @@ class Utils {
             securityGroup?.qualifiedName?.joinToString(":") ?: "local"
         } else null
         return AddressType(subnet, networkName, securityGroupName, policyName)
+    }
+
+    fun createEndpoint(
+        type: String,
+        tags: List<Tag>?,
+        virtualNetwork: VirtualNetwork?,
+        addressGroup: AddressGroup?
+    ): FirewallRuleEndpointType {
+        val any = type == EndpointType.AnyWorkload.value
+        val tagNames = if (type == EndpointType.Tag.value && tags != null) tags.map { tagToString(it) } else null
+        val virtualNetworkFqn = virtualNetwork?.qualifiedName?.joinToString(":")
+        val addressGroupFqn = addressGroup?.qualifiedName?.joinToString(":")
+        return FirewallRuleEndpointType(null, virtualNetworkFqn, addressGroupFqn, tagNames, null, any)
+    }
+
+    fun tagToString(
+        tag: Tag
+    ): String {
+        return if (tag.parentType == "project") {
+            tag.name
+        } else {
+            "global:${tag.name}"
+        }
     }
 
     fun randomUUID(): String =
