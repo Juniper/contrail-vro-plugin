@@ -27,7 +27,6 @@ import net.juniper.contrail.vro.config.pluralize
 import net.juniper.contrail.vro.config.propertyName
 import net.juniper.contrail.vro.config.refPropertyName
 import net.juniper.contrail.vro.config.returnTypeOrListType
-import net.juniper.contrail.vro.config.returnsApiPropertyOrList
 import net.juniper.contrail.vro.config.returnsObjectReferences
 import net.juniper.contrail.vro.config.toPluginName
 import java.lang.reflect.Method
