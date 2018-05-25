@@ -12,8 +12,6 @@ import net.juniper.contrail.vro.config.hasCustomCreateWorkflow
 import net.juniper.contrail.vro.config.hasCustomDeleteWorkflow
 import net.juniper.contrail.vro.config.hasCustomEditWorkflow
 import net.juniper.contrail.vro.config.hasCustomRemoveReferenceWorkflow
-import net.juniper.contrail.vro.config.hasMultipleParentsInModel
-import net.juniper.contrail.vro.config.hasParents
 import net.juniper.contrail.vro.config.isInternal
 import net.juniper.contrail.vro.config.isRelationEditable
 import net.juniper.contrail.vro.config.isRelationMandatory

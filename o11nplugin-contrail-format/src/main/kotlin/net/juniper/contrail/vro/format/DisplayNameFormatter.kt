@@ -15,13 +15,13 @@ import net.juniper.contrail.api.types.Subnet
  */
 object DisplayNameFormatter {
 
-    fun format(obj: FloatingIp):String? =
+    fun format(obj: FloatingIp): String? =
         obj.address
 
-    fun format(obj: Subnet):String? =
+    fun format(obj: Subnet): String? =
         obj.ipPrefix?.let { PropertyFormatter.format(it) }
 
-    fun format(obj: ApiObjectBase):String? =
+    fun format(obj: ApiObjectBase): String? =
         obj.name
 
     fun format(obj: IpamSubnetType): String? =

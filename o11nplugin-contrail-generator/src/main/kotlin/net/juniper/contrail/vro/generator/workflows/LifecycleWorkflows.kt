@@ -166,7 +166,7 @@ private fun setParentConnectionCall() =
 
 private fun ObjectClass.setRootParentCall(parentClazz: ObjectClass) = when {
     // create empty ConfigRoot object just to configure parent type
-    parentClazz.isConfigRoot  -> "$item.setParent${parentClazz.pluginName}(new Contrail${parentClazz.pluginName}());"
+    parentClazz.isConfigRoot -> "$item.setParent${parentClazz.pluginName}(new Contrail${parentClazz.pluginName}());"
     // default parent will be set by the API
     defaultParentType == parentClazz.objectType -> ""
     else -> throw IllegalArgumentException("Unable to create parent ${parentClazz.simpleName} for $simpleName.")
