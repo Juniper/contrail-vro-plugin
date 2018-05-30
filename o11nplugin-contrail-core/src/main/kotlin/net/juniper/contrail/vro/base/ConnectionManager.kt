@@ -58,7 +58,7 @@ class ConnectionManager
             if (list == null)
                 throw ConnectionException("User not authorized to connect to Contrail controller.")
         } catch (ex: IOException) {
-            throw ConnectionException("Could not connect to Contrail controller.")
+            throw ConnectionException("Could not connect to Contrail controller: ${ex.message}.")
         }
     }
 
