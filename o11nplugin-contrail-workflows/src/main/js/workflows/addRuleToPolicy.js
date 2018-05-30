@@ -48,11 +48,11 @@ if (services != null) {
 actions.setMirrorTo(mirrorAction);
 
 var rule = new ContrailPolicyRuleType(null, ruleUuid, direction, protocol, srcAddr, parsedSrcPorts, application, dstAddr, parsedDstPorts, actions);
-var rules = parent.getEntries();
+var rules = item.getEntries();
 if (!rules) {
     rules = new ContrailPolicyEntriesType();
-    parent.setEntries(rules);
+    item.setEntries(rules);
 }
 rules.addPolicyRule(rule);
 
-parent.update();
+item.update();

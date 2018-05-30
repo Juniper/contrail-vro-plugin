@@ -23,11 +23,11 @@ if (direction == "ingress") {
 }
 
 var rule = new ContrailPolicyRuleType(null, ruleUuid, trafficDirection, protocol, srcAddr, srcPorts, null, dstAddr, dstPorts, null, ethertype);
-var rules = parent.getEntries();
+var rules = item.getEntries();
 if (!rules) {
     rules = new ContrailPolicyEntriesType();
-    parent.setEntries(rules);
+    item.setEntries(rules);
 }
 rules.addPolicyRule(rule);
 
-parent.update();
+item.update();

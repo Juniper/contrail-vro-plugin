@@ -116,7 +116,7 @@ class SecurityGroupRulePropertyExecutor(private val connection: Connection) : Se
     private fun SecurityGroup.extractRule(
         ruleString: String
     ): PolicyRuleType {
-        val ruleIndex = utils.ruleStringToIndex(ruleString)
+        val ruleIndex = utils.stringToIndex(ruleString)
         return entries.policyRule[ruleIndex]
     }
 }

@@ -421,7 +421,7 @@ open class NetworkPolicyRulePropertyExecutor(private val connection: Connection)
     private fun NetworkPolicy.extractRule(
         ruleString: String
     ): PolicyRuleType {
-        val ruleIndex = utils.ruleStringToIndex(ruleString)
+        val ruleIndex = utils.stringToIndex(ruleString)
         return entries.policyRule[ruleIndex]
     }
 

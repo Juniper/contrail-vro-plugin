@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.model
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.InstanceIp
+import net.juniper.contrail.api.types.ServiceGroup
 import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.api.types.ServiceTemplate
 import net.juniper.contrail.api.types.ServiceInstance
@@ -48,4 +49,13 @@ NetworkPolicyRuleProperties by NetworkPolicyRulePropertyExecutor(connection) {
 
     fun Connection.listTagTypes(): List<String> =
         list<TagType>()?.asSequence()?.map { it.name }?.sorted()?.toList() ?: emptyList()
+
+    fun ServiceGroup.servicePropertyProtocol(ruleString: String): String? =
+        findService(ruleString)?.protocol
+
+    fun ServiceGroup.servicePropertyPort(ruleString: String): String? =
+        findService(ruleString)?.dstPorts?.let { utils.formatPort(it) }
+
+    private fun ServiceGroup.findService(ruleString: String) =
+        firewallServiceList?.firewallService?.getOrNull(ruleString.toIndex())
 }

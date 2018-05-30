@@ -38,7 +38,7 @@ abstract class WorkflowSpec extends ScriptSpec {
 
     def setupSpec() {
         createContext()
-        loadWrapperTypes()
+        engine.engine.eval(setupScript)
         def ctx = AnonymousPluginContext.get()
         def utils = createUtils(ctx)
         def constants = createConstants(ctx)
@@ -49,31 +49,6 @@ abstract class WorkflowSpec extends ScriptSpec {
 
     def setup() {
         mockUtil.attachMock(connectorMock, this)
-    }
-
-    private def loadWrapperTypes() {
-        loadWrapperType("ActionListType")
-        loadWrapperType("AllocationPoolType")
-        loadWrapperType("FloatingIp")
-        loadWrapperType("IpamSubnets")
-        loadWrapperType("IpamSubnetType")
-        loadWrapperType("PolicyEntriesType")
-        loadWrapperType("PolicyRuleType")
-        loadWrapperType("PortTuple")
-        loadWrapperType("SecurityGroup")
-        loadWrapperType("SequenceType")
-        loadWrapperType("ServiceInstance")
-        loadWrapperType("ServiceInstanceType")
-        loadWrapperType("ServiceInstanceInterfaceType")
-        loadWrapperType("ServiceInterfaceTag")
-        loadWrapperType("ServiceTemplate")
-        loadWrapperType("ServiceTemplateType")
-        loadWrapperType("ServiceTemplateInterfaceType")
-        loadWrapperType("SubnetType")
-        loadWrapperType("VirtualMachineInterfacePropertiesType")
-        loadWrapperType("VirtualNetworkPolicyType")
-        loadWrapperType("VnSubnetsType")
-        loadWrapperType("SubnetListType")
     }
 
     // We need the Spring Context to automatically load the converters for model- and plugin-objects
@@ -122,7 +97,39 @@ abstract class WorkflowSpec extends ScriptSpec {
         return new Dependencies(conn_wrap, utils)
     }
 
-    private def loadWrapperType(typeName) {
-        engine.engine.eval("var Contrail$typeName = Java.type('net.juniper.contrail.vro.gen.${typeName}_Wrapper');")
+    private final static String setupScript = buildWrapperDefinition(
+        "ActionListType",
+        "AllocationPoolType",
+        "FloatingIp",
+        "IpamSubnets",
+        "IpamSubnetType",
+        "PolicyEntriesType",
+        "PolicyRuleType",
+        "PortTuple",
+        "SecurityGroup",
+        "SequenceType",
+        "ServiceInstance",
+        "ServiceInstanceType",
+        "ServiceInstanceInterfaceType",
+        "ServiceInterfaceTag",
+        "ServiceTemplate",
+        "ServiceTemplateType",
+        "ServiceTemplateInterfaceType",
+        "SubnetType",
+        "VirtualMachineInterfacePropertiesType",
+        "VirtualNetworkPolicyType",
+        "VnSubnetsType",
+        "SubnetListType",
+        "FirewallServiceGroupType",
+        "FirewallServiceType"
+    )
+
+    private static String buildWrapperDefinition(String... types) {
+        return types.collect { toWrapperDefinitionScript(it) }.join("\n")
     }
+
+    private static String toWrapperDefinitionScript(String type) {
+        return "var Contrail$type = Java.type('net.juniper.contrail.vro.gen.${type}_Wrapper');"
+    }
+
 }

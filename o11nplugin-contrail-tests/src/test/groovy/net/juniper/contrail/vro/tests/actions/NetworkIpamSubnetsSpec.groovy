@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2018 Juniper Networks, Inc. All rights reserved.
+ */
+
 package net.juniper.contrail.vro.tests.actions
 
 import net.juniper.contrail.api.types.IpamSubnetType
@@ -12,7 +16,7 @@ class NetworkIpamSubnetsSpec extends ActionSpec {
     def action = actionFromScript(networkIpamSubnets)
 
     def "null network IPAM results in null" () {
-        given: "null address group"
+        given: "null IPAM"
         def ipam = null
 
         when: "retrieved subnet list"
