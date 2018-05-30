@@ -17,7 +17,7 @@
       command: make REPO_HOST=sdnpoc-vrodev.englab.juniper.net build
       args:
         chdir: "{{ ansible_env.HOME }}/{{ packaging.target_dir }}/vro-plugin"
-        creates: "{{ ansible_env.HOME }}/{{ packaging.target_dir }}/vro-plugin/dist/o11nplugin-contrail.vmoapp"
+        creates: "{{ ansible_env.HOME }}/{{ packaging.target_dir }}/vro-plugin/dist/o11nplugin-contrail.dar"
     
     - name: Create artifacts dir
       file:
@@ -26,6 +26,6 @@
 
     - name: Copy vro plugin to exported artifacts dir
       copy:
-        src: "{{ ansible_env.HOME }}/{{ packaging.target_dir }}/vro-plugin/dist/o11nplugin-contrail.vmoapp"
+        src: "{{ ansible_env.HOME }}/{{ packaging.target_dir }}/vro-plugin/dist/o11nplugin-contrail.dar"
         dest: "{{ ansible_env.HOME }}/artifacts/"
         remote_src: true
