@@ -109,7 +109,7 @@
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
           <execution>
-            <id>copy-vmoapp-file</id>
+            <id>copy-output-files</id>
             <phase>install</phase>
             <goals>
               <goal>copy-resources</goal>
@@ -121,6 +121,7 @@
                   <directory>${basedir}/target/</directory>
                   <includes>
                     <include>${project.build.finalName}.vmoapp</include>
+                    <include>${project.build.finalName}.dar</include>
                   </includes>
                 </resource>
               </resources>

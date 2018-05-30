@@ -5,11 +5,11 @@
 SB_ROOT = ..
 JAVA_API_DIR = $(SB_ROOT)/java-api
 
-OUTPUT_FILE = o11nplugin-contrail.vmoapp
+OUTPUT_FILE = o11nplugin-contrail.dar
 
 MVN = mvn -Drepo.host=$(REPO_HOST)
 
-.PHONY: repo init sync vmoapp build test clean
+.PHONY: repo init sync package build test clean
 .ONESHELL:
 
 $(SB_ROOT)/repo:
@@ -34,11 +34,11 @@ java-api-install:
 dist/$(OUTPUT_FILE): java-api-install
 	$(MVN) install
 
-vmoapp: dist/$(OUTPUT_FILE)
+package: dist/$(OUTPUT_FILE)
 
-build: vmoapp
+build: package
 
-test: build
+test: package
 
 clean:
 	$(MVN) clean
