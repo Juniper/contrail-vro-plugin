@@ -31,6 +31,11 @@
       <artifactId>o11n-plugin-modeldriven-runtime</artifactId>
     </dependency>
     <dependency>
+      <groupId>net.juniper.contrail.vro</groupId>
+      <artifactId>o11nplugin-contrail-config</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>net.juniper.contrail</groupId>
       <artifactId>juniper-contrail-api</artifactId>
       <scope>compile</scope>

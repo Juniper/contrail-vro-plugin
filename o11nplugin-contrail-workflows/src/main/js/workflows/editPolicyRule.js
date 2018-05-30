@@ -1,5 +1,5 @@
-var index = ContrailUtils.ruleStringToIndex(rule);
-var theRule = parent.entries.policyRule[index];
+var index = ContrailUtils.stringToIndex(rule);
+var theRule = item.entries.policyRule[index];
 
 theRule.protocol = protocol;
 theRule.direction = direction;
@@ -61,4 +61,4 @@ actions.setMirrorTo(mirrorAction);
 
 theRule.setActionList(actions);
 
-parent.update();
+item.update();

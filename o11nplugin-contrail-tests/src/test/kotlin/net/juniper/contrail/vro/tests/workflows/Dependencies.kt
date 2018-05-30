@@ -14,6 +14,7 @@ import net.juniper.contrail.vro.gen.NetworkPolicy_Wrapper
 import net.juniper.contrail.vro.gen.PortTuple_Wrapper
 import net.juniper.contrail.vro.gen.Project_Wrapper
 import net.juniper.contrail.vro.gen.SecurityGroup_Wrapper
+import net.juniper.contrail.vro.gen.ServiceGroup_Wrapper
 import net.juniper.contrail.vro.gen.ServiceHealthCheck_Wrapper
 import net.juniper.contrail.vro.gen.ServiceInstance_Wrapper
 import net.juniper.contrail.vro.gen.ServiceTemplate_Wrapper
@@ -113,6 +114,12 @@ class Dependencies(private val connection: Connection_Wrapper, private val utils
     fun someServiceTemplate() = ServiceTemplate_Wrapper().apply {
         uuid = randomStringUuid()
         name = "someServiceTemplate$uuid"
+        setParentConnection(this@Dependencies.connection)
+    }
+
+    fun someServiceGroup() = ServiceGroup_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someServiceGroup$uuid"
         setParentConnection(this@Dependencies.connection)
     }
 
