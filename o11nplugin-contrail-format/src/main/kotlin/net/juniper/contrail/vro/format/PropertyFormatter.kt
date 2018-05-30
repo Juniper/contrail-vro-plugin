@@ -6,6 +6,9 @@ package net.juniper.contrail.vro.format
 
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
+import net.juniper.contrail.vro.config.constants.any
+import net.juniper.contrail.vro.config.constants.maxPort
+import net.juniper.contrail.vro.config.constants.minPort
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
@@ -29,7 +32,9 @@ object PropertyFormatter {
 
     fun format(prop: PortType) =
         if (prop.startPort == prop.endPort)
-            if (prop.startPort == -1) "any" else "${prop.startPort}"
+            if (prop.startPort == -1) any else "${prop.startPort}"
+        else if (prop.startPort == minPort && prop.endPort == maxPort)
+            any
         else
             "${prop.startPort}-${prop.endPort}"
 
@@ -69,6 +74,9 @@ object PropertyFormatter {
     fun format(prop: PolicyRuleType): String = prop.run {
         "${actionList.safeSimpleAction}$protocol  ${srcAddresses.inline} ${srcPorts.inline} $direction ${dstAddresses.inline} ${dstPorts.inline}"
     }
+
+    fun format(prop: FirewallServiceType) =
+        "${prop.protocol} ${format(prop.dstPorts)}"
 
     private val ActionListType?.safeSimpleAction get() =
         if (this == null) "" else "$simpleAction "

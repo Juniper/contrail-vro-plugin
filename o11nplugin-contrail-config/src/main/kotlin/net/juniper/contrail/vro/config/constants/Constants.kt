@@ -19,10 +19,17 @@ val Connection = "Connection"
 val parent = "parent"
 val child = "child"
 val item = "item"
+val element = "element"
 val id = "id"
 val ingress = "ingress"
 val egress = "egress"
 val subnet = "subnet"
+val any = "any"
+
+val tcp = "tcp"
+val udp = "udp"
+val icmp = "icmp"
+val icmp6 = "icmp6"
 
 val maxOtherInterfacesSupported = 8
 val supportedOtherInterfaces = (0 until maxOtherInterfacesSupported).map { "other$it" }
@@ -34,3 +41,5 @@ val supportedInterfaceNames = listOf(
 val maxInterfacesSupported = supportedInterfaceNames.size
 
 val VxLANMaxID = 16777215
+val minPort = 0
+val maxPort = 65535

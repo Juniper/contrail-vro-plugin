@@ -1,5 +1,12 @@
 var actionResult = new Array();
-var rules = item.getEntries().getPolicyRule()
+
+if (!item) return actionResult;
+
+var entries = item.getEntries();
+if (!entries) return actionResult;
+
+var rules = entries.getPolicyRule();
+if (!rules) return actionResult;
 
 rules.forEach(function (value, index) {
     actionResult.push(ContrailUtils.ruleToString(value, index));
