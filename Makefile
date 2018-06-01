@@ -13,22 +13,22 @@ MVN = mvn -Drepo.host=$(REPO_HOST)
 .ONESHELL:
 
 $(SB_ROOT)/repo:
-	cd ..
-	curl https://storage.googleapis.com/git-repo-downloads/repo > repo
+	cd .. && \
+	curl https://storage.googleapis.com/git-repo-downloads/repo > repo && \
 	chmod a+x ./repo
 
 repo: $(SB_ROOT)/repo
 
 init: repo
-	cd $(SB_ROOT)
+	cd $(SB_ROOT) && \
 	./repo init -u https://github.com/Juniper/contrail-vnc
 
 sync:
-	cd $(SB_ROOT)
+	cd $(SB_ROOT) && \
 	./repo sync
 
 java-api-install:
-	cd $(JAVA_API_DIR)
+	cd $(JAVA_API_DIR) && \
 	mvn install
 
 dist/$(OUTPUT_FILE): java-api-install
