@@ -74,7 +74,8 @@ val customCreateWorkflows = setOf(
     the<ServiceTemplate>(),
     the<ServiceInstance>(),
     the<PortTuple>(),
-    the<Tag>()
+    the<Tag>(),
+    the<TagType>()
 )
 
 val customEditWorkflows = setOf(
@@ -88,7 +89,8 @@ val customEditWorkflows = setOf(
 
 val customDeleteWorkflows = setOf(
     the<VirtualMachineInterface>(),
-    the<PortTuple>()
+    the<PortTuple>(),
+    the<TagType>()
 )
 
 val directChildren = setOf(

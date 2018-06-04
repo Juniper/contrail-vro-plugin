@@ -37,6 +37,7 @@ val ipamHasAllocationMode = "ipamHasAllocationMode"
 val ipamHasNotAllocationMode = "ipamHasNotAllocationMode"
 val networkHasNotAllcationMode = "networkHasNotAllocationMode"
 val propertyOfObjectRule = "propertyOfObjectRule"
+val listTagTypes = "listTagTypes"
 
 val portOfVCVirtualMachine = "portOfVCVirtualMachine"
 val networkOfVCPortGroup = "networkOfVCPortGroup"

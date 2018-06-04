@@ -157,6 +157,42 @@ public class ${className}
         <@singletonMethod />
     </#if>
 
+    <#if objectClass || connectionClass>
+    public Connection_Wrapper getConnection() {
+    <#if connectionClass>
+        <#-- This special case is here to provide consistent API for all findable objects. -->
+        return this;
+    <#else>
+        return (Connection_Wrapper) util.findConnectionWrapper(getInternalId());
+    </#if>
+    }
+    </#if>
+
+    <#list executorMethods as m>
+    <@compress single_line=true>public ${m.returns.typeName} ${m.name}(<@params m />)<@thrown m /> {</@compress>
+        <@locals m />
+
+        ${m.returns.fullClassName} _res$ = util.executor(getInternalId()).${m.name}(__getTarget()<#if m.params?has_content>,</#if><@localNames m />);
+
+        <#if m.returns.fullClassName != 'boolean'>
+        if(_res$ == null) return null;
+        </#if>
+
+        ${m.returns.typeName} _res$pl = _ctx.createPluginObject(_res$, ${m.returns.convertFriendlyClassName});
+        <#if m.returns.componentTypeName??>
+        <#if m.returns.componentClassName??>
+        for(int i = 0; i < _res$.size(); i++) {
+            _res$pl.get(i).setInternalId(getInternalId().with("${m.returns.componentTypeName}",_res$.get(i).getUuid()));
+        }
+        <#else>
+        _res$pl.setInternalId(getInternalId().with("${m.returns.componentTypeName}",_res$.getUuid()));
+        </#if>
+        </#if>
+        return _res$pl;
+    }
+
+    </#list>
+
     <#if objectClass >
     <#list parents as parent>
     public void setParent${parent.simpleName}(${packageName}.${parent.simpleName}_Wrapper _parent) {
@@ -191,35 +227,6 @@ public class ${className}
     public void delete() {
         util.delete(getInternalId(), __getTarget());
     }
-
-    public Connection_Wrapper getConnection() {
-        return (Connection_Wrapper) util.findConnectionWrapper(getInternalId());
-    }
-
-    <#list executorMethods as m>
-    <@compress single_line=true>public ${m.returns.typeName} ${m.name}(<@params m />)<@thrown m /> {</@compress>
-        <@locals m />
-
-        ${m.returns.fullClassName} _res$ = util.executor(getInternalId()).${m.name}(__getTarget()<#if m.params?has_content>,</#if><@localNames m />);
-
-        <#if m.returns.fullClassName != 'boolean'>
-        if(_res$ == null) return null;
-        </#if>
-
-        ${m.returns.typeName} _res$pl = _ctx.createPluginObject(_res$, ${m.returns.convertFriendlyClassName});
-        <#if m.returns.componentTypeName??>
-        <#if m.returns.componentClassName??>
-        for(int i = 0; i < _res$.size(); i++) {
-            _res$pl.get(i).setInternalId(getInternalId().with("${m.returns.componentTypeName}",_res$.get(i).getUuid()));
-        }
-        <#else>
-        _res$pl.setInternalId(getInternalId().with("${m.returns.componentTypeName}",_res$.getUuid()));
-        </#if>
-        </#if>
-        return _res$pl;
-    }
-
-    </#list>
 
     <#list references as ref>
     //List returned by this method is read-only. Changes to the list will not be reflected in the state of the object.

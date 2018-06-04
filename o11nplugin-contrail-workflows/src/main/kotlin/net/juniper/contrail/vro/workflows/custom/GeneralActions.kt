@@ -4,12 +4,14 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
+import net.juniper.contrail.vro.config.listTagTypes
 import net.juniper.contrail.vro.config.propertyNotNull
 import net.juniper.contrail.vro.config.propertyOfObjectRule
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.config.readSubnet
 import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.any
+import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.string
 
@@ -50,5 +52,13 @@ val propertyOfObjectRule = ActionDefinition(
         "parent" ofType any,
         "rule" ofType string,
         "propertyName" ofType string
+    )
+)
+
+val listTagTypesAction = ActionDefinition (
+    name = listTagTypes,
+    resultType = string.array,
+    parameters = listOf(
+        item ofType any
     )
 )

@@ -39,7 +39,6 @@ private val executorTypes = Executor::class.java.declaredMethods.asSequence()
     .groupBy { it.parameterTypes[0] }
 
 private fun ManagedType.createExecutorMethods(): List<ManagedMethod> {
-    if (!modelClass.isApiObjectClass) return emptyList()
     val methods = executorTypes[modelClass] ?: emptyList()
     return methods.map { it.toExecutorMethod() }
 }
