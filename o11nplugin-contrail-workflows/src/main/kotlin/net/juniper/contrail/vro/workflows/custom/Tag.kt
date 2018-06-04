@@ -10,20 +10,14 @@ import net.juniper.contrail.api.types.Tag
 import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.parent
+import net.juniper.contrail.vro.config.listTagTypes
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.util.propertyDescription
 import net.juniper.contrail.vro.workflows.util.relationDescription
-
-private val tagTypes = listOf(
-    "Application",
-    "Tier",
-    "Deployment",
-    "Site",
-    "Label"
-)
 
 internal fun createGlobalTag(schema: Schema) =
     createTag(schema, global = true)
@@ -39,17 +33,17 @@ private fun createTag(schema: Schema, global: Boolean): WorkflowDefinition {
 
     return customWorkflow<Tag>(workflowName).withScriptFile(scriptName) {
         description = relationDescription<ConfigRoot, Tag>(schema)
+        parameter(parent, parentName.reference) {
+            description = "Parent ${parentName.allCapitalized}"
+            mandatory = true
+        }
         parameter("typeName", string) {
             description = propertyDescription<Tag>(schema)
-            predefinedAnswers = tagTypes
+            predefinedAnswersFrom = actionCallTo(listTagTypes).parameter(parent)
             mandatory = true
         }
         parameter("value", string) {
             description = propertyDescription<Tag>(schema)
-            mandatory = true
-        }
-        parameter(parent, parentName.reference) {
-            description = "Parent ${parentName.allCapitalized}"
             mandatory = true
         }
     }
