@@ -1,7 +1,6 @@
-var type = typeName.toLowerCase();
 item = new ContrailTag();
-item.setName(type+"="+value);
+item.setName(typeName+"="+value);
 item.setParentProject(parent);
 item.setValue(value);
-item.setTypeName(type);
+item.setTypeName(typeName);
 item.create();
