@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro
 
 import net.juniper.contrail.vro.config.backReferenceClass
+import net.juniper.contrail.vro.config.isDisplayableChildOf
 import net.juniper.contrail.vro.config.isInPropertyRelationTo
 import net.juniper.contrail.vro.config.refsPropertyPrefix
 import net.juniper.contrail.vro.config.refsPropertySuffix
@@ -35,4 +36,6 @@ val Method.isReferenceProperty get() =
         declaringClass.isInReversedRelationTo(it) ||
         declaringClass.isInPropertyRelationTo(it)
     } ?: false ||
-    backReferenceClass?.let { !declaringClass.isInReversedRelationTo(it) } ?: false
+    backReferenceClass?.let {
+        declaringClass.isDisplayableChildOf(it) &&
+        !declaringClass.isInReversedRelationTo(it) } ?: false
