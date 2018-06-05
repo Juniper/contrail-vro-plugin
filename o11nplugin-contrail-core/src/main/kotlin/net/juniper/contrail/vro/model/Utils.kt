@@ -16,16 +16,17 @@ import net.juniper.contrail.api.types.SubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.VnSubnetsType
 import net.juniper.contrail.api.types.AllowedAddressPair
+import net.juniper.contrail.api.types.FirewallServiceType
 import net.juniper.contrail.api.types.IpamSubnetType
+import net.juniper.contrail.api.types.ServiceGroup
 import net.juniper.contrail.vro.base.Description
+import net.juniper.contrail.vro.config.constants.minPort
+import net.juniper.contrail.vro.config.constants.maxPort
 import net.juniper.contrail.vro.format.PropertyFormatter
 import java.util.UUID
 
 @Description("Object containing miscellaneous utility functions used by workflows and actions, e.g. IP address validation.")
 class Utils {
-    private val minPort = 0
-    private val maxPort = 65535
-
     private val macPattern =
         "^(?:[\\p{XDigit}]{1,2}([-:]))(?:[\\p{XDigit}]{1,2}\\1){4}[\\p{XDigit}]{1,2}$".toRegex()
 
@@ -154,6 +155,8 @@ class Utils {
     fun formatPort(port: PortType): String =
         if (port.startPort == port.endPort)
             if (port.startPort == -1) "any" else "${port.startPort}"
+        else if (port.startPort == minPort && port.endPort == maxPort)
+            "any"
         else
             "${port.startPort}-${port.endPort}"
 
@@ -258,18 +261,23 @@ class Utils {
             "${rule.direction} ${PropertyFormatter.format(rule.dstAddresses[0])} ports ${rule.dstPorts.joinToString(", "){PropertyFormatter.format(it)}}"
     }
 
-    fun stringToRuleFromNetworkPolicy(ruleString: String, policy: NetworkPolicy): PolicyRuleType {
-        val index = ruleString.split(":")[0].toInt()
-        return policy.entries.policyRule[index]
-    }
+    fun stringToRuleFromNetworkPolicy(ruleString: String, policy: NetworkPolicy): PolicyRuleType =
+        policy.entries.policyRule[ruleString.toIndex()]
 
-    fun stringToRuleFromSecurityGroup(ruleString: String, group: SecurityGroup): PolicyRuleType {
-        val index = ruleString.split(":")[0].toInt()
-        return group.entries.policyRule[index]
-    }
+    fun stringToRuleFromSecurityGroup(ruleString: String, group: SecurityGroup): PolicyRuleType =
+        group.entries.policyRule[ruleString.toIndex()]
 
-    fun ruleStringToIndex(ruleString: String): Int =
-        ruleString.split(":")[0].toInt()
+    fun stringToIndex(ruleString: String): Int =
+        ruleString.toIndex()
+
+    fun firewallServiceToString(service: FirewallServiceType, index: Int) =
+        "$index: ${PropertyFormatter.format(service)}"
+
+    fun stringToFirewallService(serviceString: String, serviceGroup: ServiceGroup): FirewallServiceType =
+        serviceGroup.firewallServiceList.firewallService[serviceString.toIndex()]
+
+    fun parseFirewallServicePorts(ports: String): PortType =
+        parsePortRange(ports, anyAsFullRange = true)
 
     fun routeToString(route: RouteType, index: Int): String {
         return "$index: prefix ${route.prefix} next-hop-type ${route.nextHopType} next-hop ${route.nextHop} " +
@@ -321,6 +329,9 @@ class Utils {
         else -> null
     }
 }
+
+fun String.toIndex() =
+    split(":")[0].toInt()
 
 // Utils is not an object due to model-driven archetype constraints
 val utils = Utils()

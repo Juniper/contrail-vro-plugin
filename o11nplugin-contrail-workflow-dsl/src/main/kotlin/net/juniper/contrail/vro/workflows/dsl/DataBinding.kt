@@ -4,7 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.dsl
 
-import net.juniper.contrail.vro.config.propertyOfObjectRule
+import net.juniper.contrail.vro.config.listElementProperty
 import net.juniper.contrail.vro.workflows.model.ParameterQualifier
 import net.juniper.contrail.vro.workflows.model.ParameterType
 import net.juniper.contrail.vro.workflows.model.any
@@ -54,13 +54,15 @@ class FromAction<Type : Any>(val actionCall: ActionCall, val type: ParameterType
 fun <Type : Any> fromAction(actionName: String, type: ParameterType<Type>, setup: ActionCallBuilder.() -> Unit): DataBinding<Type> =
     FromAction(actionCallTo(actionName).apply(setup).create(), type)
 
-fun <Type : Any> fromRuleProperty(
+fun <Type : Any> fromListElementProperty(
     parentItem: String,
-    ruleItem: String,
-    parameterName: String,
+    elementItem: String,
+    propertyPrefix: String,
+    propertyName: String,
     type: ParameterType<Type>
-) = fromAction(propertyOfObjectRule, type) {
-        parameter(parentItem)
-        parameter(ruleItem)
-        string(parameterName)
+) = fromAction(listElementProperty, type) {
+    parameter(parentItem)
+    parameter(elementItem)
+    string(propertyPrefix)
+    string(propertyName.capitalize())
 }

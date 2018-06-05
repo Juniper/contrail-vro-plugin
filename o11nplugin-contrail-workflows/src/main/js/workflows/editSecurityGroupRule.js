@@ -1,5 +1,5 @@
-var index = ContrailUtils.ruleStringToIndex(rule);
-var theRule = parent.entries.policyRule[index];
+var index = ContrailUtils.stringToIndex(rule);
+var theRule = item.entries.policyRule[index];
 
 var parsedPorts = ContrailUtils.parsePortsOfSecurityGroupRule(ports);
 var addr = ContrailUtils.createAddress(addressType, addressCidr, null, null, null, addressSecurityGroup);
@@ -35,4 +35,4 @@ if (direction == "ingress") {
 theRule.protocol = protocol;
 theRule.ethertype = ethertype;
 
-parent.update();
+item.update();
