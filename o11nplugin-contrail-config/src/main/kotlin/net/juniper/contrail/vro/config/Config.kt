@@ -74,6 +74,7 @@ val customCreateWorkflows = setOf(
     the<ServiceTemplate>(),
     the<ServiceInstance>(),
     the<PortTuple>(),
+    the<PolicyManagement>(),
     the<Tag>(),
     the<TagType>()
 )
@@ -84,12 +85,14 @@ val customEditWorkflows = setOf(
     the<FloatingIp>(),
     the<ServiceTemplate>(),
     the<ServiceInstance>(),
-    the<PortTuple>()
+    the<PortTuple>(),
+    the<PolicyManagement>()
 )
 
 val customDeleteWorkflows = setOf(
     the<VirtualMachineInterface>(),
     the<PortTuple>(),
+    the<PolicyManagement>(),
     the<TagType>()
 )
 
@@ -129,10 +132,12 @@ val hiddenRelations = setOf(
     pair<VirtualMachineInterface, PortTuple>(),
     pair<VirtualMachineInterface, VirtualMachine>(),
     pair<ServiceTemplate, ServiceApplianceSet>(),
+    pair<Project, PolicyManagement>(),
     pair<Tag, TagType>()
 )
 
 val tagRelations = setOf(
+    the<ConfigRoot>(),
     the<Project>(),
     the<VirtualNetwork>(),
     the<VirtualMachineInterface>(),
@@ -236,6 +241,9 @@ val Class<*>?.isConfigRoot get() =
 val Class<*>?.isDomain get() =
     isA<Domain>()
 
+val Class<*>?.isPolicyManagement get() =
+    isA<PolicyManagement>()
+
 val Class<*>?.isDefaultRoot get() =
     isConfigRoot || isDomain
 
@@ -313,6 +321,7 @@ val Class<*>.setParentMethods get() =
 
 val Class<*>.parents get() =
     setParentMethods.map { it.parameters[0].type as ObjectClass }
+        .filter { this isDisplayableChildOf it }
 
 val ObjectClass.isRootClass: Boolean get() {
     if (isInternal || isHiddenRoot || isDefaultRoot) return false

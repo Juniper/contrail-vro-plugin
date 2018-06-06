@@ -17,6 +17,7 @@ import net.juniper.contrail.vro.config.isConfigRoot
 import net.juniper.contrail.vro.config.isDefaultRoot
 import net.juniper.contrail.vro.config.isHiddenRoot
 import net.juniper.contrail.vro.config.isModelClass
+import net.juniper.contrail.vro.config.isPolicyManagement
 import net.juniper.contrail.vro.config.isStringListWrapper
 import net.juniper.contrail.vro.config.numberOfParentsInModel
 import net.juniper.contrail.vro.config.objectType
@@ -48,15 +49,19 @@ fun createWorkflows(clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema)
         .toList()
 }
 
-fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass, parentsInModel: Int, rootParents: Boolean, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
+fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass, parentsInModel: Int, hasRootParents: Boolean, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
 
     val nonRootParents = parentsInModel > 0
-    val addInParent = rootParents || parentsInModel > 1
+    val addInParent = (hasRootParents || parentsInModel > 1) && ! parentClazz.isPolicyManagement
+    val addGlobal = (parentClazz.isDefaultRoot && nonRootParents) || parentClazz.isPolicyManagement
 
-    val workflowBaseName = "Create " + if (parentClazz.isDefaultRoot && nonRootParents) "global " else ""
-    val workflowNameSuffix = if (parentClazz.isModelClass && addInParent) " in ${parentClazz.allLowerCase}" else ""
+    val workflowBaseName = "Create " + if (addGlobal) "global " else ""
+    val workflowNameSuffix = if (addInParent) " in ${parentClazz.allLowerCase}" else ""
     val workflowName = workflowBaseName + clazz.allLowerCase + workflowNameSuffix
-    val parentName = if (parentClazz.isModelClass) parentClazz.pluginName else Connection
+    val parentName = if (parentClazz.isModelClass && ! parentClazz.isPolicyManagement)
+        parentClazz.pluginName
+    else
+        Connection
 
     return workflow(workflowName).withScript(clazz.createScriptBody(parentClazz, refs, schema)) {
         description = schema.createWorkflowDescription(clazz, parentClazz)
@@ -155,14 +160,22 @@ ${clazz.allCapitalized}
 ${relationDescription(parentClazz, clazz)}
 """.trim()
 
-private fun ObjectClass.setParentCall(parentClazz: ObjectClass) =
-    if (parentClazz.isModelClass)
-        setRegularParentCall(parentClazz)
-    else
-        setRootParentCall(parentClazz) + "\n" + setParentConnectionCall()
+private fun ObjectClass.setParentCall(parentClazz: ObjectClass) = when {
+    parentClazz.isPolicyManagement -> setParentPolicyManagementCall()
+    parentClazz.isModelClass -> setRegularParentCall(parentClazz)
+    else -> setRootParentCall(parentClazz) + "\n" + setParentConnectionCall()
+}
 
 private fun setParentConnectionCall() =
     "$item.setParent$Connection($parent);"
+
+private fun setRegularParentCall(parentClazz: ObjectClass) =
+    "$item.setParent${parentClazz.pluginName}($parent);"
+
+private fun setParentPolicyManagementCall() = """
+var defaultPolicyManagement = parent.findPolicyManagementByFQName("default-policy-management");
+$item.setParentPolicyManagement(defaultPolicyManagement);
+""".trim()
 
 private fun ObjectClass.setRootParentCall(parentClazz: ObjectClass) = when {
     // create empty ConfigRoot object just to configure parent type
@@ -171,9 +184,6 @@ private fun ObjectClass.setRootParentCall(parentClazz: ObjectClass) = when {
     defaultParentType == parentClazz.objectType -> ""
     else -> throw IllegalArgumentException("Unable to create parent ${parentClazz.simpleName} for $simpleName.")
 }
-
-private fun setRegularParentCall(parentClazz: ObjectClass) =
-    "$item.setParent${parentClazz.pluginName}($parent);"
 
 private fun ObjectClass.createScriptBody(parentClazz: ObjectClass, references: List<ObjectClass>, schema: Schema) = """
 $item = new Contrail$pluginName();
