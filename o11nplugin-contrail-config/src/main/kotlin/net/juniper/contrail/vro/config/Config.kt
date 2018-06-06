@@ -129,6 +129,7 @@ val hiddenRelations = setOf(
     pair<VirtualMachineInterface, PortTuple>(),
     pair<VirtualMachineInterface, VirtualMachine>(),
     pair<ServiceTemplate, ServiceApplianceSet>(),
+    pair<Project, PolicyManagement>(),
     pair<Tag, TagType>()
 )
 
@@ -313,6 +314,7 @@ val Class<*>.setParentMethods get() =
 
 val Class<*>.parents get() =
     setParentMethods.map { it.parameters[0].type as ObjectClass }
+        .filter { this isDisplayableChildOf it }
 
 val ObjectClass.isRootClass: Boolean get() {
     if (isInternal || isHiddenRoot || isDefaultRoot) return false
