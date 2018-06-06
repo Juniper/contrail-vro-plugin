@@ -74,6 +74,7 @@ val customCreateWorkflows = setOf(
     the<ServiceTemplate>(),
     the<ServiceInstance>(),
     the<PortTuple>(),
+    the<PolicyManagement>(),
     the<Tag>(),
     the<TagType>()
 )
@@ -84,12 +85,14 @@ val customEditWorkflows = setOf(
     the<FloatingIp>(),
     the<ServiceTemplate>(),
     the<ServiceInstance>(),
-    the<PortTuple>()
+    the<PortTuple>(),
+    the<PolicyManagement>()
 )
 
 val customDeleteWorkflows = setOf(
     the<VirtualMachineInterface>(),
     the<PortTuple>(),
+    the<PolicyManagement>(),
     the<TagType>()
 )
 
@@ -134,6 +137,7 @@ val hiddenRelations = setOf(
 )
 
 val tagRelations = setOf(
+    the<ConfigRoot>(),
     the<Project>(),
     the<VirtualNetwork>(),
     the<VirtualMachineInterface>(),
@@ -236,6 +240,9 @@ val Class<*>?.isConfigRoot get() =
 
 val Class<*>?.isDomain get() =
     isA<Domain>()
+
+val Class<*>?.isPolicyManagement get() =
+    isA<PolicyManagement>()
 
 val Class<*>?.isDefaultRoot get() =
     isConfigRoot || isDomain
