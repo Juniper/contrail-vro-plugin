@@ -22,6 +22,7 @@ import net.juniper.contrail.vro.config.isInReversedRelationTo
 import net.juniper.contrail.vro.config.isModelClassName
 import net.juniper.contrail.vro.config.nameWithoutGetAndBackRefs
 import net.juniper.contrail.vro.config.objectReferenceAttributeClass
+import net.juniper.contrail.vro.config.order
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.pluralize
 import net.juniper.contrail.vro.config.propertyName
@@ -73,17 +74,21 @@ class PropertyRelation (
 }
 
 fun List<ObjectClass>.generateRelations() = asSequence()
-    .flatMap { it.relations() }.toList()
+    .sortedBy { it.order }
+    .flatMap { it.relations() }
+    .toList()
 
 private fun ObjectClass.relations() = methods.asSequence()
     .filter { it.isChildReferenceGetter }
     .map { it.childClassName }.filterNotNull()
     .filter { it.isModelClassName }
     .map { it.asObjectClass }.filterNotNull()
+    .sortedBy { it.order }
     .map { Relation(this, it) }
 
 fun List<ObjectClass>.generateReferenceRelations(): List<ForwardRelation> =
     asSequence()
+        .sortedBy { it.order }
         .flatMap { it.refRelations }
         .filter { contains(it.childClass) }
         .toList()
@@ -110,6 +115,7 @@ private val ObjectClass.refRelations: Sequence<ForwardRelation> get() =
         .filter { ! it.isBackRef }
         .map { ForwardRelation(this, it) }
         .filter { it.childName isDisplayableChildOf it.parentName }
+        .sortedBy { it.childClass.order }
 
 private val ObjectClass.referenceMethods: Sequence<Method> get() =
     declaredMethods.asSequence()
