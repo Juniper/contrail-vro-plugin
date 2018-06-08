@@ -5,7 +5,6 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
-import net.juniper.contrail.api.types.NetworkPolicy
 import net.juniper.contrail.api.types.ServiceGroup
 
 class AddServiceToServiceGroupSpec extends WorkflowSpec {
@@ -19,7 +18,7 @@ class AddServiceToServiceGroupSpec extends WorkflowSpec {
 
     def "Adding service to a service group"() {
         given:
-        def serviceGroup = dependencies.someServiceGroup()
+        def serviceGroup = dependencies.someGlobalServiceGroup()
 
         def initialSize = serviceGroup.getFirewallServiceList()?.getFirewallService()?.size() ?: 0
         connectorMock.read(_) >> Status.success()

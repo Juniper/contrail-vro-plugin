@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.vro.gen.AddressGroup_Wrapper
+import net.juniper.contrail.vro.gen.ConfigRoot_Wrapper
 import net.juniper.contrail.vro.gen.Connection_Wrapper
 import net.juniper.contrail.vro.gen.FirewallRule_Wrapper
 import net.juniper.contrail.vro.gen.FloatingIpPool_Wrapper
@@ -12,6 +13,7 @@ import net.juniper.contrail.vro.gen.FloatingIp_Wrapper
 import net.juniper.contrail.vro.gen.IpamSubnetType_Wrapper
 import net.juniper.contrail.vro.gen.NetworkIpam_Wrapper
 import net.juniper.contrail.vro.gen.NetworkPolicy_Wrapper
+import net.juniper.contrail.vro.gen.PolicyManagement_Wrapper
 import net.juniper.contrail.vro.gen.PortTuple_Wrapper
 import net.juniper.contrail.vro.gen.Project_Wrapper
 import net.juniper.contrail.vro.gen.SecurityGroup_Wrapper
@@ -20,6 +22,7 @@ import net.juniper.contrail.vro.gen.ServiceHealthCheck_Wrapper
 import net.juniper.contrail.vro.gen.ServiceInstance_Wrapper
 import net.juniper.contrail.vro.gen.ServiceTemplate_Wrapper
 import net.juniper.contrail.vro.gen.SubnetType_Wrapper
+import net.juniper.contrail.vro.gen.Tag_Wrapper
 import net.juniper.contrail.vro.gen.Utils_Wrapper
 import net.juniper.contrail.vro.gen.VirtualMachineInterfacePropertiesType_Wrapper
 import net.juniper.contrail.vro.gen.VirtualMachineInterface_Wrapper
@@ -29,6 +32,18 @@ import java.util.UUID
 fun randomStringUuid() = UUID.randomUUID().toString()
 
 class Dependencies(private val connection: Connection_Wrapper, private val utils: Utils_Wrapper) {
+    val defaultPolicyManagement: PolicyManagement_Wrapper = PolicyManagement_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "default-policy-management"
+        setParentConnection(this@Dependencies.connection)
+    }
+
+    val configRoot: ConfigRoot_Wrapper = ConfigRoot_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "config-root"
+        setParentConnection(this@Dependencies.connection)
+    }
+
     fun someProject(): Project_Wrapper = Project_Wrapper().apply {
         uuid = randomStringUuid()
         name = "someProject$uuid"
@@ -113,10 +128,16 @@ class Dependencies(private val connection: Connection_Wrapper, private val utils
     }
 
     @JvmOverloads
-    fun someFirewallRule(parent: Project_Wrapper = someProject()) = FirewallRule_Wrapper().apply {
+    fun someProjectFirewallRule(parent: Project_Wrapper = someProject()) = FirewallRule_Wrapper().apply {
         uuid = randomStringUuid()
-        name = "someFirewallRule$uuid"
+        name = "someProjectFirewallRule$uuid"
         setParentProject(parent)
+    }
+
+    fun someGlobalFirewallRule() = FirewallRule_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someGlobalFirewallRule$uuid"
+        setParentPolicyManagement(defaultPolicyManagement)
     }
 
     fun someServiceTemplate() = ServiceTemplate_Wrapper().apply {
@@ -125,9 +146,30 @@ class Dependencies(private val connection: Connection_Wrapper, private val utils
         setParentConnection(this@Dependencies.connection)
     }
 
-    fun someServiceGroup() = ServiceGroup_Wrapper().apply {
+    @JvmOverloads
+    fun someProjectServiceGroup(parent: Project_Wrapper = someProject()) = ServiceGroup_Wrapper().apply {
         uuid = randomStringUuid()
-        name = "someServiceGroup$uuid"
+        name = "someProjectServiceGroup$uuid"
+        setParentProject(parent)
+    }
+
+    fun someGlobalServiceGroup() = ServiceGroup_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someGlobalServiceGroup$uuid"
+        setParentPolicyManagement(defaultPolicyManagement)
+    }
+
+    @JvmOverloads
+    fun someProjectTag(parent: Project_Wrapper = someProject()) = Tag_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someProjectTag$uuid"
+        setParentProject(parent)
+    }
+
+    fun someGlobalTag() = Tag_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someGlobalTag$uuid"
+        setParentConfigRoot(configRoot)
         setParentConnection(this@Dependencies.connection)
     }
 
