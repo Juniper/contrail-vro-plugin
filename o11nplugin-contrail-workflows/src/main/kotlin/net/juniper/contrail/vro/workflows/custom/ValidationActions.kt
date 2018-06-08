@@ -18,6 +18,7 @@ import net.juniper.contrail.vro.config.isValidMac
 import net.juniper.contrail.vro.config.isSingleAddressNetworkPolicyRule
 import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRule
 import net.juniper.contrail.vro.config.isValidSubnet
+import net.juniper.contrail.vro.config.matchesSecurityParentage
 import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
 import net.juniper.contrail.vro.config.templateHasInterfaceWithName
 import net.juniper.contrail.vro.config.networkHasNotAllcationMode
@@ -125,4 +126,14 @@ val networkHasNotAllcationModeAction = ActionDefinition(
     name = networkHasNotAllcationMode,
     resultType = string,
     parameters = listOf("virtualNetwork" ofType reference<VirtualNetwork>(), "mode" ofType string)
+)
+
+val matchesSecurityParentage = ActionDefinition(
+    name = matchesSecurityParentage,
+    resultType = string,
+    parameters = listOf(
+        "children" ofType any,
+        "parent" ofType any,
+        "directMode" ofType boolean,
+        "arrayMode" ofType boolean)
 )
