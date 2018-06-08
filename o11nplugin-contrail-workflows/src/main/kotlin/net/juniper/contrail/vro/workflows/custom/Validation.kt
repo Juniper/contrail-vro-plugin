@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
+import net.juniper.contrail.vro.config.arrayMatchesSecurityParentage
 import net.juniper.contrail.vro.config.isValidAllocactionPool
 import net.juniper.contrail.vro.config.isValidCidr
 import net.juniper.contrail.vro.config.isValidSubnet
@@ -13,11 +14,15 @@ import net.juniper.contrail.vro.config.isInCidr
 import net.juniper.contrail.vro.config.isValidIp
 import net.juniper.contrail.vro.config.isSingleAddressNetworkPolicyRule
 import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRule
+import net.juniper.contrail.vro.config.matchesSecurityParentage
 import net.juniper.contrail.vro.config.areValidCommunityAttributes
+import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.networkHasNotAllcationMode
 import net.juniper.contrail.vro.config.ipamHasAllocationMode
 import net.juniper.contrail.vro.config.ipamHasNotAllocationMode
+import net.juniper.contrail.vro.workflows.dsl.ArrayParameterBuilder
 import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
+import net.juniper.contrail.vro.workflows.dsl.ReferenceArrayParameterBuilder
 import net.juniper.contrail.vro.workflows.dsl.ReferenceParameterBuilder
 
 fun BasicParameterBuilder<String>.isSubnet() =
@@ -31,6 +36,12 @@ fun ReferenceParameterBuilder.ipamHasAllocationMode(mode: String) =
 
 fun ReferenceParameterBuilder.ipamHasNotAllocationMode(mode: String) =
     validationActionCallTo(ipamHasNotAllocationMode).string(mode)
+
+fun ReferenceParameterBuilder.matchesSecurityParentage(parentUuidField: String = "$parent.uuid") =
+    validationActionCallTo(matchesSecurityParentage).parameter(parentUuidField)
+
+fun ReferenceArrayParameterBuilder.matchesSecurityParentage(parentUuidField: String = "$parent.uuid") =
+    validationActionCallTo(arrayMatchesSecurityParentage).parameter(parentUuidField)
 
 fun BasicParameterBuilder<String>.isCidr() =
     validationActionCallTo(isValidCidr)
@@ -47,14 +58,14 @@ fun BasicParameterBuilder<String>.addressIsFreeInSubnet(subnet: String, allocati
 fun BasicParameterBuilder<String>.addressInSubnet(subnet: String) =
     validationActionCallTo(isInCidr).parameter(subnet)
 
-fun BasicParameterBuilder<List<String>>.allocationPoolInSubnet(subnet: String) =
-    validationActionCallTo(isValidAllocactionPool).parameter(subnet)
-
 fun BasicParameterBuilder<String>.isSingleAddressNetworkPolicyRuleOf(networkPolicy: String) =
     validationActionCallTo(isSingleAddressNetworkPolicyRule).parameter(networkPolicy)
 
 fun BasicParameterBuilder<String>.isSingleAddressSecurityGroupRuleOf(securityGroup: String) =
     validationActionCallTo(isSingleAddressSecurityGroupRule).parameter(securityGroup)
 
-fun BasicParameterBuilder<List<String>>.isCommunityAttribute() =
+fun ArrayParameterBuilder<String>.allocationPoolInSubnet(subnet: String) =
+    validationActionCallTo(isValidAllocactionPool).parameter(subnet)
+
+fun ArrayParameterBuilder<String>.isCommunityAttribute() =
     validationActionCallTo(areValidCommunityAttributes)

@@ -42,6 +42,8 @@ val ipamHasNotAllocationMode = "ipamHasNotAllocationMode"
 val networkHasNotAllcationMode = "networkHasNotAllocationMode"
 val listElementProperty = "listElementProperty"
 val listTagTypes = "listTagTypes"
+val matchesSecurityParentage = "matchesSecurityParentage"
+val arrayMatchesSecurityParentage = "arrayMatchesSecurityParentage"
 
 val portOfVCVirtualMachine = "portOfVCVirtualMachine"
 val networkOfVCPortGroup = "networkOfVCPortGroup"

@@ -8,6 +8,7 @@ import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.ServiceTemplate
 import net.juniper.contrail.api.types.VirtualNetwork
+import net.juniper.contrail.vro.config.arrayMatchesSecurityParentage
 import net.juniper.contrail.vro.config.areValidCommunityAttributes
 import net.juniper.contrail.vro.config.isValidAllocactionPool
 import net.juniper.contrail.vro.config.isValidCidr
@@ -18,6 +19,7 @@ import net.juniper.contrail.vro.config.isValidMac
 import net.juniper.contrail.vro.config.isSingleAddressNetworkPolicyRule
 import net.juniper.contrail.vro.config.isSingleAddressSecurityGroupRule
 import net.juniper.contrail.vro.config.isValidSubnet
+import net.juniper.contrail.vro.config.matchesSecurityParentage
 import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
 import net.juniper.contrail.vro.config.templateHasInterfaceWithName
 import net.juniper.contrail.vro.config.networkHasNotAllcationMode
@@ -125,4 +127,16 @@ val networkHasNotAllcationModeAction = ActionDefinition(
     name = networkHasNotAllcationMode,
     resultType = string,
     parameters = listOf("virtualNetwork" ofType reference<VirtualNetwork>(), "mode" ofType string)
+)
+
+val matchesSecurityParentage = ActionDefinition(
+    name = matchesSecurityParentage,
+    resultType = string,
+    parameters = listOf("child" ofType any, "parentUuid" ofType string)
+)
+
+val arrayMatchesSecurityParentage = ActionDefinition(
+    name = arrayMatchesSecurityParentage,
+    resultType = string,
+    parameters = listOf("children" ofType array(any), "parentUuid" ofType string)
 )

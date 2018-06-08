@@ -56,7 +56,8 @@ internal fun createPolicyManagementFirewallRule(schema: Schema): WorkflowDefinit
         output("rule", reference<FirewallRule>()) {
             description = "Rule created by this workflow"
         }
-        firewallRuleParameters(schema, parentConnectionField, false)
+        // we use connection name, as it does not have an uuid.
+        firewallRuleParameters(schema, "$parentConnectionField.name", parentConnectionField, false)
     }
 }
 
@@ -74,7 +75,7 @@ internal fun createProjectFirewallRule(schema: Schema): WorkflowDefinition {
         output("rule", reference<FirewallRule>()) {
             description = "Rule created by this workflow"
         }
-        firewallRuleParameters(schema, parentProjectField, false)
+        firewallRuleParameters(schema, "$parentProjectField.uuid", parentProjectField, false)
     }
 }
 
@@ -88,12 +89,12 @@ internal fun editFirewallRule(schema: Schema): WorkflowDefinition {
                 mandatory = true
             }
         }
-        firewallRuleParameters(schema, "rule", true)
+        firewallRuleParameters(schema, "rule.parentUuid", "rule", true)
 
     }
 }
 
-private fun PresentationParametersBuilder.firewallRuleParameters(schema: Schema, visibilityDependencyField: String, loadCurrentValues: Boolean) {
+private fun PresentationParametersBuilder.firewallRuleParameters(schema: Schema, parentField: String, visibilityDependencyField: String, loadCurrentValues: Boolean) {
     step("Basic attributes") {
         visibility = WhenNonNull(visibilityDependencyField)
         parameter("action", string) {
@@ -110,8 +111,8 @@ private fun PresentationParametersBuilder.firewallRuleParameters(schema: Schema,
     }
     step("Endpoints") {
         visibility = WhenNonNull(visibilityDependencyField)
-        endpointParameters(schema, 1, loadCurrentValues)
-        endpointParameters(schema, 2, loadCurrentValues)
+        endpointParameters(schema, parentField, 1, loadCurrentValues)
+        endpointParameters(schema, parentField, 2, loadCurrentValues)
     }
     step("Service") {
         visibility = WhenNonNull(visibilityDependencyField)
@@ -146,6 +147,7 @@ private fun PresentationParametersBuilder.firewallRuleParameters(schema: Schema,
             description = "Service group"
             visibility = FromStringParameter(serviceTypeParameterName, ServiceType.Reference.value)
             mandatory = true
+            validWhen = matchesSecurityParentage(parentField)
             if (loadCurrentValues) dataBinding = firewallRulePropertyDataBinding("serviceGroup[0]")
         }
     }
@@ -159,7 +161,7 @@ private fun PresentationParametersBuilder.firewallRuleParameters(schema: Schema,
     }
 }
 
-private fun ParameterAggregator.endpointParameters(schema: Schema, endpointNumber: Int, loadCurrentValues: Boolean) {
+private fun ParameterAggregator.endpointParameters(schema: Schema, parentField: String, endpointNumber: Int, loadCurrentValues: Boolean) {
     val endpointName = endpointParameterName(endpointNumber)
     val endpointTypeParameterName = "${endpointName}Type"
     parameter(endpointTypeParameterName, string) {
@@ -173,6 +175,8 @@ private fun ParameterAggregator.endpointParameters(schema: Schema, endpointNumbe
         description = schema.propertyDescription<FirewallRuleEndpointType>("tags")
         visibility = FromStringParameter(endpointTypeParameterName, EndpointType.Tag.value)
         mandatory = true
+        sameValues = false
+        validWhen = matchesSecurityParentage(parentField)
         if (loadCurrentValues) dataBinding = firewallRulePropertyDataBinding("endpointTags($endpointNumber)")
     }
     parameter("${endpointName}VirtualNetwork", reference<VirtualNetwork>()) {
