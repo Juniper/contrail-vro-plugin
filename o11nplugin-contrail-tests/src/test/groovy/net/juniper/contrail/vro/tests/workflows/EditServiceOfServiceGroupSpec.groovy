@@ -24,7 +24,7 @@ class EditServiceOfServiceGroupSpec extends WorkflowSpec {
 
     def "Editing service of service group"() {
         given:
-        def serviceGroup = dependencies.someServiceGroup()
+        def serviceGroup = dependencies.someGlobalServiceGroup()
 
         connectorMock.read(_) >> Status.success()
         connectorMock.update(_) >> Status.success()

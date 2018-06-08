@@ -19,7 +19,7 @@ class RemoveServiceFromServiceGroupSpec extends WorkflowSpec {
 
     def "Removing service from service group"() {
         given:
-        def serviceGroup = dependencies.someServiceGroup()
+        def serviceGroup = dependencies.someGlobalServiceGroup()
 
         def initialSize = serviceGroup.getFirewallServiceList()?.getFirewallService()?.size() ?: 0
         connectorMock.read(_) >> Status.success()
