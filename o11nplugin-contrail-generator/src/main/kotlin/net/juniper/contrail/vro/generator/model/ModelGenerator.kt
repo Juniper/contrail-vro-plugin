@@ -9,6 +9,7 @@ import net.juniper.contrail.vro.config.PropertyClass
 import net.juniper.contrail.vro.config.div
 import net.juniper.contrail.vro.config.ProjectInfo
 import net.juniper.contrail.vro.config.isRootClass
+import net.juniper.contrail.vro.config.order
 import net.juniper.contrail.vro.generator.generatedPackageName
 import net.juniper.contrail.vro.generator.generatedSourcesRoot
 import net.juniper.contrail.vro.generator.templatesInClassPath
@@ -24,7 +25,8 @@ fun generateModel(
     val relations = definition.relations
     val forwardRelations = definition.forwardRelations
     val propertyRelations = definition.propertyRelations
-    val rootClasses = modelClasses.filter { it.isRootClass }
+    val rootClasses = modelClasses.asSequence()
+        .filter { it.isRootClass }.sortedBy { it.order }.toList()
 
     val relationsModel = generateRelationsModel(relations, forwardRelations, propertyRelations, rootClasses)
     val customMappingModel = generateCustomMappingModel(info, pluginClasses, rootClasses, propertyClasses, relations, forwardRelations, propertyRelations)
