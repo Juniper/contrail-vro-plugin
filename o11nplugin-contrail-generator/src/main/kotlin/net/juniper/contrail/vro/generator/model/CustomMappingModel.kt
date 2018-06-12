@@ -15,18 +15,23 @@ import net.juniper.contrail.vro.config.isInventoryPropertyClassName
 data class CustomMappingModel (
     val findableClasses: List<ClassInfoModel>,
     val rootClasses: List<ClassInfoModel>,
+    val securityClasses: List<ClassInfoModel>,
     val propertyClasses: List<PropertyInfo>,
     val relations: List<RelationModel>,
     val forwardRelations: List<ForwardRelation>,
     val propertyRelations: List<PropertyRelation>,
+    val categories: List<Category>,
+    val categoryRelations: List<CategoryRelation>,
     val iconRootDir: String
 ) : GenericModel()
 
 data class ClassInfoModel(
     val simpleName: String,
-    val pluginName: String,
-    val folderName: String
-)
+    val pluginName: String
+) {
+    val folderName = pluginName.folderName()
+    val simpleNameDecapitalized = simpleName.decapitalize()
+}
 
 data class PropertyInfo(val simpleName: String) {
     val isPropertyAsObject : Boolean get() =
@@ -37,8 +42,7 @@ fun Class<*>.toPropertyInfoClass() = PropertyInfo(simpleName)
 
 fun Class<*>.toClassInfoModel() = ClassInfoModel(
     simpleName,
-    pluginName,
-    pluginName.folderName()
+    pluginName
 )
 
 fun generateCustomMappingModel(
@@ -52,9 +56,12 @@ fun generateCustomMappingModel(
 ) = CustomMappingModel(
     pluginClasses.map { it.toClassInfoModel() },
     rootClasses.map { it.toClassInfoModel() },
+    relations.toSecurityClasses().toList(),
     propertyClasses.map { it.toPropertyInfoClass() },
-    relations.map { it.toRelationModel() },
+    relations.filter { !it.isCategoryRelation }.map { it.toRelationModel() },
     forwardRelations,
     propertyRelations,
+    relations.toCategories().toList(),
+    relations.toCategoryRelations().toList(),
     info.finalProjectRoot
 )

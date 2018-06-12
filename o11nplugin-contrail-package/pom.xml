@@ -31,28 +31,6 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/src/main/resources</outputDirectory>
-              <resources>
-                <resource>
-                  <directory>${basedir}/templates/main/resources</directory>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
         <groupId>com.vmware.o11n.mojo.pkg</groupId>
         <artifactId>maven-o11n-package-plugin</artifactId>
         <version>${vco.version}</version>
@@ -81,10 +59,6 @@
         <artifactId>maven-clean-plugin</artifactId>
         <configuration>
           <filesets>
-            <fileset>
-              <directory>templates/main/resources</directory>
-              <followSymlinks>false</followSymlinks>
-            </fileset>
             <fileset>
               <directory>src/main/resources</directory>
               <followSymlinks>false</followSymlinks>

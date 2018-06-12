@@ -11,12 +11,13 @@ import com.vmware.o11n.sdk.modeldriven.Sid
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.base.ConnectionRepository
+import net.juniper.contrail.vro.config.GlobalSecurity
 import org.springframework.beans.factory.annotation.Autowired
 
 class ConnectionFinder
 @Autowired constructor(private val connectionRepository: ConnectionRepository) : ObjectFinder<Connection>
 {
-    override fun assignId(connection: Connection, relatedObject: Sid?): Sid =
+    override fun assignId(connection: Connection, id: Sid?): Sid =
         connection.info.sid
 
     override fun find(ctx: PluginContext, type: String, id: Sid): Connection? =
@@ -24,6 +25,13 @@ class ConnectionFinder
 
     override fun query(ctx: PluginContext, type: String, query: String): List<FoundObject<Connection>> =
         connectionRepository.findConnections(query).map { FoundObject<Connection>(it, it.info.sid) }
+}
+
+class GlobalSecurityFinder : ObjectFinder<GlobalSecurity>
+{
+    override fun assignId(security: GlobalSecurity, id: Sid) = id
+    override fun find(ctx: PluginContext, type: String, id: Sid) = GlobalSecurity
+    override fun query(ctx: PluginContext, type: String, query: String) = null
 }
 
 class IpamSubnetTypeFinder

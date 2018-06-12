@@ -27,10 +27,11 @@ fun generateModel(
     val propertyRelations = definition.propertyRelations
     val rootClasses = modelClasses.asSequence()
         .filter { it.isRootClass }.sortedBy { it.order }.toList()
+    val categories = relations.toCategories().map { it.type }.distinct().toList()
 
     val relationsModel = generateRelationsModel(relations, forwardRelations, propertyRelations, rootClasses)
     val customMappingModel = generateCustomMappingModel(info, pluginClasses, rootClasses, propertyClasses, relations, forwardRelations, propertyRelations)
-    val findersModel = generateFindersModel(pluginClasses, propertyRelations)
+    val findersModel = generateFindersModel(pluginClasses, categories, propertyRelations)
 
     val templateDir = info.generatorRoot / templatesInResourcesPath
 

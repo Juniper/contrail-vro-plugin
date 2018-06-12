@@ -23,10 +23,10 @@ import net.juniper.contrail.vro.config.isModelClassName
 import net.juniper.contrail.vro.config.nameWithoutGetAndBackRefs
 import net.juniper.contrail.vro.config.objectReferenceAttributeClass
 import net.juniper.contrail.vro.config.order
-import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.pluralize
 import net.juniper.contrail.vro.config.propertyName
 import net.juniper.contrail.vro.config.refPropertyName
+import net.juniper.contrail.vro.config.referenceFolderName
 import net.juniper.contrail.vro.config.returnTypeOrListType
 import net.juniper.contrail.vro.config.returnsObjectReferences
 import net.juniper.contrail.vro.config.toPluginName
@@ -38,7 +38,7 @@ open class Relation (
 ) {
     val parentName: String = parentClass.simpleName
     val childName: String = childClass.simpleName
-    val folderName = childClass.pluginName.folderName()
+    val folderName = childClass.folderName
 }
 
 class ForwardRelation (
@@ -56,7 +56,7 @@ class ForwardRelation (
     val childNamePluralized = childPluginName.pluralize()
     val pluginGetter = declaredChildClass.refPropertyName
     val getter: String = childName.decapitalize() + if (isReversed) BackRefs else ""
-    val folderName = childName.folderName()
+    val folderName = childClass.referenceFolderName
     val attribute = method.objectReferenceAttributeClassOrDefault
     val attributeSimpleName = attribute.simpleName
     val simpleReference = attribute.isSimpleReference
@@ -83,6 +83,7 @@ private fun ObjectClass.relations() = methods.asSequence()
     .map { it.childClassName }.filterNotNull()
     .filter { it.isModelClassName }
     .map { it.asObjectClass }.filterNotNull()
+    .filter { it isDisplayableChildOf this }
     .sortedBy { it.order }
     .map { Relation(this, it) }
 
