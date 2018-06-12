@@ -85,6 +85,7 @@ internal fun editFirewallRule(schema: Schema): WorkflowDefinition {
     return customWorkflow<FirewallRule>(workflowName).withScriptFile("editFirewallRule") {
         step("Rule") {
             parameter("rule", reference<FirewallRule>()) {
+                description = "Rule to edit"
                 mandatory = true
             }
         }
@@ -116,6 +117,7 @@ private fun PresentationParametersBuilder.firewallRuleParameters(schema: Schema,
     step("Service") {
         visibility = WhenNonNull(visibilityDependencyField)
         parameter(serviceTypeParameterName, string) {
+            description = "Service Type"
             mandatory = true
             predefinedAnswers = allowedServiceTypes
             defaultValue = defaultServiceType
@@ -143,7 +145,7 @@ private fun PresentationParametersBuilder.firewallRuleParameters(schema: Schema,
             if (loadCurrentValues) dataBinding = firewallRulePropertyDataBinding("serviceDstPorts()")
         }
         parameter("serviceReference", reference<ServiceGroup>()) {
-            description = "Service group"
+            description = "Service Group"
             visibility = FromStringParameter(serviceTypeParameterName, ServiceType.Reference.value)
             mandatory = true
             if (loadCurrentValues) dataBinding = firewallRulePropertyDataBinding("serviceGroup[0]")
@@ -152,6 +154,7 @@ private fun PresentationParametersBuilder.firewallRuleParameters(schema: Schema,
     step("Match Tags") {
         visibility = WhenNonNull(visibilityDependencyField)
         parameter("matchTags", array(string)) {
+            description = "Match Tags"
             predefinedAnswers = allowedMatchTags
             sameValues = false
             if (loadCurrentValues) dataBinding = firewallRulePropertyDataBinding("matchTags.tagList")
