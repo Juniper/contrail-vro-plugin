@@ -13,7 +13,9 @@ data class RelationsModel(
     val rootClasses: List<ClassInfoModel>,
     val relations: List<RelationModel>,
     val forwardRelations: List<ForwardRelation>,
-    val propertyRelations: List<PropertyRelation>
+    val propertyRelations: List<PropertyRelation>,
+    val categories: List<Category>,
+    val securityClasses: List<ClassInfoModel>
 ) : GenericModel()
 
 data class RelationModel(
@@ -45,7 +47,9 @@ fun generateRelationsModel(
     rootClasses: List<ObjectClass>
 ): RelationsModel {
     val relationModels = relations.map { it.toRelationModel() }
+    val categories = relations.toCategories().toList()
     val rootClassesModel = rootClasses.map { it.toClassInfoModel() }
+    val securityClasses = relations.toSecurityClasses().toList()
 
-    return RelationsModel(rootClassesModel, relationModels, forwardRelations, propertyRelations)
+    return RelationsModel(rootClassesModel, relationModels, forwardRelations, propertyRelations, categories, securityClasses)
 }

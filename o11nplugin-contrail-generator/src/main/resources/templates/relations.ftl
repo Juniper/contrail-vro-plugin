@@ -7,8 +7,9 @@ import com.vmware.o11n.sdk.modeldriven.Sid
 import org.springframework.beans.factory.annotation.Autowired
 import net.juniper.contrail.api.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
-import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.base.ConnectionRepository
+import net.juniper.contrail.vro.config.* // ktlint-disable no-wildcard-imports
+import net.juniper.contrail.vro.model.Connection
 
 private val rootObject: (ApiObjectBase) -> Boolean =
     { it.parentType == null || it.parentType == "domain" || it.parentType == "config-root" }
@@ -34,6 +35,28 @@ class ${relation.parentName}Has${relation.childName}
         val parent = connection?.findById<${relation.parentName}>(parentId.getString("${relation.parentPluginName}"))
         return connection?.getObjects(${relation.childName}::class.java, parent?.${relation.childNameDecapitalized}s)
     }
+}
+
+</#list>
+
+<#list securityClasses as klass>
+class GlobalSecurityHas${klass.simpleName}
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${klass.simpleName}> {
+
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${klass.simpleName}>? {
+        val connection = connections.getConnection(parentId)
+        val parent = connection?.findByFQN<PolicyManagement>("default-policy-management")
+        return connection?.getObjects(${klass.simpleName}::class.java, parent?.${klass.simpleNameDecapitalized}s)
+    }
+}
+
+</#list>
+
+<#list categories as category>
+class ${category.parentName}Has${category.name}: ObjectRelater<${category.name}> {
+
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${category.name}> =
+        listOf(${category.name})
 }
 
 </#list>

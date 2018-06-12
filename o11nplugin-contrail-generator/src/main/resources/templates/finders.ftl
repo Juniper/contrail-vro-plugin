@@ -7,7 +7,7 @@ import com.vmware.o11n.sdk.modeldriven.PluginContext
 import com.vmware.o11n.sdk.modeldriven.Sid
 import org.springframework.beans.factory.annotation.Autowired
 import net.juniper.contrail.vro.base.ConnectionRepository
-import net.juniper.contrail.vro.config.readUponQuery
+import net.juniper.contrail.vro.config.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.api.* // ktlint-disable no-wildcard-imports
 import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
@@ -54,6 +54,21 @@ class ${relation.childName}Finder
     }
 
     override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${relation.childName}>>? =
+        null
+}
+
+</#list>
+
+<#list categories as category>
+class ${category.name}Finder : ObjectFinder<${category.name}> {
+
+    override fun assignId(obj: ${category.name}, sid: Sid) =
+        sid
+
+    override fun find(pluginContext: PluginContext, s: String, sid: Sid): ${category.name}? =
+        ${category.name}
+
+    override fun query(pluginContext: PluginContext, type: String, query: String): List<FoundObject<${category.name}>>? =
         null
 }
 
