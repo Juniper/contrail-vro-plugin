@@ -60,6 +60,21 @@ class CustomMapping: AbstractMapping() {
            .using(ConnectionFinder::class.java)
            .withIcon("controller.png")
 
+        wrap(GlobalSecurity::class.java)
+            .unconstructible()
+            .andFind()
+            .using(GlobalSecurityFinder::class.java)
+            <#-- Re-use security icon -->
+            .withIcon(findFolderIcon<Security>())
+
+        <#list categories as category>
+        wrap(${category.name}::class.java)
+            .unconstructible()
+            .andFind()
+            .using(${category.name}Finder::class.java)
+            .withIcon(findFolderIcon<${category.name}>())
+        </#list>
+
         <#list findableClasses as klass>
         wrap(${klass.simpleName}::class.java)
           .`as`("${klass.pluginName}")
@@ -95,12 +110,41 @@ class CustomMapping: AbstractMapping() {
             .using(NetworkIpamToSubnet::class.java)
             .`as`("NetworkIpamToSubnet")
 
+        relate(Connection::class.java)
+            .to(GlobalSecurity::class.java)
+            .using(ConnectionHasGlobalSecurity::class.java)
+            .`as`("ConnectionHasGlobalSecurity")
+
         <#list rootClasses as rootClass>
         relate(Connection::class.java)
             .to(${rootClass.simpleName}::class.java)
             .using(ConnectionHas${rootClass.simpleName}::class.java)
             .`as`("ConnectionHas${rootClass.simpleName}")
             .`in`(FolderDef(folderName("${rootClass.folderName}", "ROOT"), findFolderIcon<${rootClass.simpleName}>()))
+        </#list>
+
+        <#list securityClasses as klass>
+        relate(GlobalSecurity::class.java)
+            .to(${klass.simpleName}::class.java)
+            .using(GlobalSecurityHas${klass.simpleName}::class.java)
+            .`as`("GlobalSecurityHas${klass.pluginName}")
+            .`in`(FolderDef(folderName("${klass.folderName}", "GlobalSecurity"), findFolderIcon<${klass.simpleName}>()))
+        </#list>
+
+        <#list categories as category>
+        relate(${category.parentName}::class.java)
+            .to(${category.name}::class.java)
+            .using(${category.parentName}Has${category.name}::class.java)
+            .`as`("${category.parentPluginName}Has${category.name}")
+        </#list>
+
+        <#list categoryRelations as relation>
+        relate(${relation.categoryName}::class.java)
+            .to(${relation.childName}::class.java)
+            <#-- Here we can use normal relater. -->
+            .using(${relation.parentName}Has${relation.childName}::class.java)
+            .`as`("${relation.parentPluginName}Has${relation.childPluginName}")
+            .`in`(FolderDef(folderName("${relation.folderName}", "${relation.parentName}"), findFolderIcon<${relation.childName}>()))
         </#list>
 
         <#list relations as relation>

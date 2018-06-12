@@ -135,6 +135,7 @@ val hiddenRelations = setOf(
     pair<VirtualMachineInterface, VirtualMachine>(),
     pair<ServiceTemplate, ServiceApplianceSet>(),
     pair<Project, PolicyManagement>(),
+    pair<ConfigRoot, PolicyManagement>(),
     pair<Tag, TagType>(),
     pair<FirewallRule, AddressGroup>(),
     pair<FirewallRule, ServiceGroup>(),
@@ -351,6 +352,17 @@ val String.toPluginName get() = when (this) {
     VirtualMachineInterfaceName -> PortName
     else -> this
 }
+
+val String.referenceFolderPrefix get() = when (this) {
+    "Tag", "ApplicationPolicySet" -> "Applied"
+    else -> ""
+}
+
+val Class<*>.referenceFolderPrefix get() =
+    simpleName.referenceFolderPrefix
+
+val Class<*>.referenceFolderName get() =
+    "$referenceFolderPrefix $folderName".trim()
 
 val String.toPluginMethodName get() =
     replace(VirtualMachineInterfaceName, PortName)
