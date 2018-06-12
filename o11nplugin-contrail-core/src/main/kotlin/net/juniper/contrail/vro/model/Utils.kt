@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.model
 
+import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.types.AddressGroup
 import net.juniper.contrail.api.types.AddressType
 import net.juniper.contrail.api.types.AllowedAddressPair
@@ -226,6 +227,9 @@ class Utils {
     fun parseSubnetPrefix(address: String) : String =
         address.trim().split('/')[1]
 
+    private val ApiObjectBase.FQN get() =
+        qualifiedName?.joinToString(":")
+
     fun createAddress(
         type: String,
         cidr: String?,
@@ -237,7 +241,7 @@ class Utils {
         val subnet = if (type == "CIDR" && cidr != null) parseSubnet(cidr) else null
         val networkName = if (type == "Network") {
             if (networkType == "reference") {
-                network?.name
+                network?.FQN
             } else {
                 // "any" or "local"
                 networkType
@@ -245,7 +249,7 @@ class Utils {
         } else null
         val policyName = if (type == "Policy" && policy != null) policy.name else null
         val securityGroupName = if (type == "Security Group") {
-            securityGroup?.qualifiedName?.joinToString(":") ?: "local"
+            securityGroup?.FQN ?: "local"
         } else null
         return AddressType(subnet, networkName, securityGroupName, policyName)
     }
@@ -258,8 +262,8 @@ class Utils {
     ): FirewallRuleEndpointType {
         val anyWorkload = type == EndpointType.AnyWorkload.value
         val tagNames = if (type == EndpointType.Tag.value && tags != null) tags.map { tagToString(it) } else listOf()
-        val virtualNetworkFqn = virtualNetwork?.qualifiedName?.joinToString(":")
-        val addressGroupFqn = addressGroup?.qualifiedName?.joinToString(":")
+        val virtualNetworkFqn = virtualNetwork?.FQN
+        val addressGroupFqn = addressGroup?.FQN
         return FirewallRuleEndpointType(null, virtualNetworkFqn, addressGroupFqn, tagNames, null, anyWorkload)
     }
 
