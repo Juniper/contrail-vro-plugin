@@ -65,6 +65,7 @@ class ConnectionManager
     fun delete(connection: Connection) {
         repository.removeConnection(connection)
         notifier.notifyElementsInvalidate()
+        connection.dispose()
     }
 
     fun connection(id: String?): Connection? {
