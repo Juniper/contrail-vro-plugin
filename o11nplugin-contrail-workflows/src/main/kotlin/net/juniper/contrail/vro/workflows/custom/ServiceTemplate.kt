@@ -18,6 +18,8 @@ import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.supportedInterfaceNames
+import net.juniper.contrail.vro.config.defaultConnection
+import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.util.propertyDescription
 import net.juniper.contrail.vro.workflows.util.relationDescription
 
@@ -34,6 +36,7 @@ internal fun createServiceTemplate(schema: Schema) : WorkflowDefinition {
         parameter(parent, Connection.reference) {
             description = "Parent connection"
             mandatory = true
+            dataBinding = fromAction(defaultConnection, type) {}
         }
         parameter("name", string) {
             description = "Name\nName of service template"

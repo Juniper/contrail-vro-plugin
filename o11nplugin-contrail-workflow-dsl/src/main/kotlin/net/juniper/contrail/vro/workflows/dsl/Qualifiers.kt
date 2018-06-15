@@ -33,6 +33,9 @@ val showInInventoryQualifier =
 fun <T : Any> defaultValueQualifier(type: ParameterType<T>, value: T) =
     staticQualifier(QualifierName.defaultValue, type, value)
 
+fun <T : Any> defaultValueActionQualifier(action: ActionCall, type: ParameterType<T>) =
+    ognlQualifier(QualifierName.defaultValue, type, action.ognl)
+
 fun <T : Any> predefinedAnswersQualifier(type: ParameterType<T>, values: List<T>): ParameterQualifier {
     val simpleType = type.componentType
     return staticQualifier(QualifierName.genericEnumeration, simpleType.array, simpleType.formatList(values))

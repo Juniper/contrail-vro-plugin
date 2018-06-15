@@ -7,6 +7,8 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.vro.config.constants.Configuration
 import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.item
+import net.juniper.contrail.vro.config.defaultConnection
+import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.dsl.inCategory
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
@@ -59,6 +61,7 @@ internal fun deleteConnectionWorkflow() =
             description = "$Connection to delete"
             mandatory = true
             showInInventory = true
+            dataBinding = fromAction(defaultConnection, type) {}
         }
     }.inCategory(Configuration)
 
