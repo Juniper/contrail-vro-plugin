@@ -17,6 +17,7 @@ import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.EndpointType
 import net.juniper.contrail.vro.config.constants.ServiceType
 import net.juniper.contrail.vro.config.constants.rule
+import net.juniper.contrail.vro.config.defaultConnection
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.schema.propertyDescription
 import net.juniper.contrail.vro.schema.simpleTypeConstraints
@@ -27,6 +28,7 @@ import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.workflows.dsl.PresentationParametersBuilder
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
@@ -52,6 +54,7 @@ internal fun createPolicyManagementFirewallRule(schema: Schema): WorkflowDefinit
             parameter(parentConnectionField, Connection.reference) {
                 description = "Contrail connection in which the rule will be created"
                 mandatory = true
+                dataBinding = fromAction(defaultConnection, type) {}
             }
         }
         output(rule, reference<FirewallRule>()) {
