@@ -15,6 +15,10 @@ abstract class ActionSpec extends ScriptSpec {
         engine.addToContext(utilsName)
         engine.addToContext(constantsName)
     }
+
+    def addToContext(String name, Object value) {
+        engine.addToContext(name, value)
+    }
 }
 
 trait ValidationAsserts {

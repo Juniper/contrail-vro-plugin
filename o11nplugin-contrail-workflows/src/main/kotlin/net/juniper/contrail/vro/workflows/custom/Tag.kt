@@ -11,9 +11,11 @@ import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.listTagTypes
+import net.juniper.contrail.vro.config.defaultConnection
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
+import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.util.propertyDescription
@@ -36,6 +38,8 @@ private fun createTag(schema: Schema, global: Boolean): WorkflowDefinition {
         parameter(parent, parentName.reference) {
             description = "Parent ${parentName.allCapitalized}"
             mandatory = true
+            if (parentName == Connection)
+                dataBinding = fromAction(defaultConnection, type) {}
         }
         parameter("typeName", string) {
             description = propertyDescription<Tag>(schema)
