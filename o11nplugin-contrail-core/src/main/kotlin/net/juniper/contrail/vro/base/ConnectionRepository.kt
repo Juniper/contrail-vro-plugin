@@ -66,8 +66,8 @@ class DefaultConnectionRepository
             persister.delete(connection.info)
     }
 
-    override val connections: List<Connection>
-        get() = ArrayList(items.values)
+    override val connections: List<Connection> get() =
+        items.values.toList()
 
     @Throws(IllegalArgumentException::class)
     override fun getConnection(id: Sid): Connection? =
