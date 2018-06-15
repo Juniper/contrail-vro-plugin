@@ -9,7 +9,9 @@ import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.name
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
+import net.juniper.contrail.vro.config.defaultConnection
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 
@@ -25,6 +27,7 @@ internal fun createTagType(): WorkflowDefinition {
         parameter(parent, Connection.reference) {
             description = "Parent connection"
             mandatory = true
+            dataBinding = fromAction(defaultConnection, type) {}
         }
         output(item, reference<TagType>()) {
             description = "Tag Type created in this workflow"
