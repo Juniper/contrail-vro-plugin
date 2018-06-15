@@ -72,4 +72,7 @@ class ConnectionManager
         if (id == null) return null
         return repository.getConnection(Sid.valueOf(id))
     }
+
+    val connections: List<Connection> get() =
+        repository.connections
 }

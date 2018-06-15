@@ -43,6 +43,7 @@ val networkHasNotAllcationMode = "networkHasNotAllocationMode"
 val listElementProperty = "listElementProperty"
 val listTagTypes = "listTagTypes"
 val matchesSecurityScope = "matchesSecurityScope"
+val defaultConnection = "defaultConnection"
 
 val portOfVCVirtualMachine = "portOfVCVirtualMachine"
 val networkOfVCPortGroup = "networkOfVCPortGroup"
