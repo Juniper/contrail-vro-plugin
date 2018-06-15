@@ -97,24 +97,27 @@ internal fun editFirewallRule(schema: Schema): WorkflowDefinition {
 
 private fun PresentationParametersBuilder.firewallRuleParameters(schema: Schema, parentField: String, editing: Boolean) {
     val projectValidationDirectMode = !editing
-    step("Basic attributes") {
+    step("Endpoints") {
+        visibility = WhenNonNull(parentField)
+        endpointParameters(schema, parentField, 1, editing)
+        endpointParameters(schema, parentField, 2, editing)
+    }
+    step("Action") {
         visibility = WhenNonNull(parentField)
         parameter("action", string) {
             description = schema.propertyDescription<ActionListType>("simpleAction")
             additionalQualifiers += schema.simpleTypeConstraints<ActionListType>("simpleAction")
             if (editing) dataBinding = firewallRulePropertyDataBinding("actionList.simpleAction")
         }
+    }
+    step("Direction") {
+        visibility = WhenNonNull(parentField)
         parameter("direction", string) {
             description = "Direction"
             mandatory = true
             additionalQualifiers += schema.simpleTypeConstraints<FirewallRule>("direction")
             if (editing) dataBinding = firewallRulePropertyDataBinding("direction")
         }
-    }
-    step("Endpoints") {
-        visibility = WhenNonNull(parentField)
-        endpointParameters(schema, parentField, 1, editing)
-        endpointParameters(schema, parentField, 2, editing)
     }
     step("Service") {
         visibility = WhenNonNull(parentField)
