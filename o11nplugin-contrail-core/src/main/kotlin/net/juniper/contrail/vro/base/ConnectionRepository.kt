@@ -9,7 +9,6 @@ import net.juniper.contrail.vro.model.Connection
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
-import java.util.ArrayList
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -66,8 +65,8 @@ class DefaultConnectionRepository
             persister.delete(connection.info)
     }
 
-    override val connections: List<Connection>
-        get() = ArrayList(items.values)
+    override val connections: List<Connection> get() =
+        items.values.toList()
 
     @Throws(IllegalArgumentException::class)
     override fun getConnection(id: Sid): Connection? =

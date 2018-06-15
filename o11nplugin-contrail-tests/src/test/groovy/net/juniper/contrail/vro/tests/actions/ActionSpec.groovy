@@ -11,9 +11,17 @@ import static net.juniper.contrail.vro.tests.JsTesterKt.utilsName
 
 abstract class ActionSpec extends ScriptSpec {
 
-    def setup() {
+    // can be overriden by derived specs
+    def additionalSetup() {}
+
+    final def setup() {
         engine.addToContext(utilsName)
         engine.addToContext(constantsName)
+        additionalSetup()
+    }
+
+    def addToContext(String name, Object value) {
+        engine.addToContext(name, value)
     }
 }
 
