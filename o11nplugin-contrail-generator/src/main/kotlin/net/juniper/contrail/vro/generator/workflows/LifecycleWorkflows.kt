@@ -10,6 +10,7 @@ import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.allLowerCase
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
+import net.juniper.contrail.vro.config.defaultConnection
 import net.juniper.contrail.vro.config.defaultParentType
 import net.juniper.contrail.vro.config.hasRootParent
 import net.juniper.contrail.vro.config.isApiTypeClass
@@ -39,6 +40,7 @@ import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.schema.createWorkflowDescription
 import net.juniper.contrail.vro.schema.propertyDescription
 import net.juniper.contrail.vro.schema.relationDescription
+import net.juniper.contrail.vro.workflows.dsl.fromAction
 
 fun createWorkflows(clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema): List<WorkflowDefinition> {
     val parentsInModel = clazz.numberOfParentsInModel
@@ -73,7 +75,8 @@ fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass, parentsInModel:
         parameter(parent, parentName.reference) {
             description = "Parent ${parentName.allCapitalized}"
             mandatory = true
-
+            if (parentName == Connection)
+                dataBinding = fromAction(defaultConnection, type) {}
         }
 
         output(item, clazz.reference) {
