@@ -54,7 +54,8 @@ fun createWorkflows(clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema)
 fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass, parentsInModel: Int, hasRootParents: Boolean, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
 
     val nonRootParents = parentsInModel > 0
-    val addInParent = (hasRootParents || parentsInModel > 1) && ! parentClazz.isPolicyManagement
+    val addInParent = (hasRootParents || parentsInModel > 1) &&
+        ! parentClazz.isPolicyManagement && ! parentClazz.isDefaultRoot
     val addGlobal = (parentClazz.isDefaultRoot && nonRootParents) || parentClazz.isPolicyManagement
 
     val workflowBaseName = "Create " + if (addGlobal) "global " else ""
