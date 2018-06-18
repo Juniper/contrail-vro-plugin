@@ -162,6 +162,15 @@ val readUponQuery = setOf(
     the<FirewallRule>()
 )
 
+val validateSecurityScope = setOf(
+    the<ApplicationPolicySet>(),
+    the<FirewallPolicy>(),
+    the<FirewallRule>(),
+    the<AddressGroup>(),
+    the<ServiceGroup>(),
+    the<Tag>()
+)
+
 private inline fun <reified T> the() =
     T::class.java.simpleName
 
@@ -233,6 +242,9 @@ fun ObjectClass.hasCustomAddReferenceWorkflow(child: Class<*>) =
 
 fun ObjectClass.hasCustomRemoveReferenceWorkflow(child: Class<*>) =
     customRemoveReference.containsUnordered(simpleName, child.simpleName)
+
+val ObjectClass.needsSecurityScopeValidation get() =
+    validateSecurityScope.contains(simpleName)
 
 infix fun String.isDisplayableChildOf(parent: String) =
     this != parent &&
