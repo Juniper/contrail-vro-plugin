@@ -182,5 +182,8 @@ val String?.CDATA
     else -> this.CDATA
 }
 
+val String.withoutCDATA get() =
+    if (isCDATA) substring(9, length - 3) else this
+
 val String.bold get() =
     "<b>$this</b>"
