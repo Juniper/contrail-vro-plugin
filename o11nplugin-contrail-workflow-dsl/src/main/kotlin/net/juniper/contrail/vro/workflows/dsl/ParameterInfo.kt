@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.dsl
 
+import net.juniper.contrail.vro.config.withoutCDATA
 import net.juniper.contrail.vro.workflows.model.Bind
 import net.juniper.contrail.vro.workflows.model.Parameter
 import net.juniper.contrail.vro.workflows.model.ParameterQualifier
@@ -11,6 +12,7 @@ import net.juniper.contrail.vro.workflows.model.ParameterSet
 import net.juniper.contrail.vro.workflows.model.ParameterType
 import net.juniper.contrail.vro.workflows.model.PresentationParameter
 import net.juniper.contrail.vro.workflows.model.Reference
+import net.juniper.contrail.vro.workflows.model.toParameterType
 
 class ParameterInfo(
     val name: String,
@@ -50,3 +52,8 @@ val List<ParameterInfo>.asReferences get() =
         .map { it.type as Reference }
         .distinct()
         .toList()
+
+fun Parameter.toParameterInfo(qualifiers: List<ParameterQualifier> = emptyList()): ParameterInfo {
+    val parameterType = type.toParameterType
+    return ParameterInfo(name, parameterType, qualifiers, description?.withoutCDATA)
+}

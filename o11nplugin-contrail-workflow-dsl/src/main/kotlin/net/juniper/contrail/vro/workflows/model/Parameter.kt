@@ -145,3 +145,30 @@ val Class<*>.parameterType get() = when (this) {
     java.util.Date::class.java -> date
     else -> reference
 }
+
+val String.toParameterType: ParameterType<Any> get() = when (this) {
+    string.name -> string
+    number.name -> number
+    boolean.name -> boolean
+    SecureString.name -> SecureString
+    Regexp.name -> Regexp
+    date.name -> date
+    void.name -> void
+    any.name -> any
+    else -> when {
+        startsWith("CompositeType") -> {
+            val params = removePrefix("CompositeType(").removeSuffix(")").split(",").map { it.split(":") }
+            val name1 = params[0][0]
+            val type1 = params[0][1].toParameterType
+            val name2 = params[1][0]
+            val type2 = params[1][1].toParameterType
+            pair(name1, type1, name2, type2)
+        }
+        startsWith("Array") ->
+            array(removePrefix("Array/").toParameterType)
+        else -> {
+            val parts = split(":")
+            Reference(parts[1], parts[0])
+        }
+    }
+}
