@@ -9,6 +9,11 @@ import net.juniper.contrail.vro.schema.Constraint
 import java.util.Date
 
 @WorkflowBuilder
+class ComplexWorkflowBuilder(
+
+) :
+
+@WorkflowBuilder
 class PresentationParametersBuilder(
     private val steps: MutableList<PresentationStep>,
     parameters: MutableList<ParameterInfo>,

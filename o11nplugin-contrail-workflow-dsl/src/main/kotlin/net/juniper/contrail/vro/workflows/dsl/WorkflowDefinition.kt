@@ -73,7 +73,7 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
     val inBinding = Binding(allParameters.asBinds)
 
     val script = Script(scriptBody)
-    val scriptItem = scriptWorkflowItem(script, inBinding, outBinding)
+    val scriptItem = scriptWorkflowItem(script, inBinding, outBinding, 1, 0)
     val workflowItems = listOf(END, scriptItem)
 
     return copy(
@@ -86,3 +86,8 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
     )
 }
 
+typealias ComplexParameterDefinition = ComplexWorkflowBuilder.() -> Unit
+
+fun ComplexWorkflowDefinition(setup: ComplexParameterDefinition): WorkflowDefinition {
+
+}
