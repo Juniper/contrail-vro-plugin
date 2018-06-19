@@ -28,7 +28,8 @@ class Workflow(
     input: ParameterSet = ParameterSet(),
     output: ParameterSet = ParameterSet(),
     attributes: List<Attribute> = emptyList(),
-    position: Position = Position(50.0f, 10.0f)
+    position: Position = Position(50.0f, 10.0f),
+    rootItemId: Int = workflowItems.size - 1
 ) : Element {
     // this constructor is only necessary to satisfy marshaller
     constructor(): this("Workflow", "0", "0.0.0")
@@ -42,7 +43,7 @@ class Workflow(
     }.CDATA
 
     @XmlAttribute(name = "root-name")
-    val rootName: String = "item${workflowItems.size - 1}"
+    val rootName: String = "item$rootItemId"
 
     @XmlAttribute(name = "id")
     override val id: String = id

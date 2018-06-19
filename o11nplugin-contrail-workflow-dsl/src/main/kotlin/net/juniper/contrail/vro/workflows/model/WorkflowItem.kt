@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.workflows.model
 
 import net.juniper.contrail.vro.config.CDATA
+import net.juniper.contrail.vro.config.constants.item
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -14,7 +15,7 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "workflow-itemType",
-    propOrder = ["displayName", "script", "inBinding", "outBinding", "position"]
+    propOrder = ["displayName", "script", "inBinding", "outBinding", "conditions", "presentation", "position"]
 )
 class WorkflowItem(
     id: Int,
@@ -23,10 +24,14 @@ class WorkflowItem(
     displayName: String? = null,
     script: Script? = null,
     inBinding: Binding? = null,
-    outBinding: Binding? = null
+    outBinding: Binding? = null,
+    outItemId: Int? = null,
+    conditions: List<Condition>? = null,
+    presentation: Presentation? = null,
+    linkedWorkflowId: String? = null
 ) {
     @XmlAttribute(name = "name")
-    val name: String = "item$id"
+    val name: String = "$item$id"
 
     @XmlAttribute(name = "type")
     val type: String = type.name
@@ -38,7 +43,7 @@ class WorkflowItem(
     val endMode: String? = type.endMode
 
     @XmlAttribute(name = "out-name")
-    val outName: String? = if (id == 0) null else "item${id - 1}"
+    val outName: String? = outItemId?.let { "$item$it" }
 
     @XmlElement(name = "script")
     val script: Script? = script
@@ -51,9 +56,21 @@ class WorkflowItem(
 
     @XmlElement(name = "out-binding")
     val outBinding: Binding? = outBinding
+
+    @XmlElement(name = "condition")
+    val conditions: List<Condition>? = conditions
+
+    @XmlElement(name = "presentation")
+    val presentation: Presentation? = presentation
+
+    @XmlAttribute(name = "linked-workflow-id")
+    val linkedWorkflowId: String? = linkedWorkflowId
 }
 
 enum class WorkflowItemType(val endMode: String?) {
     task(null),
+    input(null),
+    link(null), // link to a workflow that will be invoked
+    switch(null),
     end("0");
 }

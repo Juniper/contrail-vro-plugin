@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.workflows.model
 
 import net.juniper.contrail.vro.config.CDATA
+import net.juniper.contrail.vro.config.withoutCDATA
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -86,10 +87,10 @@ class PresentationStep private constructor(
     propOrder = ["title", "description", "qualifiers", "presentationParameters"]
 )
 class PresentationGroup(
-        title: String,
-        presentationParameters: List<PresentationParameter>,
-        description: String?,
-        qualifiers: List<ParameterQualifier>? = null
+    title: String,
+    presentationParameters: List<PresentationParameter>,
+    description: String?,
+    qualifiers: List<ParameterQualifier>? = null
 ) {
     @XmlElement
     val title: String = title
@@ -126,4 +127,17 @@ class PresentationParameter(
     val parameterQualifiers: List<ParameterQualifier> =
         qualifiers?.toMutableList() ?: mutableListOf()
 }
+
+fun Presentation.filterNot(names: List<String>): Presentation =
+    Presentation(presentationParameters.filterNot { names.contains(it.name) }, presentationSteps.map { it.filterNot(names) }, description?.withoutCDATA)
+
+fun PresentationStep.filterNot(names: List<String>): PresentationStep =
+    if (presentationParameters == null) {
+        PresentationStep.fromGroups(title, presentationGroups?.map { it.filterNot(names) } ?: listOf(), description?.withoutCDATA, qualifiers)
+    } else {
+        PresentationStep.fromParameters(title, presentationParameters.filterNot { names.contains(it.name) }, description?.withoutCDATA, qualifiers)
+    }
+
+fun PresentationGroup.filterNot(names: List<String>): PresentationGroup =
+    PresentationGroup(title, presentationParameters.filterNot { names.contains(it.name) }, description?.withoutCDATA, qualifiers)
 
