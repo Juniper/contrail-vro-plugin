@@ -8,6 +8,31 @@ import net.juniper.contrail.vro.workflows.model.* // ktlint-disable no-wildcard-
 import net.juniper.contrail.vro.schema.Constraint
 import java.util.Date
 
+class Choice(val name: String, val targetId: Int)
+
+@WorkflowBuilder
+class ChoiceAggregator(
+    val choices: MutableList<Choice>
+) {
+    fun option(name: String, targetId: Int) {
+        choices.add(Choice(name, targetId))
+    }
+}
+
+@WorkflowBuilder
+class BindAggregator(
+    val inBinds: MutableMap<String, String>,
+    val outBinds: MutableMap<String, String>
+) {
+    fun inputBind(name: String, attributeName: String) {
+        inBinds[name] = attributeName
+    }
+
+    fun outputBind(name: String, attributeName: String) {
+        outBinds[name] = attributeName
+    }
+}
+
 @WorkflowBuilder
 class PresentationParametersBuilder(
     private val steps: MutableList<PresentationStep>,
