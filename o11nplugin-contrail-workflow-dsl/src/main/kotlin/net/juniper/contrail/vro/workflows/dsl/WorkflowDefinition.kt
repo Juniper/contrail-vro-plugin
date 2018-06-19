@@ -25,7 +25,8 @@ data class WorkflowDefinition(
     val input: ParameterSet = ParameterSet(),
     val output: ParameterSet = ParameterSet(),
     val attributes: List<Attribute> = emptyList(),
-    val position: Position = defaultWorkflowPosition
+    val position: Position = defaultWorkflowPosition,
+    val rootId: Int = workflowItems.size - 1
 ) {
     fun createWorkflow(packageName: String, version: String): Workflow {
         if (workflowItems.isEmpty())
@@ -43,7 +44,8 @@ data class WorkflowDefinition(
         input = input,
         output = output,
         attributes = attributes,
-        position = position
+        position = position,
+        rootItemId = rootId
     )
 }
 
@@ -73,7 +75,7 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
     val inBinding = Binding(allParameters.asBinds)
 
     val script = Script(scriptBody)
-    val scriptItem = scriptWorkflowItem(script, inBinding, outBinding)
+    val scriptItem = scriptWorkflowItem(script, inBinding, outBinding, 1, 0)
     val workflowItems = listOf(END, scriptItem)
 
     return copy(
@@ -86,3 +88,30 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
     )
 }
 
+typealias ComplexParameterDefinition = ComplexWorkflowBuilder.() -> Unit
+
+fun WorkflowDefinition.withComplexParameters(rootItemId: Int, workflowDefinitions: List<WorkflowDefinition>, setup: ComplexParameterDefinition): WorkflowDefinition {
+    if (!workflowItems.isEmpty())
+        throw IllegalStateException("This workflow is already set up")
+
+    val items = mutableListOf<WorkflowItem>()
+    val attributes = mutableListOf<Attribute>()
+
+    val builder = ComplexWorkflowBuilder(items, attributes, workflowDefinitions).apply(setup)
+    items.add(END)
+
+    // TODO: remove first user interaction with workflow input?
+
+    val initialPresentation = Presentation()
+    val initialInput = listOf<ParameterInfo>()
+
+    return copy(
+        presentation = initialPresentation,
+        workflowItems = items,
+        references = listOf(),
+        input = initialInput.asParameterSet,
+        output = listOf<ParameterInfo>().asParameterSet,
+        attributes = attributes,
+        rootId = rootItemId
+    ).inCategory("Complex Examples")
+}
