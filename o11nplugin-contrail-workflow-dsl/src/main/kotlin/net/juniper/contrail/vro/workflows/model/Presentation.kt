@@ -5,6 +5,8 @@
 package net.juniper.contrail.vro.workflows.model
 
 import net.juniper.contrail.vro.config.CDATA
+import net.juniper.contrail.vro.config.withoutCDATA
+import net.juniper.contrail.vro.workflows.dsl.bindDataTo
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -86,10 +88,10 @@ class PresentationStep private constructor(
     propOrder = ["title", "description", "qualifiers", "presentationParameters"]
 )
 class PresentationGroup(
-        title: String,
-        presentationParameters: List<PresentationParameter>,
-        description: String?,
-        qualifiers: List<ParameterQualifier>? = null
+    title: String,
+    presentationParameters: List<PresentationParameter>,
+    description: String?,
+    qualifiers: List<ParameterQualifier>? = null
 ) {
     @XmlElement
     val title: String = title
@@ -127,3 +129,21 @@ class PresentationParameter(
         qualifiers?.toMutableList() ?: mutableListOf()
 }
 
+// We should not completely remove the indicated parameters; They should instead be bound to their given attributes. (And possibly hidden? [MAYBE GIVE USER THE OPTION])
+fun Presentation.bindAttributes(names: Map<String, String>): Presentation =
+    Presentation(presentationParameters.map { it.bindAttributes(names) }, presentationSteps.map { it.bindAttributes(names) }, description?.withoutCDATA)
+
+fun PresentationStep.bindAttributes(names: Map<String, String>): PresentationStep =
+    if (presentationParameters == null) {
+        PresentationStep.fromGroups(title, presentationGroups?.map { it.bindAttributes(names) } ?: listOf(), description?.withoutCDATA, qualifiers)
+    } else {
+        PresentationStep.fromParameters(title, presentationParameters.map { it.bindAttributes(names) }, description?.withoutCDATA, qualifiers)
+    }
+
+fun PresentationGroup.bindAttributes(names: Map<String, String>): PresentationGroup =
+    PresentationGroup(title, presentationParameters.map { it.bindAttributes(names) }, description?.withoutCDATA, qualifiers)
+
+fun PresentationParameter.bindAttributes(names: Map<String, String>): PresentationParameter {
+    val newName = names[name] ?: return this
+    return PresentationParameter(name, description?.withoutCDATA, parameterQualifiers + bindDataTo(newName, any))
+}

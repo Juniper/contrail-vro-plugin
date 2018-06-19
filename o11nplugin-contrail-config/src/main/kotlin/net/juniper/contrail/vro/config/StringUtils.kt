@@ -182,5 +182,8 @@ val String?.CDATA
     else -> this.CDATA
 }
 
+val String.withoutCDATA get() =
+    if (isCDATA) removePrefix("<![CDATA[").removeSuffix("]]>") else this
+
 val String.bold get() =
     "<b>$this</b>"
