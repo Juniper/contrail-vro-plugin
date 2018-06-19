@@ -25,7 +25,8 @@ data class WorkflowDefinition(
     val input: ParameterSet = ParameterSet(),
     val output: ParameterSet = ParameterSet(),
     val attributes: List<Attribute> = emptyList(),
-    val position: Position = defaultWorkflowPosition
+    val position: Position = defaultWorkflowPosition,
+    val rootId: Int = 0
 ) {
     fun createWorkflow(packageName: String, version: String): Workflow {
         if (workflowItems.isEmpty())
@@ -43,7 +44,8 @@ data class WorkflowDefinition(
         input = input,
         output = output,
         attributes = attributes,
-        position = position
+        position = position,
+        rootItemId = rootId
     )
 }
 
@@ -73,8 +75,9 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
     val inBinding = Binding(allParameters.asBinds)
 
     val script = Script(scriptBody)
-    val scriptItem = scriptWorkflowItem(script, inBinding, outBinding)
+    val scriptItem = scriptWorkflowItem(script, inBinding, outBinding, 1, 0)
     val workflowItems = listOf(END, scriptItem)
+    val startingItemId = workflowItems.size - 1
 
     return copy(
         presentation = presentation,
@@ -82,7 +85,34 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
         references = allParameters.asReferences,
         input = allParameters.asParameterSet,
         output = outputParameters.asParameterSet,
-        attributes = attributes
+        attributes = attributes,
+        rootId = startingItemId
     )
 }
 
+typealias ComplexParameterDefinition = ComplexWorkflowBuilder.() -> Unit
+
+fun WorkflowDefinition.withComplexParameters(rootItemId: Int, workflowDefinitions: List<WorkflowDefinition>, setup: ComplexParameterDefinition): WorkflowDefinition {
+    if (!workflowItems.isEmpty())
+        throw IllegalStateException("This workflow is already set up")
+
+    val builder = ComplexWorkflowBuilder(workflowDefinitions).apply(setup)
+    val items = builder.items
+    val attributes = builder.attributes
+
+    items.add(END)
+
+    // TODO: first user interaction can be replaced with workflow input
+    val initialPresentation = Presentation()
+    val initialInput = listOf<ParameterInfo>()
+
+    return copy(
+        presentation = initialPresentation,
+        workflowItems = items,
+        references = listOf(),
+        input = initialInput.asParameterSet,
+        output = listOf<ParameterInfo>().asParameterSet,
+        attributes = attributes,
+        rootId = rootItemId
+    ).inCategory("Complex Examples")
+}
