@@ -5,7 +5,9 @@
 package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.vro.config.classesIn
+import net.juniper.contrail.vro.config.isA
 import net.juniper.contrail.vro.config.isStatic
+import net.juniper.contrail.vro.config.parameterClass
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import java.lang.reflect.Method
@@ -28,10 +30,15 @@ object ScriptLoader {
 }
 
 object WorkflowLoader {
-    fun load(schema: Schema): Sequence<WorkflowDefinition> =
+    fun loadSimple(schema: Schema): Sequence<WorkflowDefinition> =
+        workflowClasses.flatMap { it.simpleWorkflowDefinitions(schema) }
+
+    fun loadComplex(definitions: List<WorkflowDefinition>, schema: Schema): Sequence<WorkflowDefinition> =
+        workflowClasses.flatMap { it.complexWorkflowDefinitions(definitions, schema) }
+
+    private val workflowClasses =
         classesIn(WorkflowLoader::class.java.`package`.name)
         .filter { it.hasWorkflowDefinitions }
-        .flatMap { it.workflowDefinitions(schema) }
 }
 
 object ActionLoader {
@@ -47,19 +54,26 @@ private val Class<*>.hasWorkflowDefinitions get() =
 private val Class<*>.hasActionDefinitions get() =
     declaredMethods.any { it.definesAction }
 
-private fun Class<*>.workflowDefinitions(schema: Schema) =
+private fun Class<*>.simpleWorkflowDefinitions(schema: Schema) =
     declaredMethods.asSequence()
-        .filter { it.definesWorkflow }
+        .filter { it.definesSimpleWorkflow }
         .map { it.createWorkflowDefinition(schema) }
+
+private fun Class<*>.complexWorkflowDefinitions(definitions: List<WorkflowDefinition>, schema: Schema) =
+    declaredMethods.asSequence()
+        .filter { it.definesComplexWorkflow }
+        .map { it.createWorkflowDefinition(schema, definitions) }
 
 private fun Class<*>.actionDefinitions() =
     declaredMethods.asSequence()
         .filter { it.definesAction }
         .map { it.createActionDefinition() }
 
-private fun Method.createWorkflowDefinition(schema: Schema): WorkflowDefinition = when {
+private fun Method.createWorkflowDefinition(schema: Schema, definitions: List<WorkflowDefinition> = listOf()) = when {
     takesNoParameters -> invoke(declaringClass)
     takesOnlySchema -> invoke(declaringClass, schema)
+    takesOnlyWorkflowDefinitions -> invoke(declaringClass, definitions)
+    takesWorkflowDefinitionsAndSchema -> invoke(declaringClass, definitions, schema)
     else -> throw IllegalArgumentException("Cannot create workflow definition using method '$this' of class '$declaringClass'.")
 } as WorkflowDefinition
 
@@ -69,16 +83,37 @@ private fun Method.createActionDefinition(): ActionDefinition = when {
 } as ActionDefinition
 
 private val Method.definesWorkflow get() =
-    isStatic && returnType == WorkflowDefinition::class.java && takesWorkflowDefinitionParameters
+    isStatic && returnType == WorkflowDefinition::class.java
 
-private val Method.takesWorkflowDefinitionParameters get() =
+private val Method.definesSimpleWorkflow get() =
+    definesWorkflow && takesSimpleWorkflowDefinitionParameters
+
+private val Method.definesComplexWorkflow get() =
+    definesWorkflow && takesComplexWorkflowDefinitionParameters
+
+private val Method.takesSimpleWorkflowDefinitionParameters get() =
     takesNoParameters || takesOnlySchema
+
+private val Method.takesComplexWorkflowDefinitionParameters get() =
+    takesOnlyWorkflowDefinitions || takesWorkflowDefinitionsAndSchema
 
 private val Method.takesNoParameters get() =
     parameterCount == 0
 
 private val Method.takesOnlySchema get() =
-    parameterCount == 1 && parameters[0].type == Schema::class.java
+    parameterCount == 1 && hasSchemaParameter
+
+private val Method.takesOnlyWorkflowDefinitions get() =
+    parameterCount == 1 && hasWorkflowDefinitionsParameter
+
+private val Method.takesWorkflowDefinitionsAndSchema get() =
+    parameterCount == 2 && hasWorkflowDefinitionsParameter && hasSchemaParameter
+
+private val Method.hasSchemaParameter get() =
+    parameters.any { it.type == Schema::class.java }
+
+private val Method.hasWorkflowDefinitionsParameter get() =
+    parameters.any { it.type.isA<List<*>>() && it.parameterizedType.parameterClass.isA<WorkflowDefinition>() }
 
 private val Method.definesAction get() =
     isStatic && returnType == ActionDefinition::class.java && takesNoParameters
