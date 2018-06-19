@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.workflows.model
 
 import net.juniper.contrail.vro.config.CDATA
+import net.juniper.contrail.vro.workflows.dsl.workflowEndItemId
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -28,7 +29,8 @@ class Workflow(
     input: ParameterSet = ParameterSet(),
     output: ParameterSet = ParameterSet(),
     attributes: List<Attribute> = emptyList(),
-    position: Position = Position(50.0f, 10.0f)
+    position: Position = Position(50.0f, 10.0f),
+    rootItemId: Int = workflowEndItemId
 ) : Element {
     // this constructor is only necessary to satisfy marshaller
     constructor(): this("Workflow", "0", "0.0.0")
@@ -42,7 +44,7 @@ class Workflow(
     }.CDATA
 
     @XmlAttribute(name = "root-name")
-    val rootName: String = "item${workflowItems.size - 1}"
+    val rootName: String = "item$rootItemId"
 
     @XmlAttribute(name = "id")
     override val id: String = id
