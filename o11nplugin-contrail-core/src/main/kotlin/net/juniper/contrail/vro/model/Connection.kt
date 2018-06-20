@@ -124,6 +124,9 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
         connector.getObjects(clazz, references ?: return@safe null) as List<T>?
     }
 
+    fun dispose() =
+        connector.dispose()
+
     private fun <T> safe(unsafeOperation: () -> T?): T? {
         return try {
             unsafeOperation()
