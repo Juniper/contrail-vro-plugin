@@ -98,6 +98,7 @@ abstract class WorkflowSpec extends ScriptSpec {
     }
 
     private final static String setupScript = buildWrapperDefinition(
+        "ConfigRoot",
         "ActionListType",
         "AllocationPoolType",
         "FloatingIp",
@@ -121,7 +122,9 @@ abstract class WorkflowSpec extends ScriptSpec {
         "VnSubnetsType",
         "SubnetListType",
         "FirewallServiceGroupType",
-        "FirewallServiceType"
+        "FirewallServiceType",
+        "Tag",
+        "TagType"
     )
 
     private static String buildWrapperDefinition(String... types) {
