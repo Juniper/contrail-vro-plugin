@@ -22,6 +22,7 @@ import net.juniper.contrail.vro.gen.ServiceHealthCheck_Wrapper
 import net.juniper.contrail.vro.gen.ServiceInstance_Wrapper
 import net.juniper.contrail.vro.gen.ServiceTemplate_Wrapper
 import net.juniper.contrail.vro.gen.SubnetType_Wrapper
+import net.juniper.contrail.vro.gen.TagType_Wrapper
 import net.juniper.contrail.vro.gen.Tag_Wrapper
 import net.juniper.contrail.vro.gen.Utils_Wrapper
 import net.juniper.contrail.vro.gen.VirtualMachineInterfacePropertiesType_Wrapper
@@ -170,6 +171,13 @@ class Dependencies(private val connection: Connection_Wrapper, private val utils
         uuid = randomStringUuid()
         name = "someGlobalTag$uuid"
         setParentConfigRoot(configRoot)
+        setParentConnection(this@Dependencies.connection)
+    }
+
+    @JvmOverloads
+    fun someTagType() = TagType_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someTag$uuid"
         setParentConnection(this@Dependencies.connection)
     }
 
