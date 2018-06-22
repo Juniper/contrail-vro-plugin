@@ -14,7 +14,7 @@
     <repo.url>http://${repo.host}:8280/vco-repo</repo.url>
     <spring.version>4.3.7.RELEASE</spring.version>
     <installation.mode>version</installation.mode>
-    <kotlin.version>1.2.41</kotlin.version>
+    <kotlin.version>1.2.50</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     <workflow.package>net.juniper.contrail</workflow.package>
     <!-- Sandbox root is defined relative to submodules -->
