@@ -20,7 +20,7 @@ class ConnectionHas${rootClass.simpleName}
 
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${rootClass.simpleName}>? =
         connections.getConnection(parentId)?.run {
-            list<${rootClass.simpleName}>()?.filter(rootObject)?.onEach { read(it) }
+            list<${rootClass.simpleName}>()?.onEach { read(it) }?.filter(rootObject)
         }
 }
 
