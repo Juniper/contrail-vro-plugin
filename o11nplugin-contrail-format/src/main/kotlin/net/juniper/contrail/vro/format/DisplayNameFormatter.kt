@@ -10,6 +10,7 @@ import net.juniper.contrail.api.types.FloatingIp
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.QuotaType
 import net.juniper.contrail.api.types.Subnet
+import net.juniper.contrail.api.types.Tag
 import net.juniper.contrail.vro.format.PropertyFormatter.format
 
 /**
@@ -32,6 +33,9 @@ object DisplayNameFormatter {
     fun format(obj: QuotaType): String? =
         "Quotas"
 
+    fun format(obj: Tag): String? =
+        if (obj.parentType == "project") "${obj.parentName}: ${obj.name}" else "global: ${obj.name}"
+
     fun format(obj: FirewallRule): String? {
         // `obj.parent?.name` returns null, so we use `obj.qualifiedName.dropLast(1).last()` to get the parent name.
         val parentName = obj.parentName.let { if (it == "default-policy-management") "global" else it }
@@ -43,6 +47,7 @@ object DisplayNameFormatter {
         return "$parentName: $simpleAction $service  EP1: $endpoint1  $direction  EP2: $endpoint2"
     }
 
-    private val FirewallRule.parentName get() =
+    private val ApiObjectBase.parentName get() =
         qualifiedName.dropLast(1).last()
+
 }
