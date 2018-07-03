@@ -8,6 +8,7 @@ import net.juniper.contrail.vro.model.constants
 import net.juniper.contrail.vro.model.utils
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.model.Action
+import net.juniper.contrail.vro.workflows.model.WorkflowItemType
 import javax.script.Invocable
 import javax.script.ScriptContext
 import javax.script.ScriptEngine
@@ -84,9 +85,8 @@ fun WorkflowDefinition.provisionWorkflowFunction(name: String) : String =
     """ var $name = function(${input.parameters.joinToString ( ", " ) { it.name }}) {
         $scriptString};"""
 
-// workflowItem containing the script should be at index 1
 val WorkflowDefinition.scriptString: String? get() =
-    workflowItems.getOrNull(1)?.script?.rawString ?:
+    workflowItems.find { it.type == WorkflowItemType.task.name }?.script?.rawString ?:
     throw IllegalStateException("No script found in workflow! $displayName")
 
 fun String.getValue() : Any? =
