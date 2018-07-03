@@ -14,6 +14,9 @@ import net.juniper.contrail.vro.workflows.model.Reference
 import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.Workflow
 import net.juniper.contrail.vro.workflows.model.WorkflowItem
+import net.juniper.contrail.vro.workflows.model.WorkflowItemDefinition
+import net.juniper.contrail.vro.workflows.model.WorkflowItemType
+import net.juniper.contrail.vro.workflows.model.asWorkflowItem
 import net.juniper.contrail.vro.workflows.util.generateID
 
 data class WorkflowDefinition(
@@ -25,7 +28,7 @@ data class WorkflowDefinition(
     val input: ParameterSet = ParameterSet(),
     val output: ParameterSet = ParameterSet(),
     val attributes: List<Attribute> = emptyList(),
-    val position: Position = defaultWorkflowPosition,
+    val position: Position = defaultPosition,
     val rootId: Int = 0
 ) {
     fun createWorkflow(packageName: String, version: String): Workflow {
@@ -55,6 +58,49 @@ fun workflow(name: String) =
 fun WorkflowDefinition.inCategory(category: String) =
     copy(category = category)
 
+fun fixItemsPositions(items: List<WorkflowItemDefinition>, horizontalTranslation: Int, verticalTranslation: Int): List<WorkflowItemDefinition> {
+    return items.mapIndexed { idx, it ->
+        WorkflowItemDefinition(
+            it.id,
+            it.type,
+            generateNewPosition(idx, defaultX, defaultY, horizontalTranslation, verticalTranslation, it.type),
+            it.displayName,
+            it.script,
+            it.inBinding,
+            it.outBinding,
+            it.outItemId,
+            it.conditions,
+            it.presentation,
+            it.linkedWorkflowId
+        )
+    }
+}
+
+fun generateNewPosition(idx: Int, defaultX: Float, defaultY: Float, horizontalTranslation: Int, verticalTranslation: Int, type: WorkflowItemType): Position {
+    val endHorizontalTranslation = 80.0f
+    val taskVerticalTranslation = 10.0f
+    val neededTranslations = idx + 1
+    val baseX = defaultX + (neededTranslations * horizontalTranslation)
+
+    val newX = when (type) {
+        WorkflowItemType.end -> baseX + endHorizontalTranslation
+        else -> baseX
+    }
+
+    val newY = when (type) {
+        WorkflowItemType.end -> defaultY
+        WorkflowItemType.task -> defaultY + taskVerticalTranslation
+        else -> {
+            if (idx % 2 == 0)
+                defaultY + verticalTranslation
+            else
+                defaultY + (verticalTranslation * -1)
+        }
+    }
+
+    return Position(newX, newY)
+}
+
 typealias ParameterDefinition = PresentationParametersBuilder.() -> Unit
 
 fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition): WorkflowDefinition {
@@ -77,7 +123,14 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
     val script = Script(scriptBody)
     val scriptItemId = 1
     val scriptItem = scriptWorkflowItem(scriptItemId, script, inBinding, outBinding, workflowEndItemId)
-    val workflowItems = listOf(END, scriptItem)
+    val workflowItemsDefinitions = listOf(scriptItem, END)
+
+    // vertical translation is 0 because we have only 3 items
+    val horizontalTranslation = 100
+    val verticalTranslation = 0
+
+    val fixedPositionItems = fixItemsPositions(workflowItemsDefinitions, horizontalTranslation, verticalTranslation)
+    val workflowItems = fixedPositionItems.map { it.asWorkflowItem() }
 
     return copy(
         presentation = presentation,
@@ -104,9 +157,14 @@ fun WorkflowDefinition.withComplexParameters(rootItemId: Int, workflowDefinition
     val initialPresentation = Presentation()
     val initialInput = listOf<ParameterInfo>()
 
+    val horizontalTranslation = 75
+    val verticalTranslation = 70
+    val fixedPositionItems = fixItemsPositions(items, horizontalTranslation, verticalTranslation)
+    val workflowItems = fixedPositionItems.map { it.asWorkflowItem() }
+
     return copy(
         presentation = initialPresentation,
-        workflowItems = items,
+        workflowItems = workflowItems,
         references = listOf(),
         input = initialInput.asParameterSet,
         output = listOf<ParameterInfo>().asParameterSet,

@@ -12,19 +12,18 @@ import net.juniper.contrail.vro.workflows.model.DefaultCondition
 import net.juniper.contrail.vro.workflows.model.EqualsCondition
 import net.juniper.contrail.vro.workflows.model.Parameter
 import net.juniper.contrail.vro.workflows.model.ParameterType
-import net.juniper.contrail.vro.workflows.model.WorkflowItem
+import net.juniper.contrail.vro.workflows.model.WorkflowItemDefinition
 import net.juniper.contrail.vro.workflows.model.bindAttributes
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.model.toFullItemId
 import net.juniper.contrail.vro.workflows.util.generateID
 
-// TODO: POSITIONS (right now all objects are stacked on top of one another)
 // TODO: Attributes input (set values of global attributes without invoking any workflow)
 // TODO: Output parameters (I see no way to do this other than dummy script object with relevant bindings)
 @WorkflowBuilder
 class ComplexWorkflowBuilder(
     private val workflowDefinitions: List<WorkflowDefinition>,
-    val items: MutableList<WorkflowItem> = mutableListOf(),
+    val items: MutableList<WorkflowItemDefinition> = mutableListOf(),
     val attributes: MutableList<Attribute> = mutableListOf()
 ) {
     private var baseFreeId = 1000000

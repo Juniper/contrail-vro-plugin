@@ -8,9 +8,9 @@ import net.juniper.contrail.vro.workflows.model.Binding
 import net.juniper.contrail.vro.workflows.model.Condition
 import net.juniper.contrail.vro.workflows.model.Position
 import net.juniper.contrail.vro.workflows.model.Presentation
-import net.juniper.contrail.vro.workflows.model.WorkflowItem
 import net.juniper.contrail.vro.workflows.model.WorkflowItemType
 import net.juniper.contrail.vro.workflows.model.Script
+import net.juniper.contrail.vro.workflows.model.WorkflowItemDefinition
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.generateSwitchScript
 
@@ -18,26 +18,24 @@ import net.juniper.contrail.vro.workflows.model.generateSwitchScript
 annotation class WorkflowBuilder
 
 val workflowEndItemId = 0
-val END = WorkflowItem(workflowEndItemId, WorkflowItemType.end, Position(330.0f, 10.0f))
+val defaultX = 50.0f
+val defaultY = 80.0f
+val END = WorkflowItemDefinition(workflowEndItemId, WorkflowItemType.end, Position(defaultX, defaultY))
 
 val success = ParameterInfo("success", boolean)
 
-val defaultScriptPosition = Position(150.0f, 20.0f)
-val defaultWorkflowPosition = Position(50.0f, 10.0f)
-
-// TODO: set proper positions for generated workflow items
-val somePosition = Position(100.0f, 0.0f)
+val defaultPosition = Position(defaultX, defaultY)
 
 fun scriptWorkflowItem(id: Int, script: Script, inBinding: Binding, outBinding: Binding, outId: Int) =
-    WorkflowItem(id, WorkflowItemType.task, defaultScriptPosition, "Scriptable task", script, inBinding, outBinding, outId)
+    WorkflowItemDefinition(id, WorkflowItemType.task, defaultPosition, "Scriptable task", script, inBinding, outBinding, outId)
 
 fun workflowWorkflowItem(id: Int, workflowName: String, workflowId: String, inBinding: Binding, outBinding: Binding, outId: Int) =
-    WorkflowItem(id, WorkflowItemType.link, somePosition, workflowName, null, inBinding, outBinding, outId, null, null, workflowId)
+    WorkflowItemDefinition(id, WorkflowItemType.link, defaultPosition, workflowName, null, inBinding, outBinding, outId, null, null, workflowId)
 
 fun switchWorkflowItem(id: Int, inBinding: Binding, conditions: List<Condition>) =
-    WorkflowItem(id, WorkflowItemType.switch, somePosition, "Switch", generateSwitchScript(conditions), inBinding, null, null, conditions)
+    WorkflowItemDefinition(id, WorkflowItemType.switch, defaultPosition, "Switch", generateSwitchScript(conditions), inBinding, null, null, conditions)
 
-fun inputWorkflowItem(id: Int, inBinding: Binding, outBinding: Binding, outId: Int, preparedPresentation: Presentation? = null, parameterDefinitions: ParameterAggregator.() -> Unit = {}): WorkflowItem {
+fun inputWorkflowItem(id: Int, inBinding: Binding, outBinding: Binding, outId: Int, preparedPresentation: Presentation? = null, parameterDefinitions: ParameterAggregator.() -> Unit = {}): WorkflowItemDefinition {
     val parameters = mutableListOf<ParameterInfo>()
     val allParameters = mutableListOf<ParameterInfo>()
     val presentation = if (preparedPresentation == null) {
@@ -46,5 +44,5 @@ fun inputWorkflowItem(id: Int, inBinding: Binding, outBinding: Binding, outId: I
     } else {
         preparedPresentation
     }
-    return WorkflowItem(id, WorkflowItemType.input, somePosition, "User interaction", null, inBinding, outBinding, outId, null, presentation)
+    return WorkflowItemDefinition(id, WorkflowItemType.input, defaultPosition, "User interaction", null, inBinding, outBinding, outId, null, presentation)
 }
