@@ -14,6 +14,9 @@ import net.juniper.contrail.vro.workflows.model.Reference
 import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.Workflow
 import net.juniper.contrail.vro.workflows.model.WorkflowItem
+import net.juniper.contrail.vro.workflows.model.WorkflowItemDefinition
+import net.juniper.contrail.vro.workflows.model.WorkflowItemType
+import net.juniper.contrail.vro.workflows.model.asWorkflowItem
 import net.juniper.contrail.vro.workflows.util.generateID
 
 data class WorkflowDefinition(
@@ -25,7 +28,7 @@ data class WorkflowDefinition(
     val input: ParameterSet = ParameterSet(),
     val output: ParameterSet = ParameterSet(),
     val attributes: List<Attribute> = emptyList(),
-    val position: Position = defaultWorkflowPosition,
+    val position: Position = defaultPosition,
     val rootId: Int = 0
 ) {
     fun createWorkflow(packageName: String, version: String): Workflow {
@@ -55,6 +58,46 @@ fun workflow(name: String) =
 fun WorkflowDefinition.inCategory(category: String) =
     copy(category = category)
 
+fun fixItemsPositions(items: List<WorkflowItemDefinition>, horizontalTranslation: Float, verticalTranslation: Float): List<WorkflowItemDefinition> =
+    items.mapIndexed { idx, it ->
+        it.copy(position = generateTruePosition(idx, horizontalTranslation, verticalTranslation, it.type))
+    }
+
+private fun generateTruePosition(idx: Int, horizontalTranslation: Float, verticalTranslation: Float, type: WorkflowItemType): Position {
+    val neededTranslations = idx + 1
+
+    val newX = calculateHorizontalPosition(neededTranslations, horizontalTranslation) + horizontalOffset(type)
+    val newY = calculateVerticalPosition(idx, verticalTranslation) + verticalOffset(type)
+
+    return Position(newX, newY)
+}
+
+private fun calculateHorizontalPosition(numberOfTranslations: Int, sizeOfTranslation: Float): Float = defaultX + (numberOfTranslations * sizeOfTranslation)
+
+private fun calculateVerticalPosition (idx: Int, sizeOfTranslation: Float): Float =
+    if (idx % 2 == 0)
+        defaultY + sizeOfTranslation
+    else
+        defaultY + (sizeOfTranslation * -1)
+
+private fun horizontalOffset(type: WorkflowItemType): Float {
+    val endHorizontalTranslation = 80.0f
+    val defaultTranslation = 0f
+    return when (type) {
+        WorkflowItemType.end -> endHorizontalTranslation
+        else -> defaultTranslation
+    }
+}
+
+private fun verticalOffset(type: WorkflowItemType): Float {
+    val taskVerticalTranslation = 10.0f
+    val defaultTranslation = 0f
+    return when (type) {
+        WorkflowItemType.task -> taskVerticalTranslation
+        else -> defaultTranslation
+    }
+}
+
 typealias ParameterDefinition = PresentationParametersBuilder.() -> Unit
 
 fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition): WorkflowDefinition {
@@ -77,7 +120,14 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
     val script = Script(scriptBody)
     val scriptItemId = 1
     val scriptItem = scriptWorkflowItem(scriptItemId, script, inBinding, outBinding, workflowEndItemId)
-    val workflowItems = listOf(END, scriptItem)
+    val workflowItemsDefinitions = listOf(scriptItem, END)
+
+    // vertical translation is 0 because we have only 3 items
+    val horizontalTranslation = 100.0f
+    val verticalTranslation = 0f
+
+    val fixedPositionItems = fixItemsPositions(workflowItemsDefinitions, horizontalTranslation, verticalTranslation)
+    val workflowItems = fixedPositionItems.map { it.asWorkflowItem() }
 
     return copy(
         presentation = presentation,
@@ -104,9 +154,14 @@ fun WorkflowDefinition.withComplexParameters(rootItemId: Int, workflowDefinition
     val initialPresentation = Presentation()
     val initialInput = listOf<ParameterInfo>()
 
+    val horizontalTranslation = 75.0f
+    val verticalTranslation = 70.0f
+    val fixedPositionItems = fixItemsPositions(items, horizontalTranslation, verticalTranslation)
+    val workflowItems = fixedPositionItems.map { it.asWorkflowItem() }
+
     return copy(
         presentation = initialPresentation,
-        workflowItems = items,
+        workflowItems = workflowItems,
         references = listOf(),
         input = initialInput.asParameterSet,
         output = listOf<ParameterInfo>().asParameterSet,
