@@ -26,4 +26,9 @@ class Position (
     val value: String? = null
 ) {
     constructor(x: Float, y: Float) : this(x = x.toString(), y = y.toString())
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Position) return false
+        return this.x == other.x && this.y == other.y
+    }
 }

@@ -12,6 +12,36 @@ import javax.xml.bind.annotation.XmlAttribute
 import javax.xml.bind.annotation.XmlElement
 import javax.xml.bind.annotation.XmlType
 
+data class WorkflowItemDefinition(
+    val id: Int,
+    val type: WorkflowItemType,
+    val position: Position,
+    val displayName: String? = null,
+    val script: Script? = null,
+    val inBinding: Binding? = null,
+    val outBinding: Binding? = null,
+    val outItemId: Int? = null,
+    val conditions: List<Condition>? = null,
+    val presentation: Presentation? = null,
+    val linkedWorkflowId: String? = null
+)
+
+fun WorkflowItemDefinition.asWorkflowItem(): WorkflowItem {
+    return WorkflowItem(
+        id,
+        type,
+        position,
+        displayName,
+        script,
+        inBinding,
+        outBinding,
+        outItemId,
+        conditions,
+        presentation,
+        linkedWorkflowId
+    )
+}
+
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "workflow-itemType",
