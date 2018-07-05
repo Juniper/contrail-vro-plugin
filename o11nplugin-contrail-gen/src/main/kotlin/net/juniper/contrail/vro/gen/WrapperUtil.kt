@@ -41,7 +41,7 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
         findConnection(sid).operation(obj)
 
     fun <T : ApiObjectBase> create(sid: Sid, obj: T) =
-        crud(obj, sid) { create(it); read(it) }
+        crud(obj, sid) { create(it) }
 
     fun <T : ApiObjectBase> update(sid: Sid, obj: T) =
         crud(obj, sid) { update(it) }
