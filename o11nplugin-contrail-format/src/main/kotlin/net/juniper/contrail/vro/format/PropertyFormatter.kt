@@ -61,7 +61,7 @@ object PropertyFormatter {
     }
 
     fun format(prop: FirewallServiceType): String = prop.run {
-        "$protocol:${format(srcPorts)}:${format(dstPorts)}"
+        "$protocol:${srcPorts.safeFormat()}:${dstPorts.safeFormat()}"
     }
 
     fun format(prop: ShareType) =
@@ -92,6 +92,9 @@ object PropertyFormatter {
 
     private val ActionListType?.safeSimpleAction get() =
         if (this == null) "" else "$simpleAction "
+
+    private fun PortType?.safeFormat() : String =
+        if (this == null) empty else format(this)
 
     private fun String.withValue(value: String?): String =
         "$this: " + (value ?: "-")

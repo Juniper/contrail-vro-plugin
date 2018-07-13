@@ -23,6 +23,7 @@ if(serviceType == "manual") {
     rule.setService(service);
 } else {
     if(serviceReference != null) {
+        rule.setService(new ContrailFirewallServiceType());
         rule.addServiceGroup(serviceReference);
     }
 }
