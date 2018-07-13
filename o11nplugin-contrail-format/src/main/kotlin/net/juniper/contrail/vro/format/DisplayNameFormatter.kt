@@ -41,7 +41,10 @@ object DisplayNameFormatter {
         val parentName = obj.parentName.let { if (it == "default-policy-management") "global" else it }
         val simpleAction = obj.actionList?.simpleAction
         val direction = obj.direction
-        val service = if (obj.service != null) format(obj.service) else obj.serviceGroup[0].referredName.last()
+        val serviceGroup = obj.serviceGroup.run {
+            if (this != null && this.isNotEmpty()) this[0].referredName.last() else ""
+        }
+        val service = if (obj.service != null && obj.service.protocol != null) format(obj.service) else serviceGroup
         val endpoint1 = format(obj.endpoint1)
         val endpoint2 = format(obj.endpoint2)
         return "$parentName: $simpleAction $service  EP1: $endpoint1  $direction  EP2: $endpoint2"
