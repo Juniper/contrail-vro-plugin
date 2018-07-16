@@ -117,7 +117,9 @@ val customAddReference = setOf(
     pair<FloatingIp, VirtualMachineInterface>(),
     pair<VirtualNetwork, NetworkPolicy>(),
     pair<ServiceHealthCheck, ServiceInstance>(),
-    pair<VirtualNetwork, NetworkIpam>()
+    pair<VirtualNetwork, NetworkIpam>(),
+    pair<FirewallPolicy, FirewallRule>(),
+    pair<ApplicationPolicySet, FirewallPolicy>()
 )
 
 val customRemoveReference = setOf(
