@@ -8,11 +8,17 @@ import net.juniper.contrail.api.types.ApplicationPolicySet
 import net.juniper.contrail.api.types.FirewallPolicy
 import net.juniper.contrail.api.types.FirewallRule
 import net.juniper.contrail.api.types.Project
+import net.juniper.contrail.vro.config.constants.child
+import net.juniper.contrail.vro.config.constants.item
+import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.workflowEndItemId
 import net.juniper.contrail.vro.workflows.dsl.withComplexParameters
 import net.juniper.contrail.vro.workflows.dsl.workflow
+import net.juniper.contrail.vro.workflows.dsl.parentConnection
 import net.juniper.contrail.vro.workflows.model.reference
+import net.juniper.contrail.vro.workflows.util.childDescriptionInCreateRelation
+import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
 
 val apsCreationWorkflow = 1
 val mainMenu = 2
@@ -73,3 +79,21 @@ internal fun createAPS(workflowDefinitions: List<WorkflowDefinition>): WorkflowD
             inputBind("item", resultAps)
         }
     }
+
+internal fun addFirewallPolicyToAPS(schema: Schema): WorkflowDefinition {
+
+    val workflowName = "Add firewall policy to application policy set"
+
+    return customWorkflow<ApplicationPolicySet>(workflowName).withScriptFile("addFirewallPolicyToAPS") {
+        parameter(item, reference<ApplicationPolicySet>()) {
+            description = schema.parentDescriptionInCreateRelation<ApplicationPolicySet, FirewallPolicy>()
+            mandatory = true
+            browserRoot = child.parentConnection
+        }
+        parameter(child, reference<FirewallPolicy>()) {
+            description = schema.childDescriptionInCreateRelation<ApplicationPolicySet, FirewallPolicy>()
+            mandatory = true
+            browserRoot = item.parentConnection
+        }
+    }
+}
