@@ -36,11 +36,17 @@ inline fun <reified Parent : Any> PrimitiveParameterBuilder<String>.extractPrede
     predefinedAnswers = schema.predefinedAnswers<Parent>(parameterName, mandatory, convertParameterNameToXsd)
 }
 
-inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> Schema.addRelationWorkflowName() =
+inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> addRelationWorkflowName() =
     addRelationWorkflowName(Parent::class.java, Child::class.java)
 
-fun Schema.addRelationWorkflowName(parentClazz: Class<*>, clazz: Class<*>) =
+fun addRelationWorkflowName(parentClazz: Class<*>, clazz: Class<*>) =
     "Add ${clazz.allLowerCase} to ${parentClazz.allLowerCase}"
+
+inline fun <reified Clazz : ApiObjectBase> createRelationWorkflowName() =
+    createRelationWorkflowName(Clazz::class.java)
+
+fun createRelationWorkflowName(clazz: Class<*>) =
+    "Create ${clazz.allLowerCase}"
 
 inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> removeRelationWorkflowName() =
     removeRelationWorkflowName(Parent::class.java, Child::class.java)
