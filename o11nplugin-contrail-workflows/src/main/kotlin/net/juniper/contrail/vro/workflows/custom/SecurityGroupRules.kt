@@ -8,6 +8,9 @@ import net.juniper.contrail.api.types.AddressType
 import net.juniper.contrail.api.types.PolicyRuleType
 import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.SecurityGroup
+import net.juniper.contrail.vro.config.constants.addRuleToSecurityGroupWorkflowName
+import net.juniper.contrail.vro.config.constants.editRuleOfSecurityGroupWorkflowName
+import net.juniper.contrail.vro.config.constants.removeRuleFromSecurityGroupWorkflowName
 import net.juniper.contrail.vro.config.constants.egress
 import net.juniper.contrail.vro.config.constants.ingress
 import net.juniper.contrail.vro.config.constants.item
@@ -35,10 +38,8 @@ private val allowedAddressTypes = listOf("CIDR", "Security Group")
 private val defaultDirection = ingress
 private val allowedDirections = listOf(ingress, egress)
 
-internal fun addRuleToSecurityGroupWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Add rule to security group"
-
-    return customWorkflow<SecurityGroup>(workflowName).withScriptFile("addRuleToSecurityGroup") {
+internal fun addRuleToSecurityGroupWorkflow(schema: Schema): WorkflowDefinition =
+    customWorkflow<SecurityGroup>(addRuleToSecurityGroupWorkflowName).withScriptFile("addRuleToSecurityGroup") {
         step("Security Group") {
             parameter(item, reference<SecurityGroup>()) {
                 description = relationDescription<Project, SecurityGroup>(schema)
@@ -47,12 +48,9 @@ internal fun addRuleToSecurityGroupWorkflow(schema: Schema): WorkflowDefinition 
         }
         securityGroupRuleParameters(schema, item, false)
     }
-}
 
-internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Edit rule of security group"
-
-    return customWorkflow<SecurityGroup>(workflowName).withScriptFile("editSecurityGroupRule") {
+internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition =
+    customWorkflow<SecurityGroup>(editRuleOfSecurityGroupWorkflowName).withScriptFile("editSecurityGroupRule") {
         step("Security Group Rule") {
             parameter(item, reference<SecurityGroup>()) {
                 description = relationDescription<Project, SecurityGroup>(schema)
@@ -68,7 +66,6 @@ internal fun editSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
         }
         securityGroupRuleParameters(schema, rule, true)
     }
-}
 
 private fun PresentationParametersBuilder.securityGroupRuleParameters(schema: Schema, visibilityDependencyField: String, loadCurrentValues: Boolean) {
     step("Rule properties") {
@@ -123,10 +120,8 @@ private fun PresentationParametersBuilder.securityGroupRuleParameters(schema: Sc
     }
 }
 
-internal fun removeSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Remove rule from security group"
-
-    return customWorkflow<SecurityGroup>(workflowName).withScriptFile("removeRuleFromSecurityGroup") {
+internal fun removeSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition =
+    customWorkflow<SecurityGroup>(removeRuleFromSecurityGroupWorkflowName).withScriptFile("removeRuleFromSecurityGroup") {
         parameter(item, reference<SecurityGroup>()) {
             description = relationDescription<Project, SecurityGroup>(schema)
             mandatory = true
@@ -138,4 +133,3 @@ internal fun removeSecurityGroupRuleWorkflow(schema: Schema): WorkflowDefinition
             predefinedAnswersFrom = actionCallTo(networkPolicyRules).parameter(item)
         }
     }
-}

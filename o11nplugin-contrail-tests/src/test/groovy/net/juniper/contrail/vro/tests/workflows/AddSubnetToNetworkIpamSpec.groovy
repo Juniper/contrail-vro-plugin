@@ -7,8 +7,11 @@ package net.juniper.contrail.vro.tests.workflows
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.NetworkIpam
 
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.addSubnetToNetworkIpamWorkflowName
+
 class AddSubnetToNetworkIpamSpec extends WorkflowSpec {
-    def addSubnetToNetworkIpam = workflowFromScript("Add subnet to network IPAM")
+
+    def addSubnetToNetworkIpam = workflowFromScript(addSubnetToNetworkIpamWorkflowName)
 
     def somePrefix = "1.2.3.4"
     def somePrefixLen = 16

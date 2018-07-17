@@ -6,10 +6,11 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.Tag
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.createTagInProjectWorkflowName
 
 class CreateTagInProjectSpec extends WorkflowSpec {
 
-    def createTagInProject = workflowFromScript("Create tag in project")
+    def createTagInProject = workflowFromScript(createTagInProjectWorkflowName)
     def tagValue = "my-project-scoped-value"
     def tagType = "my-project-scoped-tag"
 

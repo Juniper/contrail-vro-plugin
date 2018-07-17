@@ -32,7 +32,7 @@ fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDef
 
     val parentClass = relation.declaredParentClass
     val childClass = relation.declaredChildClass
-    val workflowName = schema.addRelationWorkflowName(parentClass, childClass)
+    val workflowName = addRelationWorkflowName(parentClass, childClass)
     val scriptBody = relation.addReferenceRelationScriptBody()
     val directValidation = parentClass.isA<Project>()
 

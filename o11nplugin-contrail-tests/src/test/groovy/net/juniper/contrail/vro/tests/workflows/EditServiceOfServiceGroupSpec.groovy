@@ -7,10 +7,13 @@ package net.juniper.contrail.vro.tests.workflows
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.ServiceGroup
 
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.addServiceToServiceGroupWorkflowName
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.editServiceOfServiceGroupWorkflowName
+
 class EditServiceOfServiceGroupSpec extends WorkflowSpec {
 
-    def workflowScript = workflowFromScript("Edit service of service group")
-    def addServiceScript = workflowFromScript("Add service to service group")
+    def workflowScript = workflowFromScript(editServiceOfServiceGroupWorkflowName)
+    def addServiceScript = workflowFromScript(addServiceToServiceGroupWorkflowName)
 
     def someProtocol = "tcp"
     def startPort = 157

@@ -7,9 +7,11 @@ package net.juniper.contrail.vro.tests.workflows
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.VirtualNetwork
 
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.addSubnetToVirtualNetworkWorkflowName
+
 class CreateSubnetSpec extends WorkflowSpec {
 
-    def createSubnet = workflowFromScript("Add subnet to virtual network")
+    def createSubnet = workflowFromScript(addSubnetToVirtualNetworkWorkflowName)
 
     def somePrefix = "1.2.3.4"
     def somePrefixLen = 16

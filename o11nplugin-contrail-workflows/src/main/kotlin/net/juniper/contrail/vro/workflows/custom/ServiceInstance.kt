@@ -9,30 +9,29 @@ import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.ServiceInstanceType
 import net.juniper.contrail.api.types.ServiceTemplate
 import net.juniper.contrail.api.types.VirtualNetwork
-import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.maxInterfacesSupported
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.constants.supportedInterfaceNames
 import net.juniper.contrail.vro.config.templateHasInterfaceWithName
-import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
+import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.schema.propertyDescription
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
+import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
+import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
 import net.juniper.contrail.vro.workflows.dsl.asVisibilityCondition
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.schema.propertyDescription
+import net.juniper.contrail.vro.workflows.util.createSimpleWorkflowName
 import net.juniper.contrail.vro.workflows.util.propertyDescription
 import net.juniper.contrail.vro.workflows.util.relationDescription
 
 private val serviceTemplate = "serviceTemplate"
 
-internal fun createServiceInstance(schema: Schema) : WorkflowDefinition {
-    val workflowName = "Create service instance"
-
-    return customWorkflow<ServiceInstance>(workflowName).withScriptFile("createServiceInstance") {
+internal fun createServiceInstance(schema: Schema) : WorkflowDefinition =
+    customWorkflow<ServiceInstance>(createSimpleWorkflowName<ServiceInstance>()).withScriptFile("createServiceInstance") {
         description = relationDescription<Project, ServiceInstance>(schema)
         parameter(parent, reference<Project>()) {
             description = "Project this service instance will belong to"
@@ -61,7 +60,6 @@ internal fun createServiceInstance(schema: Schema) : WorkflowDefinition {
             description = "Service instance created in this workflow"
         }
     }
-}
 
 private fun ParameterAggregator.generateServiceInstanceInterface(index: Int) {
     val interfaceName = supportedInterfaceNames[index]
