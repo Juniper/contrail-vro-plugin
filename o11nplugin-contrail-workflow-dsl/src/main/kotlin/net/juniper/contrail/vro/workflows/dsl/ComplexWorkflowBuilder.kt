@@ -19,7 +19,6 @@ import net.juniper.contrail.vro.workflows.model.toFullItemId
 import net.juniper.contrail.vro.workflows.util.generateID
 
 // TODO: POSITIONS (right now all objects are stacked on top of one another)
-// TODO: Attributes input (set values of global attributes without invoking any workflow)
 // TODO: Output parameters (I see no way to do this other than dummy script object with relevant bindings)
 @WorkflowBuilder
 class ComplexWorkflowBuilder(
@@ -119,6 +118,29 @@ class ComplexWorkflowBuilder(
             options.map {
                 EqualsCondition(decisionInput, it.name, string, it.targetId.toFullItemId)
             } + DefaultCondition(defaultOut.toFullItemId)
+        ))
+    }
+
+    fun addWorkflowItemWithAttributes(itemId: Int, outItemId: Int, parameterDefinitions: ParameterAggregator.() -> Unit = {}) {
+        if (itemId > baseFreeId) throw IllegalArgumentException("Use ID lower than $baseFreeId")
+
+        val parameters = mutableListOf<ParameterInfo>()
+        val allParameters = mutableListOf<ParameterInfo>()
+        ParameterAggregator(parameters, allParameters).apply(parameterDefinitions)
+
+        val attributeNames = attributes.map { it.name }
+        val paramNames = parameters.map { it.name }
+        if (!paramNames.all { it in attributeNames }) throw IllegalArgumentException("Entered parameter doesn't exist in Workflow")
+
+        val outputBinding = Binding(parameters.asBinds)
+
+        items.add(inputWorkflowItem(
+            itemId,
+            Binding(listOf()),
+            outputBinding,
+            outItemId,
+            null,
+            parameterDefinitions
         ))
     }
 
