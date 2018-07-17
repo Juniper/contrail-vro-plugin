@@ -9,6 +9,10 @@ import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withComplexParameters
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
+import net.juniper.contrail.vro.workflows.model.boolean
+import net.juniper.contrail.vro.workflows.model.date
+import net.juniper.contrail.vro.workflows.model.number
+import net.juniper.contrail.vro.workflows.model.string
 
 val workflowId = 99
 val start = 1
@@ -37,3 +41,23 @@ fun someComplexWorkflow() : WorkflowDefinition {
 }
 
 fun someSimpleWorkflow() : WorkflowDefinition = workflow("Some simple workflow").withScript("") { }
+
+val parameterNames = listOf("parameter1", "parameter2", "parameter3", "parameter4")
+
+fun someWorkflowWithInputItem(): WorkflowDefinition {
+    val workflowDefinitions = mutableListOf<WorkflowDefinition>()
+    return workflow("Some workflow with inputItem").withComplexParameters(workflowId + 1, workflowDefinitions) {
+        attribute(parameterNames[0], string)
+        attribute(parameterNames[1], number)
+        attribute(parameterNames[2], boolean)
+        attribute(parameterNames[3], date)
+
+        addWorkflowItemWithAttributes(start, END.id) {
+            parameter(parameterNames[0], string) {}
+            parameter(parameterNames[1], number) {}
+            parameter(parameterNames[2], boolean) {}
+            parameter(parameterNames[3], date) {}
+        }
+
+    }
+}

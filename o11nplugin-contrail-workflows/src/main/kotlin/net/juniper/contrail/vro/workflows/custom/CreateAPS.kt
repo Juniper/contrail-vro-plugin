@@ -14,15 +14,16 @@ import net.juniper.contrail.vro.workflows.dsl.withComplexParameters
 import net.juniper.contrail.vro.workflows.dsl.workflow
 import net.juniper.contrail.vro.workflows.model.reference
 
-val apsCreationWorkflow = 1
-val mainMenu = 2
-val newFirewallPolicy = 3
-val addRuleMenu = 4
-val createRule = 5
-val addRule = 6
-val addNewPolicy = 7
-val addPolicy = 8
-val addTag = 9
+val inputItem = 1
+val apsCreationWorkflow = 2
+val mainMenu = 3
+val newFirewallPolicy = 4
+val addRuleMenu = 5
+val createRule = 6
+val addRule = 7
+val addNewPolicy = 8
+val addPolicy = 9
+val addTag = 10
 
 val resultAps = "resultAps"
 val theProject = "projectAttribute"
@@ -30,11 +31,15 @@ val resultFirewallPolicy = "resultFirewallPolicy"
 val resultFirewallRule = "resultFirewallRule"
 
 internal fun createAPS(workflowDefinitions: List<WorkflowDefinition>): WorkflowDefinition =
-    workflow("Create application policy set with firewall policies in project").withComplexParameters(apsCreationWorkflow, workflowDefinitions) {
+    workflow("Create application policy set with firewall policies in project").withComplexParameters(inputItem, workflowDefinitions) {
         attribute(resultAps, reference<ApplicationPolicySet>())
         attribute(resultFirewallPolicy, reference<FirewallPolicy>())
         attribute(resultFirewallRule, reference<FirewallRule>())
         attribute(theProject, reference<Project>())
+
+        addWorkflowItemWithAttributes(inputItem, apsCreationWorkflow) {
+            parameter(theProject, reference<Project>()) {}
+        }
 
         workflowInvocation(apsCreationWorkflow, mainMenu, "Create application policy set in project") {
             inputBind("parent", theProject)
