@@ -6,13 +6,17 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.PortTuple
+import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.vro.tests.TestUtilsKt
 
+import static net.juniper.contrail.vro.workflows.util.DslUtilsKt.addRelationWorkflowName
+import static net.juniper.contrail.vro.workflows.util.DslUtilsKt.removeRelationWorkflowName
+
 class RemovePortTupleFromServiceInstanceSpec extends WorkflowSpec {
 
-    def addPortTupleToServiceInstance = workflowFromScript("Add port tuple to service instance")
-    def removePortTupleFromServiceInstance = workflowFromScript("Remove port tuple from service instance")
+    def addPortTupleToServiceInstance = workflowFromScript(addRelationWorkflowName(ServiceInstance, PortTuple))
+    def removePortTupleFromServiceInstance = workflowFromScript(removeRelationWorkflowName(ServiceInstance, PortTuple))
 
     def somePortTupleName = "somePortTupleName"
 

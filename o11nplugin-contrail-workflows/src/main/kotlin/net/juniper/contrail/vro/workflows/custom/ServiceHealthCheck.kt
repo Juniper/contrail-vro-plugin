@@ -20,7 +20,7 @@ import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
 
 internal fun addServiceInstanceToHealthCheck(schema: Schema): WorkflowDefinition {
 
-    val workflowName = schema.addRelationWorkflowName<ServiceHealthCheck, ServiceInstance>()
+    val workflowName = addRelationWorkflowName<ServiceHealthCheck, ServiceInstance>()
 
     return customWorkflow<ServiceHealthCheck>(workflowName).withScriptFile("addServiceInstanceToHealthCheck") {
         parameter(item, reference<ServiceHealthCheck>()) {

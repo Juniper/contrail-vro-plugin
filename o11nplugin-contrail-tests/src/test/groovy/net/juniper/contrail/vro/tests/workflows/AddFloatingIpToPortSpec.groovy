@@ -6,10 +6,13 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.FloatingIp
+import net.juniper.contrail.api.types.VirtualMachineInterface
+
+import static net.juniper.contrail.vro.workflows.util.DslUtilsKt.addRelationWorkflowName
 
 class AddFloatingIpToPortSpec extends WorkflowSpec {
 
-    def addFloatingIpToPort = workflowFromScript("Add floating IP to port")
+    def addFloatingIpToPort = workflowFromScript(addRelationWorkflowName(VirtualMachineInterface, FloatingIp))
 
     def someIsFixedIpAddress = true
 
