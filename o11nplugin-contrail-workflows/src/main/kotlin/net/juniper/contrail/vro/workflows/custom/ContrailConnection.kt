@@ -6,6 +6,8 @@ package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.vro.config.constants.Configuration
 import net.juniper.contrail.vro.config.constants.Connection
+import net.juniper.contrail.vro.config.constants.createContrailControllerConnectionWorkflowName
+import net.juniper.contrail.vro.config.constants.deleteContrailControllerConnectionWorkflowName
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.defaultConnection
 import net.juniper.contrail.vro.workflows.dsl.fromAction
@@ -18,7 +20,7 @@ import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 
 internal fun createConnectionWorkflow() =
-    workflow("Create Contrail controller connection").withScript(createConnectionScriptBody) {
+    workflow(createContrailControllerConnectionWorkflowName).withScript(createConnectionScriptBody) {
         step("Controller") {
             parameter("name", string) {
                 description = "Connection name"
@@ -56,7 +58,7 @@ internal fun createConnectionWorkflow() =
     }.inCategory(Configuration)
 
 internal fun deleteConnectionWorkflow() =
-    workflow("Delete Contrail controller connection").withScript(deleteConnectionScriptBody) {
+    workflow(deleteContrailControllerConnectionWorkflowName).withScript(deleteConnectionScriptBody) {
         parameter(item, Connection.reference) {
             description = "$Connection to delete"
             mandatory = true

@@ -5,21 +5,22 @@
 package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.Domain
-import net.juniper.contrail.api.types.ServiceTemplateType
 import net.juniper.contrail.api.types.ServiceTemplate
-import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.workflows.model.number
-import net.juniper.contrail.vro.workflows.model.array
-import net.juniper.contrail.vro.workflows.model.reference
-import net.juniper.contrail.vro.schema.Schema
-import net.juniper.contrail.vro.workflows.util.extractPredefinedAnswers
+import net.juniper.contrail.api.types.ServiceTemplateType
+import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
-import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.supportedInterfaceNames
 import net.juniper.contrail.vro.config.defaultConnection
+import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.fromAction
+import net.juniper.contrail.vro.workflows.model.array
+import net.juniper.contrail.vro.workflows.model.number
+import net.juniper.contrail.vro.workflows.model.reference
+import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.util.createRelationWorkflowName
+import net.juniper.contrail.vro.workflows.util.extractPredefinedAnswers
 import net.juniper.contrail.vro.workflows.util.propertyDescription
 import net.juniper.contrail.vro.workflows.util.relationDescription
 
@@ -28,10 +29,8 @@ val supportedVersions = listOf(supportedVersion)
 val serviceTypes = listOf("firewall", "analyzer")
 val serviceVirtualizationTypes = listOf("virtual-machine", "physical-device")
 
-internal fun createServiceTemplate(schema: Schema) : WorkflowDefinition {
-    val workflowName = "Create service template"
-
-    return customWorkflow<ServiceTemplate>(workflowName).withScriptFile("createServiceTemplate") {
+internal fun createServiceTemplate(schema: Schema) : WorkflowDefinition =
+    customWorkflow<ServiceTemplate>(createRelationWorkflowName<ServiceTemplate>()).withScriptFile("createServiceTemplate") {
         description = relationDescription<Domain, ServiceTemplate>(schema)
         parameter(parent, Connection.reference) {
             description = "Parent connection"
@@ -74,4 +73,3 @@ internal fun createServiceTemplate(schema: Schema) : WorkflowDefinition {
             description = "Service template created in this workflow"
         }
     }
-}

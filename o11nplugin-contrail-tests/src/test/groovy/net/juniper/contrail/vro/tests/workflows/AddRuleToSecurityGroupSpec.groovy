@@ -7,9 +7,11 @@ package net.juniper.contrail.vro.tests.workflows
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.SecurityGroup
 
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.addRuleToSecurityGroupWorkflowName
+
 class AddRuleToSecurityGroupSpec extends WorkflowSpec {
 
-    def addRuleToSecurityGroup = workflowFromScript("Add rule to security group")
+    def addRuleToSecurityGroup = workflowFromScript(addRuleToSecurityGroupWorkflowName)
 
     def someDirection = "ingress"
     def someEthertype = "IPv4"

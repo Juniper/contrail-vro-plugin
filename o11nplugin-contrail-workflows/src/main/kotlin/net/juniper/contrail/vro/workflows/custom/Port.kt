@@ -27,7 +27,7 @@ import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
 import net.juniper.contrail.vro.workflows.util.parentDescriptionInRemoveRelation
 
 internal fun addFloatingIpToPort(schema: Schema): WorkflowDefinition {
-    val workflowName = schema.addRelationWorkflowName<VirtualMachineInterface, FloatingIp>()
+    val workflowName = addRelationWorkflowName<VirtualMachineInterface, FloatingIp>()
 
     return customWorkflow<VirtualMachineInterface>(workflowName).withScriptFile("addFloatingIpToPort") {
         parameter(item, reference<VirtualMachineInterface>()) {
