@@ -6,11 +6,14 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.NetworkPolicy
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.addRuleToNetworkPolicyWorkflowName
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.editRuleOfNetworkPolicyWorkflowName
+import static net.juniper.contrail.vro.workflows.util.DslUtilsKt.addRelationWorkflowName
 
 class EditPolicyRuleSpec extends WorkflowSpec {
 
-    def addPolicyRule = workflowFromScript("Add rule to network policy")
-    def editPolicyRule = workflowFromScript("Edit rule of network policy")
+    def addPolicyRule = workflowFromScript(addRuleToNetworkPolicyWorkflowName)
+    def editPolicyRule = workflowFromScript(editRuleOfNetworkPolicyWorkflowName)
 
     def someSimpleAction = "pass"
     def someDifferentSimpleAction = "deny"

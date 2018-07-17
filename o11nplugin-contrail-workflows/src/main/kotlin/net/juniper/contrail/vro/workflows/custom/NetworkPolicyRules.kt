@@ -12,6 +12,9 @@ import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.SecurityGroup
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualNetwork
+import net.juniper.contrail.vro.config.constants.addRuleToNetworkPolicyWorkflowName
+import net.juniper.contrail.vro.config.constants.editRuleOfNetworkPolicyWorkflowName
+import net.juniper.contrail.vro.config.constants.removeRuleFromNetworkPolicyWorkflowName
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.networkPolicyRules
 import net.juniper.contrail.vro.schema.Schema
@@ -55,10 +58,8 @@ private val allowedNexthopModes = listOf("dynamic", "static")
 private val defaultNetworkType = "any"
 private val allowedNetworkTypes = listOf("any", "local", "reference")
 
-internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Add rule to network policy"
-
-    return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("addRuleToPolicy") {
+internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition =
+    customWorkflow<NetworkPolicy>(addRuleToNetworkPolicyWorkflowName).withScriptFile("addRuleToPolicy") {
         step("Network Policy") {
             parameter(item, reference<NetworkPolicy>()) {
                 description = relationDescription<Project, NetworkPolicy>(schema)
@@ -67,12 +68,9 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition {
         }
         policyRuleParameters(schema, item, false)
     }
-}
 
-internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Edit rule of network policy"
-
-    return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("editPolicyRule") {
+internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition =
+    customWorkflow<NetworkPolicy>(editRuleOfNetworkPolicyWorkflowName).withScriptFile("editPolicyRule") {
         step("Network Policy Rule") {
             parameter(item, reference<NetworkPolicy>()) {
                 description = relationDescription<Project, NetworkPolicy>(schema)
@@ -88,7 +86,6 @@ internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
         }
         policyRuleParameters(schema, rule, true)
     }
-}
 
 private fun PresentationParametersBuilder.policyRuleParameters(schema: Schema, visibilityDependencyField: String, loadCurrentValues: Boolean) {
     step("Basic Properties") {
@@ -337,10 +334,8 @@ private fun PresentationParametersBuilder.policyRuleParameters(schema: Schema, v
     }
 }
 
-internal fun removePolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Remove rule from network policy"
-
-    return customWorkflow<NetworkPolicy>(workflowName).withScriptFile("removeRuleFromPolicy") {
+internal fun removePolicyRuleWorkflow(schema: Schema): WorkflowDefinition =
+    customWorkflow<NetworkPolicy>(removeRuleFromNetworkPolicyWorkflowName).withScriptFile("removeRuleFromPolicy") {
         parameter(item, reference<NetworkPolicy>()) {
             description = relationDescription<Project, NetworkPolicy>(schema)
             mandatory = true
@@ -352,4 +347,3 @@ internal fun removePolicyRuleWorkflow(schema: Schema): WorkflowDefinition {
             predefinedAnswersFrom = actionCallTo(networkPolicyRules).parameter(item)
         }
     }
-}

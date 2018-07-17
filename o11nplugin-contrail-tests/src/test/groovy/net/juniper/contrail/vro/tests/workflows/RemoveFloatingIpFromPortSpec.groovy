@@ -6,11 +6,13 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.FloatingIp
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.addFloatingIPToPortWorkflowName
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.removeFloatingIPFromPortWorkflowName
 
 class RemoveFloatingIpFromPortSpec extends WorkflowSpec {
 
-    def addFloatingIpToPort = workflowFromScript("Add floating IP to port")
-    def removeFloatingIpFromPort = workflowFromScript("Remove floating IP from port")
+    def addFloatingIpToPort = workflowFromScript(addFloatingIPToPortWorkflowName)
+    def removeFloatingIpFromPort = workflowFromScript(removeFloatingIPFromPortWorkflowName)
 
     def "Removing a floating IP from a port"() {
         given: "A correct set of attributes"
