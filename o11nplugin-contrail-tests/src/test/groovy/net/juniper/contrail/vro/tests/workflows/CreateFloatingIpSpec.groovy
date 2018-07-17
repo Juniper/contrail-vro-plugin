@@ -5,10 +5,13 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
+import net.juniper.contrail.api.types.FloatingIp
+
+import static net.juniper.contrail.vro.workflows.util.DslUtilsKt.createWorkflowName
 
 class CreateFloatingIpSpec extends WorkflowSpec {
 
-    def createFloatingIp = workflowFromScript("Create floating IP")
+    def createFloatingIp = workflowFromScript(createWorkflowName(FloatingIp))
 
     def "Creating floating IP"() {
         given: "A correct set of attributes"

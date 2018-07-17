@@ -8,26 +8,29 @@ import net.juniper.contrail.api.types.PortTuple
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.vro.config.asChildRef
+import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.maxInterfacesSupported
 import net.juniper.contrail.vro.config.constants.parent
-import net.juniper.contrail.vro.config.constants.item
+import net.juniper.contrail.vro.config.constants.supportedInterfaceNames
 import net.juniper.contrail.vro.config.descriptionOf
 import net.juniper.contrail.vro.config.portsForServiceInterface
-import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
 import net.juniper.contrail.vro.config.propertyValue
-import net.juniper.contrail.vro.config.constants.supportedInterfaceNames
+import net.juniper.contrail.vro.config.serviceHasInterfaceWithName
+import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.schema.createWorkflowDescription
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
+import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
+import net.juniper.contrail.vro.workflows.dsl.asVisibilityCondition
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.schema.Schema
-import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
-import net.juniper.contrail.vro.workflows.dsl.asVisibilityCondition
-import net.juniper.contrail.vro.schema.createWorkflowDescription
+import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
+import net.juniper.contrail.vro.workflows.util.removeRelationWorkflowName
 
 internal fun addPortTupleToServiceInstance(schema: Schema): WorkflowDefinition {
-    val workflowName = "Add port tuple to service instance"
+
+    val workflowName = addRelationWorkflowName<ServiceInstance, PortTuple>()
 
     return customWorkflow<ServiceInstance>(workflowName).withScriptFile("addPortTupleToServiceInstance") {
         description = schema.createWorkflowDescription<ServiceInstance, PortTuple>()
@@ -60,7 +63,8 @@ private fun ParameterAggregator.generatePortInput(index: Int) {
 }
 
 internal fun removePortTupleFromServiceInstance(): WorkflowDefinition {
-    val workflowName = "Remove port tuple from service instance"
+
+    val workflowName = removeRelationWorkflowName<ServiceInstance, PortTuple>()
 
     return customWorkflow<ServiceInstance>(workflowName).withScriptFile("removePortTupleFromServiceInstance") {
         parameter(parent, reference<ServiceInstance>()) {

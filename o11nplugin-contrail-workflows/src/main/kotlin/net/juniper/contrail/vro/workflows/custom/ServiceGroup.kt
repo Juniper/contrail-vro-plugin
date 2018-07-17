@@ -5,6 +5,9 @@
 package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.ServiceGroup
+import net.juniper.contrail.vro.config.constants.addServiceToServiceGroupWorkflowName
+import net.juniper.contrail.vro.config.constants.editServiceOfServiceGroupWorkflowName
+import net.juniper.contrail.vro.config.constants.removeServiceFromServiceGroupWorkflowName
 import net.juniper.contrail.vro.config.constants.any
 import net.juniper.contrail.vro.config.constants.icmp
 import net.juniper.contrail.vro.config.constants.item
@@ -19,10 +22,8 @@ import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 
-internal fun addServiceToServiceGroupWorkflow(): WorkflowDefinition {
-    val workflowName = "Add service to service group"
-
-    return customWorkflow<ServiceGroup>(workflowName).withScriptFile("addServiceToServiceGroup") {
+internal fun addServiceToServiceGroupWorkflow(): WorkflowDefinition =
+    customWorkflow<ServiceGroup>(addServiceToServiceGroupWorkflowName).withScriptFile("addServiceToServiceGroup") {
         step("Service Group") {
             parameter(item, reference<ServiceGroup>()) {
                 description = "Service Group to add service to"
@@ -31,12 +32,9 @@ internal fun addServiceToServiceGroupWorkflow(): WorkflowDefinition {
         }
         serviceGroupParameters(item, false)
     }
-}
 
-internal fun editServiceGroupServiceWorkflow(): WorkflowDefinition {
-    val workflowName = "Edit service of service group"
-
-    return customWorkflow<ServiceGroup>(workflowName).withScriptFile("editServiceOfServiceGroup") {
+internal fun editServiceGroupServiceWorkflow(): WorkflowDefinition =
+    customWorkflow<ServiceGroup>(editServiceOfServiceGroupWorkflowName).withScriptFile("editServiceOfServiceGroup") {
         step("Service Group") {
             parameter(item, reference<ServiceGroup>()) {
                 description = "Service Group to edit service"
@@ -50,7 +48,6 @@ internal fun editServiceGroupServiceWorkflow(): WorkflowDefinition {
         }
         serviceGroupParameters(service, true)
     }
-}
 
 private fun PresentationParametersBuilder.serviceGroupParameters(visibilityParameter: String, editing: Boolean) {
     step("Service Properties") {
@@ -70,10 +67,8 @@ private fun PresentationParametersBuilder.serviceGroupParameters(visibilityParam
     }
 }
 
-internal fun removeServiceGroupServiceWorkflow(schema: Schema): WorkflowDefinition {
-    val workflowName = "Remove service from service group"
-
-    return customWorkflow<ServiceGroup>(workflowName).withScriptFile("removeServiceFromServiceGroup") {
+internal fun removeServiceGroupServiceWorkflow(schema: Schema): WorkflowDefinition =
+    customWorkflow<ServiceGroup>(removeServiceFromServiceGroupWorkflowName).withScriptFile("removeServiceFromServiceGroup") {
         parameter(item, reference<ServiceGroup>()) {
             description = "Service Group to remove service from"
             mandatory = true
@@ -85,4 +80,3 @@ internal fun removeServiceGroupServiceWorkflow(schema: Schema): WorkflowDefiniti
             predefinedAnswersFrom = actionCallTo(serviceGroupServices).parameter(item)
         }
     }
-}
