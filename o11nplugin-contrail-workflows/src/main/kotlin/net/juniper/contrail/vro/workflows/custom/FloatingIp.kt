@@ -9,18 +9,16 @@ import net.juniper.contrail.api.types.FloatingIpPool
 import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
-import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.model.reference
-import net.juniper.contrail.vro.workflows.model.array
-import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.model.array
+import net.juniper.contrail.vro.workflows.model.reference
+import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.util.createSimpleWorkflowName
 import net.juniper.contrail.vro.workflows.util.relationDescription
 
-internal fun createFloatingIpWorkflow(schema: Schema): WorkflowDefinition {
-
-    val workflowName = "Create floating IP"
-
-    return customWorkflow<FloatingIp>(workflowName).withScriptFile("createFloatingIp") {
+internal fun createFloatingIpWorkflow(schema: Schema): WorkflowDefinition =
+    customWorkflow<FloatingIp>(createSimpleWorkflowName<FloatingIp>()).withScriptFile("createFloatingIp") {
         description = relationDescription<FloatingIpPool, FloatingIp>(schema)
         parameter(parent, reference<FloatingIpPool>()) {
             description = "Floating IP pools this IP will belong to"
@@ -38,4 +36,4 @@ internal fun createFloatingIpWorkflow(schema: Schema): WorkflowDefinition {
             description = "Floating IP created in this workflow"
         }
     }
-}
+

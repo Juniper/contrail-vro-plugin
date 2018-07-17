@@ -16,6 +16,8 @@ import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.EndpointType
 import net.juniper.contrail.vro.config.constants.ServiceType
+import net.juniper.contrail.vro.config.constants.editFirewallRuleWorkflowName
+import net.juniper.contrail.vro.config.constants.createGlobalFirewallRuleWorkflowName
 import net.juniper.contrail.vro.config.constants.rule
 import net.juniper.contrail.vro.config.defaultConnection
 import net.juniper.contrail.vro.schema.Schema
@@ -32,6 +34,7 @@ import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.util.createWorkflowName
 
 val defaultEndpointType = EndpointType.None.value
 val allowedEndpointTypes = EndpointType.values().map { it.value }
@@ -45,11 +48,8 @@ val allowedMatchTags = listOf("application", "tier", "deployment", "site")
 val parentConnectionField = "parentConnection"
 val parentProjectField = "parentProject"
 
-internal fun createPolicyManagementFirewallRule(schema: Schema): WorkflowDefinition {
-
-    val workflowName = "Create global firewall rule"
-
-    return customWorkflow<FirewallRule>(workflowName).withScriptFile("createFirewallRule") {
+internal fun createPolicyManagementFirewallRule(schema: Schema): WorkflowDefinition =
+    customWorkflow<FirewallRule>(createGlobalFirewallRuleWorkflowName).withScriptFile("createFirewallRule") {
         step("Parent") {
             parameter(parentConnectionField, Connection.reference) {
                 description = "Contrail connection in which the rule will be created"
@@ -62,13 +62,9 @@ internal fun createPolicyManagementFirewallRule(schema: Schema): WorkflowDefinit
         }
         firewallRuleParameters(schema, parentConnectionField, false)
     }
-}
 
-internal fun createProjectFirewallRule(schema: Schema): WorkflowDefinition {
-
-    val workflowName = "Create firewall rule in project"
-
-    return customWorkflow<FirewallRule>(workflowName).withScriptFile("createFirewallRule") {
+internal fun createProjectFirewallRule(schema: Schema): WorkflowDefinition =
+    customWorkflow<FirewallRule>(createWorkflowName<Project, FirewallRule>()).withScriptFile("createFirewallRule") {
         step("Parent") {
             parameter(parentProjectField, reference<Project>()) {
                 description = "Project this firewall rule will belong to"
@@ -80,13 +76,9 @@ internal fun createProjectFirewallRule(schema: Schema): WorkflowDefinition {
         }
         firewallRuleParameters(schema, parentProjectField, false)
     }
-}
 
-internal fun editFirewallRule(schema: Schema): WorkflowDefinition {
-
-    val workflowName = "Edit firewall rule"
-
-    return customWorkflow<FirewallRule>(workflowName).withScriptFile("editFirewallRule") {
+internal fun editFirewallRule(schema: Schema): WorkflowDefinition =
+    customWorkflow<FirewallRule>(editFirewallRuleWorkflowName).withScriptFile("editFirewallRule") {
         step("Rule") {
             parameter(rule, reference<FirewallRule>()) {
                 description = "Rule to edit"
@@ -96,7 +88,6 @@ internal fun editFirewallRule(schema: Schema): WorkflowDefinition {
         firewallRuleParameters(schema, rule, true)
 
     }
-}
 
 private fun PresentationParametersBuilder.firewallRuleParameters(schema: Schema, parentField: String, editing: Boolean) {
     val projectValidationDirectMode = !editing

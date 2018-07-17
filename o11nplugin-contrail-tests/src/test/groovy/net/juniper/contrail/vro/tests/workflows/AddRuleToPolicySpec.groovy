@@ -7,9 +7,11 @@ package net.juniper.contrail.vro.tests.workflows
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.NetworkPolicy
 
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.addRuleToNetworkPolicyWorkflowName
+
 class AddRuleToPolicySpec extends WorkflowSpec {
 
-    def addRuleToNetworkPolicy = workflowFromScript("Add rule to network policy")
+    def addRuleToNetworkPolicy = workflowFromScript(addRuleToNetworkPolicyWorkflowName)
 
     def someSimpleAction = "pass"
     def someProtocol = "tcp"
