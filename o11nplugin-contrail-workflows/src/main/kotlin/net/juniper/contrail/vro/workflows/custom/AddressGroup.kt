@@ -8,7 +8,11 @@ import net.juniper.contrail.api.types.AddressGroup
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.Tag
 import net.juniper.contrail.vro.config.addressGroupSubnets
+import net.juniper.contrail.vro.config.constants.addLabelToAddressGroupWorkflowName
+import net.juniper.contrail.vro.config.constants.addSubnetToAddressGroupWorkflowName
 import net.juniper.contrail.vro.config.constants.item
+import net.juniper.contrail.vro.config.constants.removeLabelFromAddressGroupWorkflowName
+import net.juniper.contrail.vro.config.constants.removeSubnetFromAddressGroupWorkflowName
 import net.juniper.contrail.vro.config.constants.subnet
 import net.juniper.contrail.vro.config.listLabelTags
 import net.juniper.contrail.vro.config.propertyValue
@@ -20,12 +24,13 @@ import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.util.propertyDescription
 
+// There is no good description of Address Group object in the schema.
 internal fun addSubnetToAddressGroupWorkflow(schema: Schema): WorkflowDefinition {
 
-    val workflowName = "Add subnet to address group"
+    val workflowName = addSubnetToAddressGroupWorkflowName
 
     return customWorkflow<AddressGroup>(workflowName).withScriptFile("addSubnetToAddressGroup") {
-        // There is no good description of Address Group object in the schema.
+
         parameter(item, reference<AddressGroup>()) {
             description = "Address Group to add subnet to"
             mandatory = true
@@ -38,8 +43,9 @@ internal fun addSubnetToAddressGroupWorkflow(schema: Schema): WorkflowDefinition
     }
 }
 
-internal fun removeSubnetFromAddressGroup(schema: Schema): WorkflowDefinition {
-    val workflowName = "Remove subnet from address group"
+internal fun removeSubnetFromAddressGroupWorkflow(schema: Schema): WorkflowDefinition {
+
+    val workflowName = removeSubnetFromAddressGroupWorkflowName
 
     return customWorkflow<AddressGroup>(workflowName).withScriptFile("removeSubnetFromAddressGroup") {
         parameter(item, reference<AddressGroup>()) {
@@ -56,7 +62,7 @@ internal fun removeSubnetFromAddressGroup(schema: Schema): WorkflowDefinition {
 }
 
 internal fun addLabelToAddressGroup(): WorkflowDefinition {
-    val workflowName = "Add label to Address Group"
+    val workflowName = addLabelToAddressGroupWorkflowName
 
     return customWorkflow<AddressGroup>(workflowName).withScriptFile("addLabelToAddressGroup") {
         parameter(item, reference<AddressGroup>()) {
@@ -74,7 +80,7 @@ internal fun addLabelToAddressGroup(): WorkflowDefinition {
 }
 
 internal fun removeLabelFromAddressGroup(): WorkflowDefinition {
-    val workflowName = "Remove label from Address Group"
+    val workflowName = removeLabelFromAddressGroupWorkflowName
 
     return customWorkflow<AddressGroup>(workflowName).withScriptFile("removeLabelFromAddressGroup") {
         parameter(item, reference<AddressGroup>()) {

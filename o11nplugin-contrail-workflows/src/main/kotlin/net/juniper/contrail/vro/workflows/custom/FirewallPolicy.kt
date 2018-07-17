@@ -12,12 +12,13 @@ import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.parentConnection
 import net.juniper.contrail.vro.workflows.model.reference
+import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
 import net.juniper.contrail.vro.workflows.util.childDescriptionInCreateRelation
 import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
 
 internal fun addFirewallRuleToFirewallPolicy(schema: Schema): WorkflowDefinition {
 
-    val workflowName = "Add firewall rule to firewall policy"
+    val workflowName = addRelationWorkflowName<FirewallPolicy, FirewallRule>()
 
     return customWorkflow<FirewallPolicy>(workflowName).withScriptFile("addFirewallRuleToFirewallPolicy") {
         parameter(item, reference<FirewallPolicy>()) {
