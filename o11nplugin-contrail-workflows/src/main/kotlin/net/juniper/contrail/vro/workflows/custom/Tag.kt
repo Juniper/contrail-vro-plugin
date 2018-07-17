@@ -7,6 +7,8 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.api.types.ConfigRoot
 import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.Tag
+import net.juniper.contrail.vro.config.constants.createGlobalTagWorkflowName
+import net.juniper.contrail.vro.config.constants.createTagInProjectWorkflowName
 import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.parent
@@ -29,7 +31,7 @@ internal fun createTagInProject(schema: Schema) =
 
 private fun createTag(schema: Schema, global: Boolean): WorkflowDefinition {
 
-    val workflowName = if (global) "Create global tag" else "Create tag in project"
+    val workflowName = if (global) createGlobalTagWorkflowName else createTagInProjectWorkflowName
     val scriptName = workflowName.toScriptName()
     val parentName = if (global) Connection else Project::class.java.simpleName
 

@@ -6,11 +6,13 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.NetworkPolicy
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.addRuleToNetworkPolicyWorkflowName
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.removeRuleFromNetworkPolicyWorkflowName
 
 class RemoveRuleFromPolicySpec extends WorkflowSpec {
 
-    def addPolicyRule = workflowFromScript("Add rule to network policy")
-    def removeRuleFromPolicy = workflowFromScript("Remove rule from network policy")
+    def addPolicyRule = workflowFromScript(addRuleToNetworkPolicyWorkflowName)
+    def removeRuleFromPolicy = workflowFromScript(removeRuleFromNetworkPolicyWorkflowName)
 
     def someSimpleAction = "pass"
     def someProtocol = "tcp"
