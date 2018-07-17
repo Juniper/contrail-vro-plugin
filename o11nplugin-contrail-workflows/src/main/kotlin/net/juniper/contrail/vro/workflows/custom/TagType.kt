@@ -6,20 +6,19 @@ package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.TagType
 import net.juniper.contrail.vro.config.constants.Connection
-import net.juniper.contrail.vro.config.constants.name
+import net.juniper.contrail.vro.config.constants.deleteTagTypeWorkflowName
 import net.juniper.contrail.vro.config.constants.item
+import net.juniper.contrail.vro.config.constants.name
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.defaultConnection
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.util.createRelationWorkflowName
 
-internal fun createTagType(): WorkflowDefinition {
-
-    val workflowName = "Create tag type"
-
-    return customWorkflow<TagType>(workflowName).withScriptFile("createTagType") {
+internal fun createTagType(): WorkflowDefinition =
+    customWorkflow<TagType>(createRelationWorkflowName<TagType>()).withScriptFile("createTagType") {
         parameter(name, string) {
             description = "Name of the tag type"
             mandatory = true
@@ -33,16 +32,11 @@ internal fun createTagType(): WorkflowDefinition {
             description = "Tag Type created in this workflow"
         }
     }
-}
 
-internal fun deleteTagType(): WorkflowDefinition {
-
-    val workflowName = "Delete tag type"
-
-    return customWorkflow<TagType>(workflowName).withScriptFile("deleteTagType") {
+internal fun deleteTagType(): WorkflowDefinition =
+    customWorkflow<TagType>(deleteTagTypeWorkflowName).withScriptFile("deleteTagType") {
         parameter(item, reference<TagType>()) {
             description = "Tag Type to delete"
             mandatory = true
         }
     }
-}

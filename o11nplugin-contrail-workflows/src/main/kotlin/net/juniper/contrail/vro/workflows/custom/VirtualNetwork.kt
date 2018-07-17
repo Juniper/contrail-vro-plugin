@@ -4,36 +4,40 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
-import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.NetworkPolicy
-import net.juniper.contrail.vro.config.propertyValue
+import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.asForwardRef
+import net.juniper.contrail.vro.config.constants.addSubnetToVirtualNetwork
 import net.juniper.contrail.vro.config.constants.child
-import net.juniper.contrail.vro.config.virtualNetworkSubnets
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
+import net.juniper.contrail.vro.config.constants.removeSubnetFromVirtualNetwork
+import net.juniper.contrail.vro.config.propertyValue
+import net.juniper.contrail.vro.config.virtualNetworkSubnets
+import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
+import net.juniper.contrail.vro.workflows.dsl.parentConnection
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
-import net.juniper.contrail.vro.schema.Schema
-import net.juniper.contrail.vro.workflows.dsl.parentConnection
-import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
 import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
 import net.juniper.contrail.vro.workflows.util.childDescriptionInCreateRelation
-import net.juniper.contrail.vro.workflows.util.removeRelationWorkflowName
-import net.juniper.contrail.vro.workflows.util.parentDescriptionInRemoveRelation
 import net.juniper.contrail.vro.workflows.util.childDescriptionInRemoveRelation
+import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
+import net.juniper.contrail.vro.workflows.util.parentDescriptionInRemoveRelation
+import net.juniper.contrail.vro.workflows.util.removeRelationWorkflowName
 
 val flatOnly = "flat-subnet-only"
 val userDefinedOnly = "user-defined-subnet-only"
 val flat = "flat-subnet"
 
 internal fun addPolicyToVirtualNetwork(schema: Schema): WorkflowDefinition {
-    val workflowName = schema.addRelationWorkflowName<VirtualNetwork, NetworkPolicy>()
+
+    val workflowName = addRelationWorkflowName<VirtualNetwork, NetworkPolicy>()
+
     return customWorkflow<VirtualNetwork>(workflowName).withScriptFile("addPolicyToVirtualNetwork") {
         parameter(item, reference<VirtualNetwork>()) {
             description = schema.parentDescriptionInCreateRelation<VirtualNetwork, NetworkPolicy>()
@@ -49,10 +53,9 @@ internal fun addPolicyToVirtualNetwork(schema: Schema): WorkflowDefinition {
 }
 
 internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
-
-    val workflowName = "Add subnet to virtual network"
-
     // Due to custom validation in Contrail UI the mandatory field is not extracted from schema
+
+    val workflowName = addSubnetToVirtualNetwork
 
     return customWorkflow<VirtualNetwork>(workflowName).withScriptFile("createSubnet") {
         step("References") {
@@ -73,7 +76,7 @@ internal fun createSubnetWorkflow(schema: Schema): WorkflowDefinition {
 
 internal fun addFlatIpamWorkflow(schema: Schema): WorkflowDefinition {
 
-    val workflowName = schema.addRelationWorkflowName<VirtualNetwork, NetworkIpam>()
+    val workflowName = addRelationWorkflowName<VirtualNetwork, NetworkIpam>()
 
     return customWorkflow<VirtualNetwork>(workflowName).withScriptFile("addFlatIpamToNetwork") {
         step("References") {
@@ -116,7 +119,7 @@ internal fun removeFlatIpamWorkflow(): WorkflowDefinition {
 
 internal fun deleteSubnetWorkflow(): WorkflowDefinition {
 
-    val workflowName = "Remove subnet from virtual network"
+    val workflowName = removeSubnetFromVirtualNetwork
 
     return customWorkflow<VirtualNetwork>(workflowName).withScriptFile("deleteSubnet") {
         parameter(item, reference<VirtualNetwork>()) {

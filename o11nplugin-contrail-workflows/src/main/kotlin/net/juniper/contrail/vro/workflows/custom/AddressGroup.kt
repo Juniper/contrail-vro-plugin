@@ -7,7 +7,9 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.api.types.AddressGroup
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.vro.config.addressGroupSubnets
+import net.juniper.contrail.vro.config.constants.addSubnetToAddressGroup
 import net.juniper.contrail.vro.config.constants.item
+import net.juniper.contrail.vro.config.constants.removeSubnetFromAddressGroup
 import net.juniper.contrail.vro.config.constants.subnet
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
@@ -17,12 +19,13 @@ import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.util.propertyDescription
 
+// There is no good description of Address Group object in the schema.
 internal fun addSubnetToAddressGroupWorkflow(schema: Schema): WorkflowDefinition {
 
-    val workflowName = "Add subnet to address group"
+    val workflowName = addSubnetToAddressGroup
 
     return customWorkflow<AddressGroup>(workflowName).withScriptFile("addSubnetToAddressGroup") {
-        // There is no good description of Address Group object in the schema.
+
         parameter(item, reference<AddressGroup>()) {
             description = "Address Group to add subnet to"
             mandatory = true
@@ -35,8 +38,9 @@ internal fun addSubnetToAddressGroupWorkflow(schema: Schema): WorkflowDefinition
     }
 }
 
-internal fun removeSubnetFromAddressGroup(schema: Schema): WorkflowDefinition {
-    val workflowName = "Remove subnet from address group"
+internal fun removeSubnetFromAddressGroupWorkflow(schema: Schema): WorkflowDefinition {
+
+    val workflowName = removeSubnetFromAddressGroup
 
     return customWorkflow<AddressGroup>(workflowName).withScriptFile("removeSubnetFromAddressGroup") {
         parameter(item, reference<AddressGroup>()) {

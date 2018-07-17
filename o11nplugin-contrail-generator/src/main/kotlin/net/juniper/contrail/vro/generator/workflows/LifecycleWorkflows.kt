@@ -4,10 +4,10 @@
 
 package net.juniper.contrail.vro.generator.workflows
 
-import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.allLowerCase
+import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.defaultConnection
@@ -27,20 +27,21 @@ import net.juniper.contrail.vro.config.parents
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.toPluginMethodName
 import net.juniper.contrail.vro.generator.model.Property
-import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.dsl.withScript
-import net.juniper.contrail.vro.workflows.dsl.workflow
-import net.juniper.contrail.vro.workflows.dsl.FromBooleanParameter
-import net.juniper.contrail.vro.workflows.dsl.NullStateOfProperty
-import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
-import net.juniper.contrail.vro.workflows.model.boolean
-import net.juniper.contrail.vro.workflows.model.reference
-import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.schema.createWorkflowDescription
 import net.juniper.contrail.vro.schema.propertyDescription
 import net.juniper.contrail.vro.schema.relationDescription
+import net.juniper.contrail.vro.workflows.dsl.FromBooleanParameter
+import net.juniper.contrail.vro.workflows.dsl.NullStateOfProperty
+import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
+import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.fromAction
+import net.juniper.contrail.vro.workflows.dsl.withScript
+import net.juniper.contrail.vro.workflows.dsl.workflow
+import net.juniper.contrail.vro.workflows.model.boolean
+import net.juniper.contrail.vro.workflows.model.reference
+import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.util.createWorkflowName
 
 fun createWorkflows(clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema): List<WorkflowDefinition> {
     val parentsInModel = clazz.numberOfParentsInModel
@@ -53,14 +54,7 @@ fun createWorkflows(clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema)
 
 fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass, parentsInModel: Int, hasRootParents: Boolean, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
 
-    val nonRootParents = parentsInModel > 0
-    val addInParent = (hasRootParents || parentsInModel > 1) &&
-        ! parentClazz.isPolicyManagement && ! parentClazz.isDefaultRoot
-    val addGlobal = (parentClazz.isDefaultRoot && nonRootParents) || parentClazz.isPolicyManagement
-
-    val workflowBaseName = "Create " + if (addGlobal) "global " else ""
-    val workflowNameSuffix = if (addInParent) " in ${parentClazz.allLowerCase}" else ""
-    val workflowName = workflowBaseName + clazz.allLowerCase + workflowNameSuffix
+    val workflowName = createWorkflowName(parentClazz, clazz, parentsInModel, hasRootParents)
     val parentName = if (parentClazz.isModelClass && ! parentClazz.isPolicyManagement)
         parentClazz.pluginName
     else

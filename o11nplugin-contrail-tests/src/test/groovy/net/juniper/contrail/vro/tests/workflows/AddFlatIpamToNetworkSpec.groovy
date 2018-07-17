@@ -5,11 +5,14 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
+import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.api.types.VirtualNetwork
+
+import static net.juniper.contrail.vro.workflows.util.DslUtilsKt.addRelationWorkflowName
 
 class AddFlatIpamToNetworkSpec extends WorkflowSpec {
 
-    def addFlatIpamToNetwork = workflowFromScript("Add network IPAM to virtual network")
+    def addFlatIpamToNetwork = workflowFromScript(addRelationWorkflowName(VirtualNetwork, NetworkIpam))
 
     def "Adding a network IPAM to a virtual network"() {
         given: "A correct set of attributes"

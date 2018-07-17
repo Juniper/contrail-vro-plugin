@@ -5,10 +5,13 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
+import net.juniper.contrail.api.types.ServiceTemplate
+
+import static net.juniper.contrail.vro.workflows.util.DslUtilsKt.createRelationWorkflowName
 
 class CreateServiceTemplateSpec extends WorkflowSpec {
 
-    def createServiceTemplate = workflowFromScript("Create service template")
+    def createServiceTemplate = workflowFromScript(createRelationWorkflowName(ServiceTemplate))
 
     def someName = "someName"
     def someVersion = 2

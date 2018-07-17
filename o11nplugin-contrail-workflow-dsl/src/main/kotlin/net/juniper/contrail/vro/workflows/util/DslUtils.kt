@@ -7,14 +7,16 @@ package net.juniper.contrail.vro.workflows.util
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.allLowerCase
+import net.juniper.contrail.vro.config.isDefaultRoot
+import net.juniper.contrail.vro.config.isPolicyManagement
 import net.juniper.contrail.vro.config.toTitle
-import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
-import net.juniper.contrail.vro.workflows.dsl.BasicBuilder
-import net.juniper.contrail.vro.workflows.dsl.PrimitiveParameterBuilder
 import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.schema.predefinedAnswers
 import net.juniper.contrail.vro.schema.propertyDescription
 import net.juniper.contrail.vro.schema.relationDescription
-import net.juniper.contrail.vro.schema.predefinedAnswers
+import net.juniper.contrail.vro.workflows.dsl.BasicBuilder
+import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
+import net.juniper.contrail.vro.workflows.dsl.PrimitiveParameterBuilder
 
 inline fun <reified Parent : Any>
     BasicParameterBuilder<*>.propertyDescription(
@@ -36,10 +38,16 @@ inline fun <reified Parent : Any> PrimitiveParameterBuilder<String>.extractPrede
     predefinedAnswers = schema.predefinedAnswers<Parent>(parameterName, mandatory, convertParameterNameToXsd)
 }
 
-inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> Schema.addRelationWorkflowName() =
+inline fun <reified Clazz : ApiObjectBase> createRelationWorkflowName() =
+    createRelationWorkflowName(Clazz::class.java)
+
+fun createRelationWorkflowName(clazz: Class<*>) =
+    "Create ${clazz.allLowerCase}"
+
+inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> addRelationWorkflowName() =
     addRelationWorkflowName(Parent::class.java, Child::class.java)
 
-fun Schema.addRelationWorkflowName(parentClazz: Class<*>, clazz: Class<*>) =
+fun addRelationWorkflowName(parentClazz: Class<*>, clazz: Class<*>) =
     "Add ${clazz.allLowerCase} to ${parentClazz.allLowerCase}"
 
 inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> removeRelationWorkflowName() =
@@ -73,3 +81,17 @@ inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> child
 
 fun childDescriptionInRemoveRelation(parentClazz: Class<*>, clazz: Class<*>) =
     "${clazz.allCapitalized} to be removed"
+
+inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> createWorkflowName(parentsInModel: Int = 0, hasRootParents: Boolean = false) =
+    createWorkflowName(Parent::class.java, Child::class.java, parentsInModel, hasRootParents)
+
+fun createWorkflowName(parentClazz: Class<*>, clazz: Class<*>, parentsInModel: Int = 0, hasRootParents: Boolean = false): String {
+    val nonRootParents = parentsInModel > 0
+    val addInParent = (hasRootParents || parentsInModel > 1) &&
+        ! parentClazz.isPolicyManagement && ! parentClazz.isDefaultRoot
+    val addGlobal = (parentClazz.isDefaultRoot && nonRootParents) || parentClazz.isPolicyManagement
+
+    val workflowBaseName = "Create " + if (addGlobal) "global " else ""
+    val workflowNameSuffix = if (addInParent) " in ${parentClazz.allLowerCase}" else ""
+    return workflowBaseName + clazz.allLowerCase + workflowNameSuffix
+}
