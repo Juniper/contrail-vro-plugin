@@ -9,15 +9,15 @@ import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.withComplexParameters
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
+import net.juniper.contrail.vro.workflows.model.string
 
-val workflowId = 99
 val start = 1
 val choice1 = 2
 val choice2 = 3
+val workflowDefinitions = mutableListOf<WorkflowDefinition>()
 
 fun someComplexWorkflow() : WorkflowDefinition {
-    val workflowDefinitions = mutableListOf<WorkflowDefinition>()
-    return workflow("Some complex workflow").withComplexParameters(workflowId, workflowDefinitions) {
+    return workflow("Some complex workflow").withComplexParameters(start, workflowDefinitions) {
 
         choice(start, choice1, "Do you want to go back to start?") {
             option("Yes!", start)
@@ -37,3 +37,16 @@ fun someComplexWorkflow() : WorkflowDefinition {
 }
 
 fun someSimpleWorkflow() : WorkflowDefinition = workflow("Some simple workflow").withScript("") { }
+
+fun someWorkflowWithInputItem(attributeNames: List<String> = listOf("attribute1")): WorkflowDefinition {
+    return workflow("Some workflow with inputItem").withComplexParameters(start, workflowDefinitions) {
+
+        //The Attribute type here is arbitrary but has to be the same for all attributes because the parameter() function doesn't support polymorphism dependent on type.
+        attributeNames.forEach { attribute(it, string) }
+
+        addWorkflowItemWithAttributes(start, END.id) {
+            attributeNames.forEach { parameter(it, string) {} }
+        }
+
+    }
+}
