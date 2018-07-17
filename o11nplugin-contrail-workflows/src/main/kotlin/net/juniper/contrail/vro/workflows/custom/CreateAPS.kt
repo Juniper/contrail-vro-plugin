@@ -27,6 +27,7 @@ val addRule = 6
 val addNewPolicy = 7
 val addPolicy = 8
 val addTag = 9
+val inputItem = 10
 
 val resultAps = "resultAps"
 val theProject = "projectAttribute"
@@ -34,15 +35,17 @@ val resultFirewallPolicy = "resultFirewallPolicy"
 val resultFirewallRule = "resultFirewallRule"
 
 internal fun createAPS(workflowDefinitions: List<WorkflowDefinition>): WorkflowDefinition =
-    workflow(createApplicationPolicySetWithFirewallPoliciesInProjectWorkflowName).withComplexParameters(apsCreationWorkflow, workflowDefinitions) {
-        //create new user interaction which asks for projectAttribute
-
+    workflow(createApplicationPolicySetWithFirewallPoliciesInProjectWorkflowName).withComplexParameters(inputItem, workflowDefinitions) {
         attribute(resultAps, reference<ApplicationPolicySet>())
         attribute(resultFirewallPolicy, reference<FirewallPolicy>())
         attribute(resultFirewallRule, reference<FirewallRule>())
         attribute(theProject, reference<Project>())
 
-        workflowInvocation(apsCreationWorkflow, mainMenu, createWorkflowName<Project, ApplicationPolicySet>()) {
+        addWorkflowItemWithAttributes(inputItem, apsCreationWorkflow) {
+            parameter(theProject, reference<Project>()) {}
+        }
+
+        workflowInvocation(apsCreationWorkflow, mainMenu, "Create application policy set in project") {
             inputBind("parent", theProject)
             outputBind("item", resultAps)
         }
