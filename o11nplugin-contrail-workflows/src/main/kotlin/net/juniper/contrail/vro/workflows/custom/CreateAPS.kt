@@ -8,11 +8,17 @@ import net.juniper.contrail.api.types.ApplicationPolicySet
 import net.juniper.contrail.api.types.FirewallPolicy
 import net.juniper.contrail.api.types.FirewallRule
 import net.juniper.contrail.api.types.Project
+import net.juniper.contrail.api.types.Tag
+import net.juniper.contrail.vro.config.constants.createApplicationPolicySetInProjectWorkflowName
+import net.juniper.contrail.vro.config.constants.createApplicationPolicySetWithFirewallPoliciesInProjectWorkflowName
+import net.juniper.contrail.vro.config.constants.createFirewallPolicyInProjectWorkflowName
+import net.juniper.contrail.vro.config.constants.createFirewallRuleInProjectWorkflowName
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.dsl.workflowEndItemId
 import net.juniper.contrail.vro.workflows.dsl.withComplexParameters
 import net.juniper.contrail.vro.workflows.dsl.workflow
+import net.juniper.contrail.vro.workflows.dsl.workflowEndItemId
 import net.juniper.contrail.vro.workflows.model.reference
+import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
 
 val apsCreationWorkflow = 1
 val mainMenu = 2
@@ -30,13 +36,15 @@ val resultFirewallPolicy = "resultFirewallPolicy"
 val resultFirewallRule = "resultFirewallRule"
 
 internal fun createAPS(workflowDefinitions: List<WorkflowDefinition>): WorkflowDefinition =
-    workflow("Create application policy set with firewall policies in project").withComplexParameters(apsCreationWorkflow, workflowDefinitions) {
+    workflow(createApplicationPolicySetWithFirewallPoliciesInProjectWorkflowName).withComplexParameters(apsCreationWorkflow, workflowDefinitions) {
+        //create new user interaction which asks for projectAttribute
+
         attribute(resultAps, reference<ApplicationPolicySet>())
         attribute(resultFirewallPolicy, reference<FirewallPolicy>())
         attribute(resultFirewallRule, reference<FirewallRule>())
         attribute(theProject, reference<Project>())
 
-        workflowInvocation(apsCreationWorkflow, mainMenu, "Create application policy set in project") {
+        workflowInvocation(apsCreationWorkflow, mainMenu, createApplicationPolicySetInProjectWorkflowName) {
             inputBind("parent", theProject)
             outputBind("item", resultAps)
         }
@@ -46,7 +54,7 @@ internal fun createAPS(workflowDefinitions: List<WorkflowDefinition>): WorkflowD
             option("Add existing firewall policy", addPolicy)
             option("Add tag", addTag)
         }
-        workflowInvocation(newFirewallPolicy, addRuleMenu, "Create firewall policy in project") {
+        workflowInvocation(newFirewallPolicy, addRuleMenu, createFirewallPolicyInProjectWorkflowName) {
             inputBind("parent", theProject)
             outputBind("item", resultFirewallPolicy)
         }
@@ -54,22 +62,22 @@ internal fun createAPS(workflowDefinitions: List<WorkflowDefinition>): WorkflowD
             option("Yes", createRule)
             option("No", addNewPolicy)
         }
-        workflowInvocation(createRule, addRule, "Create firewall rule in project") {
+        workflowInvocation(createRule, addRule, createFirewallRuleInProjectWorkflowName) {
             inputBind("parent", theProject)
             outputBind("rule", resultFirewallRule)
         }
-        workflowInvocation(addRule, addRuleMenu, "Add firewall rule to firewall policy") {
+        workflowInvocation(addRule, addRuleMenu, addRelationWorkflowName<FirewallPolicy, FirewallRule>()) {
             inputBind("item", resultFirewallPolicy)
             inputBind("child", resultFirewallRule)
         }
-        workflowInvocation(addNewPolicy, mainMenu, "Add firewall policy to application policy set") {
+        workflowInvocation(addNewPolicy, mainMenu, addRelationWorkflowName<ApplicationPolicySet, FirewallPolicy>()) {
             inputBind("item", resultAps)
             inputBind("child", resultFirewallPolicy)
         }
-        workflowInvocation(addPolicy, mainMenu, "Add firewall policy to application policy set") {
+        workflowInvocation(addPolicy, mainMenu, addRelationWorkflowName<ApplicationPolicySet, FirewallPolicy>()) {
             inputBind("item", resultAps)
         }
-        workflowInvocation(addTag, mainMenu, "Add tag to application policy set") {
+        workflowInvocation(addTag, mainMenu, addRelationWorkflowName<ApplicationPolicySet, Tag>()) {
             inputBind("item", resultAps)
         }
     }

@@ -6,11 +6,14 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.PortTuple
+import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualMachineInterface
+
+import static net.juniper.contrail.vro.workflows.util.DslUtilsKt.addRelationWorkflowName
 
 class AddPortTupleToServiceInstanceSpec extends WorkflowSpec {
 
-    def addPortTupleToServiceInstance = workflowFromScript("Add port tuple to service instance")
+    def addPortTupleToServiceInstance = workflowFromScript(addRelationWorkflowName(ServiceInstance, PortTuple))
 
     def somePortTupleName = "somePortTupleName"
 

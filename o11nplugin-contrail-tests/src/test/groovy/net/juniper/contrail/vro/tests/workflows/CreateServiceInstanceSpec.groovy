@@ -5,10 +5,13 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
+import net.juniper.contrail.api.types.ServiceInstance
+
+import static net.juniper.contrail.vro.workflows.util.DslUtilsKt.createRelationWorkflowName
 
 class CreateServiceInstanceSpec extends WorkflowSpec {
 
-    def createServiceInstance = workflowFromScript("Create service instance")
+    def createServiceInstance = workflowFromScript(createRelationWorkflowName(ServiceInstance))
 
     def someInstanceName = "someInstanceName"
     def someVirtualRouterId = null
