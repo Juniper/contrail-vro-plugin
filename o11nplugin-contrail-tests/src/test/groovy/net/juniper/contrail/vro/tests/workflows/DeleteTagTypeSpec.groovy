@@ -6,10 +6,11 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.TagType
+import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.deleteTagTypeWorkflowName
 
 class DeleteTagTypeSpec extends WorkflowSpec {
 
-    def deleteTagType = workflowFromScript("Delete tag type")
+    def deleteTagType = workflowFromScript(deleteTagTypeWorkflowName)
 
     def "Deleting tag type"() {
         given:

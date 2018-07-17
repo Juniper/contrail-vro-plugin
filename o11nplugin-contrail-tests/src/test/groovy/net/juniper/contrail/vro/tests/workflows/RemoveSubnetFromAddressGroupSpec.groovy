@@ -2,11 +2,15 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.AddressGroup
+import net.juniper.contrail.api.types.Subnet
+
+import static net.juniper.contrail.vro.workflows.util.DslUtilsKt.addRelationWorkflowName
+import static net.juniper.contrail.vro.workflows.util.DslUtilsKt.removeRelationWorkflowName
 
 class RemoveSubnetFromAddressGroupSpec extends WorkflowSpec {
 
-    def addSubnetToAddressGroup = workflowFromScript("Add subnet to address group")
-    def removeSubnetFromAddressGroup = workflowFromScript("Remove subnet from address group")
+    def addSubnetToAddressGroup = workflowFromScript(addRelationWorkflowName(AddressGroup, Subnet))
+    def removeSubnetFromAddressGroup = workflowFromScript(removeRelationWorkflowName(AddressGroup, Subnet))
 
     def somePrefix = "1.2.3.4"
     def somePrefixLen = 16
