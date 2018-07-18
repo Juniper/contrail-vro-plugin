@@ -42,6 +42,7 @@ val ipamHasNotAllocationMode = "ipamHasNotAllocationMode"
 val networkHasNotAllcationMode = "networkHasNotAllocationMode"
 val listElementProperty = "listElementProperty"
 val listTagTypes = "listTagTypes"
+val listLabelTags = "listLabelTags"
 val matchesSecurityScope = "matchesSecurityScope"
 val defaultConnection = "defaultConnection"
 

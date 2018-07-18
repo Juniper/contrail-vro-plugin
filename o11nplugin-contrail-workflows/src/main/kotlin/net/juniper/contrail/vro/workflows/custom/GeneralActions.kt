@@ -4,10 +4,12 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
+import net.juniper.contrail.api.types.Tag
 import net.juniper.contrail.vro.config.constants.element
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.listTagTypes
 import net.juniper.contrail.vro.config.propertyNotNull
+import net.juniper.contrail.vro.config.listLabelTags
 import net.juniper.contrail.vro.config.listElementProperty
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.config.readSubnet
@@ -15,6 +17,7 @@ import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.boolean
+import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
 
 private val parameterPath = "parameterPath"
@@ -60,6 +63,14 @@ val listElementPropertyAction = ActionDefinition(
 val listTagTypesAction = ActionDefinition (
     name = listTagTypes,
     resultType = string.array,
+    parameters = listOf(
+        item ofType any
+    )
+)
+
+val listLabelTags = ActionDefinition (
+    name = listLabelTags,
+    resultType = reference<Tag>().array,
     parameters = listOf(
         item ofType any
     )
