@@ -11,11 +11,29 @@ import javax.xml.bind.annotation.XmlAttribute
 import javax.xml.bind.annotation.XmlElement
 import javax.xml.bind.annotation.XmlType
 
+data class AttributeDefinition(
+    val name: String,
+    val type: ParameterType<Any>,
+    val description: String? = null,
+    val readOnly: Boolean = false
+) {
+    fun toAttribute() = Attribute(
+        name,
+        type,
+        description,
+        readOnly
+    )
+}
+
+val List<AttributeDefinition>.asAttributes get() =
+    map { it.toAttribute() }
+
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
     name = "attributeType",
     propOrder = ["description"]
 )
+
 class Attribute(
     name: String,
     type: ParameterType<Any>,

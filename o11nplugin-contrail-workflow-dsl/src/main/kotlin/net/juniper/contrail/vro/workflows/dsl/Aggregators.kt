@@ -31,3 +31,13 @@ class BindAggregator {
     val inBinds: Map<String, String> = _inBinds
     val outBinds: Map<String, String> = _outBinds
 }
+
+@WorkflowBuilder
+class OutputAggregator {
+    private val _output: MutableMap<String, String> = mutableMapOf()
+    fun output(attribute: String, name: String) {
+        _output[attribute] = name
+    }
+
+    val outputs: Map<String, String> = _output
+}

@@ -5,26 +5,29 @@
 package net.juniper.contrail.vro.workflows.dsl
 
 import net.juniper.contrail.vro.config.constants.basePackageName
-import net.juniper.contrail.vro.workflows.model.Attribute
+import net.juniper.contrail.vro.workflows.model.AttributeDefinition
 import net.juniper.contrail.vro.workflows.model.Bind
 import net.juniper.contrail.vro.workflows.model.Binding
-import net.juniper.contrail.vro.workflows.model.DefaultCondition
-import net.juniper.contrail.vro.workflows.model.EqualsCondition
+import net.juniper.contrail.vro.workflows.model.DefaultConditionDefinition
+import net.juniper.contrail.vro.workflows.model.EqualsConditionDefinition
 import net.juniper.contrail.vro.workflows.model.Parameter
 import net.juniper.contrail.vro.workflows.model.ParameterType
+import net.juniper.contrail.vro.workflows.model.Script
 import net.juniper.contrail.vro.workflows.model.WorkflowItemDefinition
 import net.juniper.contrail.vro.workflows.model.bindAttributes
+import net.juniper.contrail.vro.workflows.model.existsConnectedToEnd
+import net.juniper.contrail.vro.workflows.model.replaceEndLabels
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.model.toFullItemId
 import net.juniper.contrail.vro.workflows.util.generateID
 
 // TODO: Attributes input (set values of global attributes without invoking any workflow)
-// TODO: Output parameters (I see no way to do this other than dummy script object with relevant bindings)
 @WorkflowBuilder
 class ComplexWorkflowBuilder(
     private val workflowDefinitions: List<WorkflowDefinition>,
     val items: MutableList<WorkflowItemDefinition> = mutableListOf(),
-    val attributes: MutableList<Attribute> = mutableListOf()
+    val attributes: MutableList<AttributeDefinition> = mutableListOf(),
+    val outputParameters: MutableList<ParameterInfo> = mutableListOf()
 ) {
     private var baseFreeId = 1000000
     private fun nextId(): Int {
@@ -33,7 +36,7 @@ class ComplexWorkflowBuilder(
     }
 
     fun <T : Any> attribute (attributeName: String, attributeType: ParameterType<T>, description: String? = null) {
-        attributes.add(Attribute(attributeName, attributeType, description))
+        attributes.add(AttributeDefinition(attributeName, attributeType, description))
     }
 
     fun workflowInvocation(itemId: Int, outItemId: Int, workflowName: String, workflowPackage: String = basePackageName, setup: BindAggregator.() -> Unit) {
@@ -58,6 +61,7 @@ class ComplexWorkflowBuilder(
             outputMapping,
             attributePrefix
         )
+
         val newAttributes = invocationParameters.newAttributes
         val workflowInputBinding = invocationParameters.workflowInputBinding
         val workflowOutputBinding = invocationParameters.workflowOutputBinding
@@ -98,7 +102,7 @@ class ComplexWorkflowBuilder(
         val options = aggregator.choices
 
         val decisionInput = "Decision_$itemId"
-        attributes.add(Attribute(decisionInput, string))
+        attributes.add(AttributeDefinition(decisionInput, string))
 
         items.add(inputWorkflowItem(
             itemId,
@@ -112,19 +116,62 @@ class ComplexWorkflowBuilder(
                 predefinedAnswers = options.map { it.name }
             }
         })
+        val conditions = options.map {
+            EqualsConditionDefinition(decisionInput, it.name, string, it.targetId.toFullItemId)
+        } + DefaultConditionDefinition(defaultOut.toFullItemId)
+
         items.add(switchWorkflowItem(
             switchId,
             Binding(listOf(Bind(decisionInput, string, decisionInput))),
-            options.map {
-                EqualsCondition(decisionInput, it.name, string, it.targetId.toFullItemId)
-            } + DefaultCondition(defaultOut.toFullItemId)
+            conditions
+        ))
+    }
+
+    fun automaticWorkflowOutput(setup: OutputAggregator.() -> Unit) {
+        val itemsConnectedToEnd = items.filter { it.isConnectedToEnd() }
+        val itemsWithConditionToEnd = items.filter { it.withConditionToEnd() }
+        if (itemsConnectedToEnd.isEmpty() && itemsWithConditionToEnd.isEmpty()) throw IllegalStateException("There are no workflowItems connected to EndItem")
+
+        val itemId = nextId()
+
+        val newItems = items.map {
+            when {
+                it.isConnectedToEnd() -> it.copy(outItemId = itemId)
+                it.withConditionToEnd() -> it.copy(conditions = it.conditions!!.replaceEndLabels(itemId))
+                else -> it
+            }
+        }
+
+        items.clear()
+        items.addAll(newItems)
+        workflowOutput(itemId, setup)
+    }
+
+    private fun workflowOutput(itemId: Int, setup: OutputAggregator.() -> Unit) {
+        val aggregator = OutputAggregator().apply(setup)
+        val outputs = aggregator.outputs
+        val attributeNames = attributes.map { it.name }
+        val outputAttributeNames = outputs.keys
+        if (!outputAttributeNames.all { it in attributeNames }) throw IllegalArgumentException("Given attributes don't exist in this workflow")
+
+        val attributesToBind = attributes.filter { it.name in outputAttributeNames }
+        attributesToBind.forEach { outputParameters.add(ParameterInfo(outputs[it.name]!!, it.type)) }
+        val inputBinds = Binding(attributesToBind.map { Bind(it.name, it.type, it.name, "" ) })
+        val outputBinds = Binding(attributesToBind.map { Bind(it.name, it.type, outputs[it.name]!!, "") })
+
+        items.add(scriptWorkflowItem(
+            itemId,
+            Script(""),
+            inputBinds,
+            outputBinds,
+            workflowEndItemId
         ))
     }
 
     class WorkflowInvocationParameters(
         val workflowInputBinding: Binding,
         val workflowOutputBinding: Binding,
-        val newAttributes: List<Attribute>
+        val newAttributes: List<AttributeDefinition>
     )
 
     private fun prepareWorkflowInvocationParameters(
@@ -151,6 +198,7 @@ class ComplexWorkflowBuilder(
             }
 
         val workflowInputBinding = Binding(interactionParamBinds + externalBinds)
+
         val workflowOutputBinding = Binding(
             boundOutputParams.map {
                 val exportName = outputMapping[it.name]!!
@@ -160,12 +208,12 @@ class ComplexWorkflowBuilder(
         val newInputAttributes =
             unboundInputParams.map {
                 val attributeName = attributeName(attributePrefix, it.name)
-                it.asAttribute(attributeName)
+                it.asAttributeDefinition(attributeName)
             }
         val newOutputAttributes =
             unboundOutputParams.map {
                 val attributeName = attributeName(attributePrefix, it.name)
-                it.asAttribute(attributeName)
+                it.asAttributeDefinition(attributeName)
             }
 
         return WorkflowInvocationParameters(
@@ -179,12 +227,16 @@ class ComplexWorkflowBuilder(
 
     private fun Parameter.asBindWithExportName(exportName: String) = toParameterInfo().asBindWithExportName(exportName)
 
-    private fun Parameter.asAttribute(attributeName: String): Attribute {
+    private fun Parameter.asAttributeDefinition(attributeName: String): AttributeDefinition {
         val parameterInfo = toParameterInfo()
-        return Attribute(
+        return AttributeDefinition(
             attributeName,
             parameterInfo.type,
             parameterInfo.description
         )
     }
+
+    private fun WorkflowItemDefinition.isConnectedToEnd() = outItemId == workflowEndItemId
+
+    private fun WorkflowItemDefinition.withConditionToEnd() = conditions != null && conditions.existsConnectedToEnd
 }
