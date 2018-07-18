@@ -11,6 +11,7 @@ import net.juniper.contrail.api.types.ServiceGroup
 import net.juniper.contrail.api.types.VirtualMachineInterface
 import net.juniper.contrail.api.types.ServiceTemplate
 import net.juniper.contrail.api.types.ServiceInstance
+import net.juniper.contrail.api.types.Tag
 import net.juniper.contrail.api.types.TagType
 
 // To reduce complexity of one class, the functionality has been split between multiple simpler classes.
@@ -50,6 +51,9 @@ FirewallRuleComplexProperties by FirewallRuleComplexPropertyExecutor(connection)
 
     fun Connection.listTagTypes(): List<String> =
         list<TagType>()?.asSequence()?.map { it.name }?.sorted()?.toList() ?: emptyList()
+
+    fun Connection.listLabels(): List<Tag> =
+        list<Tag>()?.asSequence()?.map { it.also { read(it) } }?.filter { it.typeName == "label" }?.toList() ?: emptyList()
 
     fun ServiceGroup.servicePropertyProtocol(ruleString: String): String? =
         findService(ruleString)?.protocol
