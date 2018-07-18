@@ -16,6 +16,7 @@ if(matchTags != null) {
 rule.setMatchTags(mTags);
 
 if(serviceType == "manual") {
+    rule.clearServiceGroup();
     var service = new ContrailFirewallServiceType();
     service.setProtocol(serviceProtocol);
     service.setSrcPorts(ContrailUtils.parsePortsOfFirewallRule(serviceSrcPorts));
