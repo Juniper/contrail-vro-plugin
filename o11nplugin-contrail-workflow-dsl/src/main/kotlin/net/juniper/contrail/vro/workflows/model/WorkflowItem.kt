@@ -17,6 +17,42 @@ import javax.xml.bind.annotation.XmlType
     name = "workflow-itemType",
     propOrder = ["displayName", "script", "inBinding", "outBinding", "conditions", "presentation", "position"]
 )
+
+data class WorkflowItemDefinition(
+    val id: Int,
+    val type: WorkflowItemType,
+    val position: Position,
+    val displayName: String? = null,
+    val script: Script? = null,
+    val inBinding: Binding? = null,
+    val outBinding: Binding? = null,
+    val outItemId: Int? = null,
+    val conditions: List<ConditionDefinition>? = null,
+    val presentation: Presentation? = null,
+    val linkedWorkflowId: String? = null
+) {
+    fun toWorkflowItem(): WorkflowItem {
+        val conditions = conditions?.toConditions
+        val tempScript: Script? = script ?: if (conditions != null && type == WorkflowItemType.switch) generateSwitchScript(conditions) else null
+        return WorkflowItem (
+            id,
+            type,
+            position,
+            displayName,
+            tempScript,
+            inBinding,
+            outBinding,
+            outItemId,
+            conditions,
+            presentation,
+            linkedWorkflowId
+        )
+    }
+}
+
+val List<WorkflowItemDefinition>.toWorkflowItems get() =
+    map { it.toWorkflowItem() }
+
 class WorkflowItem(
     id: Int,
     type: WorkflowItemType,
