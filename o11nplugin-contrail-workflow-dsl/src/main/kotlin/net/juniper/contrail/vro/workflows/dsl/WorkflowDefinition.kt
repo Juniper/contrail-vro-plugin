@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.workflows.dsl
 
 import net.juniper.contrail.vro.workflows.model.Attribute
+import net.juniper.contrail.vro.workflows.model.AttributeDefinition
 import net.juniper.contrail.vro.workflows.model.Binding
 import net.juniper.contrail.vro.workflows.model.ParameterSet
 import net.juniper.contrail.vro.workflows.model.Position
@@ -16,7 +17,8 @@ import net.juniper.contrail.vro.workflows.model.Workflow
 import net.juniper.contrail.vro.workflows.model.WorkflowItem
 import net.juniper.contrail.vro.workflows.model.WorkflowItemDefinition
 import net.juniper.contrail.vro.workflows.model.WorkflowItemType
-import net.juniper.contrail.vro.workflows.model.asWorkflowItem
+import net.juniper.contrail.vro.workflows.model.asAttributes
+import net.juniper.contrail.vro.workflows.model.asWorkflowItems
 import net.juniper.contrail.vro.workflows.util.generateID
 
 data class WorkflowDefinition(
@@ -108,7 +110,7 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
     val parameters = mutableListOf<ParameterInfo>()
     val allParameters = mutableListOf<ParameterInfo>()
     val outputParameters = mutableListOf<ParameterInfo>()
-    val attributes = mutableListOf<Attribute>()
+    val attributes = mutableListOf<AttributeDefinition>()
 
     val builder = PresentationParametersBuilder(steps, parameters, allParameters, outputParameters, attributes).apply(setup)
 
@@ -127,7 +129,7 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
     val verticalTranslation = 0f
 
     val fixedPositionItems = fixItemsPositions(workflowItemsDefinitions, horizontalTranslation, verticalTranslation)
-    val workflowItems = fixedPositionItems.map { it.asWorkflowItem() }
+    val workflowItems = fixedPositionItems.asWorkflowItems
 
     return copy(
         presentation = presentation,
@@ -135,7 +137,7 @@ fun WorkflowDefinition.withScript(scriptBody: String, setup: ParameterDefinition
         references = allParameters.asReferences,
         input = allParameters.asParameterSet,
         output = outputParameters.asParameterSet,
-        attributes = attributes,
+        attributes = attributes.asAttributes,
         rootId = scriptItemId
     )
 }
@@ -147,6 +149,7 @@ fun WorkflowDefinition.withComplexParameters(rootItemId: Int, workflowDefinition
     val builder = ComplexWorkflowBuilder(workflowDefinitions).apply(setup)
     val items = builder.items
     val attributes = builder.attributes
+    val outputParameters = builder.outputParameters
 
     items.add(END)
 
@@ -157,15 +160,15 @@ fun WorkflowDefinition.withComplexParameters(rootItemId: Int, workflowDefinition
     val horizontalTranslation = 75.0f
     val verticalTranslation = 70.0f
     val fixedPositionItems = fixItemsPositions(items, horizontalTranslation, verticalTranslation)
-    val workflowItems = fixedPositionItems.map { it.asWorkflowItem() }
+    val workflowItems = fixedPositionItems.asWorkflowItems
 
     return copy(
         presentation = initialPresentation,
         workflowItems = workflowItems,
         references = listOf(),
         input = initialInput.asParameterSet,
-        output = listOf<ParameterInfo>().asParameterSet,
-        attributes = attributes,
+        output = outputParameters.asParameterSet,
+        attributes = attributes.asAttributes,
         rootId = rootItemId
     ).inCategory("Complex Examples")
 }
