@@ -6,9 +6,12 @@ package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.AddressGroup
 import net.juniper.contrail.api.types.IpamSubnetType
+import net.juniper.contrail.api.types.Tag
 import net.juniper.contrail.vro.config.addressGroupSubnets
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.subnet
+import net.juniper.contrail.vro.config.listLabelTags
+import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
@@ -48,6 +51,42 @@ internal fun removeSubnetFromAddressGroup(schema: Schema): WorkflowDefinition {
             description = "Subnet to remove"
             mandatory = true
             predefinedAnswersFrom = actionCallTo(addressGroupSubnets).parameter(item)
+        }
+    }
+}
+
+internal fun addLabelToAddressGroup(): WorkflowDefinition {
+    val workflowName = "Add label to Address Group"
+
+    return customWorkflow<AddressGroup>(workflowName).withScriptFile("addLabelToAddressGroup") {
+        parameter(item, reference<AddressGroup>()) {
+            description = "Address Group to add label to"
+            mandatory = true
+        }
+        parameter("label", reference<Tag>()) {
+            description = "Label to add"
+            mandatory = true
+            visibility = WhenNonNull(item)
+            validWhen = matchesSecurityScope(item, false)
+            listedBy = actionCallTo(listLabelTags).parameter(item)
+        }
+    }
+}
+
+internal fun removeLabelFromAddressGroup(): WorkflowDefinition {
+    val workflowName = "Remove label from Address Group"
+
+    return customWorkflow<AddressGroup>(workflowName).withScriptFile("removeLabelFromAddressGroup") {
+        parameter(item, reference<AddressGroup>()) {
+            description = "Address Group to remove label from"
+            mandatory = true
+        }
+        parameter("label", reference<Tag>()) {
+            description = "Label to remove"
+            mandatory = true
+            visibility = WhenNonNull(item)
+            validWhen = matchesSecurityScope(item, false)
+            listedBy = actionCallTo(propertyValue).parameter(item).string("tag")
         }
     }
 }
