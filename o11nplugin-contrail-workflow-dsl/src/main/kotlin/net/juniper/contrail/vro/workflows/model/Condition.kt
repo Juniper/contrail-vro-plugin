@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.model
 
+import net.juniper.contrail.vro.workflows.dsl.workflowEndItemId
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
@@ -12,6 +13,62 @@ import javax.xml.bind.annotation.XmlValue
 
 val equalsComparator = "0"
 val defaultComparator = "6"
+
+abstract class ConditionDefinition (
+    val name: String,
+    val type: ParameterType<Any>,
+    val comparator: String,
+    val label: String,
+    val value: String
+) {
+    abstract fun toCondition(): Condition
+    abstract fun newTargetId(newId: String): ConditionDefinition
+    fun isConnectedToEnd() = label == workflowEndItemId.toFullItemId
+}
+
+val List<ConditionDefinition>.toConditions get() =
+    map { it.toCondition() }
+
+val List<ConditionDefinition>.existsConnectedToEnd get() =
+    any { it.isConnectedToEnd() }
+
+class EqualsConditionDefinition(val _name: String, val _value: String, val _type: ParameterType<Any>, val _targetId: String) : ConditionDefinition(
+    _name,
+    _type,
+    equalsComparator,
+    _targetId,
+    _value
+) {
+    override fun toCondition() = EqualsCondition(
+        name,
+        value,
+        type,
+        label
+    )
+
+    override fun newTargetId(newId: String) = EqualsConditionDefinition(
+        _name,
+        _value,
+        _type,
+        newId
+    )
+}
+
+class DefaultConditionDefinition(val _targetId: String) : ConditionDefinition(
+    "",
+    boolean,
+    defaultComparator,
+    _targetId,
+    ""
+) {
+    override fun toCondition() = DefaultCondition(
+        _targetId
+    )
+
+    override fun newTargetId(newId: String) = DefaultConditionDefinition(
+        newId
+    )
+}
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(
