@@ -78,4 +78,7 @@ internal fun createAPS(workflowDefinitions: List<WorkflowDefinition>): WorkflowD
         workflowInvocation(addTag, mainMenu, addRelationWorkflowName<ApplicationPolicySet, Tag>()) {
             inputBind("item", resultAps)
         }
+        automaticWorkflowOutput {
+            output(resultAps, "resultItem")
+        }
     }

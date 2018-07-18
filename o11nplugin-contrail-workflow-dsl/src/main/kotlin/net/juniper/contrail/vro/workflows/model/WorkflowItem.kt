@@ -6,11 +6,18 @@ package net.juniper.contrail.vro.workflows.model
 
 import net.juniper.contrail.vro.config.CDATA
 import net.juniper.contrail.vro.config.constants.item
+import net.juniper.contrail.vro.workflows.dsl.workflowEndItemId
 import javax.xml.bind.annotation.XmlAccessType
 import javax.xml.bind.annotation.XmlAccessorType
 import javax.xml.bind.annotation.XmlAttribute
 import javax.xml.bind.annotation.XmlElement
 import javax.xml.bind.annotation.XmlType
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(
+    name = "workflow-itemType",
+    propOrder = ["displayName", "script", "inBinding", "outBinding", "conditions", "presentation", "position"]
+)
 
 data class WorkflowItemDefinition(
     val id: Int,
@@ -21,32 +28,39 @@ data class WorkflowItemDefinition(
     val inBinding: Binding? = null,
     val outBinding: Binding? = null,
     val outItemId: Int? = null,
-    val conditions: List<Condition>? = null,
+    val conditions: List<ConditionDefinition>? = null,
     val presentation: Presentation? = null,
     val linkedWorkflowId: String? = null
-)
-
-fun WorkflowItemDefinition.asWorkflowItem(): WorkflowItem {
-    return WorkflowItem(
-        id,
-        type,
-        position,
-        displayName,
-        script,
-        inBinding,
-        outBinding,
-        outItemId,
-        conditions,
-        presentation,
-        linkedWorkflowId
-    )
+) {
+    fun asWorkflowItem(): WorkflowItem {
+        val conditions = conditions?.toConditions
+        val tempScript: Script? = script ?: if (type == WorkflowItemType.switch && conditions != null) generateSwitchScript(conditions) else null
+        return WorkflowItem (
+            id,
+            type,
+            position,
+            displayName,
+            tempScript,
+            inBinding,
+            outBinding,
+            outItemId,
+            conditions,
+            presentation,
+            linkedWorkflowId
+        )
+    }
 }
 
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(
-    name = "workflow-itemType",
-    propOrder = ["displayName", "script", "inBinding", "outBinding", "conditions", "presentation", "position"]
-)
+fun List<ConditionDefinition>.replaceEndLabels(newItemId: Int) =
+    map {
+        it.withNewTargetId(
+            if (it.label == workflowEndItemId.toFullItemId) newItemId.toFullItemId else it.label
+        )
+    }
+
+val List<WorkflowItemDefinition>.asWorkflowItems get() =
+    map { it.asWorkflowItem() }
+
 class WorkflowItem(
     id: Int,
     type: WorkflowItemType,

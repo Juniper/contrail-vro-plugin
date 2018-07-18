@@ -14,7 +14,7 @@ class PresentationParametersBuilder(
     parameters: MutableList<ParameterInfo>,
     allParameters: MutableList<ParameterInfo>,
     private val outputParameters: MutableList<ParameterInfo>,
-    private val attributes: MutableList<Attribute>
+    private val attributes: MutableList<AttributeDefinition>
 ) : ParameterAggregator(parameters, allParameters) {
 
     fun step(title: String, setup: ParameterAggregator.() -> Unit) {
@@ -298,5 +298,5 @@ class AttributeBuilder(val name: String, val type: ParameterType<Any>) {
     var readOnly: Boolean = false
 
     fun buildAttribute() =
-        Attribute(name, type, description, readOnly)
+        AttributeDefinition(name, type, description, readOnly)
 }
