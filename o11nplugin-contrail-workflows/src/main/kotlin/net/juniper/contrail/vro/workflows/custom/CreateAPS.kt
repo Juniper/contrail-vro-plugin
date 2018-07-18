@@ -72,4 +72,7 @@ internal fun createAPS(workflowDefinitions: List<WorkflowDefinition>): WorkflowD
         workflowInvocation(addTag, mainMenu, "Add tag to application policy set") {
             inputBind("item", resultAps)
         }
+        automaticWorkflowOutput {
+            output(resultAps, "Item")
+        }
     }
