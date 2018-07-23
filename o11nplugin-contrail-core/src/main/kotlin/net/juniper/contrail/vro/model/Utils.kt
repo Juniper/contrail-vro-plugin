@@ -262,8 +262,8 @@ class Utils {
     ): FirewallRuleEndpointType {
         val anyWorkload = type == EndpointType.AnyWorkload.value
         val tagNames = if (type == EndpointType.Tag.value && tags != null) tags.map { tagToString(it) } else listOf()
-        val virtualNetworkFqn = virtualNetwork?.FQN
-        val addressGroupFqn = addressGroup?.FQN
+        val virtualNetworkFqn = if (type == EndpointType.VirtualNetwork.value) virtualNetwork?.FQN else null
+        val addressGroupFqn = if (type == EndpointType.AddressGroup.value) addressGroup?.FQN else null
         return FirewallRuleEndpointType(null, virtualNetworkFqn, addressGroupFqn, tagNames, null, anyWorkload)
     }
 
