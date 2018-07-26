@@ -28,10 +28,16 @@ sealed class CategoryType {
 object Networking : CategoryType()
 object Services : CategoryType()
 object Security : CategoryType()
+object DraftSecurity : CategoryType()
 
 // top level security object
 object GlobalSecurity {
     val name = Security.name
+}
+
+// top level draft security object
+object DraftGlobalSecurity {
+    val name = DraftSecurity.name
 }
 
 val Class<*>.category get() = when (this) {
