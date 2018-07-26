@@ -6,7 +6,7 @@ package net.juniper.contrail.vro.tests.actions
 
 import static net.juniper.contrail.vro.config.Actions.isInCidr
 
-class InCidrValidationSpec extends ActionSpec {
+class InCidrValidationSpec extends ActionSpec implements ValidationAsserts{
     def validateIp = actionFromScript(isInCidr)
     def ipValidationMessage = "IP must be in defined CIDR"
 
@@ -19,7 +19,7 @@ class InCidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating ip with ip not defined and empty cidr should pass" () {
@@ -31,7 +31,7 @@ class InCidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating ip with valid IPv4 ip and cidr should pass" () {
@@ -43,7 +43,7 @@ class InCidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating ip with valid IPv6 ip and cidr should pass" () {
@@ -55,7 +55,7 @@ class InCidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating ip with valid IPv4 cidr and valid Ipv6 ip should not pass" () {
@@ -67,7 +67,7 @@ class InCidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip, cidr)
 
         then: "it returns error message"
-        result == ipValidationMessage
+        validationFailureWith(result, ipValidationMessage)
     }
 
     def "validating ip with not valid cidr format should not pass" () {
@@ -79,7 +79,7 @@ class InCidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip, cidr)
 
         then: "it returns error message"
-        result == ipValidationMessage
+        validationFailureWith(result, ipValidationMessage)
     }
 
     def "validating ip with trailing and preceding whitespaces should pass" () {
@@ -91,7 +91,7 @@ class InCidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating ip with whitespaces inside should not pass" () {
@@ -103,6 +103,6 @@ class InCidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip, cidr)
 
         then: "it returns error message"
-        result == ipValidationMessage
+        validationFailureWith(result, ipValidationMessage)
     }
 }

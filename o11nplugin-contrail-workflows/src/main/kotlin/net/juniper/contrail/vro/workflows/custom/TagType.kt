@@ -43,6 +43,7 @@ internal fun deleteTagType(): WorkflowDefinition {
         parameter(item, reference<TagType>()) {
             description = "Tag Type to delete"
             mandatory = true
+            validWhen = hasBackrefs()
         }
     }
 }

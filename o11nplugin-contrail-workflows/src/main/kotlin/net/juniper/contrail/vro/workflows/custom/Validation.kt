@@ -18,6 +18,7 @@ import net.juniper.contrail.vro.config.areValidCommunityAttributes
 import net.juniper.contrail.vro.config.networkHasNotAllcationMode
 import net.juniper.contrail.vro.config.ipamHasAllocationMode
 import net.juniper.contrail.vro.config.ipamHasNotAllocationMode
+import net.juniper.contrail.vro.config.hasBackrefs
 import net.juniper.contrail.vro.workflows.dsl.ArrayParameterBuilder
 import net.juniper.contrail.vro.workflows.dsl.BasicParameterBuilder
 import net.juniper.contrail.vro.workflows.dsl.ReferenceArrayParameterBuilder
@@ -37,6 +38,9 @@ fun ReferenceParameterBuilder.ipamHasNotAllocationMode(mode: String) =
 
 fun ReferenceParameterBuilder.matchesSecurityScope(parentField: String, directMode: Boolean) =
     validationActionCallTo(matchesSecurityScope).parameter(parentField).boolean(directMode).boolean(false)
+
+fun ReferenceParameterBuilder.hasBackrefs() =
+    validationActionCallTo(hasBackrefs)
 
 fun ReferenceArrayParameterBuilder.matchesSecurityScope(parentField: String, directMode: Boolean) =
     validationActionCallTo(matchesSecurityScope).parameter(parentField).boolean(directMode).boolean(true)

@@ -6,7 +6,7 @@ package net.juniper.contrail.vro.tests.actions
 
 import static net.juniper.contrail.vro.config.Actions.isValidSubnet
 
-class CidrValidationSpec extends ActionSpec {
+class CidrValidationSpec extends ActionSpec implements ValidationAsserts{
     def validateCidr = actionFromScript(isValidSubnet)
     def cidrValidationMessage = "Enter valid IPv4 or IPv6 Subnet/Mask"
 
@@ -18,7 +18,7 @@ class CidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateCidr, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating empty cidr should not pass" () {
@@ -29,7 +29,7 @@ class CidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateCidr, cidr)
 
         then: "it returns error message"
-        result == cidrValidationMessage
+        validationFailureWith(result, cidrValidationMessage)
     }
 
     def "validating IPv4 cidr should pass" () {
@@ -40,7 +40,7 @@ class CidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateCidr, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating IPv6 cidr should pass" () {
@@ -51,7 +51,7 @@ class CidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateCidr, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating valid IPv4 cidr with too big mask should not pass" () {
@@ -62,7 +62,7 @@ class CidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateCidr, cidr)
 
         then: "it returns error message"
-        result == cidrValidationMessage
+        validationFailureWith(result, cidrValidationMessage)
     }
 
     def "validating valid IPv6 cidr with too big mask should not pass" () {
@@ -73,7 +73,7 @@ class CidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateCidr, cidr)
 
         then: "it returns error message"
-        result == cidrValidationMessage
+        validationFailureWith(result, cidrValidationMessage)
     }
 
     def "validating valid IPv4 cidr with biggest valid mask should pass" () {
@@ -84,7 +84,7 @@ class CidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateCidr, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating valid IPv6 cidr with biggest valid mask should  pass" () {
@@ -95,7 +95,7 @@ class CidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateCidr, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating valid IPv4 cidr with smallest valid mask should pass" () {
@@ -106,7 +106,7 @@ class CidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateCidr, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating valid IPv6 cidr with smallest valid mask should  pass" () {
@@ -117,7 +117,7 @@ class CidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateCidr, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating cidr with trailing and preceding whitespaces should pass" () {
@@ -128,7 +128,7 @@ class CidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateCidr, cidr)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating cidr with whitespaces inside should not pass" () {
@@ -139,6 +139,6 @@ class CidrValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateCidr, cidr)
 
         then: "it returns error message"
-        result == cidrValidationMessage
+        validationFailureWith(result, cidrValidationMessage)
     }
 }

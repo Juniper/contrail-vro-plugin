@@ -45,6 +45,7 @@ import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.schema.crudStatus
 import net.juniper.contrail.vro.schema.propertyDescription
 import net.juniper.contrail.vro.schema.simpleTypeConstraints
+import net.juniper.contrail.vro.workflows.custom.hasBackrefs
 
 fun Element.elementInfoPropertiesFor(categoryPath: String) = createElementInfoProperties(
     categoryPath = categoryPath,
@@ -74,6 +75,7 @@ fun deleteWorkflow(className: String, scriptBody: String) =
             description = "${className.allCapitalized} to delete"
             mandatory = true
             showInInventory = true
+            validWhen = hasBackrefs()
         }
     }
 
