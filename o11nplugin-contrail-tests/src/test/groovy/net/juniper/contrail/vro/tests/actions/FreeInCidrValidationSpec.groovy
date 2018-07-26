@@ -6,7 +6,7 @@ package net.juniper.contrail.vro.tests.actions
 
 import static net.juniper.contrail.vro.config.Actions.isFreeInCidr
 
-class FreeInCidrValidationSpec extends ActionSpec {
+class FreeInCidrValidationSpec extends ActionSpec implements ValidationAsserts{
     def validateFreeIp = actionFromScript(isFreeInCidr)
     def freeIpMsg = "Default Gateway IP must be in CIDR and not be in allocation pools or be the same as DNS server IP"
 
@@ -20,8 +20,8 @@ class FreeInCidrValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validateFreeIp, ip, cidr, pools, dns)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating free ip in cidr with any of mandatory parameters not defined should pass" () {
@@ -34,8 +34,8 @@ class FreeInCidrValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validateFreeIp, ip, cidr, pools, dns)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating free ip in cidr with all valid IPv4 values should pass" () {
@@ -48,8 +48,8 @@ class FreeInCidrValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validateFreeIp, ip, cidr, pools, dns)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating free ip in cidr with all valid IPv6 values should pass" () {
@@ -62,8 +62,8 @@ class FreeInCidrValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validateFreeIp, ip, cidr, pools, dns)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating free ip in cidr with non-mandatory values not defined should pass" () {
@@ -76,8 +76,8 @@ class FreeInCidrValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validateFreeIp, ip, cidr, pools, dns)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating free ip in cidr with parameters with redundant whitespaces should pass" () {
@@ -90,8 +90,8 @@ class FreeInCidrValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validateFreeIp, ip, cidr, pools, dns)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating free ip in cidr with parameters with mismatched ip version should not pass" () {
@@ -104,8 +104,8 @@ class FreeInCidrValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validateFreeIp, ip, cidr, pools, dns)
 
-        then: "it returns error message"
-        result == freeIpMsg
+        then: "it fails with the correct message"
+        validationFailureWith(result, freeIpMsg)
     }
 
     def "validating free ip in cidr with ip not in cidr should not pass" () {
@@ -118,8 +118,8 @@ class FreeInCidrValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validateFreeIp, ip, cidr, pools, dns)
 
-        then: "it returns error message"
-        result == freeIpMsg
+        then: "it fails with the correct message"
+        validationFailureWith(result, freeIpMsg)
     }
 
     def "validating free ip in cidr with ip in allocation pool should not pass" () {
@@ -132,8 +132,8 @@ class FreeInCidrValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validateFreeIp, ip, cidr, pools, dns)
 
-        then: "it returns error message"
-        result == freeIpMsg
+        then: "it fails with the correct message"
+        validationFailureWith(result, freeIpMsg)
     }
 
     def "validating free ip in cidr with ip the same as dns should not pass" () {
@@ -146,7 +146,7 @@ class FreeInCidrValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validateFreeIp, ip, cidr, pools, dns)
 
-        then: "it returns error message"
-        result == freeIpMsg
+        then: "it fails with the correct message"
+        validationFailureWith(result, freeIpMsg)
     }
 }
