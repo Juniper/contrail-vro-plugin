@@ -10,6 +10,7 @@ import com.vmware.o11n.sdk.modeldriven.Sid
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.NetworkIpam
 import net.juniper.contrail.vro.base.ConnectionRepository
+import net.juniper.contrail.vro.config.GlobalDraftSecurity
 import net.juniper.contrail.vro.config.GlobalSecurity
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -24,6 +25,12 @@ class ConnectionHasGlobalSecurity : ObjectRelater<GlobalSecurity>
 {
     override fun findChildren(ctx: PluginContext, relation: String, parentType: String, id: Sid) =
         listOf(GlobalSecurity)
+}
+
+class ConnectionHasGlobalDraftSecurity : ObjectRelater<GlobalDraftSecurity>
+{
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, id: Sid) =
+        listOf(GlobalDraftSecurity)
 }
 
 class NetworkIpamToSubnet @Autowired

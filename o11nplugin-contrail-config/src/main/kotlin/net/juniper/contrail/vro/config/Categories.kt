@@ -29,9 +29,19 @@ object Networking : CategoryType()
 object Services : CategoryType()
 object Security : CategoryType()
 
+// project-level draft security object
+object DraftSecurity {
+    val name = "Draft Security"
+}
+
 // top level security object
 object GlobalSecurity {
     val name = Security.name
+}
+
+// top level draft security object
+object GlobalDraftSecurity {
+    val name = DraftSecurity.name
 }
 
 val Class<*>.category get() = when (this) {

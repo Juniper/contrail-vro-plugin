@@ -67,6 +67,20 @@ class CustomMapping: AbstractMapping() {
             <#-- Re-use security icon -->
             .withIcon(findFolderIcon<Security>())
 
+        wrap(GlobalDraftSecurity::class.java)
+            .unconstructible()
+            .andFind()
+            .using(GlobalDraftSecurityFinder::class.java)
+            <#-- Re-use security icon -->
+            .withIcon(findFolderIcon<Security>())
+
+        wrap(DraftSecurity::class.java)
+            .unconstructible()
+            .andFind()
+            .using(DraftSecurityFinder::class.java)
+            <#-- Re-use security icon -->
+            .withIcon(findFolderIcon<Security>())
+
         <#list categories as category>
         wrap(${category.name}::class.java)
             .unconstructible()
@@ -115,6 +129,11 @@ class CustomMapping: AbstractMapping() {
             .using(ConnectionHasGlobalSecurity::class.java)
             .`as`("ConnectionHasGlobalSecurity")
 
+        relate(Connection::class.java)
+            .to(GlobalDraftSecurity::class.java)
+            .using(ConnectionHasGlobalDraftSecurity::class.java)
+            .`as`("ConnectionHasGlobalDraftSecurity")
+
         <#list rootClasses as rootClass>
         relate(Connection::class.java)
             .to(${rootClass.simpleName}::class.java)
@@ -129,6 +148,19 @@ class CustomMapping: AbstractMapping() {
             .using(GlobalSecurityHas${klass.simpleName}::class.java)
             .`as`("GlobalSecurityHas${klass.pluginName}")
             .`in`(FolderDef(folderName("${klass.folderName}", "GlobalSecurity"), findFolderIcon<${klass.simpleName}>()))
+
+        relate(GlobalDraftSecurity::class.java)
+            .to(${klass.simpleName}::class.java)
+            .using(GlobalDraftSecurityHas${klass.simpleName}::class.java)
+            .`as`("GlobalDraftSecurityHas${klass.pluginName}")
+            .`in`(FolderDef(folderName("Draft ${klass.folderName}", "GlobalDraftSecurity"), findFolderIcon<${klass.simpleName}>()))
+
+        relate(DraftSecurity::class.java)
+            .to(${klass.simpleName}::class.java)
+            .using(ProjectHasDraft${klass.simpleName}::class.java)
+            .`as`("ProjectHasDraft${klass.pluginName}")
+            .`in`(FolderDef(folderName("Draft ${klass.folderName}", "Project"), findFolderIcon<${klass.simpleName}>()))
+
         </#list>
 
         <#list categories as category>
@@ -136,6 +168,12 @@ class CustomMapping: AbstractMapping() {
             .to(${category.name}::class.java)
             .using(${category.parentName}Has${category.name}::class.java)
             .`as`("${category.parentPluginName}Has${category.name}")
+        <#if category.name == "Security">
+        relate(Project::class.java)
+            .to(DraftSecurity::class.java)
+            .using(ProjectHasDraftSecurity::class.java)
+            .`as`("ProjectHasDraftSecurity")
+        </#if>
         </#list>
 
         <#list categoryRelations as relation>
