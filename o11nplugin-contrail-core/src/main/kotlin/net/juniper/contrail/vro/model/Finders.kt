@@ -11,6 +11,8 @@ import com.vmware.o11n.sdk.modeldriven.Sid
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.base.ConnectionRepository
+import net.juniper.contrail.vro.config.DraftGlobalSecurity
+import net.juniper.contrail.vro.config.DraftSecurity
 import net.juniper.contrail.vro.config.GlobalSecurity
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -31,6 +33,20 @@ class GlobalSecurityFinder : ObjectFinder<GlobalSecurity>
 {
     override fun assignId(security: GlobalSecurity, id: Sid) = id
     override fun find(ctx: PluginContext, type: String, id: Sid) = GlobalSecurity
+    override fun query(ctx: PluginContext, type: String, query: String) = null
+}
+
+class DraftGlobalSecurityFinder : ObjectFinder<DraftGlobalSecurity>
+{
+    override fun assignId(security: DraftGlobalSecurity, id: Sid) = id
+    override fun find(ctx: PluginContext, type: String, id: Sid) = DraftGlobalSecurity
+    override fun query(ctx: PluginContext, type: String, query: String) = null
+}
+
+class DraftSecurityFinder : ObjectFinder<DraftSecurity>
+{
+    override fun assignId(security: DraftSecurity, id: Sid) = id
+    override fun find(ctx: PluginContext, type: String, id: Sid) = DraftSecurity
     override fun query(ctx: PluginContext, type: String, query: String) = null
 }
 
