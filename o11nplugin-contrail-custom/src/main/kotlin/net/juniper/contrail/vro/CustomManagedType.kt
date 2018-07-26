@@ -9,6 +9,7 @@ import com.vmware.o11n.sdk.modeldrivengen.model.FormalParameter
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedConstructor
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedMethod
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
+import net.juniper.contrail.vro.config.backReferencePattern
 import net.juniper.contrail.vro.config.constants.apiTypesPackageName
 import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.isNodeClass
@@ -132,6 +133,11 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         methods.asSequence()
             .map { it.toCustomReference() }.filterNotNull()
             .toList()
+    } ?: emptyList()
+
+    val backrefs: List<CustomReference> = delegate.modelClass?.run {
+        references.asSequence()
+            .filter { it.methodName.matches(backReferencePattern) }.toList()
     } ?: emptyList()
 
     val referenceProperties: List<CustomReferenceProperty> = delegate.modelClass?.run {
