@@ -40,6 +40,18 @@ class ${relation.parentName}Has${relation.childName}
 </#list>
 
 <#list securityClasses as klass>
+
+class ProjectHasDraft${klass.simpleName}
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${klass.simpleName}> {
+
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${klass.simpleName}>? {
+        val connection = connections.getConnection(parentId)
+        val parentProject = connection?.findById<Project>(parentId.getString("Project"))
+        val parent = connection?.findByFQN<PolicyManagement>(parentProject?.qualifiedName?.plus("draft-policy-management")?.joinToString(":")!!)
+        return connection?.getObjects(${klass.simpleName}::class.java, parent?.${klass.simpleNameDecapitalized}s)
+    }
+}
+
 class GlobalSecurityHas${klass.simpleName}
 @Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${klass.simpleName}> {
 
@@ -50,7 +62,23 @@ class GlobalSecurityHas${klass.simpleName}
     }
 }
 
+class DraftGlobalSecurityHas${klass.simpleName}
+@Autowired constructor(private val connections: ConnectionRepository) : ObjectRelater<${klass.simpleName}> {
+
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<${klass.simpleName}>? {
+        val connection = connections.getConnection(parentId)
+        val parent = connection?.findByFQN<PolicyManagement>("draft-policy-management")
+        return connection?.getObjects(${klass.simpleName}::class.java, parent?.${klass.simpleNameDecapitalized}s)
+    }
+}
+
 </#list>
+
+class ProjectHasDraftSecurity: ObjectRelater<DraftSecurity> {
+
+   override fun findChildren(ctx: PluginContext, relation: String, parentType: String, parentId: Sid): List<DraftSecurity> =
+       listOf(DraftSecurity)
+}
 
 <#list categories as category>
 class ${category.parentName}Has${category.name}: ObjectRelater<${category.name}> {
