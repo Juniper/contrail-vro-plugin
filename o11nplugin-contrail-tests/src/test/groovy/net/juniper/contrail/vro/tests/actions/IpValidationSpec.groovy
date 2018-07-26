@@ -6,7 +6,7 @@ package net.juniper.contrail.vro.tests.actions
 
 import static net.juniper.contrail.vro.config.Actions.isValidIp
 
-class IpValidationSpec extends ActionSpec {
+class IpValidationSpec extends ActionSpec implements ValidationAsserts{
     def validateIp = actionFromScript(isValidIp)
     def ipValidationMessage = "Enter valid IPv4 or IPv6 Address"
 
@@ -18,7 +18,7 @@ class IpValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating empty ip should not pass" () {
@@ -29,7 +29,7 @@ class IpValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip)
 
         then: "it returns error message"
-        result == ipValidationMessage
+        validationFailureWith(result, ipValidationMessage)
     }
 
     def "validating private IPv4 ip should pass" () {
@@ -40,7 +40,7 @@ class IpValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating public IPv4 ip should pass" () {
@@ -51,7 +51,7 @@ class IpValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating broadcast IPv4 ip should pass" () {
@@ -62,7 +62,7 @@ class IpValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating all-zero IPv4 ip should pass" () {
@@ -73,7 +73,7 @@ class IpValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating incorrect IPv4 ip should not pass" () {
@@ -84,7 +84,7 @@ class IpValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip)
 
         then: "it returns error message"
-        result == ipValidationMessage
+        validationFailureWith(result, ipValidationMessage)
     }
 
     def "validating not shortened IPv6 ip address should pass" () {
@@ -95,7 +95,7 @@ class IpValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating IPv6 address without leading zeros should pass" () {
@@ -106,7 +106,7 @@ class IpValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating fully abbreviated IPv6 address should pass" () {
@@ -117,7 +117,7 @@ class IpValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating all-zero IPv6 ip should pass" () {
@@ -128,7 +128,7 @@ class IpValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip)
 
         then: "it returns null"
-        result == null
+        validationSuccess(result)
     }
 
     def "validating incorrect IPv6 ip should not pass" () {
@@ -139,6 +139,6 @@ class IpValidationSpec extends ActionSpec {
         def result = engine.invokeFunction(validateIp, ip)
 
         then: "it returns error message"
-        result == ipValidationMessage
+        validationFailureWith(result, ipValidationMessage)
     }
 }

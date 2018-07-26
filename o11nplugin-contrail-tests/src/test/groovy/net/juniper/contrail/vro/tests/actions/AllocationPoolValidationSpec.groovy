@@ -6,7 +6,7 @@ package net.juniper.contrail.vro.tests.actions
 
 import static net.juniper.contrail.vro.config.Actions.isValidAllocactionPool
 
-class AllocationPoolValidationSpec extends ActionSpec {
+class AllocationPoolValidationSpec extends ActionSpec implements ValidationAsserts{
     def validatePool = actionFromScript(isValidAllocactionPool)
     def allocationValidationMessage = "e.g. 192.168.2.3-192.168.2.10 <enter>... and IPs should be from CIDR"
 
@@ -18,8 +18,8 @@ class AllocationPoolValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validatePool, pools, cidr)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating allocation pool with pools not defined should pass" () {
@@ -30,8 +30,8 @@ class AllocationPoolValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validatePool, pools, cidr)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating allocation pool with cidr not defined should pass" () {
@@ -42,8 +42,8 @@ class AllocationPoolValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validatePool, pools, cidr)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating allocation pool with cidr not defined and pools with length 0 should pass" () {
@@ -54,8 +54,8 @@ class AllocationPoolValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validatePool, pools, cidr)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating allocation pool with valid IPv4 pools and cidr should pass" () {
@@ -66,8 +66,8 @@ class AllocationPoolValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validatePool, pools, cidr)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating pools with valid IPv4 pools and cidr with preceding and trailing whitespaces should pass" () {
@@ -78,8 +78,8 @@ class AllocationPoolValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validatePool, pools, cidr)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating allocation pool with valid IPv6 pools and cidr should pass" () {
@@ -90,8 +90,8 @@ class AllocationPoolValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validatePool, pools, cidr)
 
-        then: "it returns null"
-        result == null
+        then: "it succeeds"
+        validationSuccess(result)
     }
 
     def "validating allocation pool with not valid cidr format should not pass" () {
@@ -102,8 +102,8 @@ class AllocationPoolValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validatePool, pools, cidr)
 
-        then: "it returns error message"
-        result == allocationValidationMessage
+        then: "it fails with the correct message"
+        validationFailureWith(result, allocationValidationMessage)
     }
 
     def "validating allocation pool with overlapping pools should not pass" () {
@@ -114,8 +114,8 @@ class AllocationPoolValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validatePool, pools, cidr)
 
-        then: "it returns error message"
-        result == allocationValidationMessage
+        then: "it fails with the correct message"
+        validationFailureWith(result, allocationValidationMessage)
     }
 
     def "validating allocation pool with pools no in cidr should not pass" () {
@@ -126,7 +126,7 @@ class AllocationPoolValidationSpec extends ActionSpec {
         when: "executing validating script"
         def result = engine.invokeFunction(validatePool, pools, cidr)
 
-        then: "it returns error message"
-        result == allocationValidationMessage
+        then: "it fails with the correct message"
+        validationFailureWith(result, allocationValidationMessage)
     }
 }

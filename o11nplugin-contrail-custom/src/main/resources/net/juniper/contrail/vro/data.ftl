@@ -235,6 +235,15 @@ public class ${className}
     }
 
     </#list>
+
+    public Integer backrefCount() {
+        int count = 0;
+        <#list backrefs as bref>
+        count += ${bref.pluginMethodName}().size();
+        </#list>
+        return count;
+    }
+
     <#list referenceProperties as prop>
     public String ${prop.wrapperMethodName}() {
         return formatter.format(this, __getTarget().${prop.methodName}(), "${prop.refObjectPluginType}");
