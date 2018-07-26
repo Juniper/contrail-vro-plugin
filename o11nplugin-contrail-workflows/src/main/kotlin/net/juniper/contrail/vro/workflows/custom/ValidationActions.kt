@@ -25,6 +25,7 @@ import net.juniper.contrail.vro.config.networkHasNotAllcationMode
 import net.juniper.contrail.vro.config.ipamHasAllocationMode
 import net.juniper.contrail.vro.config.ipamHasNotAllocationMode
 import net.juniper.contrail.vro.config.isValidVxLANId
+import net.juniper.contrail.vro.config.hasBackrefs
 import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.array
@@ -136,4 +137,12 @@ val matchesSecurityScope = ActionDefinition(
         "parent" ofType any,
         "directMode" ofType boolean,
         "arrayMode" ofType boolean)
+)
+
+val hasBackrefs = ActionDefinition(
+    name = hasBackrefs,
+    resultType = string,
+    parameters = listOf(
+        "item" ofType any
+    )
 )
