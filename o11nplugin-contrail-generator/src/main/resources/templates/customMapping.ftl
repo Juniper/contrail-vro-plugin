@@ -29,6 +29,9 @@ inline private fun <reified T> findItemIcon() =
 inline private fun <reified T> findFolderIcon() =
     findIcon(folderIconName<T>(), defaultFolderIconName)
 
+inline private fun <reified T> findDraftFolderIcon() =
+    findIcon("draft-" + folderIconName<T>(), defaultItemIconName)
+
 private val renamePolicy = object : MethodRenamePolicy {
     override fun rename(m: Method): String =
         m.name.toPluginMethodName
@@ -72,14 +75,14 @@ class CustomMapping: AbstractMapping() {
             .andFind()
             .using(DraftGlobalSecurityFinder::class.java)
             <#-- Re-use security icon -->
-            .withIcon(findFolderIcon<Security>())
+            .withIcon(findDraftFolderIcon<Security>())
 
         wrap(DraftSecurity::class.java)
             .unconstructible()
             .andFind()
             .using(DraftSecurityFinder::class.java)
             <#-- Re-use security icon -->
-            .withIcon(findFolderIcon<Security>())
+            .withIcon(findDraftFolderIcon<Security>())
 
         <#list categories as category>
         wrap(${category.name}::class.java)
@@ -153,13 +156,13 @@ class CustomMapping: AbstractMapping() {
             .to(${klass.simpleName}::class.java)
             .using(DraftGlobalSecurityHas${klass.simpleName}::class.java)
             .`as`("DraftGlobalSecurityHas${klass.pluginName}")
-            .`in`(FolderDef(folderName("Draft ${klass.folderName}", "DraftGlobalSecurity"), findFolderIcon<${klass.simpleName}>()))
+            .`in`(FolderDef(folderName("Draft ${klass.folderName}", "DraftGlobalSecurity"), findDraftFolderIcon<${klass.simpleName}>()))
 
         relate(DraftSecurity::class.java)
             .to(${klass.simpleName}::class.java)
             .using(ProjectHasDraft${klass.simpleName}::class.java)
             .`as`("ProjectHasDraft${klass.pluginName}")
-            .`in`(FolderDef(folderName("Draft ${klass.folderName}", "Project"), findFolderIcon<${klass.simpleName}>()))
+            .`in`(FolderDef(folderName("Draft ${klass.folderName}", "Project"), findDraftFolderIcon<${klass.simpleName}>()))
 
         </#list>
 
