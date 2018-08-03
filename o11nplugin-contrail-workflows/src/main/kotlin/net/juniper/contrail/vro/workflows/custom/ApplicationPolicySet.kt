@@ -30,6 +30,7 @@ internal fun addFirewallPolicyToAPS(schema: Schema): WorkflowDefinition {
             description = schema.childDescriptionInCreateRelation<ApplicationPolicySet, FirewallPolicy>()
             mandatory = true
             browserRoot = item.parentConnection
+            validWhen = matchesSecurityScope(item, false)
         }
     }
 }
