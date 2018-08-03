@@ -27,3 +27,4 @@ const val removeSubnetFromAddressGroupWorkflowName = "Remove subnet from address
 const val addLabelToAddressGroupWorkflowName = "Add label to Address Group"
 const val removeLabelFromAddressGroupWorkflowName = "Remove label from Address Group"
 const val createApplicationPolicySetWithFirewallPoliciesInProjectWorkflowName = "Create application policy set with firewall policies in project"
+const val createGlobalApplicationPolicySetWithFirewallPoliciesWorkflowName = "Create global application policy set with firewall policies"
