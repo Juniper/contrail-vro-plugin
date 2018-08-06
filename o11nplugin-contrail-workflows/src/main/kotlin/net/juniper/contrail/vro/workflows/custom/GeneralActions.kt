@@ -9,7 +9,7 @@ import net.juniper.contrail.vro.config.constants.element
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.listTagTypes
 import net.juniper.contrail.vro.config.propertyNotNull
-import net.juniper.contrail.vro.config.listLabelTags
+import net.juniper.contrail.vro.config.listTagsOfType
 import net.juniper.contrail.vro.config.listElementProperty
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.config.readSubnet
@@ -68,10 +68,11 @@ val listTagTypesAction = ActionDefinition (
     )
 )
 
-val listLabelTags = ActionDefinition (
-    name = listLabelTags,
+val listTagsOfType = ActionDefinition (
+    name = listTagsOfType,
     resultType = reference<Tag>().array,
     parameters = listOf(
-        item ofType any
+        item ofType any,
+        "tagType" ofType string
     )
 )

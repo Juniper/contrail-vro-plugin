@@ -52,12 +52,12 @@ FirewallRuleComplexProperties by FirewallRuleComplexPropertyExecutor(connection)
     fun Connection.listTagTypes(): List<String> =
         list<TagType>()?.asSequence()?.map { it.name }?.sorted()?.toList() ?: emptyList()
 
-    fun Connection.listLabels(): List<Tag> =
-        list<Tag>()?.asSequence()?.filter { isLabel(it) }?.toList() ?: emptyList()
+    fun Connection.listTagsOfType(tagType: String): List<Tag> =
+        list<Tag>()?.asSequence()?.filter { isTagOfType(it, tagType) }?.toList() ?: emptyList()
 
-    private fun Connection.isLabel(tag: Tag): Boolean {
+    private fun Connection.isTagOfType(tag: Tag, tagType: String): Boolean {
         tag.typeName ?: read(tag)
-        return tag.typeName == "label"
+        return tag.typeName == tagType
     }
 
     fun ServiceGroup.servicePropertyProtocol(ruleString: String): String? =
