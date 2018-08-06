@@ -30,6 +30,7 @@ internal fun addFirewallRuleToFirewallPolicy(schema: Schema): WorkflowDefinition
         parameter(child, reference<FirewallRule>()) {
             description = schema.childDescriptionInCreateRelation<FirewallPolicy, FirewallRule>()
             mandatory = true
+            validWhen = matchesSecurityScope(item, false)
             browserRoot = item.parentConnection
             validWhen = isNotReferencedBy(item) and matchesSecurityScope(item, false)
         }

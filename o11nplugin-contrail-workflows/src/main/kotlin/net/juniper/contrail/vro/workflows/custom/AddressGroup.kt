@@ -14,7 +14,7 @@ import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.removeLabelFromAddressGroupWorkflowName
 import net.juniper.contrail.vro.config.constants.removeSubnetFromAddressGroupWorkflowName
 import net.juniper.contrail.vro.config.constants.subnet
-import net.juniper.contrail.vro.config.listLabelTags
+import net.juniper.contrail.vro.config.listTagsOfType
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
@@ -74,7 +74,7 @@ internal fun addLabelToAddressGroup(): WorkflowDefinition {
             mandatory = true
             visibility = WhenNonNull(item)
             validWhen = matchesSecurityScope(item, false)
-            listedBy = actionCallTo(listLabelTags).parameter(item)
+            listedBy = actionCallTo(listTagsOfType).parameter(item).string("label")
         }
     }
 }
