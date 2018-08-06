@@ -144,12 +144,12 @@ val hiddenRelations = setOf(
     pair<FirewallRule, VirtualNetwork>()
 )
 
+// APS is excluded, as it needs a custom workflow that lists only application tags.
 val tagRelations = setOf(
     the<ConfigRoot>(),
     the<Project>(),
     the<VirtualNetwork>(),
-    the<VirtualMachineInterface>(),
-    the<ApplicationPolicySet>()
+    the<VirtualMachineInterface>()
 )
 
 val relationAsProperty = setOf(
@@ -161,7 +161,12 @@ val reversedRelations = setOf(
 )
 
 val readUponQuery = setOf(
-    the<FirewallRule>()
+    the<ApplicationPolicySet>(),
+    the<FirewallPolicy>(),
+    the<FirewallRule>(),
+    the<AddressGroup>(),
+    the<ServiceGroup>(),
+    the<Tag>()
 )
 
 val validateSecurityScope = setOf(
