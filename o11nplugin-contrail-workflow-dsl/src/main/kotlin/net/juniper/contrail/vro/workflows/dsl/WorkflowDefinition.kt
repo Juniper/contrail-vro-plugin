@@ -19,6 +19,7 @@ import net.juniper.contrail.vro.workflows.model.WorkflowItemDefinition
 import net.juniper.contrail.vro.workflows.model.WorkflowItemType
 import net.juniper.contrail.vro.workflows.model.asAttributes
 import net.juniper.contrail.vro.workflows.model.asWorkflowItems
+import net.juniper.contrail.vro.workflows.model.toFullItemId
 import net.juniper.contrail.vro.workflows.util.generateID
 
 data class WorkflowDefinition(
@@ -59,6 +60,26 @@ fun workflow(name: String) =
 
 fun WorkflowDefinition.inCategory(category: String) =
     copy(category = category)
+
+val WorkflowDefinition.hasConnectionToStart get() =
+    rootId.toFullItemId in workflowItems.map { it.name }
+
+val WorkflowDefinition.hasItemsConnected get(): Boolean {
+    val ids = workflowItems.map { it.name }
+    return workflowItems.all { it.isConnected(ids) }
+}
+
+fun WorkflowItem.isConnected(ids: List<String>) =
+    if (this.outName == null) {
+        when (this.type) {
+            "switch" -> this.conditions!!.all { it.label in ids }
+            "end" -> true
+            else -> false
+        }
+    } else this.outName!! in ids
+
+val WorkflowDefinition.hasConnectionToEnd get() =
+    workflowEndItemId.toFullItemId in workflowItems.map { it.outName }
 
 fun fixItemsPositions(items: List<WorkflowItemDefinition>, horizontalTranslation: Float, verticalTranslation: Float): List<WorkflowItemDefinition> =
     items.mapIndexed { idx, it ->

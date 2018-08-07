@@ -15,19 +15,22 @@ import net.juniper.contrail.vro.config.hasCustomRemoveReferenceWorkflow
 import net.juniper.contrail.vro.config.isInternal
 import net.juniper.contrail.vro.config.isRelationEditable
 import net.juniper.contrail.vro.config.isRelationMandatory
+import net.juniper.contrail.vro.config.packageToPath
+import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
-import net.juniper.contrail.vro.config.packageToPath
-import net.juniper.contrail.vro.workflows.custom.loadCustomActions
-import net.juniper.contrail.vro.config.pluginName
-import net.juniper.contrail.vro.workflows.custom.loadCustomWorkflows
-import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.model.Action
-import net.juniper.contrail.vro.workflows.model.Element
-import net.juniper.contrail.vro.workflows.model.Workflow
-import net.juniper.contrail.vro.workflows.model.Properties
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.custom.loadComplexWorkflows
+import net.juniper.contrail.vro.workflows.custom.loadCustomActions
+import net.juniper.contrail.vro.workflows.custom.loadCustomWorkflows
+import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.hasConnectionToEnd
+import net.juniper.contrail.vro.workflows.dsl.hasConnectionToStart
+import net.juniper.contrail.vro.workflows.dsl.hasItemsConnected
+import net.juniper.contrail.vro.workflows.model.Action
+import net.juniper.contrail.vro.workflows.model.Element
+import net.juniper.contrail.vro.workflows.model.Properties
+import net.juniper.contrail.vro.workflows.model.Workflow
 import java.io.File
 import java.io.Writer
 import javax.xml.bind.JAXBContext
@@ -141,8 +144,11 @@ private fun Workflow.save(info: ProjectInfo, category: String) {
 private fun WorkflowDefinition.save(info: ProjectInfo) =
     save(info, category ?: throw IllegalStateException("Category of workflow $displayName was not defined."))
 
-private fun WorkflowDefinition.save(info: ProjectInfo, category: String) =
+private fun WorkflowDefinition.save(info: ProjectInfo, category: String) {
+    val exceptionMessage = this.checkWorkflowConnectedness(category)
+    if (exceptionMessage != null) throw IllegalStateException(exceptionMessage)
     createWorkflow(info).save(info, category)
+}
 
 private fun WorkflowDefinition.createWorkflow(info: ProjectInfo) =
     createWorkflow(info.workflowPackage, info.workflowVersion)
@@ -218,3 +224,11 @@ private fun Element.prepareElementInfoFile(packageRoot: String, categoryPackage:
 
 private fun dunesOutputPath(info: ProjectInfo) =
     "${info.packageRoot}/$dunesInfoPath/$dunesFileName"
+
+private fun WorkflowDefinition.checkWorkflowConnectedness(category: String): String? =
+    when {
+        !this.hasConnectionToStart -> "Workflow $displayName in category $category has no connection from start"
+        !this.hasItemsConnected -> "Workflow $displayName in category $category doesn't have all items connected"
+        !this.hasConnectionToEnd -> "Workflow $displayName in category $category has no connection to end"
+        else -> null
+    }
