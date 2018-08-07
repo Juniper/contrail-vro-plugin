@@ -15,19 +15,20 @@ import net.juniper.contrail.vro.config.hasCustomRemoveReferenceWorkflow
 import net.juniper.contrail.vro.config.isInternal
 import net.juniper.contrail.vro.config.isRelationEditable
 import net.juniper.contrail.vro.config.isRelationMandatory
+import net.juniper.contrail.vro.config.packageToPath
+import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
-import net.juniper.contrail.vro.config.packageToPath
-import net.juniper.contrail.vro.workflows.custom.loadCustomActions
-import net.juniper.contrail.vro.config.pluginName
-import net.juniper.contrail.vro.workflows.custom.loadCustomWorkflows
-import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
-import net.juniper.contrail.vro.workflows.model.Action
-import net.juniper.contrail.vro.workflows.model.Element
-import net.juniper.contrail.vro.workflows.model.Workflow
-import net.juniper.contrail.vro.workflows.model.Properties
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.custom.loadComplexWorkflows
+import net.juniper.contrail.vro.workflows.custom.loadCustomActions
+import net.juniper.contrail.vro.workflows.custom.loadCustomWorkflows
+import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.isConnected
+import net.juniper.contrail.vro.workflows.model.Action
+import net.juniper.contrail.vro.workflows.model.Element
+import net.juniper.contrail.vro.workflows.model.Properties
+import net.juniper.contrail.vro.workflows.model.Workflow
 import java.io.File
 import java.io.Writer
 import javax.xml.bind.JAXBContext
@@ -141,8 +142,10 @@ private fun Workflow.save(info: ProjectInfo, category: String) {
 private fun WorkflowDefinition.save(info: ProjectInfo) =
     save(info, category ?: throw IllegalStateException("Category of workflow $displayName was not defined."))
 
-private fun WorkflowDefinition.save(info: ProjectInfo, category: String) =
+private fun WorkflowDefinition.save(info: ProjectInfo, category: String) {
+    if (!(isConnected())) throw IllegalStateException("Workflow $displayName in category $category doesn't have all items connected")
     createWorkflow(info).save(info, category)
+}
 
 private fun WorkflowDefinition.createWorkflow(info: ProjectInfo) =
     createWorkflow(info.workflowPackage, info.workflowVersion)

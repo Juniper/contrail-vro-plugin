@@ -19,6 +19,7 @@ import net.juniper.contrail.vro.workflows.model.WorkflowItemDefinition
 import net.juniper.contrail.vro.workflows.model.WorkflowItemType
 import net.juniper.contrail.vro.workflows.model.asAttributes
 import net.juniper.contrail.vro.workflows.model.asWorkflowItems
+import net.juniper.contrail.vro.workflows.model.toFullItemId
 import net.juniper.contrail.vro.workflows.util.generateID
 
 data class WorkflowDefinition(
@@ -59,6 +60,33 @@ fun workflow(name: String) =
 
 fun WorkflowDefinition.inCategory(category: String) =
     copy(category = category)
+
+data class WorkflowGraph(
+    val adjacencyMap: Map<String, List<String?>>
+)
+
+fun WorkflowDefinition.isConnected(): Boolean {
+    val visited = mutableSetOf<String>()
+    toGraph().DFS(rootId.toFullItemId, visited)
+    val itemIds = workflowItems.map { it.name }
+    return itemIds.all { it in visited }
+}
+
+fun WorkflowGraph.DFS(vertex: String, visited: MutableSet<String>) {
+    if (vertex in visited) return else visited.add(vertex)
+    adjacencyMap[vertex]?.forEach {
+        if ( it != null && !(it in visited)) DFS(it, visited) else return
+    }
+}
+
+fun WorkflowDefinition.toGraph() =
+    WorkflowGraph(createAdjacencyMap())
+
+fun WorkflowDefinition.createAdjacencyMap() =
+    workflowItems.associate { it.name to it.connections }
+
+val WorkflowItem.connections get() =
+    if (type == "switch") conditions!!.map { it.label } else listOf(outName)
 
 fun fixItemsPositions(items: List<WorkflowItemDefinition>, horizontalTranslation: Float, verticalTranslation: Float): List<WorkflowItemDefinition> =
     items.mapIndexed { idx, it ->
