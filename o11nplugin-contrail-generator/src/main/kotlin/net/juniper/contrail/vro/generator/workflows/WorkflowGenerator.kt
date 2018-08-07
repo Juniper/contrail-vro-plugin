@@ -28,10 +28,12 @@ import net.juniper.contrail.vro.workflows.model.Workflow
 import net.juniper.contrail.vro.workflows.model.Properties
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.custom.loadComplexWorkflows
+import net.juniper.contrail.vro.workflows.model.toFullItemId
 import java.io.File
 import java.io.Writer
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
+import net.juniper.contrail.vro.workflows.dsl.workflowEndItemId
 
 fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: Schema) {
     generateDunesMetaInfo(info)
@@ -141,8 +143,10 @@ private fun Workflow.save(info: ProjectInfo, category: String) {
 private fun WorkflowDefinition.save(info: ProjectInfo) =
     save(info, category ?: throw IllegalStateException("Category of workflow $displayName was not defined."))
 
-private fun WorkflowDefinition.save(info: ProjectInfo, category: String) =
-    createWorkflow(info).save(info, category)
+private fun WorkflowDefinition.save(info: ProjectInfo, category: String) {
+    this.checkWorkflowConnectedness(category)
+    return createWorkflow(info).save(info, category)
+}
 
 private fun WorkflowDefinition.createWorkflow(info: ProjectInfo) =
     createWorkflow(info.workflowPackage, info.workflowVersion)
@@ -153,11 +157,11 @@ private fun Action.save(info: ProjectInfo) {
 }
 
 private class DefaultCharacterEscapeHandler : CharacterEscapeHandler {
+
     override fun escape(ac: CharArray, i: Int, j: Int, flag: Boolean, writer: Writer) {
         writer.write(ac, i, j)
     }
 }
-
 private fun Element.generateDefinition(marshaller: Marshaller, packageRoot: String, categoryPackage: String) {
     val outputFile = prepareDefinitionFile(packageRoot, categoryPackage)
 
@@ -185,10 +189,10 @@ private fun generateDunesMetaInfo(info: ProjectInfo) {
 }
 
 val libraryPackage = "Library.Contrail"
+
 val resourcesPath = "src/main/resources"
 val dunesInfoPath = "$resourcesPath/META-INF"
 val dunesFileName = "dunes-meta-inf.xml"
-
 private fun File.prepare()
 {
     parentFile.mkdirs()
@@ -218,3 +222,30 @@ private fun Element.prepareElementInfoFile(packageRoot: String, categoryPackage:
 
 private fun dunesOutputPath(info: ProjectInfo) =
     "${info.packageRoot}/$dunesInfoPath/$dunesFileName"
+
+private fun WorkflowDefinition.checkWorkflowConnectedness(category: String) {
+    when {
+        !this.hasConnectionToStart -> throw IllegalStateException("Workflow $displayName in category $category has no connection from start")
+        !this.hasItemsConnected -> throw IllegalStateException("Workflow $displayName in category $category doesn't have all items connected")
+        !this.hasConnectionToEnd -> throw IllegalStateException("Workflow $displayName in category $category has no connection to end")
+    }
+}
+
+private val WorkflowDefinition.hasConnectionToStart get() =
+    rootId.toFullItemId in workflowItems.map { it.name }
+
+private val WorkflowDefinition.hasItemsConnected get(): Boolean {
+    val ids = workflowItems.map { it.name }
+    return workflowItems.all {
+        if (it.outName == null) {
+            when (it.type) {
+                "switch" -> it.conditions!!.all { it.label in ids }
+                "end" -> true
+                else -> false
+            }
+        } else { it.outName!! in ids }
+    }
+}
+
+private val WorkflowDefinition.hasConnectionToEnd get() =
+    workflowEndItemId.toFullItemId in workflowItems.map { it.outName }
