@@ -130,7 +130,6 @@ open class ParameterAggregator(
 abstract class BasicBuilder {
     var description: String? = null
     var visibility: VisibilityCondition = AlwaysVisible
-
     protected val basicQualifiers get() = mutableListOf<ParameterQualifier>().apply {
         visibility.let {
             when (it) {
@@ -139,17 +138,15 @@ abstract class BasicBuilder {
             }
         }
     }
-}
 
+}
 abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val type: ParameterType<Type>) : BasicBuilder() {
+
     var mandatory: Boolean = false
     var defaultValue: Type? = null
     var dataBinding: DataBinding<Type> = NoDataBinding
     val additionalQualifiers = mutableListOf<ParameterQualifier>()
-    var validWhen: ActionCallBuilder? = null
-        set(value) {
-            field = value?.snapshot()
-        }
+    var validWhen: ValidationCondition = AlwaysValid
 
     fun validationActionCallTo(actionName: String) =
         actionCallTo(actionName).parameter(parameterName)
@@ -173,8 +170,11 @@ abstract class BasicParameterBuilder<Type: Any>(val parameterName: String, val t
         dataBinding.qualifier?.let {
             add(it)
         }
-        validWhen?.let {
-            add(validationQualifier(it.create()))
+        validWhen.let {
+            when (it) {
+                AlwaysValid -> Unit
+                else -> add(validationConditionQualifier(it))
+            }
         }
     }
 

@@ -26,6 +26,7 @@ import net.juniper.contrail.vro.config.ipamHasAllocationMode
 import net.juniper.contrail.vro.config.ipamHasNotAllocationMode
 import net.juniper.contrail.vro.config.isValidVxLANId
 import net.juniper.contrail.vro.config.hasBackrefs
+import net.juniper.contrail.vro.config.isReferencedBy
 import net.juniper.contrail.vro.workflows.dsl.ofType
 import net.juniper.contrail.vro.workflows.model.any
 import net.juniper.contrail.vro.workflows.model.array
@@ -144,5 +145,14 @@ val hasBackrefs = ActionDefinition(
     resultType = string,
     parameters = listOf(
         "item" ofType any
+    )
+)
+
+val hasReferenceTo = ActionDefinition(
+    name = isReferencedBy,
+    resultType = string,
+    parameters = listOf(
+        "children" ofType any,
+        "parent" ofType any
     )
 )
