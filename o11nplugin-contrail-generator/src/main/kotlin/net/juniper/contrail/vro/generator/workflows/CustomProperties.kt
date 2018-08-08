@@ -8,7 +8,6 @@ import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.types.SubnetType
 import net.juniper.contrail.vro.config.constants.Contrail
 import net.juniper.contrail.vro.config.constants.item
-import net.juniper.contrail.vro.config.isValidSubnet
 import net.juniper.contrail.vro.config.readSubnet
 import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.generator.model.Property
@@ -16,6 +15,7 @@ import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.schema.simpleTypeConstraints
+import net.juniper.contrail.vro.workflows.custom.isSubnet
 
 val Class<*>.hasCustomInput get() =
     customProperties.containsKey(this)
@@ -47,7 +47,7 @@ private object CustomSubnetType : CustomProperty<SubnetType> {
     override fun Property.setup(builder: ParameterAggregator, schema: Schema, createMode: Boolean, propertyPath: () -> String) {
         builder.parameter(propertyName, string) {
             description = description(schema)
-            validWhen = validationActionCallTo(isValidSubnet)
+            validWhen = isSubnet()
             if (!createMode)
                 dataBinding = fromAction(readSubnet, string) { parameter(item).string("${propertyPath().preparePrefix()}$propertyName") }
             additionalQualifiers += schema.simpleTypeConstraints(parent, propertyName, ignoreMissing = true)
