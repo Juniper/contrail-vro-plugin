@@ -140,6 +140,10 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
             .filter { it.methodName.matches(backReferencePattern) }.toList()
     } ?: emptyList()
 
+    val forwardRefs: List<CustomReference> = delegate.modelClass?.run {
+        references.minus(backrefs)
+    } ?: emptyList()
+
     val referenceProperties: List<CustomReferenceProperty> = delegate.modelClass?.run {
         if (isApiObjectClass)
         methods.asSequence()

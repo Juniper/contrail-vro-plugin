@@ -16,6 +16,7 @@ import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.schema.simpleTypeConstraints
+import net.juniper.contrail.vro.workflows.dsl.asValidationCondition
 
 val Class<*>.hasCustomInput get() =
     customProperties.containsKey(this)
@@ -47,7 +48,7 @@ private object CustomSubnetType : CustomProperty<SubnetType> {
     override fun Property.setup(builder: ParameterAggregator, schema: Schema, createMode: Boolean, propertyPath: () -> String) {
         builder.parameter(propertyName, string) {
             description = description(schema)
-            validWhen = validationActionCallTo(isValidSubnet)
+            validWhen = validationActionCallTo(isValidSubnet).asValidationCondition()
             if (!createMode)
                 dataBinding = fromAction(readSubnet, string) { parameter(item).string("${propertyPath().preparePrefix()}$propertyName") }
             additionalQualifiers += schema.simpleTypeConstraints(parent, propertyName, ignoreMissing = true)

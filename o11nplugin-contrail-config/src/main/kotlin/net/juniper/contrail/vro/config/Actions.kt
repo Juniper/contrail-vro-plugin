@@ -46,6 +46,7 @@ val listLabelTags = "listLabelTags"
 val matchesSecurityScope = "matchesSecurityScope"
 val defaultConnection = "defaultConnection"
 val hasBackrefs = "hasBackrefs"
+val hasReferenceTo = "hasReferenceTo"
 
 val portOfVCVirtualMachine = "portOfVCVirtualMachine"
 val networkOfVCPortGroup = "networkOfVCPortGroup"

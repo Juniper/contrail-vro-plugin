@@ -11,16 +11,19 @@ import net.juniper.contrail.vro.config.isA
 import net.juniper.contrail.vro.config.needsSecurityScopeValidation
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.generator.model.ForwardRelation
+import net.juniper.contrail.vro.schema.Schema
+import net.juniper.contrail.vro.workflows.custom.hasReferenceTo
+import net.juniper.contrail.vro.workflows.custom.matchesSecurityScope
+import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.actionCallTo
+import net.juniper.contrail.vro.workflows.dsl.and
+import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
+import net.juniper.contrail.vro.workflows.dsl.or
+import net.juniper.contrail.vro.workflows.dsl.parentConnection
 import net.juniper.contrail.vro.workflows.dsl.withScript
 import net.juniper.contrail.vro.workflows.dsl.workflow
-import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
-import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
-import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.model.reference
-import net.juniper.contrail.vro.schema.Schema
-import net.juniper.contrail.vro.workflows.custom.matchesSecurityScope
-import net.juniper.contrail.vro.workflows.dsl.parentConnection
 import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
 import net.juniper.contrail.vro.workflows.util.childDescriptionInCreateRelation
 import net.juniper.contrail.vro.workflows.util.childDescriptionInRemoveRelation
@@ -47,8 +50,10 @@ fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDef
             description = schema.childDescriptionInCreateRelation(parentClass, childClass, ignoreMissing = true)
             mandatory = true
             browserRoot = item.parentConnection
-            if (childClass.needsSecurityScopeValidation)
-                validWhen = matchesSecurityScope(item, directValidation)
+            validWhen = if (childClass.needsSecurityScopeValidation)
+                matchesSecurityScope(item, directValidation) and hasReferenceTo(item)
+            else
+                hasReferenceTo(item)
         }
     }
 }
