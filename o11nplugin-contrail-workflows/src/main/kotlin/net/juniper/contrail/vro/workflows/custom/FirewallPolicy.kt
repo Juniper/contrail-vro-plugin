@@ -10,6 +10,7 @@ import net.juniper.contrail.vro.config.constants.child
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.and
 import net.juniper.contrail.vro.workflows.dsl.parentConnection
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
@@ -30,6 +31,7 @@ internal fun addFirewallRuleToFirewallPolicy(schema: Schema): WorkflowDefinition
             description = schema.childDescriptionInCreateRelation<FirewallPolicy, FirewallRule>()
             mandatory = true
             browserRoot = item.parentConnection
+            validWhen = isNotReferencedBy(item) and matchesSecurityScope(item, false)
         }
     }
 }

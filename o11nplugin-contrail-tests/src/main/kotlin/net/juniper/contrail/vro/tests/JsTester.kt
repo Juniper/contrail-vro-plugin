@@ -48,6 +48,8 @@ class ScriptTestEngine {
         engine.context.setAttribute(name, attr, scope)
     }
 
+    fun evalCondition(condition: String) = engine.eval(condition)
+
     fun evalFunction(function : String) {
         engine.eval(function, engine.context)
     }

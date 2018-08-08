@@ -34,6 +34,7 @@ import net.juniper.contrail.vro.workflows.dsl.NullStateOfProperty
 import net.juniper.contrail.vro.workflows.dsl.VisibilityCondition
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.and
+import net.juniper.contrail.vro.workflows.dsl.asValidationCondition
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.createDunesProperties
@@ -126,7 +127,7 @@ private fun Property.toPrimitiveParameter(builder: ParameterAggregator, schema: 
         if (customValidationAction == null)
             additionalQualifiers += schema.simpleTypeConstraints(parent, propertyName, ignoreMissing = true)
         else
-            validWhen = validationActionCallTo(customValidationAction)
+            validWhen = validationActionCallTo(customValidationAction).asValidationCondition()
     }
 }
 

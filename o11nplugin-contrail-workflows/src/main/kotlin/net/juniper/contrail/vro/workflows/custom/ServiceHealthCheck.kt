@@ -30,6 +30,7 @@ internal fun addServiceInstanceToHealthCheck(schema: Schema): WorkflowDefinition
         parameter(child, reference<ServiceInstance>()) {
             description = schema.childDescriptionInCreateRelation<ServiceHealthCheck, ServiceInstance>()
             mandatory = true
+            validWhen = isNotReferencedBy(item)
         }
         parameter("interface", string) {
             description = "Interface name"

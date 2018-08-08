@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 import net.juniper.contrail.vro.model.Connection;
 import net.juniper.contrail.vro.model.Executor;
 import net.juniper.contrail.vro.format.*;
@@ -60,6 +61,10 @@ public class ${className}
     @Override
     public ${modelClass.canonicalName} __getTarget() {
         return (${modelClass.canonicalName}) _target;
+    }
+
+    public String getObjectClassName() {
+        return __getTarget().getClass().getSimpleName();
     }
 
     <#list constructors as c> <#if !c.extensionClass??>
@@ -234,6 +239,12 @@ public class ${className}
         return util.references(_internalId, ${ref.className}.class, __getTarget().${ref.methodName}());
     }
 
+    </#list>
+
+    <#list backrefs as bref>
+    public boolean isReferencedBy${bref.className}(${bref.className}_Wrapper reference) {
+        return ${bref.pluginMethodName}().stream().map(it -> it.getUuid()).collect(Collectors.toList()).contains(reference.getUuid());
+    }
     </#list>
 
     public Integer backrefCount() {

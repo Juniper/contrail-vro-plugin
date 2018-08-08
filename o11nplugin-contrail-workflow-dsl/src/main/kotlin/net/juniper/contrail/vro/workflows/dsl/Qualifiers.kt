@@ -68,11 +68,11 @@ fun regexQualifier(pattern: String) =
 fun visibilityConditionQualifier(condition: VisibilityCondition) =
     ognlQualifier(QualifierName.visible, boolean, condition.stringCondition)
 
+fun validationConditionQualifier(condition: ValidationCondition) =
+    ognlQualifier(QualifierName.ognlValidator, boolean, condition.stringCondition)
+
 fun <T : Any> listFromAction(action: ActionCall, type: ParameterType<T>) =
     ognlQualifier(QualifierName.linkedEnumeration, type, action.ognl)
-
-fun validationQualifier(action: ActionCall) =
-    ognlQualifier(QualifierName.ognlValidator, any, action.ognl)
 
 fun selectWith(selector: ReferenceSelector) =
     staticQualifier(QualifierName.showSelectAs, string, selector.toString())

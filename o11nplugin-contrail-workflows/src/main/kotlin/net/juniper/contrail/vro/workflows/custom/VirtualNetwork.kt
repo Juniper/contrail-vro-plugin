@@ -48,6 +48,7 @@ internal fun addPolicyToVirtualNetwork(schema: Schema): WorkflowDefinition {
             description = schema.childDescriptionInCreateRelation<VirtualNetwork, NetworkPolicy>()
             mandatory = true
             browserRoot = item.parentConnection
+            validWhen = isNotReferencedBy(item)
         }
     }
 }
