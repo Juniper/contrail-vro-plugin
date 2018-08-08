@@ -161,7 +161,12 @@ val reversedRelations = setOf(
 )
 
 val readUponQuery = setOf(
-    the<FirewallRule>()
+    the<ApplicationPolicySet>(),
+    the<FirewallPolicy>(),
+    the<FirewallRule>(),
+    the<AddressGroup>(),
+    the<ServiceGroup>(),
+    the<Tag>()
 )
 
 val validateSecurityScope = setOf(

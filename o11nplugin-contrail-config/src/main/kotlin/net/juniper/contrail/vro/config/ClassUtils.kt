@@ -33,13 +33,13 @@ val getPrefix = "^get".toRegex()
 val backRefsPostfix = "$BackRefs$".toRegex()
 
 val childReferencePattern = "get($className)s".toRegex()
-val forwardReferencePattern = "get($className)".toRegex()
+val referencePattern = "get($className)".toRegex()
 val backReferencePattern = "get($className)$BackRefs".toRegex()
 
 val referencePatterns = sequenceOf(
     backReferencePattern,
     childReferencePattern,
-    forwardReferencePattern
+    referencePattern
 )
 
 val Class<*>.refPropertyName get() =
@@ -85,7 +85,7 @@ val Method.childClassName get() =
     referredClassName(childReferencePattern)
 
 val Method.referenceClassName get() =
-    referredClassName(forwardReferencePattern)
+    referredClassName(referencePattern)
 
 val Method.backReferenceClassName get() =
     referredClassName(backReferencePattern)
