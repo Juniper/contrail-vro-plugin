@@ -12,6 +12,7 @@ import com.vmware.o11n.sdk.modeldriven.WrapperContext
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
+import net.juniper.contrail.api.types.PolicyManagement
 import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.propertyName
@@ -102,5 +103,28 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
         declaredMethods.asList()
             .filter { it.isGetter }
             .map { Property(it.propertyName.capitalize(), it.returnType) }
-}
 
+    fun <T : ApiObjectBase> nonDraftParentType(sid: Sid, obj: T): String? {
+        println("Gettin'")
+        val parentQN = obj.qualifiedName.dropLast(1)
+        val parentName = parentQN.lastOrNull()
+        return if (obj.parentType == "policy-management" && parentName == "draft-policy-management") {
+            val parentDraftPolicyManagement = findConnection(sid).findByFQN<PolicyManagement>(parentQN.joinToString(":"))
+            return parentDraftPolicyManagement?.parentType
+        } else {
+            obj.parentType
+        }
+    }
+
+    fun <T : ApiObjectBase> nonDraftParentUuid(sid: Sid, obj: T): String? {
+        println("Gettin'")
+        val parentQN = obj.qualifiedName.dropLast(1)
+        val parentName = parentQN.lastOrNull()
+        return if (obj.parentType == "policy-management" && parentName == "draft-policy-management") {
+            val parentDraftPolicyManagement = findConnection(sid).findByFQN<PolicyManagement>(parentQN.joinToString(":"))
+            return parentDraftPolicyManagement?.parentUuid
+        } else {
+            obj.parentUuid
+        }
+    }
+}
