@@ -7,6 +7,16 @@ if (!arrayMode) {
 }
 
 var expectedUuid = null;
+
+parent.qualifiedName.forEach(function(x){
+    print(x);
+});
+print(parent.objectClassName);
+print(parent.name);
+print(parent.uuid);
+print(parent.parentType);
+print(children[0].parentType);
+
 if (directMode && typeof parent.uuid !== "undefined") {
     expectedUuid = parent.uuid;
 } else {

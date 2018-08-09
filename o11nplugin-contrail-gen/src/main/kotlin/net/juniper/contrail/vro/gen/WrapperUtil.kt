@@ -103,4 +103,3 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
             .filter { it.isGetter }
             .map { Property(it.propertyName.capitalize(), it.returnType) }
 }
-
