@@ -7,6 +7,11 @@ if (!arrayMode) {
 }
 
 var expectedUuid = null;
+print(parent.getObjectType())
+print(parent.name)
+print(parent.uuid)
+print(parent.parentType)
+print(children[0].parentType)
 if (directMode && typeof parent.uuid !== "undefined") {
     expectedUuid = parent.uuid;
 } else {
