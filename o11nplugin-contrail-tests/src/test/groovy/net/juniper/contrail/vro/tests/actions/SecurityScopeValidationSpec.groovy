@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.tests.actions
 
+import net.juniper.contrail.api.types.PolicyManagement
 import net.juniper.contrail.vro.tests.workflows.WorkflowSpec
 
 import static net.juniper.contrail.vro.config.Actions.matchesSecurityScope
@@ -18,16 +19,26 @@ class SecurityScopeValidationSpec extends WorkflowSpec implements ValidationAsse
     def connection = dependencies.connection
     def project1 = dependencies.someProject()
     def project2 = dependencies.someProject()
+    def someProjectDraftPolicyManagement = dependencies.someProjectDraftPolicyManagement(project1)
+    def globalDraftPolicyManagement = dependencies.globalDraftPolicyManagement
     def projectFirewallRule = dependencies.someProjectFirewallRule(project1)
     def globalFirewallRule = dependencies.someGlobalFirewallRule()
+    def projectDraftFirewallRule = dependencies.someDraftFirewallRule(someProjectDraftPolicyManagement)
+    def globalDraftFirewallRule = dependencies.someDraftFirewallRule(globalDraftPolicyManagement)
 
     def project1ServiceGroup = dependencies.someProjectServiceGroup(project1)
     def project2ServiceGroup = dependencies.someProjectServiceGroup(project2)
     def globalServiceGroup = dependencies.someGlobalServiceGroup()
+    def projectDraftServiceGroup = dependencies.someDraftServiceGroup(someProjectDraftPolicyManagement)
 
     def project1Tag = dependencies.someProjectTag(project1)
     def project2Tag = dependencies.someProjectTag(project2)
     def globalTag = dependencies.someGlobalTag()
+
+    def mockDraftPolicyManagements() {
+        connectorMock.findByFQN(PolicyManagement.class, someProjectDraftPolicyManagement.qualifiedName.join(":")) >> someProjectDraftPolicyManagement.__getTarget()
+        connectorMock.findByFQN(PolicyManagement.class, globalDraftPolicyManagement.qualifiedName.join(":")) >> globalDraftPolicyManagement.__getTarget()
+    }
 
     def "Validating a null object when creating a project-scope firewall rule" () {
         def children = null
@@ -336,4 +347,103 @@ class SecurityScopeValidationSpec extends WorkflowSpec implements ValidationAsse
         then: "it fails, naming the wrong tag"
         validationFailureWith(result, securityScopeValidationMessage(project2Tag.name))
     }
+
+    // draft mode
+    def "project:draft child, project:non-draft parent, direct" () {
+        given:
+        def children = projectDraftServiceGroup
+        def parent = project1
+        def arrayMode = false
+        def directMode = true
+
+        mockDraftPolicyManagements()
+
+        when: "executing validating script"
+        def result = invokeFunction(validateSecurityScope, children, parent, directMode, arrayMode)
+
+        then: "it succeeds"
+        validationSuccess(result)
+    }
+
+    def "project:non-draft child, project:draft parent, direct" () {
+        given:
+        def children = project1ServiceGroup
+        def parent = someProjectDraftPolicyManagement
+        def arrayMode = false
+        def directMode = true
+
+        mockDraftPolicyManagements()
+
+        when: "executing validating script"
+        def result = invokeFunction(validateSecurityScope, children, parent, directMode, arrayMode)
+
+        then: "it succeeds"
+        validationSuccess(result)
+    }
+
+    def "project:non-draft child, project:draft parent, non-direct" () {
+        given:
+        def children = project1ServiceGroup
+        def parent = projectDraftFirewallRule
+        def arrayMode = false
+        def directMode = false
+
+        mockDraftPolicyManagements()
+
+        when: "executing validating script"
+        def result = invokeFunction(validateSecurityScope, children, parent, directMode, arrayMode)
+
+        then: "it succeeds"
+        validationSuccess(result)
+    }
+
+    def "project:draft child, project:draft parent, non-direct" () {
+        given:
+        def children = projectDraftServiceGroup
+        def parent = projectDraftFirewallRule
+        def arrayMode = false
+        def directMode = false
+
+        mockDraftPolicyManagements()
+
+        when: "executing validating script"
+        def result = invokeFunction(validateSecurityScope, children, parent, directMode, arrayMode)
+
+        then: "it succeeds"
+        validationSuccess(result)
+    }
+
+    def "project:draft child, global:draft parent, direct" () {
+        given:
+        def children = projectDraftServiceGroup
+        def parent = globalDraftPolicyManagement
+        def arrayMode = false
+        def directMode = true
+
+        mockDraftPolicyManagements()
+
+        when: "executing validating script"
+        def result = invokeFunction(validateSecurityScope, children, parent, directMode, arrayMode)
+
+        then: "it fails"
+        validationFailure(result)
+    }
+
+    def "global:draft child, global:draft parent, direct" () {
+        given:
+        def children = globalDraftFirewallRule
+        def parent = globalDraftPolicyManagement
+        def arrayMode = false
+        def directMode = true
+
+        mockDraftPolicyManagements()
+
+        when: "executing validating script"
+        def result = invokeFunction(validateSecurityScope, children, parent, directMode, arrayMode)
+
+        then: "it succeeds"
+        validationSuccess(result)
+    }
+
+
 }

@@ -260,6 +260,14 @@ public class ${className}
         return formatter.format(this, __getTarget().${prop.methodName}(), "${prop.refObjectPluginType}");
     }
     </#list>
+
+    public String getNonDraftParentType() {
+        return util.nonDraftParentType(_internalId, __getTarget());
+    }
+
+    public String getNonDraftParentUuid() {
+        return util.nonDraftParentUuid(_internalId, __getTarget());
+    }
     </#if>
 
     <#list connectionFindClasses as clazz>
