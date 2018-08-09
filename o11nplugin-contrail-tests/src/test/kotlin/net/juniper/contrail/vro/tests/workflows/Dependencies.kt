@@ -33,15 +33,23 @@ import java.util.UUID
 fun randomStringUuid() = UUID.randomUUID().toString()
 
 class Dependencies(private val connection: Connection_Wrapper, private val utils: Utils_Wrapper) {
-    val defaultPolicyManagement: PolicyManagement_Wrapper = PolicyManagement_Wrapper().apply {
-        uuid = randomStringUuid()
-        name = "default-policy-management"
-        setParentConnection(this@Dependencies.connection)
-    }
-
     val configRoot: ConfigRoot_Wrapper = ConfigRoot_Wrapper().apply {
         uuid = randomStringUuid()
         name = "config-root"
+        setParentConnection(this@Dependencies.connection)
+    }
+
+    val defaultPolicyManagement: PolicyManagement_Wrapper = PolicyManagement_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "default-policy-management"
+        __getTarget().setParent(configRoot.__getTarget())
+        setParentConnection(this@Dependencies.connection)
+    }
+
+    val globalDraftPolicyManagement: PolicyManagement_Wrapper = PolicyManagement_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "draft-policy-management"
+        __getTarget().setParent(configRoot.__getTarget())
         setParentConnection(this@Dependencies.connection)
     }
 
@@ -49,6 +57,15 @@ class Dependencies(private val connection: Connection_Wrapper, private val utils
         uuid = randomStringUuid()
         name = "someProject$uuid"
         setParentConnection(this@Dependencies.connection)
+    }
+
+    @JvmOverloads
+    fun someProjectDraftPolicyManagement(parent: Project_Wrapper = someProject()): PolicyManagement_Wrapper = PolicyManagement_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "draft-policy-management"
+        // workaround to set PM's parent to a project
+        __getTarget().setParent(parent.__getTarget())
+        internalId = parent.internalId.with("VirtualNetwork", uuid)
     }
 
     @JvmOverloads
@@ -135,6 +152,13 @@ class Dependencies(private val connection: Connection_Wrapper, private val utils
         setParentProject(parent)
     }
 
+    @JvmOverloads
+    fun someDraftFirewallRule(parent: PolicyManagement_Wrapper = globalDraftPolicyManagement) = FirewallRule_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someFirewallRule$uuid"
+        setParentPolicyManagement(parent)
+    }
+
     fun someGlobalFirewallRule() = FirewallRule_Wrapper().apply {
         uuid = randomStringUuid()
         name = "someGlobalFirewallRule$uuid"
@@ -152,6 +176,13 @@ class Dependencies(private val connection: Connection_Wrapper, private val utils
         uuid = randomStringUuid()
         name = "someProjectServiceGroup$uuid"
         setParentProject(parent)
+    }
+
+    @JvmOverloads
+    fun someDraftServiceGroup(parent: PolicyManagement_Wrapper = globalDraftPolicyManagement) = ServiceGroup_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someServiceGroup$uuid"
+        setParentPolicyManagement(parent)
     }
 
     fun someGlobalServiceGroup() = ServiceGroup_Wrapper().apply {
