@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.tests.actions
 
 import net.juniper.contrail.vro.tests.workflows.WorkflowSpec
+import spock.lang.Ignore
 
 import static net.juniper.contrail.vro.config.Actions.matchesSecurityScope
 
@@ -18,12 +19,15 @@ class SecurityScopeValidationSpec extends WorkflowSpec implements ValidationAsse
     def connection = dependencies.connection
     def project1 = dependencies.someProject()
     def project2 = dependencies.someProject()
+    def someProjectDraftPolicyManagement = dependencies.someProjectDraftPolicyManagement(project1)
     def projectFirewallRule = dependencies.someProjectFirewallRule(project1)
     def globalFirewallRule = dependencies.someGlobalFirewallRule()
+    def projectDraftFirewallRule = dependencies.someDraftFirewallRule(someProjectDraftPolicyManagement)
 
     def project1ServiceGroup = dependencies.someProjectServiceGroup(project1)
     def project2ServiceGroup = dependencies.someProjectServiceGroup(project2)
     def globalServiceGroup = dependencies.someGlobalServiceGroup()
+    def projectDraftServiceGroup = dependencies.someDraftServiceGroup(someProjectDraftPolicyManagement)
 
     def project1Tag = dependencies.someProjectTag(project1)
     def project2Tag = dependencies.someProjectTag(project2)
@@ -335,5 +339,49 @@ class SecurityScopeValidationSpec extends WorkflowSpec implements ValidationAsse
 
         then: "it fails, naming the wrong tag"
         validationFailureWith(result, securityScopeValidationMessage(project2Tag.name))
+    }
+
+    // draft mode
+    def "Validating a draft Security Group when editing a non-draft Firewall Rule" () {
+        given:
+        def children = projectDraftServiceGroup
+        def parent = project1
+        def arrayMode = false
+        def directMode = true
+
+        when: "executing validating script"
+        def result = invokeFunction(validateSecurityScope, children, parent, directMode, arrayMode)
+
+        then: "it succeeds"
+        validationSuccess(result)
+    }
+
+    // TODO: test name makes no sense
+    def "Validating a non-draft Security Group when creating a draft Firewall Rule" () {
+        given:
+        def children = project1ServiceGroup
+        def parent = someProjectDraftPolicyManagement
+        def arrayMode = false
+        def directMode = true
+
+        when: "executing validating script"
+        def result = invokeFunction(validateSecurityScope, children, parent, directMode, arrayMode)
+
+        then: "it succeeds"
+        validationSuccess(result)
+    }
+
+    def "Validating a global-scope Service Group when editing a draft project-scope firewall rule" () {
+        given:
+        def children = project1ServiceGroup
+        def parent = projectDraftFirewallRule
+        def arrayMode = false
+        def directMode = false
+
+        when: "executing validating script"
+        def result = invokeFunction(validateSecurityScope, children, parent, directMode, arrayMode)
+
+        then: "it succeeds"
+        validationSuccess(result)
     }
 }

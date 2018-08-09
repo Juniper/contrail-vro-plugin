@@ -12,6 +12,11 @@ import com.vmware.o11n.sdk.modeldriven.WrapperContext
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
+import net.juniper.contrail.api.types.AddressGroup
+import net.juniper.contrail.api.types.ApplicationPolicySet
+import net.juniper.contrail.api.types.FirewallPolicy
+import net.juniper.contrail.api.types.FirewallRule
+import net.juniper.contrail.api.types.ServiceGroup
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.model.Executor
@@ -43,8 +48,35 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
     fun <T : ApiObjectBase> create(sid: Sid, obj: T) =
         crud(obj, sid) { create(it) }
 
-    fun <T : ApiObjectBase> update(sid: Sid, obj: T) =
+    fun <T : ApiObjectBase> update(sid: Sid, obj: T) {
+        if (obj is ApplicationPolicySet) {
+            obj.allApplications = null
+            obj.draftModeState = null
+            obj.idPerms = null
+            obj.perms2 = null
+        }
+        if (obj is FirewallPolicy) {
+            obj.draftModeState = null
+            obj.idPerms = null
+            obj.perms2 = null
+        }
+        if (obj is FirewallRule) {
+            obj.draftModeState = null
+            obj.idPerms = null
+            obj.perms2 = null
+        }
+        if (obj is ServiceGroup) {
+            obj.draftModeState = null
+            obj.idPerms = null
+            obj.perms2 = null
+        }
+        if (obj is AddressGroup) {
+            obj.draftModeState = null
+            obj.idPerms = null
+            obj.perms2 = null
+        }
         crud(obj, sid) { update(it) }
+    }
 
     fun <T : ApiObjectBase> delete(sid: Sid, obj: T) =
         crud(obj, sid) { delete(it) }
