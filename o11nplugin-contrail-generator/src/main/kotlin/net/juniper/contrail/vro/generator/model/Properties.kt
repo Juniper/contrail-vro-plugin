@@ -7,9 +7,9 @@ package net.juniper.contrail.vro.generator.model
 import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.kotlinClassName
+import net.juniper.contrail.vro.config.pluginPropertyName
 import net.juniper.contrail.vro.config.propertyName
 import net.juniper.contrail.vro.config.returnListGenericClass
-import net.juniper.contrail.vro.config.pluginPropertyName
 import net.juniper.contrail.vro.config.underscoredNestedName
 import net.juniper.contrail.vro.config.wrapperName
 import java.lang.reflect.Method
