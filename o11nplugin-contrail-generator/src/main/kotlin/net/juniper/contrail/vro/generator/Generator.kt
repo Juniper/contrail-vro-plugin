@@ -31,7 +31,6 @@ fun generatePlugin(projectInfo: ProjectInfo, schema: Schema) {
     val pluginClasses = objectClasses.filter { it.isPluginClass }
     val modelClasses = pluginClasses.filter { it.isModelClass }
     val propertyClasses = pluginClasses.propertyClasses()
-
     val relations = buildRelationDefinition(modelClasses)
 
     generateModel(projectInfo, relations, pluginClasses, modelClasses, propertyClasses)

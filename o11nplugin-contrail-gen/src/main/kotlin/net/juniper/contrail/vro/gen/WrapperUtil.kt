@@ -12,9 +12,11 @@ import com.vmware.o11n.sdk.modeldriven.WrapperContext
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
-import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.config.pluginName
+import net.juniper.contrail.vro.generator.model.properties
+import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.Executor
+import net.juniper.contrail.vro.schema.defaultSchema
 import net.juniper.contrail.vro.config.constants.Connection as ConnectionName
 
 class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
@@ -43,8 +45,10 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
     fun <T : ApiObjectBase> create(sid: Sid, obj: T) =
         crud(obj, sid) { create(it) }
 
-    fun <T : ApiObjectBase> update(sid: Sid, obj: T) =
+    fun <T : ApiObjectBase> update(sid: Sid, obj: T) {
+        setNullIfReadOnly(obj)
         crud(obj, sid) { update(it) }
+    }
 
     fun <T : ApiObjectBase> delete(sid: Sid, obj: T) =
         crud(obj, sid) { delete(it) }
@@ -70,4 +74,23 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
         wrapper.internalId = sid.with(clazz.pluginName, uuid)
         return wrapper
     }
+
+    private val readOnlyPropertyNames = defaultSchema.propertyComments.filter { it.crud.isReadOnly }
+
+    private fun <T : ApiObjectBase> setNullIfReadOnly(obj: T) {
+        val clazz = obj::class.java
+        val className = clazz.simpleName
+        val readOnlyPropertyNamesInObject = readOnlyPropertyNames
+            .filter { it.parentClassName.schemaNameToCapitalizedName() == className }
+            .map { it.elementName.schemaNameToCapitalizedName() }
+
+        val readOnlyProperties = clazz.properties.properties.filter { it.componentName in readOnlyPropertyNamesInObject }
+        readOnlyProperties.forEach {
+            val setter = clazz.getDeclaredMethod( "set${it.componentName}", it.clazz )
+            setter.invoke(obj, null)
+        }
+    }
+
+    private fun String.schemaNameToCapitalizedName() =
+        split("-").map { it.capitalize() }.joinToString("")
 }
