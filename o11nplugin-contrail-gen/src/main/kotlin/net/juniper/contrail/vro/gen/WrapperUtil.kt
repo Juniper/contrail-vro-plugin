@@ -12,9 +12,12 @@ import com.vmware.o11n.sdk.modeldriven.WrapperContext
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.api.ObjectReference
-import net.juniper.contrail.vro.model.Connection
+import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.pluginName
+import net.juniper.contrail.vro.config.propertyName
+import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.Executor
+import net.juniper.contrail.vro.generated.schemaReadOnlyPropertyNames
 import net.juniper.contrail.vro.config.constants.Connection as ConnectionName
 
 class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
@@ -43,8 +46,10 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
     fun <T : ApiObjectBase> create(sid: Sid, obj: T) =
         crud(obj, sid) { create(it) }
 
-    fun <T : ApiObjectBase> update(sid: Sid, obj: T) =
+    fun <T : ApiObjectBase> update(sid: Sid, obj: T) {
+        setNullIfReadOnly(obj)
         crud(obj, sid) { update(it) }
+    }
 
     fun <T : ApiObjectBase> delete(sid: Sid, obj: T) =
         crud(obj, sid) { delete(it) }
@@ -70,4 +75,31 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
         wrapper.internalId = sid.with(clazz.pluginName, uuid)
         return wrapper
     }
+
+    data class Property(val propertyName: String, val type: Class<*>)
+
+    private fun <T : ApiObjectBase> setNullIfReadOnly(obj: T) {
+        val clazz = obj::class.java
+        val className = clazz.simpleName
+        val readOnlyPropertyNamesInObject = schemaReadOnlyPropertyNames
+            .filter { it.first.schemaNameToCapitalizedName() == className }
+            .map { it.second.schemaNameToCapitalizedName() }
+
+        //We filter out properties belonging to "all" classes because they don't cause Bad Request error.
+        val readOnlyProperties = clazz.properties.filter { it.propertyName in readOnlyPropertyNamesInObject }
+        readOnlyProperties.forEach {
+            val setter = clazz.getDeclaredMethod( "set${it.propertyName}", it.type )
+            println("set$it")
+            setter.invoke(obj, null)
+        }
+    }
+
+    val <T> Class<T>.properties: List<Property> get() =
+        declaredMethods.asList()
+            .filter { it.isGetter }
+            .map { Property(it.propertyName.capitalize(), it.returnType) }
+
+    private fun String.schemaNameToCapitalizedName() =
+        split("-").map { it.capitalize() }.joinToString("")
 }
+

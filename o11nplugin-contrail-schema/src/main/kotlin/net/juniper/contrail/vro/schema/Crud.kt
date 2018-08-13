@@ -13,6 +13,8 @@ class CRUD(val crud: String) {
     val isDelete = crud.contains('D')
 
     val isCreateOnly = isCreate && !isUpdate
+
+    val isReadOnly = isRead && !isCreate && !isUpdate
 }
 
 fun String?.toCrud() =
