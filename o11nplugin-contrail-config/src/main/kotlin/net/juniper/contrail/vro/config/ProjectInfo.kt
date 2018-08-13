@@ -23,6 +23,7 @@ fun readProjectInfo(): ProjectInfo {
     val customRoot = configRoot.replace(configPattern, "-custom")
     val packageRoot = configRoot.replace(configPattern, "-package")
     val generatorRoot = configRoot.replace(configPattern, "-generator")
+    val genRoot = configRoot.replace(configPattern, "-gen")
     val version = props["dist.version"] as String
     val buildNumber = props["build.number"] as String
     val workflowPackage = props["workflow.package"] as String
@@ -36,6 +37,7 @@ fun readProjectInfo(): ProjectInfo {
         customRoot = customRoot,
         packageRoot = packageRoot,
         generatorRoot = generatorRoot,
+        genRoot = genRoot,
         version = version,
         baseVersion = baseVersion,
         buildNumber = buildNumber,
@@ -50,6 +52,7 @@ data class ProjectInfo(
     val customRoot: String,
     val packageRoot: String,
     val generatorRoot: String,
+    val genRoot: String,
     val version: String,
     val baseVersion: String,
     val buildNumber: String,
