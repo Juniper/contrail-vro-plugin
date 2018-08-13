@@ -11,6 +11,7 @@ val generatedTestsRoot = "/target/generated-tests"
 val templatesDirName = "templates"
 val templatesInClassPath = "/$templatesDirName"
 val templatesInResourcesPath = "src/main/resources/$templatesDirName"
+val generatedSchemaInfoRoot = "/target/generated-Schema-Info"
 
 val editWarningMessage: String =
 """
