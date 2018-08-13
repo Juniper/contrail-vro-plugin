@@ -56,7 +56,8 @@ object DisplayNameFormatter {
         val service = if (obj.service != null && obj.service.protocol != null) format(obj.service) else serviceGroup
         val endpoint1 = format(obj.endpoint1)
         val endpoint2 = format(obj.endpoint2)
-        return "$draftState$parentName: $simpleAction $service  EP1: $endpoint1  $direction  EP2: $endpoint2"
+        val matchTags = obj.matchTags.tagList.joinToString(",")
+        return "$draftState$parentName: $simpleAction $service  EP1: $endpoint1  $direction  EP2: $endpoint2  MT: $matchTags"
     }
 
     fun format(obj: FirewallPolicy): String? =
