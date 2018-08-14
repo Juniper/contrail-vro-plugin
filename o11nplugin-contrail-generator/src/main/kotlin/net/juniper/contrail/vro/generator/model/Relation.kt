@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.generator.model
 
 import net.juniper.contrail.api.ApiPropertyBase
 import net.juniper.contrail.vro.config.BackRefs
+import net.juniper.contrail.vro.config.Config
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.PropertyClass
 import net.juniper.contrail.vro.config.PropertyClassFilter
@@ -16,10 +17,7 @@ import net.juniper.contrail.vro.config.isApiPropertyClass
 import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isBackRef
 import net.juniper.contrail.vro.config.isChildReferenceGetter
-import net.juniper.contrail.vro.config.isDisplayableChildOf
 import net.juniper.contrail.vro.config.isGetter
-import net.juniper.contrail.vro.config.isInReversedRelationTo
-import net.juniper.contrail.vro.config.isModelClassName
 import net.juniper.contrail.vro.config.nameWithoutGetAndBackRefs
 import net.juniper.contrail.vro.config.objectReferenceAttributeClass
 import net.juniper.contrail.vro.config.order
@@ -43,10 +41,11 @@ open class Relation (
 
 class ForwardRelation (
     val declaredParentClass: ObjectClass,
-    method: Method
+    method: Method,
+    val config: Config
 ) {
     val declaredChildClass = method.nameWithoutGetAndBackRefs.asObjectClass!!
-    val isReversed: Boolean = declaredParentClass.isInReversedRelationTo(declaredChildClass)
+    val isReversed: Boolean = config.isInReversedRelationTo(declaredParentClass, declaredChildClass)
     val parentClass: ObjectClass = if (isReversed) declaredChildClass else declaredParentClass
     val childClass: ObjectClass = if (isReversed) declaredParentClass else declaredChildClass
     val parentName: String = parentClass.simpleName
@@ -73,24 +72,24 @@ class PropertyRelation (
     val childPluginName = childName.toPluginName
 }
 
-fun List<ObjectClass>.generateRelations() = asSequence()
+fun List<ObjectClass>.generateRelations(config: Config) = asSequence()
     .sortedBy { it.order }
-    .flatMap { it.relations() }
+    .flatMap { it.relations(config) }
     .toList()
 
-private fun ObjectClass.relations() = methods.asSequence()
+private fun ObjectClass.relations(config: Config) = methods.asSequence()
     .filter { it.isChildReferenceGetter }
     .map { it.childClassName }.filterNotNull()
-    .filter { it.isModelClassName }
+    .filter { config.isModelClassName(it) }
     .map { it.asObjectClass }.filterNotNull()
-    .filter { it isDisplayableChildOf this }
+    .filter { config.isDisplayableChildOf(it, this) }
     .sortedBy { it.order }
     .map { Relation(this, it) }
 
-fun List<ObjectClass>.generateReferenceRelations(): List<ForwardRelation> =
+fun List<ObjectClass>.generateReferenceRelations(config: Config): List<ForwardRelation> =
     asSequence()
         .sortedBy { it.order }
-        .flatMap { it.refRelations }
+        .flatMap { it.refRelations(config) }
         .filter { contains(it.childClass) }
         .toList()
 
@@ -111,11 +110,11 @@ private fun Method.toPropertyRelation() = PropertyRelation(
     propertyName
 )
 
-private val ObjectClass.refRelations: Sequence<ForwardRelation> get() =
+private fun ObjectClass.refRelations(config: Config): Sequence<ForwardRelation> =
     referenceMethods
         .filter { ! it.isBackRef }
-        .map { ForwardRelation(this, it) }
-        .filter { it.childName isDisplayableChildOf it.parentName }
+        .map { ForwardRelation(this, it, config) }
+        .filter { config.isDisplayableChildOf(it.childName, it.parentName) }
         .sortedBy { it.childClass.order }
 
 private val ObjectClass.referenceMethods: Sequence<Method> get() =

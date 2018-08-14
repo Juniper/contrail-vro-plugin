@@ -9,24 +9,19 @@ import com.vmware.o11n.sdk.modeldrivengen.model.FormalParameter
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedConstructor
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedMethod
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
+import net.juniper.contrail.vro.config.Config
 import net.juniper.contrail.vro.config.backReferencePattern
 import net.juniper.contrail.vro.config.constants.apiTypesPackageName
+import net.juniper.contrail.vro.config.pluginName
+import net.juniper.contrail.vro.config.toPluginName
 import net.juniper.contrail.vro.config.isApiObjectClass
-import net.juniper.contrail.vro.config.isNodeClass
 import net.juniper.contrail.vro.config.isApiPropertyClass
-import net.juniper.contrail.vro.config.isCustomPropertyObject
 import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.isHiddenProperty
-import net.juniper.contrail.vro.config.isInventoryProperty
-import net.juniper.contrail.vro.config.isModelClass
 import net.juniper.contrail.vro.config.isPublic
-import net.juniper.contrail.vro.config.modelClasses
 import net.juniper.contrail.vro.config.parameterClass
-import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.returnsApiPropertyOrList
 import net.juniper.contrail.vro.config.returnsObjectReferences
-import net.juniper.contrail.vro.config.parentsInPlugin
-import net.juniper.contrail.vro.config.toPluginName
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.Executor
 import java.lang.reflect.Method
@@ -39,28 +34,28 @@ private val executorTypes = Executor::class.java.declaredMethods.asSequence()
     // only methods with at least one parameter should be in executor
     .groupBy { it.parameterTypes[0] }
 
-private fun ManagedType.createExecutorMethods(): List<ManagedMethod> {
+private fun ManagedType.createExecutorMethods(config: Config): List<ManagedMethod> {
     val methods = executorTypes[modelClass] ?: emptyList()
-    return methods.map { it.toExecutorMethod() }
+    return methods.map { it.toExecutorMethod(config) }
 }
 
-private fun Method.toExecutorMethod() = ManagedMethod().apply {
+private fun Method.toExecutorMethod(config: Config) = ManagedMethod().apply {
     val methodName = this@toExecutorMethod.name
     setName(methodName, null)
-    params = executorMethodParameters()
+    params = executorMethodParameters(config)
     // trick to avoid generating standard wrapper method
     setIsInheritedWrapperMethod(true)
     isPropertyReadOnly = true
-    returns = executorFormalParameter(returnType, "_result", genericReturnType.parameterClass)
+    returns = executorFormalParameter(returnType, "_result", genericReturnType.parameterClass, config)
 }
 
-private fun Method.executorMethodParameters() =
+private fun Method.executorMethodParameters(config: Config) =
     parameters.asSequence().drop(1)
-        .map { it.toExecutorFormalParameter() }
+        .map { it.toExecutorFormalParameter(config) }
         .toList()
 
-private fun Parameter.toExecutorFormalParameter() =
-    executorFormalParameter(type, name, parameterizedType.parameterClass)
+private fun Parameter.toExecutorFormalParameter(config: Config) =
+    executorFormalParameter(type, name, parameterizedType.parameterClass, config)
 
 /**
  * Formal parameter created by this function has the following content:
@@ -68,26 +63,26 @@ private fun Parameter.toExecutorFormalParameter() =
  * componentTypeName - not null if parameter is wrapped model class
  * componentClassName - not null if parameter is list
  */
-private fun executorFormalParameter(clazz: Class<*>, parameterName: String, component: Class<*>?) : FormalParameter {
-    val parameter = commonFormalParameter(clazz, parameterName)
+private fun executorFormalParameter(clazz: Class<*>, parameterName: String, component: Class<*>?, config: Config) : FormalParameter {
+    val parameter = commonFormalParameter(clazz, parameterName, config)
     return when {
-        listClass.isAssignableFrom(clazz) -> listParamConfig(parameter, component!!)
-        clazz.isModelClass -> clazz.modelParamConfig(parameter)
+        listClass.isAssignableFrom(clazz) -> listParamConfig(parameter, component!!, config)
+        config.isModelClass(clazz) -> clazz.modelParamConfig(parameter)
         else -> clazz.simpleParamConfig(parameter)
     }
 }
 
-private fun commonFormalParameter(clazz: Class<*>, parameterName: String) = FormalParameter().apply {
+private fun commonFormalParameter(clazz: Class<*>, parameterName: String, config: Config) = FormalParameter().apply {
     name = parameterName
     modelType = clazz
-    isWrapped = clazz.isModelClass
+    isWrapped = config.isModelClass(clazz)
 }
 
-private fun listParamConfig(parameter: FormalParameter, component: Class<*>) = parameter.apply {
+private fun listParamConfig(parameter: FormalParameter, component: Class<*>, config: Config) = parameter.apply {
     componentClassName = component.canonicalName
     val className = component.simpleName
     fullClassName = "List<$className>"
-    if (component.isModelClass) {
+    if (config.isModelClass(component)) {
         typeName = "List<${className}_Wrapper>"
         componentTypeName = component.pluginName
     } else {
@@ -110,7 +105,7 @@ class ClassInfo(val simpleName: String) {
     val pluginName = simpleName.toPluginName
 }
 
-class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
+class CustomManagedType(private val delegate: ManagedType, val config: Config) : ManagedType() {
 
     val isObjectClass get() =
         delegate.modelClass?.isApiObjectClass ?: false
@@ -119,19 +114,18 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         delegate.modelClass == Connection::class.java
 
     val isNodeClass get() =
-        delegate.modelClass?.isNodeClass ?: false
+        delegate.modelClass?.let { config.isNodeClass(it) } ?: false
 
     val pluginName = delegate.modelClass?.pluginName
 
-    val parents = delegate.modelClass?.parentsInPlugin
-        ?.toList()?.let { it + Connection::class.java }
-        ?: emptyList()
+    val parents = if (delegate.modelClass == null) emptyList() else config.parentsInPlugin(delegate.modelClass)
+                                                                    .toList().let { it + Connection::class.java }
 
-    val executorMethods = delegate.createExecutorMethods()
+    val executorMethods = delegate.createExecutorMethods(config)
 
     val references: List<CustomReference> = delegate.modelClass?.run {
         methods.asSequence()
-            .map { it.toCustomReference() }.filterNotNull()
+            .map { it.toCustomReference(config) }.filterNotNull()
             .toList()
     } ?: emptyList()
 
@@ -145,7 +139,7 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         methods.asSequence()
             .filter { it.returnsObjectReferences }
             .filter { it.isReferenceProperty }
-            .filter { it.referencePropertyClass.isModelClass }
+            .filter { config.isModelClass(it.referencePropertyClass) }
             .map { it.toCustomReferenceProperty() }
             .toList()
         else
@@ -153,13 +147,13 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
     } ?: emptyList()
 
     val connectionFindClasses: List<ClassInfo> = if (isConnectionClass) {
-        modelClasses.map { ClassInfo(it) }
+        config.context.modelClasses.map { ClassInfo(it) }
     } else {
         emptyList()
     }
 
     val customProperties: List<AdditionalProperty> = delegate.modelClass?.run {
-        if (isCustomPropertyObject || isInventoryProperty)
+        if (config.isCustomPropertyObject(this) || config.isInventoryProperty(this))
             propertyAsObjectNewProperties
         else
             null
@@ -170,7 +164,7 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         methods.asSequence()
             .filter { it.isGetter }
             .filter { it.returnsApiPropertyOrList }
-            .filter { ! it.returnType.isInventoryProperty }
+            .filter { ! config.isInventoryProperty(it.returnType) }
             .map { it.toCustomProperty() }
             .filter { ! it.propertyName.isHiddenProperty }
             .toList()
