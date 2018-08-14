@@ -5,10 +5,10 @@
 package net.juniper.contrail.vro.generator.workflows
 
 import net.juniper.contrail.api.types.Project
+import net.juniper.contrail.vro.config.Config
 import net.juniper.contrail.vro.config.constants.child
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.isA
-import net.juniper.contrail.vro.config.needsSecurityScopeValidation
 import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
@@ -28,7 +28,7 @@ import net.juniper.contrail.vro.workflows.util.parentDescriptionInCreateRelation
 import net.juniper.contrail.vro.workflows.util.parentDescriptionInRemoveRelation
 import net.juniper.contrail.vro.workflows.util.removeRelationWorkflowName
 
-fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDefinition {
+fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema, config: Config): WorkflowDefinition {
 
     val parentClass = relation.declaredParentClass
     val childClass = relation.declaredChildClass
@@ -47,7 +47,7 @@ fun addReferenceWorkflow(relation: ForwardRelation, schema: Schema): WorkflowDef
             description = schema.childDescriptionInCreateRelation(parentClass, childClass, ignoreMissing = true)
             mandatory = true
             browserRoot = item.parentConnection
-            if (childClass.needsSecurityScopeValidation)
+            if (config.needsSecurityScopeValidation(childClass))
                 validWhen = matchesSecurityScope(item, directValidation)
         }
     }
