@@ -4,8 +4,8 @@
 
 package net.juniper.contrail.vro.generator.model
 
+import net.juniper.contrail.vro.config.Config
 import net.juniper.contrail.vro.config.ObjectClass
-import net.juniper.contrail.vro.config.isDirectChild
 import net.juniper.contrail.vro.config.pluralize
 import net.juniper.contrail.vro.config.toPluginName
 
@@ -33,10 +33,10 @@ data class RelationModel(
     val getter: String = childName.decapitalize() + "s"
 }
 
-fun Relation.toRelationModel() = RelationModel(
+fun Relation.toRelationModel(config: Config) = RelationModel(
     parentName,
     childName,
-    childName.isDirectChild,
+    config.isDirectChild(childName),
     folderName
 )
 
@@ -44,9 +44,10 @@ fun generateRelationsModel(
     relations: List<Relation>,
     forwardRelations: List<ForwardRelation>,
     propertyRelations: List<PropertyRelation>,
-    rootClasses: List<ObjectClass>
+    rootClasses: List<ObjectClass>,
+    config: Config
 ): RelationsModel {
-    val relationModels = relations.map { it.toRelationModel() }
+    val relationModels = relations.map { it.toRelationModel(config) }
     val categories = relations.toCategories().toList()
     val rootClassesModel = rootClasses.map { it.toClassInfoModel() }
     val securityClasses = relations.toSecurityClasses().toList()
