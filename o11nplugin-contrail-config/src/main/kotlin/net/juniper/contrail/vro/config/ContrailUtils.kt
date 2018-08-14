@@ -54,8 +54,8 @@ val ObjectClass.objectType: String get() =
 val ObjectClass.defaultParentType: String? get() =
     newInstance().defaultParentType
 
-val ObjectClass.parentType: String? get() = when {
-    isRootClass -> null
+fun ObjectClass.parentType( config: Config) : String? = when {
+    config.isRootClass(this) -> null
     // Default parent of Virtual Machine Interface is deprecated in the schema
     isA<VirtualMachineInterface>() -> "project"
     else -> defaultParentType

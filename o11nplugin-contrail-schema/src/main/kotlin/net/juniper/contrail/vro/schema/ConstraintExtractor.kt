@@ -5,15 +5,14 @@
 package net.juniper.contrail.vro.schema
 
 import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.vro.config.Config
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.bold
+import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.isApiPropertyClass
-import net.juniper.contrail.vro.config.isModelClass
-import net.juniper.contrail.vro.config.isModelClassName
 import net.juniper.contrail.vro.config.parentType
-import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.typeToClassName
 import org.w3c.dom.Node
 
@@ -57,16 +56,16 @@ private fun Schema.propertyDescriptionImpl(clazz: Class<*>, xsdFieldName: String
     else -> definitionNode(clazz, xsdFieldName).descriptionAttribute
 }
 
-fun Schema.classDescription(clazz: Class<*>): String? = when {
-    clazz.isApiObjectClass -> objectClassDefinitionComments(clazz).formatDescription()
-    clazz.isApiPropertyClass -> propertyClassDefinitionComments(clazz).formatDescription()
+fun Schema.classDescription(clazz: Class<*>, config: Config): String? = when {
+    clazz.isApiObjectClass -> objectClassDefinitionComments(clazz, config).formatDescription()
+    clazz.isApiPropertyClass -> propertyClassDefinitionComments(clazz, config).formatDescription()
     // wrapper over property class
     clazz.simpleName.contains('_') -> wrapperPropertyDefinitionComment(clazz)?.description
     else -> null
 }
 
-fun Schema.objectDescription(clazz: ObjectClass, parent: ObjectClass? = null): String? {
-    return relationDefinitionComment(parent?.xsdName ?: clazz.parentType ?: return null, clazz.xsdName).description
+fun Schema.objectDescription(clazz: ObjectClass, config: Config, parent: ObjectClass? = null): String? {
+    return relationDefinitionComment(parent?.xsdName ?: clazz.parentType(config) ?: return null, clazz.xsdName).description
 }
 
 inline fun <reified F : Any, reified T : Any> Schema.relationDescription() =
@@ -78,11 +77,11 @@ fun Schema.relationDescription(from: Class<*>, to: Class<*>, ignoreMissing: Bool
     else
         relationDefinitionComment(from, to).description
 
-inline fun <reified F : ApiObjectBase, reified T : ApiObjectBase> Schema.createWorkflowDescription() =
-    createWorkflowDescription(T::class.java, F::class.java)
+inline fun <reified F : ApiObjectBase, reified T : ApiObjectBase> createWorkflowDescription(schema : Schema, config: Config) =
+    createWorkflowDescription(schema, T::class.java, config, F::class.java)
 
-fun Schema.createWorkflowDescription(clazz: ObjectClass, parentClazz: ObjectClass? = null) : String? {
-    val objectDescription = objectDescription(clazz, parentClazz) ?: return null
+fun createWorkflowDescription(schema : Schema, clazz: ObjectClass, config: Config, parentClazz: ObjectClass? = null) : String? {
+    val objectDescription = schema.objectDescription(clazz, config, parentClazz) ?: return null
     return """
 ${clazz.pluginName.allCapitalized.bold}
 $objectDescription
@@ -120,19 +119,19 @@ private fun Schema.relationDefinitionComment(from: String, to: String): Link =
     relationDefinitionCommentIfPresent(from, to) ?:
         throw IllegalArgumentException("Relation $from-$to was not found in the schema.")
 
-private fun Schema.objectClassDefinitionComments(clazz: Class<*>): Sequence<Link> =
+private fun Schema.objectClassDefinitionComments(clazz: Class<*>, config: Config): Sequence<Link> =
     clazz.methods.asSequence()
         .filter { it.name == "setParent" }
         .filter { it.parameterCount == 1 }
         .map { it.parameters[0].type }
         .filter { it.superclass == ApiObjectBase::class.java }
-        .filter { it.isModelClass }
+        .filter { config.isModelClass(it) }
         .map { relationDefinitionCommentIfPresent(it, clazz) }.filterNotNull()
 
-private fun Schema.propertyClassDefinitionComments(clazz: Class<*>): Sequence<Property> =
+private fun Schema.propertyClassDefinitionComments(clazz: Class<*>, config: Config): Sequence<Property> =
     elements.asSequence().filter { it.typeAttribute == clazz.simpleName }.map { it.nameAttribute }.filterNotNull()
         .flatMap { propertyComments.withElementName(it) }
-        .filter { it.parentClassName.typeToClassName.run { isApiPropertyClass || isModelClassName } }
+        .filter { it.parentClassName.typeToClassName.run { isApiPropertyClass || config.isModelClassName(this) } }
 
 private fun Schema.wrapperPropertyDefinitionComment(clazz: Class<*>): Property? {
     val parts = clazz.simpleName.split('_')
