@@ -18,7 +18,7 @@ private fun <T : ApiObjectBase> ConnectionRepository.query(clazz: Class<T>, quer
 private fun <T : ApiObjectBase> Connection.query(clazz: Class<T>, query: String, key: String): List<FoundObject<T>>? =
     list(clazz)?.asSequence()
         ?.filter { query.isBlank() || it.name.startsWith(query) }
-        ?.onEach { if (readUponQuery.contains(clazz.simpleName)) read(it) }
+        ?.onEach { if (Config.getInstance(DefaultConfig).context.readUponQuery.contains(clazz.simpleName)) read(it) }
         ?.map { FoundObject(it, info.sid.with(key, it.uuid)) }
         ?.toList()
 

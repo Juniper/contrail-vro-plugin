@@ -76,8 +76,10 @@ class ScriptTestEngine {
 fun List<Action>.getActionByName(name: String) : Action =
     find { it.name == name } ?: throw IllegalArgumentException()
 
-fun List<WorkflowDefinition>.getWorkflowByName(name: String) : WorkflowDefinition =
-    find { it.displayName == name } ?: throw IllegalArgumentException()
+fun List<WorkflowDefinition>.getWorkflowByName(name: String) : WorkflowDefinition {
+    forEach { println(it.displayName) }
+    return find { it.displayName == name } ?: throw IllegalArgumentException()
+}
 
 fun Action.provisionActionFunction(name : String) : String =
     """ var $name = function(${parameters.joinToString ( ", " ) { it.name }}) {

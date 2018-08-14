@@ -8,6 +8,8 @@ import com.vmware.o11n.sdk.modeldrivengen.model.Attribute
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedFinder
 import com.vmware.o11n.sdk.modeldrivengen.model.ManagedType
 import com.vmware.o11n.sdk.modeldrivengen.model.Plugin
+import net.juniper.contrail.vro.config.Config
+import net.juniper.contrail.vro.config.DefaultConfig
 import net.juniper.contrail.vro.config.isCapitalized
 import net.juniper.contrail.vro.config.isDisplayOnlyProperty
 import net.juniper.contrail.vro.config.position
@@ -34,7 +36,7 @@ class CustomPlugin : Plugin() {
         while (iterator.hasNext()) {
             val type = iterator.next()
             if (type !is CustomManagedType) {
-                val cmt = CustomManagedType(type)
+                val cmt = CustomManagedType(type, Config.getInstance(DefaultConfig))
                 iterator.set(cmt)
             }
         }

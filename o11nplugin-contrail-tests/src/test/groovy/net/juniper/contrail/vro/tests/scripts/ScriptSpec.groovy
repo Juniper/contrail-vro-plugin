@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.tests.scripts
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror
+import net.juniper.contrail.vro.config.ConfigKt
 import net.juniper.contrail.vro.tests.ScriptTestEngine
 import spock.lang.Shared
 import spock.lang.Specification
@@ -21,7 +22,7 @@ abstract class ScriptSpec extends Specification {
     private static def dummyPackage = "contrail"
     private static def actions = loadCustomActions(dummyVersion, dummyPackage)
     private static def schema = buildSchema(Paths.get(globalProjectInfo.schemaFile))
-    private static def workflows = loadCustomWorkflows(schema)
+    private static def workflows = loadCustomWorkflows(schema, ConfigKt.getDefaultConfig())
 
     @Shared def engine = new ScriptTestEngine()
 
