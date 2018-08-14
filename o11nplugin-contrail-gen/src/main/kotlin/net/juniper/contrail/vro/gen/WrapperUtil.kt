@@ -15,11 +15,11 @@ import net.juniper.contrail.api.ObjectReference
 import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.propertyName
+import net.juniper.contrail.vro.config.typeToClassName
 import net.juniper.contrail.vro.model.Connection
 import net.juniper.contrail.vro.model.Executor
 import net.juniper.contrail.vro.generated.schemaReadOnlyPropertyNames
 import net.juniper.contrail.vro.config.constants.Connection as ConnectionName
-import net.juniper.contrail.vro.config.typeToClassName
 
 class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
 
