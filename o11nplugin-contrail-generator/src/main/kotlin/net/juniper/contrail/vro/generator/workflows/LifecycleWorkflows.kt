@@ -4,28 +4,24 @@
 
 package net.juniper.contrail.vro.generator.workflows
 
+import net.juniper.contrail.vro.config.Config
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.allLowerCase
 import net.juniper.contrail.vro.config.constants.Connection
-import net.juniper.contrail.vro.config.constants.item
-import net.juniper.contrail.vro.config.constants.parent
-import net.juniper.contrail.vro.config.defaultConnection
-import net.juniper.contrail.vro.config.defaultParentType
-import net.juniper.contrail.vro.config.hasRootParent
-import net.juniper.contrail.vro.config.isApiTypeClass
 import net.juniper.contrail.vro.config.isConfigRoot
 import net.juniper.contrail.vro.config.isDefaultRoot
-import net.juniper.contrail.vro.config.isHiddenRoot
-import net.juniper.contrail.vro.config.isModelClass
 import net.juniper.contrail.vro.config.isPolicyManagement
-import net.juniper.contrail.vro.config.isStringListWrapper
-import net.juniper.contrail.vro.config.numberOfParentsInModel
-import net.juniper.contrail.vro.config.objectType
-import net.juniper.contrail.vro.config.parameterName
-import net.juniper.contrail.vro.config.parents
+import net.juniper.contrail.vro.config.constants.item
+import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.pluginName
 import net.juniper.contrail.vro.config.toPluginMethodName
+import net.juniper.contrail.vro.config.defaultConnection
+import net.juniper.contrail.vro.config.defaultParentType
+import net.juniper.contrail.vro.config.isApiTypeClass
+import net.juniper.contrail.vro.config.isStringListWrapper
+import net.juniper.contrail.vro.config.objectType
+import net.juniper.contrail.vro.config.parameterName
 import net.juniper.contrail.vro.generator.model.Property
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.schema.createWorkflowDescription
@@ -41,17 +37,18 @@ import net.juniper.contrail.vro.workflows.dsl.workflow
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.util.editWorkflowName
 
-fun createWorkflows(clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema): List<WorkflowDefinition> {
-    val parentsInModel = clazz.numberOfParentsInModel
-    val rootParents = clazz.hasRootParent && !clazz.isHiddenRoot
+fun createWorkflows(clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema, config: Config): List<WorkflowDefinition> {
+    val parentsInModel = config.numberOfParentsInModel(clazz)
+    val rootParents = config.hasRootParent(clazz) && !config.isHiddenRoot(clazz)
 
-    return clazz.parents.filter { it.isModelClass || it.isDefaultRoot }
-        .map { createWorkflow(clazz, it, parentsInModel, rootParents, refs, schema) }
+    return config.parents(clazz).filter { config.isModelClass(it) || it.isDefaultRoot }
+        .map { createWorkflow(clazz, it, parentsInModel, rootParents, refs, schema, config) }
         .toList()
 }
 
-fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass, parentsInModel: Int, hasRootParents: Boolean, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
+fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass, parentsInModel: Int, hasRootParents: Boolean, refs: List<ObjectClass>, schema: Schema, config: Config): WorkflowDefinition {
 
     val nonRootParents = parentsInModel > 0
     val addInParent = (hasRootParents || parentsInModel > 1) &&
@@ -61,13 +58,13 @@ fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass, parentsInModel:
     val workflowBaseName = "Create " + if (addGlobal) "global " else ""
     val workflowNameSuffix = if (addInParent) " in ${parentClazz.allLowerCase}" else ""
     val workflowName = workflowBaseName + clazz.allLowerCase + workflowNameSuffix
-    val parentName = if (parentClazz.isModelClass && ! parentClazz.isPolicyManagement)
+    val parentName = if (config.isModelClass(parentClazz) && ! parentClazz.isPolicyManagement)
         parentClazz.pluginName
     else
         Connection
 
-    return workflow(workflowName).withScript(clazz.createScriptBody(parentClazz, refs, schema)) {
-        description = schema.createWorkflowDescription(clazz, parentClazz)
+    return workflow(workflowName).withScript(clazz.createScriptBody(parentClazz, refs, schema, config)) {
+        description = createWorkflowDescription(schema, clazz, config, parentClazz)
         parameter("name", string) {
             description = "${clazz.allCapitalized} name"
             mandatory = true
@@ -94,18 +91,19 @@ fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass, parentsInModel:
         addProperties(
             clazz = clazz,
             schema = schema,
-            createMode = true
+            createMode = true,
+            config = config
         )
     }
 }
 
-fun editWorkflow(clazz: ObjectClass, schema: Schema): WorkflowDefinition? {
-    if (! clazz.hasAnyEditableProperty(schema)) return null
+fun editWorkflow(clazz: ObjectClass, schema: Schema, config: Config): WorkflowDefinition? {
+    if (! clazz.hasAnyEditableProperty(schema, config)) return null
 
-    val workflowName = "Edit ${clazz.allLowerCase}"
+    val workflowName = editWorkflowName(clazz)
 
-    return workflow(workflowName).withScript(editScriptBody(clazz, schema)) {
-        description = schema.createWorkflowDescription(clazz)
+    return workflow(workflowName).withScript(editScriptBody(clazz, schema, config)) {
+        description = createWorkflowDescription(schema, clazz, config)
         parameter(item, clazz.reference) {
             description = "${clazz.allCapitalized} to edit"
             mandatory = true
@@ -114,27 +112,28 @@ fun editWorkflow(clazz: ObjectClass, schema: Schema): WorkflowDefinition? {
 
         addProperties (
             clazz = clazz,
-            schema = schema
+            schema = schema,
+            config = config
         )
     }
 }
 
-fun editComplexPropertiesWorkflows(clazz: ObjectClass, schema: Schema) =
-    clazz.complexPropertiesInRange(2..3, schema, false, 0)
-        .map { it.complexEditWorkflows(schema, 0) }
+fun editComplexPropertiesWorkflows(clazz: ObjectClass, schema: Schema, config: Config) =
+    clazz.complexPropertiesInRange(2..3, schema, config, false, 0)
+        .map { it.complexEditWorkflows(schema, config, 0) }
         .flatten()
         .toList()
 
-private fun Property.complexEditWorkflows(schema: Schema, level: Int) =
-    clazz.complexPropertiesInRange(1..2, schema, false, level)
-        .map { editComplexPropertyWorkflows(this, it, schema) }
+private fun Property.complexEditWorkflows(schema: Schema, config: Config, level: Int) =
+    clazz.complexPropertiesInRange(1..2, schema, config, false, level)
+        .map { editComplexPropertyWorkflows(this, it, schema, config) }
 
-private fun editComplexPropertyWorkflows(rootProperty: Property, thisProperty: Property, schema: Schema): WorkflowDefinition {
+private fun editComplexPropertyWorkflows(rootProperty: Property, thisProperty: Property, schema: Schema, config: Config): WorkflowDefinition {
 
     val rootClass = rootProperty.parent
     val workflowName = "Edit ${thisProperty.clazz.allLowerCase} of ${rootClass.allLowerCase}"
 
-    return workflow(workflowName).withScript(editComplexPropertyScriptBody(schema, rootProperty, thisProperty)) {
+    return workflow(workflowName).withScript(editComplexPropertyScriptBody(schema, config, rootProperty, thisProperty)) {
         description = schema.propertyDescription(rootProperty.clazz, thisProperty.parameterName)
         parameter(item, rootClass.reference) {
             description = "${rootClass.allCapitalized} to edit"
@@ -151,7 +150,8 @@ private fun editComplexPropertyWorkflows(rootProperty: Property, thisProperty: P
             clazz = thisProperty.clazz,
             schema = schema,
             propertyPrefix = "${rootProperty.parameterName}.${thisProperty.parameterName}",
-            extraVisibility = FromBooleanParameter(thisProperty.parameterName.condition)
+            extraVisibility = FromBooleanParameter(thisProperty.parameterName.condition),
+            config = config
         )
     }
 }
@@ -164,9 +164,9 @@ ${clazz.allCapitalized}
 ${relationDescription(parentClazz, clazz)}
 """.trim()
 
-private fun ObjectClass.setParentCall(parentClazz: ObjectClass) = when {
+private fun ObjectClass.setParentCall(parentClazz: ObjectClass, config: Config) = when {
     parentClazz.isPolicyManagement -> setParentPolicyManagementCall()
-    parentClazz.isModelClass -> setRegularParentCall(parentClazz)
+    config.isModelClass(parentClazz) -> setRegularParentCall(parentClazz)
     else -> setRootParentCall(parentClazz) + "\n" + setParentConnectionCall()
 }
 
@@ -189,26 +189,26 @@ private fun ObjectClass.setRootParentCall(parentClazz: ObjectClass) = when {
     else -> throw IllegalArgumentException("Unable to create parent ${parentClazz.simpleName} for $simpleName.")
 }
 
-private fun ObjectClass.createScriptBody(parentClazz: ObjectClass, references: List<ObjectClass>, schema: Schema) = """
+private fun ObjectClass.createScriptBody(parentClazz: ObjectClass, references: List<ObjectClass>, schema: Schema, config: Config) = """
 $item = new Contrail$pluginName();
 $item.setName(name);
 ${references.addAllReferences}
-${setParentCall(parentClazz)}
-${editPropertiesCode(item, schema, createMode = true)}
+${setParentCall(parentClazz, config)}
+${editPropertiesCode(item, schema, config, createMode = true)}
 $item.create();
 """.trimIndent().lineSequence().filter { it.isNotBlank() }.joinToString("\n")
 
-private fun editScriptBody(clazz: Class<*>, schema: Schema) = """
-${clazz.editPropertiesCode(item, schema, createMode = false)}
+private fun editScriptBody(clazz: Class<*>, schema: Schema, config: Config) = """
+${clazz.editPropertiesCode(item, schema, config, createMode = false)}
 $item.update();
 """.trimIndent()
 
-private fun editComplexPropertyScriptBody(schema: Schema, rootProperty: Property, thisProperty: Property) = """
-${initComplexPropertyEdit(schema, rootProperty.parameterName, rootProperty.clazz, thisProperty.parameterName, thisProperty.clazz)}
+private fun editComplexPropertyScriptBody(schema: Schema, config: Config, rootProperty: Property, thisProperty: Property) = """
+${initComplexPropertyEdit(schema, config, rootProperty.parameterName, rootProperty.clazz, thisProperty.parameterName, thisProperty.clazz)}
 $item.update();
 """.trimIndent()
 
-private fun initComplexPropertyEdit(schema: Schema, rootName: String, rootClass: Class<*>, thisName: String, thisClass: Class<*>) = """
+private fun initComplexPropertyEdit(schema: Schema, config: Config, rootName: String, rootClass: Class<*>, thisName: String, thisClass: Class<*>) = """
 var $rootName = $item.get${rootName.capitalize()}();
 if (${thisName.condition}) {
     var $thisName = null;
@@ -222,7 +222,7 @@ if (${thisName.condition}) {
         $thisName = new Contrail${thisClass.pluginName}();
         $rootName.set${thisName.capitalize()}($thisName);
     }
-${thisClass.editPropertiesCode(thisName, schema, false).prependIndent(tab)}
+${thisClass.editPropertiesCode(thisName, schema, config, false).prependIndent(tab)}
 } else {
     if ($rootName) {
         $rootName.set${thisName.capitalize()}(null);
@@ -234,16 +234,16 @@ private fun deleteScriptBody() = """
 $item.delete();
 """.trimIndent()
 
-fun Class<*>.editPropertiesCode(item: String, schema: Schema, createMode: Boolean, level: Int = 0) =
-    workflowEditableProperties.asSequence().map { it.editCode(item, schema, createMode, level) }
+fun Class<*>.editPropertiesCode(item: String, schema: Schema, config: Config, createMode: Boolean, level: Int = 0) =
+    workflowEditableProperties(config).asSequence().map { it.editCode(item, schema, config, createMode, level) }
         .filter { !it.isBlank() }.joinToString("\n")
 
-fun Property.editCode(item: String, schema: Schema, createMode: Boolean, level: Int) = when {
+fun Property.editCode(item: String, schema: Schema, config: Config, createMode: Boolean, level: Int) = when {
     ! schema.propertyEditableInMode(this, createMode, level) -> ""
     (clazz.hasCustomInput || ! clazz.isApiTypeClass) && level <= maxPrimitiveLevel -> primitiveEditCode(item)
     clazz.isStringListWrapper && level <= maxPrimitiveLevel -> listEditCode(item)
     clazz.isApiTypeClass && !clazz.hasCustomInput &&
-        (level + clazz.maxDepth(schema, createMode, level) <= maxComplexLevel || level == 0) -> complexEditCode(item, schema, createMode, level)
+        (level + clazz.maxDepth(schema, config, createMode, level) <= maxComplexLevel || level == 0) -> complexEditCode(item, schema, config, createMode, level)
     else -> ""
 }
 
@@ -262,11 +262,11 @@ fun Property.primitiveEditCode(item: String) =
 fun Property.listEditCode(item: String) =
     "$item.set$pluginMethodName(new Contrail${clazz.pluginName}($parameterName));"
 
-fun Property.complexEditCode(item: String, schema: Schema, createMode: Boolean, level: Int): String = """
+fun Property.complexEditCode(item: String, schema: Schema, config: Config, createMode: Boolean, level: Int): String = """
 var $parameterName = $item.get$pluginMethodName();
 if (${parameterName.condition}) {
     if (!$parameterName) $parameterName = new Contrail${clazz.pluginName}();
-${clazz.editPropertiesCode(parameterName, schema, createMode, level + 1).prependIndent(tab)}
+${clazz.editPropertiesCode(parameterName, schema, config, createMode, level + 1).prependIndent(tab)}
 } else {
     $parameterName = null;
 }
