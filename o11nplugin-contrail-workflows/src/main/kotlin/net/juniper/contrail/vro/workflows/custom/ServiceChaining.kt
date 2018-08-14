@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.workflows.custom
 import net.juniper.contrail.api.types.PortTuple
 import net.juniper.contrail.api.types.ServiceInstance
 import net.juniper.contrail.api.types.VirtualMachineInterface
+import net.juniper.contrail.vro.config.Config
 import net.juniper.contrail.vro.config.asChildRef
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.maxInterfacesSupported
@@ -28,12 +29,12 @@ import net.juniper.contrail.vro.workflows.model.string
 import net.juniper.contrail.vro.workflows.util.addRelationWorkflowName
 import net.juniper.contrail.vro.workflows.util.removeRelationWorkflowName
 
-internal fun addPortTupleToServiceInstance(schema: Schema): WorkflowDefinition {
+internal fun addPortTupleToServiceInstance(schema: Schema, config: Config): WorkflowDefinition {
 
     val workflowName = addRelationWorkflowName<ServiceInstance, PortTuple>()
 
     return customWorkflow<ServiceInstance>(workflowName).withScriptFile("addPortTupleToServiceInstance") {
-        description = schema.createWorkflowDescription<ServiceInstance, PortTuple>()
+        description = createWorkflowDescription<ServiceInstance, PortTuple>(schema, config)
         parameter("name", string) {
             description = "${descriptionOf<PortTuple>()} name"
             mandatory = true

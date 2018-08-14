@@ -106,3 +106,12 @@ fun createWorkflowName(clazz: ObjectClass, parentClazz: ObjectClass, parentsInMo
     val workflowNameSuffix = if (addInParent) " in ${parentClazz.allLowerCase}" else ""
     return workflowBaseName + clazz.allLowerCase + workflowNameSuffix
 }
+
+fun deleteWorkflowName(clazz: ObjectClass): String =
+    "Delete ${clazz.allLowerCase}"
+
+fun deleteWorkflowName(className: String): String =
+    "Delete ${className.allLowerCase}"
+
+fun editWorkflowName(clazz: ObjectClass): String =
+    "Edit ${clazz.allLowerCase}"
