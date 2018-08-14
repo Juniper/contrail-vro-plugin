@@ -5,389 +5,197 @@
 package net.juniper.contrail.vro.config
 
 import net.juniper.contrail.api.ApiObjectBase
-import net.juniper.contrail.api.types.* // ktlint-disable no-wildcard-imports
-import java.lang.reflect.Method
 
-val modelClasses = setOf(
-    the<Project>(),
-    the<VirtualNetwork>(),
-    the<NetworkIpam>(),
-    the<FloatingIp>(),
-    the<FloatingIpPool>(),
-    the<NetworkPolicy>(),
-    the<SecurityGroup>(),
-    the<VirtualMachineInterface>(),
-    the<ServiceHealthCheck>(),
-    the<VirtualMachine>(),
-    the<ServiceInstance>(),
-    the<ServiceTemplate>(),
-    the<PortTuple>(),
-    the<InstanceIp>(),
-    the<PortTuple>(),
-    the<PolicyManagement>(),
-    the<Tag>(),
-    the<TagType>(),
-    the<ApplicationPolicySet>(),
-    the<FirewallPolicy>(),
-    the<FirewallRule>(),
-    the<ServiceGroup>(),
-    the<AddressGroup>()
+data class ConfigContext(
+    val modelClasses : Set<String>,
+    val inventoryProperties : Set<String>,
+    val customPropertyObjects : Set<String>,
+    val nonEssentialAttributes : Set<String>,
+    val ignoredInWorkflows : Set<String>,
+    val nonEditableProperties : Set<String>,
+    val customPropertyValidation : Map<String, String>,
+    val customCreateWorkflows : Set<String>,
+    val customEditWorkflows : Set<String>,
+    val customDeleteWorkflows : Set<String>,
+    val directChildren : Set<String>,
+    val mandatoryReference : Set<Pair<String, String>>,
+    val nonEditableReference : Set<Pair<String, String>>,
+    val customAddReference : Set<Pair<String, String>>,
+    val customRemoveReference : Set<Pair<String, String>>,
+    val hiddenRoots : Set<String>,
+    val hiddenRelations : Set<Pair<String, String>>,
+    val tagRelations : Set<String>,
+    val relationAsProperty : Set<Pair<String, String>>,
+    val reversedRelations : Set<Pair<String, String>>,
+    val readUponQuery : Set<String>,
+    val validateSecurityScope : Set<String>
 )
 
-val inventoryProperties = setOf(
-    the<QuotaType>()
-)
-
-val customPropertyObjects = setOf(
-    the<IpamSubnetType>()
-)
-
-val nonEssentialAttributes = setOf(
-    the<VirtualNetworkPolicyType>()
-)
-
-val ignoredInWorkflows = setOf(
-    the<KeyValuePairs>(),
-    the<PermType2>(),
-    the<IdPermsType>(),
-    the<SequenceType>(),
-    the<ActionListType>(),
-    the<FirewallServiceType>(),
-    the<FirewallRuleEndpointType>()
-)
-
-val nonEditableProperties = setOf(
-    "displayName",
-    "parentType",
-    "defaultParentType",
-    "objectType",
-    "networkId"
-)
-
-val customPropertyValidation = mapOf(
-    "vxlanNetworkIdentifier" to isValidVxLANId
-)
-
-val customCreateWorkflows = setOf(
-    the<VirtualMachineInterface>(),
-    the<FloatingIp>(),
-    the<ServiceTemplate>(),
-    the<ServiceInstance>(),
-    the<PortTuple>(),
-    the<PolicyManagement>(),
-    the<Tag>(),
-    the<TagType>(),
-    the<FirewallRule>()
-)
-
-val customEditWorkflows = setOf(
-    the<VirtualMachineInterface>(),
-    the<NetworkPolicy>(),
-    the<FloatingIp>(),
-    the<ServiceTemplate>(),
-    the<ServiceInstance>(),
-    the<PortTuple>(),
-    the<PolicyManagement>(),
-    the<FirewallRule>()
-)
-
-val customDeleteWorkflows = setOf(
-    the<VirtualMachineInterface>(),
-    the<PortTuple>(),
-    the<PolicyManagement>(),
-    the<TagType>()
-)
-
-val directChildren = setOf(
-    the<FloatingIp>()
-)
-
-val mandatoryReference = setOf(
-    pair<VirtualMachineInterface, VirtualNetwork>(),
-    pair<ServiceInstance, ServiceTemplate>()
-)
-
-val nonEditableReference = setOf(
-    pair<VirtualMachineInterface, VirtualNetwork>(),
-    pair<VirtualNetwork, NetworkIpam>(),
-    pair<ServiceInstance, ServiceTemplate>()
-)
-
-val customAddReference = setOf(
-    pair<FloatingIp, VirtualMachineInterface>(),
-    pair<VirtualNetwork, NetworkPolicy>(),
-    pair<ServiceHealthCheck, ServiceInstance>(),
-    pair<VirtualNetwork, NetworkIpam>(),
-    pair<FirewallPolicy, FirewallRule>(),
-    pair<ApplicationPolicySet, FirewallPolicy>()
-)
-
-val customRemoveReference = setOf(
-    pair<FloatingIp, VirtualMachineInterface>(),
-    pair<VirtualNetwork, NetworkIpam>()
-)
-
-val hiddenRoots = setOf(
-    the<VirtualMachineInterface>()
-)
-
-val hiddenRelations = setOf(
-    pair<FloatingIp, Project>(),
-    pair<VirtualMachineInterface, PortTuple>(),
-    pair<VirtualMachineInterface, VirtualMachine>(),
-    pair<ServiceTemplate, ServiceApplianceSet>(),
-    pair<Project, PolicyManagement>(),
-    pair<ConfigRoot, PolicyManagement>(),
-    pair<Tag, TagType>(),
-    pair<FirewallRule, AddressGroup>(),
-    pair<FirewallRule, ServiceGroup>(),
-    pair<FirewallRule, VirtualNetwork>()
-)
-
-// APS is excluded, as it needs a custom workflow that lists only application tags.
-val tagRelations = setOf(
-    the<ConfigRoot>(),
-    the<Project>(),
-    the<VirtualNetwork>(),
-    the<VirtualMachineInterface>()
-)
-
-val relationAsProperty = setOf(
-    pair<VirtualMachineInterface, VirtualMachine>()
-)
-
-val reversedRelations = setOf(
-    pair<FloatingIp, VirtualMachineInterface>()
-)
-
-val readUponQuery = setOf(
-    the<ApplicationPolicySet>(),
-    the<FirewallPolicy>(),
-    the<FirewallRule>(),
-    the<AddressGroup>(),
-    the<ServiceGroup>(),
-    the<Tag>()
-)
+class Config (val context: ConfigContext) {
 
-val validateSecurityScope = setOf(
-    the<ApplicationPolicySet>(),
-    the<FirewallPolicy>(),
-    the<FirewallRule>(),
-    the<AddressGroup>(),
-    the<ServiceGroup>(),
-    the<Tag>()
-)
+    fun isModelClassName(str : String) =
+        context.modelClasses.contains(str)
 
-private inline fun <reified T> the() =
-    T::class.java.simpleName
+    fun isInventoryPropertyClassName(str : String) =
+        context.inventoryProperties.contains(str)
 
-private inline fun <reified T1, reified T2> pair() =
-    Pair(the<T1>(), the<T2>())
+    fun customValidationAction(str : String?) =
+        context.customPropertyValidation[str]
 
-val String.isModelClassName get() =
-    modelClasses.contains(this)
+    fun isRequiredAttribute(str : String) =
+        ! context.nonEssentialAttributes.contains(str)
 
-val String.isInventoryPropertyClassName get() =
-    inventoryProperties.contains(this)
+    fun isIgnoredInWorkflow(str : String) =
+        context.ignoredInWorkflows.contains(str)
 
-val String?.customValidationAction get() =
-    customPropertyValidation[this]
+    fun isEditableProperty(str : String) =
+        ! context.nonEditableProperties.contains(str)
 
-val String.isRequiredAttribute get() =
-    ! nonEssentialAttributes.contains(this)
+    fun hasCustomCreateWorkflow(str : String) =
+        context.customCreateWorkflows.contains(str)
 
-val String.isIgnoredInWorkflow get() =
-    ignoredInWorkflows.contains(this)
+    fun hasCustomEditWorkflow(str : String) =
+        context.customEditWorkflows.contains(str)
 
-val String.isEditableProperty get() =
-    ! nonEditableProperties.contains(this)
+    fun hasCustomDeleteWorkflow(str : String) =
+        context.customDeleteWorkflows.contains(str)
 
-val String.hasCustomCreateWorkflow get() =
-    customCreateWorkflows.contains(this)
+    fun isDirectChild(str : String) =
+        context.directChildren.contains(str)
 
-val String.hasCustomEditWorkflow get() =
-    customEditWorkflows.contains(this)
+    fun isHiddenRoot(str : String) =
+        context.hiddenRoots.contains(str)
 
-val String.hasCustomDeleteWorkflow get() =
-    customDeleteWorkflows.contains(this)
+    fun isCustomPropertyObject(str : String) =
+        context.customPropertyObjects.contains(str)
 
-val String.isDirectChild get() =
-    directChildren.contains(this)
+    fun notAHiddenTagParent(str : String, maybeTag: String) =
+        if (maybeTag == "Tag") context.tagRelations.contains(str) else true
 
-val String.isHiddenRoot get() =
-    hiddenRoots.contains(this)
+    fun isRelationMandatory(parent : ObjectClass, child: ObjectClass) =
+        context.mandatoryReference.containsUnordered(parent.simpleName, child.simpleName)
 
-val String.isCustomPropertyObject get() =
-    customPropertyObjects.contains(this)
+    fun isRelationEditable(parent : ObjectClass, child: ObjectClass) =
+        ! isInternal(parent) &&
+            ! isInternal(child) &&
+            notAHiddenTagParent(parent, child) &&
+            ! context.nonEditableReference.containsUnordered(parent.simpleName, child.simpleName)
 
-infix fun String.notAHiddenTagParent(maybeTag: String) =
-    if (maybeTag == "Tag") tagRelations.contains(this) else true
+    fun isInPropertyRelationTo(parent : Class<*>, child: Class<*>) =
+        context.relationAsProperty.contains(parent.simpleName, child.simpleName)
 
-fun ObjectClass.isRelationMandatory(child: ObjectClass) =
-    mandatoryReference.containsUnordered(simpleName, child.simpleName)
+    fun notAHiddenTagParent(parent : ObjectClass, maybeTag: ObjectClass) =
+        notAHiddenTagParent(parent.simpleName, maybeTag.simpleName)
 
-fun ObjectClass.isRelationEditable(child: ObjectClass) =
-    ! isInternal &&
-    ! child.isInternal &&
-    this notAHiddenTagParent child &&
-    ! nonEditableReference.containsUnordered(simpleName, child.simpleName)
+    fun hasCustomAddReferenceWorkflow(parent : ObjectClass, child: Class<*>) =
+        context.customAddReference.containsUnordered(parent.simpleName, child.simpleName)
 
-fun Class<*>.isInPropertyRelationTo(child: Class<*>) =
-    relationAsProperty.contains(simpleName, child.simpleName)
+    fun hasCustomRemoveReferenceWorkflow(parent : ObjectClass, child: Class<*>) =
+        context.customRemoveReference.containsUnordered(parent.simpleName, child.simpleName)
 
-infix fun ObjectClass.notAHiddenTagParent(maybeTag: ObjectClass) =
-    simpleName notAHiddenTagParent maybeTag.simpleName
+    fun needsSecurityScopeValidation(objectClass : ObjectClass) =
+        context.validateSecurityScope.contains(objectClass.simpleName)
 
-private fun <T> Set<Pair<T, T>>.contains(first: T, second: T) =
-    contains(Pair(first, second))
+    fun isDisplayableChildOf(child : String, parent: String) =
+        child != parent &&
+            ! context.hiddenRelations.containsUnordered(parent, child) &&
+            notAHiddenTagParent(parent, child)
 
-private fun <T> Set<Pair<T, T>>.containsUnordered(first: T, second: T) =
-    contains(Pair(first, second)) || contains(Pair(second, first))
+    fun isInReversedRelationTo(parent : String, child: String) =
+        context.reversedRelations.containsUnordered(parent, child)
 
-fun ObjectClass.hasCustomAddReferenceWorkflow(child: Class<*>) =
-    customAddReference.containsUnordered(simpleName, child.simpleName)
+    fun isInReversedRelationTo(parent : Class<*>, child: Class<*>) =
+        isInReversedRelationTo(parent.simpleName, child.simpleName)
 
-fun ObjectClass.hasCustomRemoveReferenceWorkflow(child: Class<*>) =
-    customRemoveReference.containsUnordered(simpleName, child.simpleName)
+    fun isPluginClass(clazz : Class<*>) =
+        isModelClass(clazz) || clazz.isDefaultRoot
 
-val ObjectClass.needsSecurityScopeValidation get() =
-    validateSecurityScope.contains(simpleName)
+    fun isModelClass(clazz : Class<*>?) : Boolean {
+        if (clazz == null) return false
+        return isModelClassName(clazz.simpleName)
+    }
 
-infix fun String.isDisplayableChildOf(parent: String) =
-    this != parent &&
-    ! hiddenRelations.containsUnordered(parent, this) &&
-    parent notAHiddenTagParent this
+    fun isInventoryProperty(clazz : Class<*>) =
+        isInventoryPropertyClassName(clazz.simpleName)
 
-fun String.isInReversedRelationTo(child: String) =
-    reversedRelations.containsUnordered(this, child)
+    fun ignoredInWorkflow(clazz : Class<*>) =
+        isIgnoredInWorkflow(clazz.simpleName)
 
-fun Class<*>.isInReversedRelationTo(child: Class<*>) =
-    simpleName.isInReversedRelationTo(child.simpleName)
+    fun hasCustomCreateWorkflow(clazz : Class<*>) =
+        hasCustomCreateWorkflow(clazz.simpleName)
 
-val Class<*>?.isConfigRoot get() =
-    isA<ConfigRoot>()
+    fun hasCustomEditWorkflow(clazz : Class<*>) =
+        hasCustomEditWorkflow(clazz.simpleName)
 
-val Class<*>?.isDomain get() =
-    isA<Domain>()
+    fun hasCustomDeleteWorkflow(clazz : Class<*>) =
+        hasCustomDeleteWorkflow(clazz.simpleName)
 
-val Class<*>?.isPolicyManagement get() =
-    isA<PolicyManagement>()
+    fun isDirectChild(clazz : Class<*>) =
+        isDirectChild(clazz.simpleName)
 
-val Class<*>?.isDefaultRoot get() =
-    isConfigRoot || isDomain
+    fun isDisplayableChildOf(child : Class<*>, parent: Class<*>) =
+        isDisplayableChildOf(child.simpleName, parent.simpleName)
 
-val Class<*>?.isPluginClass get() =
-    isModelClass || isDefaultRoot
+    fun isHiddenRoot(clazz : Class<*>) =
+        isHiddenRoot(clazz.simpleName)
 
-val Class<*>?.isModelClass get() =
-    this?.simpleName?.isModelClassName ?: false
+    fun isNodeClass(clazz : Class<*>) =
+        clazz.isApiObjectClass || isInventoryProperty(clazz) || isCustomPropertyObject(clazz)
 
-val Class<*>.isInventoryProperty get() =
-    simpleName.isInventoryPropertyClassName
+    fun isCustomPropertyObject(clazz : Class<*>) =
+        isCustomPropertyObject(clazz.simpleName)
 
-val Class<*>.ignoredInWorkflow get() =
-    simpleName.isIgnoredInWorkflow
+    fun isInternal(objectClass : ObjectClass) =
+        !hasParents(objectClass)
 
-val Class<*>.hasCustomCreateWorkflow get() =
-    simpleName.hasCustomCreateWorkflow
+    fun hasParents(objectClass : ObjectClass) =
+        numberOfParents(objectClass) > 0
 
-val Class<*>.hasCustomEditWorkflow get() =
-    simpleName.hasCustomEditWorkflow
+    fun hasParentsInModel(objectClass : ObjectClass) =
+        numberOfParentsInModel(objectClass) > 0
 
-val Class<*>.hasCustomDeleteWorkflow get() =
-    simpleName.hasCustomDeleteWorkflow
+    fun hasMultipleParents(objectClass : ObjectClass) =
+        numberOfParents(objectClass) > 1
 
-val Class<*>.isDirectChild get() =
-    simpleName.isDirectChild
+    fun hasMultipleParentsInModel(objectClass : ObjectClass) =
+        numberOfParentsInModel(objectClass) > 1
 
-infix fun Class<*>.isDisplayableChildOf(parent: Class<*>) =
-    simpleName isDisplayableChildOf parent.simpleName
+    fun hasRootParent(objectClass : ObjectClass) =
+        parents(objectClass).any { it.isDefaultRoot }
 
-val Class<*>.isHiddenRoot get() =
-    simpleName.isHiddenRoot
+    fun numberOfParents(objectClass : ObjectClass) =
+        parents(objectClass).count()
 
-val Class<*>.isNodeClass get() =
-    isApiObjectClass || isInventoryProperty || isCustomPropertyObject
+    fun numberOfParentsInModel(objectClass : ObjectClass) =
+        parentsInModel(objectClass).count()
 
-val Class<*>.isCustomPropertyObject get() =
-    simpleName.isCustomPropertyObject
+    fun parentsInModel(clazz : Class<*>) =
+        parents(clazz).filter { isModelClass(it) }
 
-val ObjectClass.isInternal get() =
-    !hasParents
+    fun parentsInPlugin(clazz : Class<*>) =
+        parents(clazz).filter { isPluginClass(it) }
 
-val ObjectClass.hasParents get() =
-    numberOfParents > 0
+    fun setParentMethods(clazz : Class<*>) =
+        clazz.declaredMethods.asSequence()
+            .filter { it.name == "setParent" }
+            .filter { it.parameterCount == 1 }
+            .filter { it.parameters[0].type.superclass == ApiObjectBase::class.java }
 
-val ObjectClass.hasParentsInModel get() =
-    numberOfParentsInModel > 0
+    fun parents(clazz : Class<*>) =
+        setParentMethods(clazz).map { it.parameters[0].type as ObjectClass }
+            .filter { isDisplayableChildOf(clazz, it) }
 
-val ObjectClass.hasMultipleParents get() =
-    numberOfParents > 1
+    fun isRootClass(objectClass : ObjectClass) : Boolean {
+        if (isInternal(objectClass) || isHiddenRoot(objectClass) || objectClass.isDefaultRoot) return false
 
-val ObjectClass.hasMultipleParentsInModel get() =
-    numberOfParentsInModel > 1
+        val childOfRoot = parents(objectClass).any { it.isDefaultRoot }
+        if (childOfRoot) return true
 
-val ObjectClass.hasRootParent get() =
-    parents.any { it.isDefaultRoot }
+        val parentType = objectClass.defaultParentType ?: return false
 
-val ObjectClass.numberOfParents get() =
-    parents.count()
+        return ! isModelClassName(parentType.typeToClassName)
+    }
 
-val ObjectClass.numberOfParentsInModel get() =
-    parentsInModel.count()
-
-val Class<*>.parentsInModel get() =
-    parents.filter { it.isModelClass }
-
-val Class<*>.parentsInPlugin get() =
-    parents.filter { it.isPluginClass }
-
-val Class<*>.setParentMethods get() =
-    declaredMethods.asSequence()
-        .filter { it.name == "setParent" }
-        .filter { it.parameterCount == 1 }
-        .filter { it.parameters[0].type.superclass == ApiObjectBase::class.java }
-
-val Class<*>.parents get() =
-    setParentMethods.map { it.parameters[0].type as ObjectClass }
-        .filter { this isDisplayableChildOf it }
-
-val ObjectClass.isRootClass: Boolean get() {
-    if (isInternal || isHiddenRoot || isDefaultRoot) return false
-
-    val childOfRoot = parents.any { it.isDefaultRoot }
-    if (childOfRoot) return true
-
-    val parentType = defaultParentType ?: return false
-
-    return ! parentType.typeToClassName.isModelClassName
 }
 
-private val VirtualMachineInterfaceName = "VirtualMachineInterface"
-private val PortName = "Port"
-
-val String.toPluginName get() = when (this) {
-    // Virtual Machine Interface is visible in Contrail UI as Port
-    VirtualMachineInterfaceName -> PortName
-    else -> this
-}
-
-val String.referenceFolderPrefix get() = when (this) {
-    "Tag", "ApplicationPolicySet" -> "Applied"
-    else -> ""
-}
-
-val Class<*>.referenceFolderPrefix get() =
-    simpleName.referenceFolderPrefix
-
-val Class<*>.referenceFolderName get() =
-    "$referenceFolderPrefix $folderName".trim()
-
-val String.toPluginMethodName get() =
-    replace(VirtualMachineInterfaceName, PortName)
-
-val Method.pluginPropertyName get() =
-    nameWithoutGet.toPluginMethodName.decapitalize()
-
-val Class<*>.pluginName get() =
-    simpleName.toPluginName
+val defaultConfig = Config(defaultContext)
