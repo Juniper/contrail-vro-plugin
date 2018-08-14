@@ -8,8 +8,8 @@ import net.juniper.contrail.api.types.PolicyManagement
 import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.vro.config.CategoryType
 import net.juniper.contrail.vro.config.category
-import net.juniper.contrail.vro.config.folderName
 import net.juniper.contrail.vro.config.pluginName
+import net.juniper.contrail.vro.config.folderName
 
 data class Category(val type: CategoryType, val parent: Class<*>) {
     val name = type.name

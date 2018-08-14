@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.workflows.custom
 
+import net.juniper.contrail.vro.config.Config
 import net.juniper.contrail.vro.config.classesIn
 import net.juniper.contrail.vro.config.isA
 import net.juniper.contrail.vro.config.isStatic
@@ -30,11 +31,11 @@ object ScriptLoader {
 }
 
 object WorkflowLoader {
-    fun loadSimple(schema: Schema): Sequence<WorkflowDefinition> =
-        workflowClasses.flatMap { it.simpleWorkflowDefinitions(schema) }
+    fun loadSimple(schema: Schema, config: Config): Sequence<WorkflowDefinition> =
+        workflowClasses.flatMap { it.simpleWorkflowDefinitions(schema, config) }
 
-    fun loadComplex(definitions: List<WorkflowDefinition>, schema: Schema): Sequence<WorkflowDefinition> =
-        workflowClasses.flatMap { it.complexWorkflowDefinitions(definitions, schema) }
+    fun loadComplex(definitions: List<WorkflowDefinition>, schema: Schema, config: Config): Sequence<WorkflowDefinition> =
+        workflowClasses.flatMap { it.complexWorkflowDefinitions(definitions, schema, config) }
 
     private val workflowClasses =
         classesIn(WorkflowLoader::class.java.`package`.name)
@@ -54,24 +55,25 @@ private val Class<*>.hasWorkflowDefinitions get() =
 private val Class<*>.hasActionDefinitions get() =
     declaredMethods.any { it.definesAction }
 
-private fun Class<*>.simpleWorkflowDefinitions(schema: Schema) =
+private fun Class<*>.simpleWorkflowDefinitions(schema: Schema, config: Config) =
     declaredMethods.asSequence()
         .filter { it.definesSimpleWorkflow }
-        .map { it.createWorkflowDefinition(schema) }
+        .map { it.createWorkflowDefinition(schema, config) }
 
-private fun Class<*>.complexWorkflowDefinitions(definitions: List<WorkflowDefinition>, schema: Schema) =
+private fun Class<*>.complexWorkflowDefinitions(definitions: List<WorkflowDefinition>, schema: Schema, config: Config) =
     declaredMethods.asSequence()
         .filter { it.definesComplexWorkflow }
-        .map { it.createWorkflowDefinition(schema, definitions) }
+        .map { it.createWorkflowDefinition(schema, config, definitions) }
 
 private fun Class<*>.actionDefinitions() =
     declaredMethods.asSequence()
         .filter { it.definesAction }
         .map { it.createActionDefinition() }
 
-private fun Method.createWorkflowDefinition(schema: Schema, definitions: List<WorkflowDefinition> = listOf()) = when {
+private fun Method.createWorkflowDefinition(schema: Schema, config: Config, definitions: List<WorkflowDefinition> = listOf()) = when {
     takesNoParameters -> invoke(declaringClass)
     takesOnlySchema -> invoke(declaringClass, schema)
+    takesSchemaAndConfig -> invoke(declaringClass, schema, config)
     takesOnlyWorkflowDefinitions -> invoke(declaringClass, definitions)
     takesWorkflowDefinitionsAndSchema -> invoke(declaringClass, definitions, schema)
     else -> throw IllegalArgumentException("Cannot create workflow definition using method '$this' of class '$declaringClass'.")
@@ -92,7 +94,7 @@ private val Method.definesComplexWorkflow get() =
     definesWorkflow && takesComplexWorkflowDefinitionParameters
 
 private val Method.takesSimpleWorkflowDefinitionParameters get() =
-    takesNoParameters || takesOnlySchema
+    takesNoParameters || takesOnlySchema || takesSchemaAndConfig
 
 private val Method.takesComplexWorkflowDefinitionParameters get() =
     takesOnlyWorkflowDefinitions || takesWorkflowDefinitionsAndSchema
@@ -103,6 +105,9 @@ private val Method.takesNoParameters get() =
 private val Method.takesOnlySchema get() =
     parameterCount == 1 && hasSchemaParameter
 
+private val Method.takesSchemaAndConfig get() =
+    parameterCount == 2 && hasSchemaParameter && hasConfigParameter
+
 private val Method.takesOnlyWorkflowDefinitions get() =
     parameterCount == 1 && hasWorkflowDefinitionsParameter
 
@@ -111,6 +116,9 @@ private val Method.takesWorkflowDefinitionsAndSchema get() =
 
 private val Method.hasSchemaParameter get() =
     parameters.any { it.type == Schema::class.java }
+
+private val Method.hasConfigParameter get() =
+    parameters.any { it.type == Config::class.java }
 
 private val Method.hasWorkflowDefinitionsParameter get() =
     parameters.any { it.type.isA<List<*>>() && it.parameterizedType.parameterClass.isA<WorkflowDefinition>() }
