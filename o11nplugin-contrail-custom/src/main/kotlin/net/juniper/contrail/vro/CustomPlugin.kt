@@ -12,6 +12,7 @@ import net.juniper.contrail.vro.config.isCapitalized
 import net.juniper.contrail.vro.config.isDisplayOnlyProperty
 import net.juniper.contrail.vro.config.position
 import net.juniper.contrail.vro.config.cleanedDisplayedProperty
+import net.juniper.contrail.vro.config.defaultConfig
 import net.juniper.contrail.vro.config.isRefWrapperProperty
 import net.juniper.contrail.vro.config.refWrapperPropertyDisplayName
 import net.juniper.contrail.vro.config.displayedName
@@ -34,7 +35,7 @@ class CustomPlugin : Plugin() {
         while (iterator.hasNext()) {
             val type = iterator.next()
             if (type !is CustomManagedType) {
-                val cmt = CustomManagedType(type)
+                val cmt = CustomManagedType(type, defaultConfig)
                 iterator.set(cmt)
             }
         }

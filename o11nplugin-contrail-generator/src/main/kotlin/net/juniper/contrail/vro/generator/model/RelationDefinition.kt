@@ -4,8 +4,8 @@
 
 package net.juniper.contrail.vro.generator.model
 
+import net.juniper.contrail.vro.config.Config
 import net.juniper.contrail.vro.config.ObjectClass
-import net.juniper.contrail.vro.config.isInventoryProperty
 
 class RelationDefinition(
     val modelClasses: List<ObjectClass>,
@@ -15,10 +15,11 @@ class RelationDefinition(
 ) : GenericModel()
 
 fun buildRelationDefinition(
-    objectClasses: List<ObjectClass>
+    objectClasses: List<ObjectClass>,
+    config: Config
 ) = RelationDefinition(
     objectClasses.toList(),
-    objectClasses.generateRelations(),
-    objectClasses.generateReferenceRelations(),
-    objectClasses.generatePropertyRelations { it.isInventoryProperty }
+    objectClasses.generateRelations(config),
+    objectClasses.generateReferenceRelations(config),
+    objectClasses.generatePropertyRelations { config.isInventoryProperty(it) }
 )

@@ -5,18 +5,11 @@
 package net.juniper.contrail.vro.generator.workflows
 
 import com.sun.xml.internal.bind.marshaller.CharacterEscapeHandler
+import net.juniper.contrail.vro.config.Config
 import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.ProjectInfo
-import net.juniper.contrail.vro.config.hasCustomAddReferenceWorkflow
-import net.juniper.contrail.vro.config.hasCustomCreateWorkflow
-import net.juniper.contrail.vro.config.hasCustomDeleteWorkflow
-import net.juniper.contrail.vro.config.hasCustomEditWorkflow
-import net.juniper.contrail.vro.config.hasCustomRemoveReferenceWorkflow
-import net.juniper.contrail.vro.config.isInternal
-import net.juniper.contrail.vro.config.isRelationEditable
-import net.juniper.contrail.vro.config.isRelationMandatory
-import net.juniper.contrail.vro.config.packageToPath
 import net.juniper.contrail.vro.config.pluginName
+import net.juniper.contrail.vro.config.packageToPath
 import net.juniper.contrail.vro.generator.model.ForwardRelation
 import net.juniper.contrail.vro.generator.model.RelationDefinition
 import net.juniper.contrail.vro.schema.Schema
@@ -34,77 +27,85 @@ import java.io.Writer
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Marshaller
 
-fun generateWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: Schema) {
+fun generateCustomActions(info: ProjectInfo, schema: Schema) {
+    createCustomActions(info, schema)
+}
+
+fun generateComplexWorkflows(info: ProjectInfo, schema: Schema, config: Config, simpleWorkflows: List<WorkflowDefinition>) {
+    createComplexWorkflows(simpleWorkflows, info, schema, config)
+}
+
+fun generateCustomWorkflows(info: ProjectInfo, schema: Schema, config: Config): List<WorkflowDefinition> {
+    return createCustomWorkflows(info, schema, config)
+}
+
+fun generateSimpleWorkflows(info: ProjectInfo, relations: RelationDefinition, schema: Schema, config: Config): List<WorkflowDefinition> {
     generateDunesMetaInfo(info)
 
     val simpleWorkflows: MutableList<WorkflowDefinition> = mutableListOf()
 
-    relations.modelClasses.filter { ! it.isInternal }.forEach {
-        val refs = relations.mandatoryReferencesOf(it)
-        val lifecycleWorkflows = generateLifecycleWorkflows(info, it, refs, schema)
+    relations.modelClasses.filter { ! config.isInternal(it) }.forEach {
+        val refs = relations.mandatoryReferencesOf(it, config)
+        val lifecycleWorkflows = generateLifecycleWorkflows(info, it, refs, schema, config)
         simpleWorkflows.addAll(lifecycleWorkflows)
     }
 
     relations.forwardRelations.forEach {
-        val referenceWorkflows = generateReferenceWorkflows(info, it, schema)
+        val referenceWorkflows = generateReferenceWorkflows(info, it, schema, config)
         simpleWorkflows.addAll(referenceWorkflows)
     }
 
-    val customWorkflows = createCustomWorkflows(info, schema)
-    simpleWorkflows.addAll(customWorkflows)
-    createCustomActions(info, schema)
-
-    createComplexWorkflows(simpleWorkflows, info, schema)
+    return simpleWorkflows
 }
 
-fun RelationDefinition.mandatoryReferencesOf(clazz: ObjectClass) =
+fun RelationDefinition.mandatoryReferencesOf(clazz: ObjectClass, config: Config) =
     forwardRelations.asSequence()
         .filter { it.parentClass == clazz }
-        .filter { clazz.isRelationMandatory(it.childClass) }
+        .filter { config.isRelationMandatory(clazz, it.childClass) }
         .map { it.childClass }
         .toList()
 
 val ForwardRelation.isEditable get() =
-    parentClass.isRelationEditable(childClass)
+    config.isRelationEditable(parentClass, childClass)
 
 val ForwardRelation.hasCustomAddWorkflow get() =
-    parentClass.hasCustomAddReferenceWorkflow(childClass)
+    config.hasCustomAddReferenceWorkflow(parentClass, childClass)
 
 val ForwardRelation.hasCustomRemoveWorkflow get() =
-    parentClass.hasCustomRemoveReferenceWorkflow(childClass)
+    config.hasCustomRemoveReferenceWorkflow(parentClass, childClass)
 
-private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema): List<WorkflowDefinition> {
+private fun generateLifecycleWorkflows(info: ProjectInfo, clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema, config: Config): List<WorkflowDefinition> {
     val workflows: MutableList<WorkflowDefinition> = mutableListOf()
-    if (!clazz.hasCustomCreateWorkflow)
-        createWorkflows(clazz, refs, schema).also { workflows.addAll(it) }.forEach { it.save(info, clazz) }
-    if (!clazz.hasCustomEditWorkflow) {
-        editWorkflow(clazz, schema)?.also { workflows.add(it) }?.save(info, clazz)
-        editComplexPropertiesWorkflows(clazz, schema).also { workflows.addAll(it) }.forEach { it.save(info, clazz) }
+    if (!config.hasCustomCreateWorkflow(clazz))
+        createWorkflows(clazz, refs, schema, config).also { workflows.addAll(it) }.forEach { it.save(info, clazz) }
+    if (!config.hasCustomEditWorkflow(clazz)) {
+        editWorkflow(clazz, schema, config)?.also { workflows.add(it) }?.save(info, clazz)
+        editComplexPropertiesWorkflows(clazz, schema, config).also { workflows.addAll(it) }.forEach { it.save(info, clazz) }
     }
-    if (!clazz.hasCustomDeleteWorkflow)
+    if (!config.hasCustomDeleteWorkflow(clazz))
         deleteWorkflow(clazz).also { workflows.add(it) }.save(info, clazz)
     return workflows
 }
 
-private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation, schema: Schema): List<WorkflowDefinition> {
+private fun generateReferenceWorkflows(info: ProjectInfo, relation: ForwardRelation, schema: Schema, config: Config): List<WorkflowDefinition> {
     val workflows: MutableList<WorkflowDefinition> = mutableListOf()
     if (relation.isEditable) {
         if (!relation.hasCustomAddWorkflow)
-            addReferenceWorkflow(relation, schema).also { workflows.add(it) }.save(info, relation.declaredParentClass)
+            addReferenceWorkflow(relation, schema, config).also { workflows.add(it) }.save(info, relation.declaredParentClass)
         if (!relation.hasCustomRemoveWorkflow)
             removeReferenceWorkflow(relation).also { workflows.add(it) }.save(info, relation.declaredParentClass)
     }
     return workflows
 }
 
-private fun createCustomWorkflows(info: ProjectInfo, schema: Schema): List<WorkflowDefinition> =
-    loadCustomWorkflows(schema).also { it.forEach { it.save(info) } }
+private fun createCustomWorkflows(info: ProjectInfo, schema: Schema, config: Config): List<WorkflowDefinition> =
+    loadCustomWorkflows(schema, config).also { it.forEach { it.save(info) } }
 
 private fun createCustomActions(info: ProjectInfo, schema: Schema): List<Action> =
     loadCustomActions(info.workflowVersion, info.workflowPackage).also { it.forEach { it.save(info) } }
 
-private fun createComplexWorkflows(definitions: List<WorkflowDefinition>, info: ProjectInfo, schema: Schema): List<WorkflowDefinition> =
-    loadComplexWorkflows(definitions, schema).also { it.forEach { it.save(info) } }
+private fun createComplexWorkflows(definitions: List<WorkflowDefinition>, info: ProjectInfo, schema: Schema, config: Config): List<WorkflowDefinition> =
+    loadComplexWorkflows(definitions, schema, config).also { it.forEach { it.save(info) } }
 
 val workflowContext = JAXBContext.newInstance(Workflow::class.java)
 val workflowMarshaller = workflowContext.createMarshaller().applyDefaultSetup()
