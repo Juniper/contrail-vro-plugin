@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.workflows.util
 import net.juniper.contrail.api.ApiObjectBase
 import net.juniper.contrail.api.types.PolicyManagement
 import net.juniper.contrail.vro.config.ObjectClass
+import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.allLowerCase
 import net.juniper.contrail.vro.config.isDefaultRoot
@@ -106,3 +107,15 @@ fun createWorkflowName(clazz: ObjectClass, parentClazz: ObjectClass, parentsInMo
     val workflowNameSuffix = if (addInParent) " in ${parentClazz.allLowerCase}" else ""
     return workflowBaseName + clazz.allLowerCase + workflowNameSuffix
 }
+
+fun createWorkflowName(clazz: Class<*>): String =
+    "Create ${clazz.allLowerCase}"
+
+fun deleteWorkflowName(clazz: ObjectClass): String =
+    "Delete ${clazz.allLowerCase}"
+
+fun deleteWorkflowName(className: String): String =
+    "Delete ${className.allLowerCase}"
+
+fun editWorkflowName(clazz: ObjectClass): String =
+    "Edit ${clazz.allLowerCase}"
