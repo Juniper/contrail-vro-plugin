@@ -5,12 +5,12 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
-
-import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.createTagTypeWorkflowName
+import net.juniper.contrail.api.types.TagType
+import net.juniper.contrail.vro.workflows.util.DslUtilsKt
 
 class CreateTagTypeSpec extends WorkflowSpec {
 
-    def createTagType = workflowFromScript(createTagTypeWorkflowName)
+    def createTagType = workflowFromScript(DslUtilsKt.createSimpleWorkflowName(TagType))
     def tagName = "my-custom-tag"
 
     def "Creating tag type"() {

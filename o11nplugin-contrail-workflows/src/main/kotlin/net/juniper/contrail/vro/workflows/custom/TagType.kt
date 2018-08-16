@@ -6,7 +6,6 @@ package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.TagType
 import net.juniper.contrail.vro.config.constants.Connection
-import net.juniper.contrail.vro.config.constants.createTagTypeWorkflowName
 import net.juniper.contrail.vro.config.constants.deleteTagTypeWorkflowName
 import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.name
@@ -16,9 +15,10 @@ import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
 import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.util.createSimpleWorkflowName
 
 internal fun createTagType(): WorkflowDefinition =
-    customWorkflow<TagType>(createTagTypeWorkflowName).withScriptFile("createTagType") {
+    customWorkflow<TagType>(createSimpleWorkflowName<TagType>()).withScriptFile("createTagType") {
         parameter(name, string) {
             description = "Name of the tag type"
             mandatory = true

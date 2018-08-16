@@ -6,11 +6,11 @@ package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.api.Status
 import net.juniper.contrail.api.types.Tag
-import static net.juniper.contrail.vro.config.constants.WorkflowNamesKt.createGlobalTagWorkflowName
+import net.juniper.contrail.vro.workflows.util.DslUtilsKt
 
 class CreateGlobalTagSpec extends WorkflowSpec {
 
-    def createGlobalTag = workflowFromScript(createGlobalTagWorkflowName)
+    def createGlobalTag = workflowFromScript(DslUtilsKt.createGlobalWorkflowName(Tag))
     def tagValue = "my-global-value"
     def tagType = "my-global-tag"
 
