@@ -41,6 +41,7 @@ import net.juniper.contrail.vro.workflows.dsl.workflow
 import net.juniper.contrail.vro.workflows.model.boolean
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.util.createWorkflowName
 
 fun createWorkflows(clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema): List<WorkflowDefinition> {
     val parentsInModel = clazz.numberOfParentsInModel
@@ -53,14 +54,7 @@ fun createWorkflows(clazz: ObjectClass, refs: List<ObjectClass>, schema: Schema)
 
 fun createWorkflow(clazz: ObjectClass, parentClazz: ObjectClass, parentsInModel: Int, hasRootParents: Boolean, refs: List<ObjectClass>, schema: Schema): WorkflowDefinition {
 
-    val nonRootParents = parentsInModel > 0
-    val addInParent = (hasRootParents || parentsInModel > 1) &&
-        ! parentClazz.isPolicyManagement && ! parentClazz.isDefaultRoot
-    val addGlobal = (parentClazz.isDefaultRoot && nonRootParents) || parentClazz.isPolicyManagement
-
-    val workflowBaseName = "Create " + if (addGlobal) "global " else ""
-    val workflowNameSuffix = if (addInParent) " in ${parentClazz.allLowerCase}" else ""
-    val workflowName = workflowBaseName + clazz.allLowerCase + workflowNameSuffix
+    val workflowName = createWorkflowName(clazz, parentClazz, parentsInModel, hasRootParents)
     val parentName = if (parentClazz.isModelClass && ! parentClazz.isPolicyManagement)
         parentClazz.pluginName
     else

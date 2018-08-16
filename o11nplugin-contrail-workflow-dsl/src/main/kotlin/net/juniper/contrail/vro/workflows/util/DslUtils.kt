@@ -5,8 +5,12 @@
 package net.juniper.contrail.vro.workflows.util
 
 import net.juniper.contrail.api.ApiObjectBase
+import net.juniper.contrail.api.types.PolicyManagement
+import net.juniper.contrail.vro.config.ObjectClass
 import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.allLowerCase
+import net.juniper.contrail.vro.config.isDefaultRoot
+import net.juniper.contrail.vro.config.isPolicyManagement
 import net.juniper.contrail.vro.config.toTitle
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.schema.predefinedAnswers
@@ -78,10 +82,27 @@ inline fun <reified Parent : ApiObjectBase, reified Child : ApiObjectBase> creat
     createWorkflowName(Parent::class.java, Child::class.java)
 
 inline fun <reified Clazz : ApiObjectBase> createSimpleWorkflowName() =
-    createWorkflowName(Clazz::class.java)
+    createSimpleWorkflowName(Clazz::class.java)
 
-fun createWorkflowName(parentClazz: Class<*>, clazz: Class<*>): String =
-    "Create ${clazz.allLowerCase} in ${parentClazz.allLowerCase}"
+inline fun <reified Clazz : ApiObjectBase> createGlobalWorkflowName() =
+    createGlobalWorkflowName(Clazz::class.java)
 
-fun createWorkflowName(clazz: Class<*>): String =
-    "Create ${clazz.allLowerCase}"
+fun createWorkflowName(parentClazz: ObjectClass, clazz: ObjectClass): String =
+    createWorkflowName(clazz, parentClazz, 0, true)
+
+fun createSimpleWorkflowName(clazz: ObjectClass): String =
+    createWorkflowName(clazz, clazz, 0, false)
+
+fun createGlobalWorkflowName(clazz: ObjectClass): String =
+    createWorkflowName(clazz, PolicyManagement::class.java, 0, false)
+
+fun createWorkflowName(clazz: ObjectClass, parentClazz: ObjectClass, parentsInModel: Int, hasRootParents: Boolean): String {
+    val nonRootParents = parentsInModel > 0
+    val addInParent = (hasRootParents || parentsInModel > 1) &&
+        !parentClazz.isPolicyManagement && ! parentClazz.isDefaultRoot
+    val addGlobal = (parentClazz.isDefaultRoot && nonRootParents) || parentClazz.isPolicyManagement
+
+    val workflowBaseName = "Create " + if (addGlobal) "global " else ""
+    val workflowNameSuffix = if (addInParent) " in ${parentClazz.allLowerCase}" else ""
+    return workflowBaseName + clazz.allLowerCase + workflowNameSuffix
+}
