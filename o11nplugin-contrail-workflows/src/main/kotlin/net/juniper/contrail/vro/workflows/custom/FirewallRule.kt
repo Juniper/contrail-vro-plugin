@@ -17,7 +17,6 @@ import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.EndpointType
 import net.juniper.contrail.vro.config.constants.ServiceType
 import net.juniper.contrail.vro.config.constants.editFirewallRuleWorkflowName
-import net.juniper.contrail.vro.config.constants.createGlobalFirewallRuleWorkflowName
 import net.juniper.contrail.vro.config.constants.rule
 import net.juniper.contrail.vro.config.defaultConnection
 import net.juniper.contrail.vro.schema.Schema
@@ -34,6 +33,7 @@ import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.util.createGlobalWorkflowName
 import net.juniper.contrail.vro.workflows.util.createWorkflowName
 
 val defaultEndpointType = EndpointType.None.value
@@ -49,7 +49,7 @@ val parentConnectionField = "parentConnection"
 val parentProjectField = "parentProject"
 
 internal fun createPolicyManagementFirewallRule(schema: Schema): WorkflowDefinition =
-    customWorkflow<FirewallRule>(createGlobalFirewallRuleWorkflowName).withScriptFile("createFirewallRule") {
+    customWorkflow<FirewallRule>(createGlobalWorkflowName<FirewallRule>()).withScriptFile("createFirewallRule") {
         step("Parent") {
             parameter(parentConnectionField, Connection.reference) {
                 description = "Contrail connection in which the rule will be created"
