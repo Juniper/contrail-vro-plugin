@@ -9,8 +9,6 @@ import net.juniper.contrail.api.types.Project
 import net.juniper.contrail.api.types.Tag
 import net.juniper.contrail.vro.config.allCapitalized
 import net.juniper.contrail.vro.config.constants.Connection
-import net.juniper.contrail.vro.config.constants.createGlobalTagWorkflowName
-import net.juniper.contrail.vro.config.constants.createTagInProjectWorkflowName
 import net.juniper.contrail.vro.config.constants.parent
 import net.juniper.contrail.vro.config.defaultConnection
 import net.juniper.contrail.vro.config.listTagTypes
@@ -20,6 +18,8 @@ import net.juniper.contrail.vro.workflows.dsl.actionCallTo
 import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.model.reference
 import net.juniper.contrail.vro.workflows.model.string
+import net.juniper.contrail.vro.workflows.util.createGlobalWorkflowName
+import net.juniper.contrail.vro.workflows.util.createWorkflowName
 import net.juniper.contrail.vro.workflows.util.propertyDescription
 import net.juniper.contrail.vro.workflows.util.relationDescription
 
@@ -31,7 +31,7 @@ internal fun createTagInProject(schema: Schema) =
 
 private fun createTag(schema: Schema, global: Boolean): WorkflowDefinition {
 
-    val workflowName = if (global) createGlobalTagWorkflowName else createTagInProjectWorkflowName
+    val workflowName = if (global) createGlobalWorkflowName<Tag>() else createWorkflowName<Project, Tag>()
     val scriptName = workflowName.toScriptName()
     val parentName = if (global) Connection else Project::class.java.simpleName
 
