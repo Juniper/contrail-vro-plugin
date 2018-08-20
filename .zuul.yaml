@@ -11,7 +11,7 @@
     name: contrail-build-vro-plugin
     description: |
       Job that builds Juniper/contrail-vro-plugin project.
-    voting: True
+    voting: False
     parent: contrail-vnc-base2
     required-projects:
       - Juniper/contrail-vro-plugin
