@@ -25,7 +25,7 @@ class AddFlatIpamToNetworkSpec extends WorkflowSpec {
         invokeFunction(
             addFlatIpamToNetwork,
             virtualNetwork,
-            networkIpam,
+            networkIpam
         )
 
         then: "The virtual network object is updated"
