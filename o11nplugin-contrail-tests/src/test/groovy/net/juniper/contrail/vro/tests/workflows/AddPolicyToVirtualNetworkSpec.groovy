@@ -29,7 +29,7 @@ class AddPolicyToVirtualNetworkSpec extends WorkflowSpec {
         )
 
         then: "The virtual network object is updated"
-        connectorMock.update({
+        1 * connectorMock.update({
             def _it = it as VirtualNetwork
             _it.uuid == virtualNetwork.uuid &&
             _it.networkPolicy.any {
