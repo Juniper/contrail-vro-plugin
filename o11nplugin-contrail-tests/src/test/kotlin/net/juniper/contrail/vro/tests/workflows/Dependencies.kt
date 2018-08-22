@@ -5,8 +5,10 @@
 package net.juniper.contrail.vro.tests.workflows
 
 import net.juniper.contrail.vro.gen.AddressGroup_Wrapper
+import net.juniper.contrail.vro.gen.ApplicationPolicySet_Wrapper
 import net.juniper.contrail.vro.gen.ConfigRoot_Wrapper
 import net.juniper.contrail.vro.gen.Connection_Wrapper
+import net.juniper.contrail.vro.gen.FirewallPolicy_Wrapper
 import net.juniper.contrail.vro.gen.FirewallRule_Wrapper
 import net.juniper.contrail.vro.gen.FloatingIpPool_Wrapper
 import net.juniper.contrail.vro.gen.FloatingIp_Wrapper
@@ -33,15 +35,16 @@ import java.util.UUID
 fun randomStringUuid() = UUID.randomUUID().toString()
 
 class Dependencies(private val connection: Connection_Wrapper, private val utils: Utils_Wrapper) {
-    val defaultPolicyManagement: PolicyManagement_Wrapper = PolicyManagement_Wrapper().apply {
-        uuid = randomStringUuid()
-        name = "default-policy-management"
-        setParentConnection(this@Dependencies.connection)
-    }
-
     val configRoot: ConfigRoot_Wrapper = ConfigRoot_Wrapper().apply {
         uuid = randomStringUuid()
         name = "config-root"
+        setParentConnection(this@Dependencies.connection)
+    }
+
+    val defaultPolicyManagement: PolicyManagement_Wrapper = PolicyManagement_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "default-policy-management"
+        __getTarget().setParent(configRoot.__getTarget())
         setParentConnection(this@Dependencies.connection)
     }
 
@@ -56,6 +59,12 @@ class Dependencies(private val connection: Connection_Wrapper, private val utils
         uuid = randomStringUuid()
         name = "someVirtualNetwork$uuid"
         setParentProject(parent)
+    }
+
+    fun someGlobalApplicationPolicySet() = ApplicationPolicySet_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someApplicationPolicySet$uuid"
+        setParentPolicyManagement(defaultPolicyManagement)
     }
 
     @JvmOverloads
@@ -129,6 +138,20 @@ class Dependencies(private val connection: Connection_Wrapper, private val utils
     }
 
     @JvmOverloads
+    fun someProjectFirewallPolicy(parent: Project_Wrapper = someProject()) = FirewallPolicy_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someProjectFirewallPolicy$uuid"
+        setParentProject(parent)
+    }
+
+    @JvmOverloads
+    fun someGlobalFirewallPolicy(parent: Project_Wrapper = someProject()) = FirewallPolicy_Wrapper().apply {
+        uuid = randomStringUuid()
+        name = "someProjectFirewallPolicy$uuid"
+        setParentPolicyManagement(defaultPolicyManagement)
+    }
+
+    @JvmOverloads
     fun someProjectFirewallRule(parent: Project_Wrapper = someProject()) = FirewallRule_Wrapper().apply {
         uuid = randomStringUuid()
         name = "someProjectFirewallRule$uuid"
@@ -174,7 +197,6 @@ class Dependencies(private val connection: Connection_Wrapper, private val utils
         setParentConnection(this@Dependencies.connection)
     }
 
-    @JvmOverloads
     fun someTagType() = TagType_Wrapper().apply {
         uuid = randomStringUuid()
         name = "someTag$uuid"

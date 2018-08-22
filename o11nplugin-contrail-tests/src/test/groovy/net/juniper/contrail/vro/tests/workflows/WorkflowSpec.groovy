@@ -44,7 +44,7 @@ abstract class WorkflowSpec extends ScriptSpec {
         def constants = createConstants(ctx)
         engine.addToContext(utilsName, utils)
         engine.addToContext(constantsName, constants)
-        dependencies = createDependencies(utils)
+        dependencies = createDependencies(utils, ctx)
     }
 
     def setup() {
@@ -89,11 +89,12 @@ abstract class WorkflowSpec extends ScriptSpec {
         return constants
     }
 
-    private static def createDependencies(Utils_Wrapper utils) {
+    private static def createDependencies(Utils_Wrapper utils, PluginContext ctx) {
         def connection = new WorkflowTestConfig().connection()
         def conn_wrap = new Connection_Wrapper()
         conn_wrap.__setTarget(connection)
         conn_wrap.setInternalId(Sid.empty().with("Connection", "theConnection"))
+        conn_wrap.setContext(ctx)
         return new Dependencies(conn_wrap, utils)
     }
 
@@ -123,6 +124,9 @@ abstract class WorkflowSpec extends ScriptSpec {
         "SubnetListType",
         "FirewallServiceGroupType",
         "FirewallServiceType",
+        "FirewallRule",
+        "FirewallRuleMatchTagsType",
+        "FirewallSequence",
         "Tag",
         "TagType"
     )
