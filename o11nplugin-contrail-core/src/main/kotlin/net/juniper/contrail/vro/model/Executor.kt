@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.model
 
+import net.juniper.contrail.api.types.GlobalSystemConfig
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.InstanceIp
@@ -58,6 +59,17 @@ FirewallRuleComplexProperties by FirewallRuleComplexPropertyExecutor(connection)
     private fun Connection.isTagOfType(tag: Tag, tagType: String): Boolean {
         tag.typeName ?: read(tag)
         return tag.typeName == tagType
+    }
+
+    private val defaultGlobalSystemConfigFQN = "default-global-system-config"
+    fun Connection.commitGlobalDrafts() {
+        val globalSystemConfig = findByFQN<GlobalSystemConfig>(defaultGlobalSystemConfigFQN)!!
+        commitDrafts(globalSystemConfig)
+    }
+
+    fun Connection.discardGlobalDrafts() {
+        val globalSystemConfig = findByFQN<GlobalSystemConfig>(defaultGlobalSystemConfigFQN)!!
+        discardDrafts(globalSystemConfig)
     }
 
     fun ServiceGroup.servicePropertyProtocol(ruleString: String): String? =
