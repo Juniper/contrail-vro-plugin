@@ -81,5 +81,8 @@ val defaultTestConfig = ConfigContext(
     ),
 
     validateSecurityScope = setOf(
+    ),
+
+    draftClasses = setOf(
     )
 )
