@@ -221,6 +221,16 @@ public class ${className}
         _internalId = getInternalId().with("${pluginName}", __getTarget().getUuid());
     }
 
+    <#if draftClass >
+    public void commitDrafts() {
+        util.commitDrafts(getInternalId(), __getTarget());
+    }
+
+    public void discardDrafts() {
+        util.commitDrafts(getInternalId(), __getTarget());
+    }
+
+    </#if>
     public void update() {
         util.update(getInternalId(), __getTarget());
     }

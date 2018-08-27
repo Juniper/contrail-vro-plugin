@@ -44,6 +44,12 @@ class WrapperUtil(val ctx: WrapperContext, val factory: IPluginFactory) {
     private inline fun <T : ApiObjectBase> crud(obj: T, sid: Sid, operation: Connection.(T) -> Unit) =
         findConnection(sid).operation(obj)
 
+    fun <T : ApiObjectBase> commitDrafts(sid: Sid, obj: T) =
+        crud(obj, sid) { commitDrafts(it) }
+
+    fun <T : ApiObjectBase> discardDrafts(sid: Sid, obj: T) =
+        crud(obj, sid) { discardDrafts(it) }
+
     fun <T : ApiObjectBase> create(sid: Sid, obj: T) =
         crud(obj, sid) { create(it) }
 
