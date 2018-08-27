@@ -14,6 +14,7 @@ val apiTypesPackageName = "$basePackageName.api.types"
 val VC = "VC"
 val VirtualMachine = "VirtualMachine"
 
+val Drafts = "Drafts"
 val Configuration = "Configuration"
 val Connection = "Connection"
 val parent = "parent"

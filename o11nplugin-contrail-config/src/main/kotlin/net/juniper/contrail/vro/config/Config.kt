@@ -178,6 +178,10 @@ val validateSecurityScope = setOf(
     the<Tag>()
 )
 
+val draftClasses = setOf(
+    the<Project>()
+)
+
 private inline fun <reified T> the() =
     T::class.java.simpleName
 
@@ -219,6 +223,9 @@ val String.isHiddenRoot get() =
 
 val String.isCustomPropertyObject get() =
     customPropertyObjects.contains(this)
+
+val String.isDraftClass: Boolean get() =
+    draftClasses.contains(this)
 
 infix fun String.notAHiddenTagParent(maybeTag: String) =
     if (maybeTag == "Tag") tagRelations.contains(this) else true
@@ -311,6 +318,9 @@ val Class<*>.isNodeClass get() =
 
 val Class<*>.isCustomPropertyObject get() =
     simpleName.isCustomPropertyObject
+
+val Class<*>.isDraftClass get() =
+    simpleName.isDraftClass
 
 val ObjectClass.isInternal get() =
     !hasParents

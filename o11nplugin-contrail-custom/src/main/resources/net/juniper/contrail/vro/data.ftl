@@ -177,8 +177,11 @@ public class ${className}
     <@compress single_line=true>public ${m.returns.typeName} ${m.name}(<@params m />)<@thrown m /> {</@compress>
         <@locals m />
 
-        ${m.returns.fullClassName} _res$ = util.executor(getInternalId()).${m.name}(__getTarget()<#if m.params?has_content>,</#if><@localNames m />);
+        <@compress single_line=true><#if m.returns.returnFriendlyClassName != 'void'>${m.returns.fullClassName} _res$ = <#else> </#if>
+        util.executor(getInternalId()).${m.name}(__getTarget()<#if m.params?has_content>,</#if><@localNames m />);
+        </@compress>
 
+        <#if m.returns.returnFriendlyClassName != 'void'>
         <#if m.returns.fullClassName != 'boolean'>
         if(_res$ == null) return null;
         </#if>
@@ -194,6 +197,7 @@ public class ${className}
         </#if>
         </#if>
         return _res$pl;
+        </#if>
     }
 
     </#list>
@@ -221,6 +225,16 @@ public class ${className}
         _internalId = getInternalId().with("${pluginName}", __getTarget().getUuid());
     }
 
+    <#if draftClass >
+    public void commitDrafts() {
+        util.commitDrafts(getInternalId(), __getTarget());
+    }
+
+    public void discardDrafts() {
+        util.commitDrafts(getInternalId(), __getTarget());
+    }
+
+    </#if>
     public void update() {
         util.update(getInternalId(), __getTarget());
     }

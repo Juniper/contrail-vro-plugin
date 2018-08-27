@@ -15,6 +15,7 @@ import net.juniper.contrail.vro.config.isApiObjectClass
 import net.juniper.contrail.vro.config.isNodeClass
 import net.juniper.contrail.vro.config.isApiPropertyClass
 import net.juniper.contrail.vro.config.isCustomPropertyObject
+import net.juniper.contrail.vro.config.isDraftClass
 import net.juniper.contrail.vro.config.isGetter
 import net.juniper.contrail.vro.config.isHiddenProperty
 import net.juniper.contrail.vro.config.isInventoryProperty
@@ -164,6 +165,9 @@ class CustomManagedType(private val delegate: ManagedType) : ManagedType() {
         else
             null
     } ?: emptyList()
+
+    val isDraftClass get() =
+        delegate.modelClass?.isDraftClass ?: false
 
     val propertyViews: List<CustomProperty> = delegate.modelClass?.run {
         if (isApiObjectClass)
