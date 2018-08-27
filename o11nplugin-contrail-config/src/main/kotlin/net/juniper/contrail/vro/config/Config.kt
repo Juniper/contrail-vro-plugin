@@ -28,7 +28,8 @@ data class ConfigContext(
     val relationAsProperty : Set<Pair<String, String>>,
     val reversedRelations : Set<Pair<String, String>>,
     val readUponQuery : Set<String>,
-    val validateSecurityScope : Set<String>
+    val validateSecurityScope : Set<String>,
+    val draftClasses : Set<String>
 )
 
 class Config (val context: ConfigContext) {
@@ -68,6 +69,9 @@ class Config (val context: ConfigContext) {
 
     fun isCustomPropertyObject(str : String) =
         context.customPropertyObjects.contains(str)
+
+    fun isDraftClass(str : String) =
+        context.draftClasses.contains(str)
 
     fun notAHiddenTagParent(str : String, maybeTag: String) =
         if (maybeTag == "Tag") context.tagRelations.contains(str) else true
@@ -144,6 +148,9 @@ class Config (val context: ConfigContext) {
 
     fun isCustomPropertyObject(clazz : Class<*>) =
         isCustomPropertyObject(clazz.simpleName)
+
+    fun isDraftClass(clazz : Class<*>) =
+        isDraftClass(clazz.simpleName)
 
     fun isInternal(objectClass : ObjectClass) =
         !hasParents(objectClass)
