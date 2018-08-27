@@ -49,7 +49,8 @@ abstract class GeneratorSpec extends Specification{
                 settings['relationAsProperty'] ?: defaultTestConfig.relationAsProperty,
                 settings['reversedRelations'] ?: defaultTestConfig.reversedRelations,
                 settings['readUponQuery'] ?: defaultTestConfig.readUponQuery,
-                settings['validateSecurityScope'] ?: defaultTestConfig.validateSecurityScope
+                settings['validateSecurityScope'] ?: defaultTestConfig.validateSecurityScope,
+                settings['draftClasses'] ?: defaultTestConfig.draftClasses
         ))
     }
 
