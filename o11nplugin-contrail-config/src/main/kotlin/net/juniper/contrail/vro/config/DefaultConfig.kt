@@ -210,6 +210,10 @@ val defaultContext = ConfigContext(
         the<AddressGroup>(),
         the<ServiceGroup>(),
         the<Tag>()
+    ),
+
+    draftClasses = setOf(
+        the<Project>()
     )
 )
 

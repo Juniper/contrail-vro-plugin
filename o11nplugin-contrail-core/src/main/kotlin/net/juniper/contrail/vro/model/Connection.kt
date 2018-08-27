@@ -60,6 +60,14 @@ class Connection(val info: ConnectionInfo, val connector: ApiConnector) {
         .build()
 
     @Throws(IOException::class, ConnectionException::class)
+    fun commitDrafts(obj: ApiObjectBase) =
+        connector.commitDrafts(obj).checkStatus("Commit Drafts").apply { cache.add(obj) }
+
+    @Throws(IOException::class, ConnectionException::class)
+    fun discardDrafts(obj: ApiObjectBase) =
+        connector.discardDrafts(obj).checkStatus("Discard Drafts").apply { cache.add(obj) }
+
+    @Throws(IOException::class, ConnectionException::class)
     fun create(obj: ApiObjectBase) =
         connector.create(obj).checkStatus("Create").apply { cache.add(obj) }
 

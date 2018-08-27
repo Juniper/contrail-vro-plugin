@@ -116,6 +116,9 @@ class CustomManagedType(private val delegate: ManagedType, val config: Config) :
     val isNodeClass get() =
         delegate.modelClass?.let { config.isNodeClass(it) } ?: false
 
+    val isDraftClass get() =
+        delegate.modelClass?.let { config.isDraftClass(it) } ?: false
+
     val pluginName = delegate.modelClass?.pluginName
 
     val parents = if (delegate.modelClass == null) emptyList() else config.parentsInPlugin(delegate.modelClass)
