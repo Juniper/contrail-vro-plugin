@@ -4,6 +4,11 @@
 
 package net.juniper.contrail.vro.tests.generator
 
+import net.juniper.contrail.api.types.NetworkIpam
+import net.juniper.contrail.api.types.NetworkPolicy
+import net.juniper.contrail.api.types.Project
+import net.juniper.contrail.api.types.SecurityGroup
+import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.config.Config
 import net.juniper.contrail.vro.config.ContrailUtilsKt
 import net.juniper.contrail.vro.config.ProjectInfoKt
@@ -15,6 +20,11 @@ import spock.lang.Specification
 abstract class GeneratorSpec extends Specification{
     private static def defaultTestConfig = TestConfigKt.defaultTestConfig
 
+    def topLevelModel = Project
+    def nonTopLevelModel = VirtualNetwork
+    def parentChildPair = [Project, VirtualNetwork]
+    def relatedPair = [VirtualNetwork, NetworkPolicy]
+    def unrelatedPair = [NetworkIpam, SecurityGroup]
 
     def createConfig(HashMap settings) {
         return new Config(defaultTestConfig.copy(
