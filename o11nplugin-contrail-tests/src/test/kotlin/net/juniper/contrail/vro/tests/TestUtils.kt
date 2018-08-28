@@ -8,3 +8,7 @@ fun setField(obj: Any, fieldName: String, fieldValue: Any) {
     f1.isAccessible = true
     f1.set(obj, fieldValue)
 }
+
+// this method is necessary because Groovy Tuple2 is ignored
+fun getPairOf(clazz1: Class<*>, clazz2: Class<*>) =
+    Pair(clazz1.simpleName, clazz2.simpleName)
