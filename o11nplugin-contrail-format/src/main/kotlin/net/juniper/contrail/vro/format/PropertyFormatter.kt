@@ -140,7 +140,7 @@ object DefaultFormat {
 
     fun format(obj: Any?, indent: String = ""): String {
         if (obj == null) return ""
-        val fields = obj.javaClass.propertyFields
+        val fields = obj.javaClass.propertyFields.filter { !it.isSynthetic }
 
         return if (fields.size == 1) {
             val field = fields[0]
