@@ -138,9 +138,12 @@ object DefaultFormat {
         .filter { it.isCustomFormatter }
         .associateBy({ it.parameters[0].type }, { it.toFormatter() })
 
+    @JvmOverloads
     fun format(obj: Any?, indent: String = ""): String {
         if (obj == null) return ""
-        val fields = obj.javaClass.propertyFields
+        //Synthetic methods are added when building the project to calculate code coverage.
+        //These methods are used only by JaCoCo and shouldn't be taken into account when formatting the class.
+        val fields = obj.javaClass.propertyFields.filter { !it.isSynthetic }
 
         return if (fields.size == 1) {
             val field = fields[0]
