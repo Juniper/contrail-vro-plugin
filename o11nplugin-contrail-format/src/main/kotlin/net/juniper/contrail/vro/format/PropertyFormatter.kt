@@ -138,9 +138,10 @@ object DefaultFormat {
         .filter { it.isCustomFormatter }
         .associateBy({ it.parameters[0].type }, { it.toFormatter() })
 
+    @JvmOverloads
     fun format(obj: Any?, indent: String = ""): String {
         if (obj == null) return ""
-        val fields = obj.javaClass.propertyFields
+        val fields = obj.javaClass.propertyFields.filter { !it.isSynthetic }
 
         return if (fields.size == 1) {
             val field = fields[0]
