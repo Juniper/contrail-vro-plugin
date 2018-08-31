@@ -69,7 +69,7 @@ internal fun addRuleToPolicyWorkflow(schema: Schema): WorkflowDefinition =
         policyRuleParameters(schema, item, false)
     }
 
-internal fun editPolicyRuleWorkflow(schema: Schema): WorkflowDefinition =
+internal fun editNetworkPolicyRuleWorkflow(schema: Schema): WorkflowDefinition =
     customWorkflow<NetworkPolicy>(editRuleOfNetworkPolicyWorkflowName).withScriptFile("editPolicyRule") {
         step("Network Policy Rule") {
             parameter(item, reference<NetworkPolicy>()) {

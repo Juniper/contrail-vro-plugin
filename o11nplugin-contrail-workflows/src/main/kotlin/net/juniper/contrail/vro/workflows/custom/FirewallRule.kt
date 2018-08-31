@@ -6,6 +6,7 @@ package net.juniper.contrail.vro.workflows.custom
 
 import net.juniper.contrail.api.types.ActionListType
 import net.juniper.contrail.api.types.AddressGroup
+import net.juniper.contrail.api.types.FirewallPolicy
 import net.juniper.contrail.api.types.FirewallRule
 import net.juniper.contrail.api.types.FirewallRuleEndpointType
 import net.juniper.contrail.api.types.FirewallServiceType
@@ -17,8 +18,11 @@ import net.juniper.contrail.vro.config.constants.Connection
 import net.juniper.contrail.vro.config.constants.EndpointType
 import net.juniper.contrail.vro.config.constants.ServiceType
 import net.juniper.contrail.vro.config.constants.editFirewallRuleWorkflowName
+import net.juniper.contrail.vro.config.constants.editRuleOfFirewallPolicyWorkflowName
+import net.juniper.contrail.vro.config.constants.item
 import net.juniper.contrail.vro.config.constants.rule
 import net.juniper.contrail.vro.config.defaultConnection
+import net.juniper.contrail.vro.config.propertyValue
 import net.juniper.contrail.vro.schema.Schema
 import net.juniper.contrail.vro.schema.propertyDescription
 import net.juniper.contrail.vro.schema.simpleTypeConstraints
@@ -29,6 +33,8 @@ import net.juniper.contrail.vro.workflows.dsl.ParameterAggregator
 import net.juniper.contrail.vro.workflows.dsl.PresentationParametersBuilder
 import net.juniper.contrail.vro.workflows.dsl.WhenNonNull
 import net.juniper.contrail.vro.workflows.dsl.WorkflowDefinition
+import net.juniper.contrail.vro.workflows.dsl.actionCallTo
+import net.juniper.contrail.vro.workflows.dsl.asBrowserRoot
 import net.juniper.contrail.vro.workflows.dsl.fromAction
 import net.juniper.contrail.vro.workflows.model.array
 import net.juniper.contrail.vro.workflows.model.reference
@@ -86,7 +92,24 @@ internal fun editFirewallRule(schema: Schema): WorkflowDefinition =
             }
         }
         firewallRuleParameters(schema, rule, true)
+    }
 
+internal fun editFirewallPolicyRuleWorkflow(schema: Schema): WorkflowDefinition =
+    customWorkflow<FirewallPolicy>(editRuleOfFirewallPolicyWorkflowName).withScriptFile("editFirewallRule") {
+        step("Firewall Policy Rule") {
+            parameter(item, reference<FirewallPolicy>()) {
+                description = "Firewall policy"
+                mandatory = true
+            }
+            parameter(rule, reference<FirewallRule>()) {
+                visibility = WhenNonNull(item)
+                description = "Rule to edit"
+                mandatory = true
+                browserRoot = item.asBrowserRoot()
+                listedBy = actionCallTo(propertyValue).parameter(item).string("firewallRule")
+            }
+        }
+        firewallRuleParameters(schema, rule, true)
     }
 
 private fun PresentationParametersBuilder.firewallRuleParameters(schema: Schema, parentField: String, editing: Boolean) {
