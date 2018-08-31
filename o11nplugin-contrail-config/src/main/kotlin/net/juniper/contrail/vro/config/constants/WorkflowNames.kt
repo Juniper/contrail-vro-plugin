@@ -7,6 +7,7 @@ package net.juniper.contrail.vro.config.constants
 const val createContrailControllerConnectionWorkflowName = "Create Contrail controller connection"
 const val deleteContrailControllerConnectionWorkflowName = "Delete Contrail controller connection"
 const val editFirewallRuleWorkflowName = "Edit firewall rule"
+const val editRuleOfFirewallPolicyWorkflowName = "Edit rule of firewall policy"
 const val addRuleToNetworkPolicyWorkflowName = "Add rule to network policy"
 const val editRuleOfNetworkPolicyWorkflowName = "Edit rule of network policy"
 const val removeRuleFromNetworkPolicyWorkflowName = "Remove rule from network policy"
