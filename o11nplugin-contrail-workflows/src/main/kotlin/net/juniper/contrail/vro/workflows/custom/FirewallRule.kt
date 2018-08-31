@@ -86,7 +86,6 @@ internal fun editFirewallRule(schema: Schema): WorkflowDefinition =
             }
         }
         firewallRuleParameters(schema, rule, true)
-
     }
 
 private fun PresentationParametersBuilder.firewallRuleParameters(schema: Schema, parentField: String, editing: Boolean) {
