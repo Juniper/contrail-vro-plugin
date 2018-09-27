@@ -1,0 +1,5 @@
+- project:
+    name: Juniper/contrail-vro-plugin
+    experimental:
+      jobs:
+        - contrail-build-vro-plugin
