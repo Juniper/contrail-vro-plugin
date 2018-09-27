@@ -1,0 +1,6 @@
+- project:
+    name: Juniper/contrail-vro-plugin
+    check:
+      jobs:
+        - contrail-build-vro-plugin
+        - noop
