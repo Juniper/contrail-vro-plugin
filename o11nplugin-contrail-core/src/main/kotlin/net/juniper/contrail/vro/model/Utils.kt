@@ -209,7 +209,12 @@ class Utils {
         val (virtualNetworkName, virtualNetworkAddress) = when (parts.size) {
             1 -> Pair(null, parts[0])
             2 -> Pair(parts[0], parts[1])
-            else -> throw IllegalArgumentException("Wrong subnet format. use CIDR or VN:CIDR")
+            4 -> {
+                // Domain:Project:NetworkName:CIDR
+                val networkFQN = parts.asSequence().take(3).joinToString(":")
+                Pair(networkFQN, parts[3])
+            }
+            else -> throw IllegalArgumentException("Wrong subnet format. use CIDR, VN:CIDR or VN-FQNAME:CIDR")
         }
         if (!isValidCidr(virtualNetworkAddress)) throw IllegalArgumentException("Wrong CIDR format.")
         val (subnetIP, subnetPrefix) = virtualNetworkAddress.split('/')
