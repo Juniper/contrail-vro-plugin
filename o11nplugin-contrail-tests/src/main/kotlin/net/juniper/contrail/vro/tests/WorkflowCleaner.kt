@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate
 
 fun authorizationHttpHeader(): HttpEntity<Any> {
     val httpHeaders = HttpHeaders()
-    httpHeaders.add("Authorization", "Basic YWRtaW5pc3RyYXRvckB2c3BoZXJlLmxvY2FsOlZNd2FyZTEh")
+    httpHeaders.add("Authorization", "Basic YWRtaW5pc3RyYXRvckB2c3BoZXJlLmxvY2FsOkFiY2QxMjM0IQ==")
     return HttpEntity(httpHeaders)
 }
 
