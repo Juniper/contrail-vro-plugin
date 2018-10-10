@@ -29,6 +29,10 @@ object Networking : CategoryType()
 object Services : CategoryType()
 object Security : CategoryType()
 
+object Configuration {
+    val name = "Configuration"
+}
+
 // project-level draft security object
 object DraftSecurity {
     val name = "Draft Security"
@@ -45,7 +49,6 @@ object GlobalDraftSecurity {
 }
 
 val Class<*>.category get() = when (this) {
-
     VirtualNetwork::class.java,
     VirtualMachineInterface::class.java,
     NetworkIpam::class.java,

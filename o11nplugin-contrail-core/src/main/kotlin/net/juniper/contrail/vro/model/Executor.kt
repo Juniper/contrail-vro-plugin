@@ -5,6 +5,7 @@
 package net.juniper.contrail.vro.model
 
 import net.juniper.contrail.api.types.GlobalSystemConfig
+import net.juniper.contrail.api.types.GlobalVrouterConfig
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.api.types.InstanceIp
@@ -21,6 +22,9 @@ class Executor(private val connection: Connection) :
 SecurityGroupRuleProperties by SecurityGroupRulePropertyExecutor(connection),
 NetworkPolicyRuleProperties by NetworkPolicyRulePropertyExecutor(connection),
 FirewallRuleComplexProperties by FirewallRuleComplexPropertyExecutor(connection) {
+    private val defaultGlobalSystemConfigFQN = "default-global-system-config"
+    private val defaultGlobalVrouterConfigFQN = "$defaultGlobalSystemConfigFQN:default-global-vrouter-config"
+
     fun VirtualNetwork.subnets(): List<IpamSubnetType> {
         val ipams = networkIpam ?: return emptyList()
         return ipams.asSequence().map { it.attr.ipamSubnets.asSequence().filterNotNull() }.flatten().toList()
@@ -56,12 +60,20 @@ FirewallRuleComplexProperties by FirewallRuleComplexPropertyExecutor(connection)
     fun Connection.listTagsOfType(tagType: String): List<Tag> =
         list<Tag>()?.asSequence()?.filter { isTagOfType(it, tagType) }?.toList() ?: emptyList()
 
+    fun Connection.globalSystemConfig(): GlobalSystemConfig =
+        findByFQN(defaultGlobalSystemConfigFQN)!!
+
+    fun Connection.globalVrouterConfig(): GlobalVrouterConfig =
+        findByFQN(defaultGlobalVrouterConfigFQN)!!
+
+    fun Connection.draftEnabled(): Boolean =
+        globalSystemConfig().enableSecurityPolicyDraft
+
     private fun Connection.isTagOfType(tag: Tag, tagType: String): Boolean {
         tag.typeName ?: read(tag)
         return tag.typeName == tagType
     }
 
-    private val defaultGlobalSystemConfigFQN = "default-global-system-config"
     fun Connection.commitGlobalDrafts() {
         val globalSystemConfig = findByFQN<GlobalSystemConfig>(defaultGlobalSystemConfigFQN)!!
         commitDrafts(globalSystemConfig)

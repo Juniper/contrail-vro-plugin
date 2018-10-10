@@ -63,6 +63,13 @@ class CustomMapping: AbstractMapping() {
            .using(ConnectionFinder::class.java)
            .withIcon("controller.png")
 
+        wrap(Configuration::class.java)
+            .unconstructible()
+            .andFind()
+            .using(ConfigurationFinder::class.java)
+            <#-- Re-use controller icon -->
+            .withIcon("controller.png")
+
         wrap(GlobalSecurity::class.java)
             .unconstructible()
             .andFind()
@@ -136,6 +143,21 @@ class CustomMapping: AbstractMapping() {
             .to(GlobalDraftSecurity::class.java)
             .using(ConnectionHasGlobalDraftSecurity::class.java)
             .`as`("ConnectionHasGlobalDraftSecurity")
+
+        relate(Connection::class.java)
+            .to(Configuration::class.java)
+            .using(ConnectionHasConfiguration::class.java)
+            .`as`("ConnectionHasConfiguration")
+
+        relate(Configuration::class.java)
+            .to(GlobalSystemConfig::class.java)
+            .using(ConfigurationHasGlobalSystemConfig::class.java)
+            .`as`("ConfigurationHasGlobalSystemConfig")
+
+        relate(Configuration::class.java)
+            .to(GlobalVrouterConfig::class.java)
+            .using(ConfigurationHasGlobalVrouterConfig::class.java)
+            .`as`("ConfigurationHasGlobalVrouterConfig")
 
         <#list rootClasses as rootClass>
         relate(Connection::class.java)
