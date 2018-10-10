@@ -15,6 +15,8 @@ import net.juniper.contrail.api.types.FirewallRuleEndpointType
 import net.juniper.contrail.api.types.FirewallServiceType
 import net.juniper.contrail.api.types.FloatingIp
 import net.juniper.contrail.api.types.FloatingIpPool
+import net.juniper.contrail.api.types.GlobalSystemConfig
+import net.juniper.contrail.api.types.GlobalVrouterConfig
 import net.juniper.contrail.api.types.IdPermsType
 import net.juniper.contrail.api.types.InstanceIp
 import net.juniper.contrail.api.types.IpamSubnetType
@@ -65,7 +67,9 @@ val defaultContext = ConfigContext(
         the<FirewallPolicy>(),
         the<FirewallRule>(),
         the<ServiceGroup>(),
-        the<AddressGroup>()
+        the<AddressGroup>(),
+        the<GlobalSystemConfig>(),
+        the<GlobalVrouterConfig>()
     ),
 
     inventoryProperties = setOf(
@@ -111,7 +115,9 @@ val defaultContext = ConfigContext(
         the<PolicyManagement>(),
         the<Tag>(),
         the<TagType>(),
-        the<FirewallRule>()
+        the<FirewallRule>(),
+        the<GlobalSystemConfig>(),
+        the<GlobalVrouterConfig>()
     ),
 
     customEditWorkflows = setOf(
@@ -122,14 +128,18 @@ val defaultContext = ConfigContext(
         the<ServiceInstance>(),
         the<PortTuple>(),
         the<PolicyManagement>(),
-        the<FirewallRule>()
+        the<FirewallRule>(),
+        the<GlobalSystemConfig>(),
+        the<GlobalVrouterConfig>()
     ),
 
     customDeleteWorkflows = setOf(
         the<VirtualMachineInterface>(),
         the<PortTuple>(),
         the<PolicyManagement>(),
-        the<TagType>()
+        the<TagType>(),
+        the<GlobalSystemConfig>(),
+        the<GlobalVrouterConfig>()
     ),
 
     directChildren = setOf(
@@ -162,7 +172,8 @@ val defaultContext = ConfigContext(
     ),
 
     hiddenRoots = setOf(
-        the<VirtualMachineInterface>()
+        the<VirtualMachineInterface>(),
+        the<GlobalSystemConfig>()
     ),
 
     hiddenRelations = setOf(
@@ -175,7 +186,9 @@ val defaultContext = ConfigContext(
         pair<Tag, TagType>(),
         pair<FirewallRule, AddressGroup>(),
         pair<FirewallRule, ServiceGroup>(),
-        pair<FirewallRule, VirtualNetwork>()
+        pair<FirewallRule, VirtualNetwork>(),
+        pair<ApplicationPolicySet, GlobalVrouterConfig>(),
+        pair<GlobalSystemConfig, GlobalVrouterConfig>()
     ),
 
     tagRelations = setOf(

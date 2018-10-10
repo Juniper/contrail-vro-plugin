@@ -83,6 +83,26 @@ class ProjectHasDraftSecurity: ObjectRelater<DraftSecurity> {
        listOf(DraftSecurity)
 }
 
+class ConfigurationHasGlobalSystemConfig
+@Autowired constructor(private val connectionRepository: ConnectionRepository) : ObjectRelater<GlobalSystemConfig>
+{
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, id: Sid): List<GlobalSystemConfig>? {
+        val connection = connectionRepository.getConnection(id) ?: return null
+        val config = connection.findByFQN<GlobalSystemConfig>("default-global-system-config") ?: return null
+        return listOf(config)
+    }
+}
+
+class ConfigurationHasGlobalVrouterConfig
+@Autowired constructor(private val connectionRepository: ConnectionRepository) : ObjectRelater<GlobalVrouterConfig>
+{
+    override fun findChildren(ctx: PluginContext, relation: String, parentType: String, id: Sid): List<GlobalVrouterConfig>? {
+        val connection = connectionRepository.getConnection(id) ?: return null
+        val config = connection.findByFQN<GlobalVrouterConfig>("default-global-system-config:default-global-vrouter-config") ?: return null
+        return listOf(config)
+    }
+}
+
 <#list categories as category>
 class ${category.parentName}Has${category.name}: ObjectRelater<${category.name}> {
 

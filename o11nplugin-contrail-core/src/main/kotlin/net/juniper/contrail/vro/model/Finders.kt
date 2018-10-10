@@ -11,6 +11,7 @@ import com.vmware.o11n.sdk.modeldriven.Sid
 import net.juniper.contrail.api.types.IpamSubnetType
 import net.juniper.contrail.api.types.VirtualNetwork
 import net.juniper.contrail.vro.base.ConnectionRepository
+import net.juniper.contrail.vro.config.Configuration
 import net.juniper.contrail.vro.config.GlobalDraftSecurity
 import net.juniper.contrail.vro.config.DraftSecurity
 import net.juniper.contrail.vro.config.GlobalSecurity
@@ -47,6 +48,13 @@ class DraftSecurityFinder : ObjectFinder<DraftSecurity>
 {
     override fun assignId(security: DraftSecurity, id: Sid) = id
     override fun find(ctx: PluginContext, type: String, id: Sid) = DraftSecurity
+    override fun query(ctx: PluginContext, type: String, query: String) = null
+}
+
+class ConfigurationFinder : ObjectFinder<Configuration>
+{
+    override fun assignId(security: Configuration, id: Sid) = id
+    override fun find(ctx: PluginContext, type: String, id: Sid) = Configuration
     override fun query(ctx: PluginContext, type: String, query: String) = null
 }
 
