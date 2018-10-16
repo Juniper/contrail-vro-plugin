@@ -29,4 +29,7 @@ if(serviceType == "manual") {
     }
 }
 
+// workaround for bug 1797825
+rule.nullifyTag();
+
 rule.update();

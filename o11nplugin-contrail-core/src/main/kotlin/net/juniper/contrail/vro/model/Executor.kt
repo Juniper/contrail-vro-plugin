@@ -4,6 +4,7 @@
 
 package net.juniper.contrail.vro.model
 
+import net.juniper.contrail.api.types.FirewallRule
 import net.juniper.contrail.api.types.GlobalSystemConfig
 import net.juniper.contrail.api.types.GlobalVrouterConfig
 import net.juniper.contrail.api.types.IpamSubnetType
@@ -86,6 +87,13 @@ FirewallRuleComplexProperties by FirewallRuleComplexPropertyExecutor(connection)
 
     fun ServiceGroup.servicePropertyPort(ruleString: String): String? =
         findService(ruleString)?.dstPorts?.let { utils.formatPort(it) }
+
+    // workaround for bug 1797825 - tag_refs field must not exist in the request JSON
+    fun FirewallRule.nullifyTag() {
+        val tagref = FirewallRule::class.java.getDeclaredField("tag_refs")
+        tagref.isAccessible = true
+        tagref.set(this, null)
+    }
 
     private fun ServiceGroup.findService(ruleString: String) =
         firewallServiceList?.firewallService?.getOrNull(ruleString.toIndex())
