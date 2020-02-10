@@ -12,7 +12,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <vco.version>7.3.0</vco.version>
     <repo.url>http://${repo.host}:8280/vco-repo</repo.url>
-    <spring.version>4.3.7.RELEASE</spring.version>
+    <spring.version>5.2.3.RELEASE</spring.version>
     <installation.mode>version</installation.mode>
     <kotlin.version>1.2.50</kotlin.version>
     <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
