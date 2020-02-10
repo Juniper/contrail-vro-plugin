@@ -1,2 +1,1 @@
-# OpenContrail vRO
-OpenContrail Plug-In for vRealize Orchestrator (vRO)
+Content was moved to https://github.com/tungstenfabric/tf-vro-plugin
